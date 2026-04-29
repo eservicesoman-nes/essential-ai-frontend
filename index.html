@@ -4,62 +4,71 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
   <title>Essential AI — Intelligence Platform</title>
+  <meta name="description" content="Essential AI — intelligent workspace with 1M context, web search, DALL-E 3, and daily free tier.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
   <style>
-    *{margin:0;padding:0;box-sizing:border-box;}
-    :root{--bg:#0c0c0e;--surface:#141418;--border:#222228;--text:#e8e8ec;--muted:#5c5c6e;--accent:#E6692E;--accent-lo:rgba(230,105,46,0.1);--accent-md:rgba(230,105,46,0.22);--green:#2ecc71;--red:#e74c3c;--blue:#3b82f6;--r:12px;--ui:'Syne',sans-serif;--mono:'DM Mono',monospace;}
-    [data-theme="light"]{--bg:#f4f4f0;--surface:#fff;--border:#e0e0e8;--text:#1a1a2e;--muted:#8888a0;}
-    body{font-family:var(--ui);background:var(--bg);color:var(--text);height:100dvh;overflow:hidden;display:flex;}
-    
-    /* Auth */
+    :root {
+      --bg:#0c0c0e;--surface:#141418;--border:#222228;--text:#e8e8ec;--muted:#5c5c6e;
+      --accent:#E6692E;--accent-lo:rgba(230,105,46,0.10);--accent-md:rgba(230,105,46,0.22);
+      --green:#2ecc71;--red:#e74c3c;--blue:#3b82f6;--r:12px;
+      --ui:'Syne',sans-serif;--mono:'DM Mono',monospace;--shadow:0 4px 24px rgba(0,0,0,0.4);
+    }
+    [data-theme="light"] {
+      --bg:#f4f4f0;--surface:#ffffff;--border:#e0e0e8;--text:#1a1a2e;--muted:#8888a0;
+      --accent:#E6692E;--accent-lo:rgba(230,105,46,0.08);--accent-md:rgba(230,105,46,0.18);
+      --shadow:0 4px 24px rgba(0,0,0,0.10);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:var(--ui);background:var(--bg);color:var(--text);height:100dvh;overflow:hidden;display:flex;transition:background .3s,color .3s;}
     #authScreen{position:fixed;inset:0;z-index:100;background:var(--bg);display:flex;align-items:center;justify-content:center;}
-    .auth-box{width:min(420px,92vw);background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:40px;}
-    .auth-logo{font-size:1.8rem;font-weight:800;margin-bottom:4px;}.auth-logo span{color:var(--accent);}
+    .auth-box{width:min(420px,92vw);background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:40px;box-shadow:var(--shadow);}
+    .auth-logo{font-size:1.8rem;font-weight:800;letter-spacing:-1px;margin-bottom:4px;}
+    .auth-logo span{color:var(--accent);}
     .auth-sub{font-family:var(--mono);font-size:.72rem;color:var(--muted);margin-bottom:32px;}
     .auth-tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:28px;}
-    .auth-tab{background:none;border:none;color:var(--muted);font-family:var(--ui);font-size:.88rem;font-weight:600;padding:12px 20px;cursor:pointer;}
+    .auth-tab{background:none;border:none;color:var(--muted);font-family:var(--ui);font-size:.88rem;font-weight:600;padding:12px 20px;cursor:pointer;transition:color .15s;}
     .auth-tab.active{color:var(--accent);border-bottom:2px solid var(--accent);}
-    .auth-panel{display:none;flex-direction:column;gap:12px;}.auth-panel.active{display:flex;}
-    .auth-input{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:12px 16px;color:var(--text);font-family:var(--mono);font-size:.88rem;outline:none;width:100%;}
+    .auth-panel{display:none;flex-direction:column;gap:12px;}
+    .auth-panel.active{display:flex;}
+    .auth-input{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:12px 16px;color:var(--text);font-family:var(--mono);font-size:.88rem;outline:none;width:100%;transition:border-color .2s;}
     .auth-input:focus{border-color:var(--accent);}
-    .auth-btn{background:var(--accent);border:none;border-radius:var(--r);padding:13px;color:#fff;font-weight:700;cursor:pointer;}
+    .auth-btn{background:var(--accent);border:none;border-radius:var(--r);padding:13px;color:#fff;font-family:var(--ui);font-size:.9rem;font-weight:700;cursor:pointer;}
     .auth-btn:hover{opacity:.88;}
     .auth-err{font-family:var(--mono);font-size:.75rem;color:var(--red);min-height:18px;}
-    
-    /* App */
-    #app{display:none;width:100%;}#app.visible{display:flex;}
-    .sidebar{width:260px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:24px 14px;}
-    .logo{font-size:1.5rem;font-weight:800;padding:0 8px;margin-bottom:2px;}.logo span{color:var(--accent);}
+    #app{display:none;width:100%;}
+    #app.visible{display:flex;}
+    .sidebar{width:260px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:24px 14px;transition:width .25s;}
+    .logo{font-size:1.5rem;font-weight:800;letter-spacing:-.5px;padding:0 8px;margin-bottom:2px;}
+    .logo span{color:var(--accent);}
     .logo-sub{font-family:var(--mono);font-size:.65rem;color:var(--muted);padding:0 8px;margin-bottom:28px;}
     .nav{display:flex;flex-direction:column;gap:4px;flex:1;}
-    .nav-item{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:var(--r);cursor:pointer;color:var(--muted);font-size:.88rem;font-weight:600;border:1px solid transparent;}
+    .nav-item{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:var(--r);cursor:pointer;color:var(--muted);font-size:.88rem;font-weight:600;border:1px solid transparent;transition:all .15s;}
     .nav-item:hover{color:var(--text);background:rgba(128,128,128,.06);}
     .nav-item.active{background:var(--accent-lo);border-color:var(--accent-md);color:var(--accent);}
-    .nav-icon{font-size:1rem;width:24px;text-align:center;}
-    .upgrade-btn{background:linear-gradient(135deg,#E6692E,#ff8c5a);border:none;border-radius:99px;padding:10px 16px;color:white;font-size:.8rem;font-weight:700;cursor:pointer;margin:8px 0 16px;text-align:center;}
+    .nav-icon{font-size:1rem;width:24px;text-align:center;flex-shrink:0;}
+    .upgrade-btn{background:linear-gradient(135deg,#E6692E,#ff8c5a);border:none;border-radius:99px;padding:10px 16px;color:white;font-family:var(--ui);font-size:.8rem;font-weight:700;cursor:pointer;margin:8px 0 16px;text-align:center;transition:all .2s;}
     .upgrade-btn:hover{transform:scale(1.02);box-shadow:0 0 12px rgba(230,105,46,.5);}
     .usage-wrap{margin-top:auto;padding:0 4px;}
     .usage-row{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.65rem;color:var(--muted);margin-bottom:8px;}
     .usage-track{height:3px;background:var(--border);border-radius:99px;overflow:hidden;margin-bottom:16px;}
     .usage-fill{height:100%;background:var(--accent);border-radius:99px;transition:width .4s ease;}
     .user-row{display:flex;align-items:center;gap:10px;padding-top:12px;border-top:1px solid var(--border);}
-    .user-av{width:32px;height:32px;background:var(--accent-lo);border:1px solid var(--accent-md);border-radius:50%;display:grid;place-items:center;font-size:.75rem;color:var(--accent);font-weight:700;}
+    .user-av{width:32px;height:32px;background:var(--accent-lo);border:1px solid var(--accent-md);border-radius:50%;display:grid;place-items:center;font-size:.75rem;color:var(--accent);font-weight:700;flex-shrink:0;}
     .user-email{font-family:var(--mono);font-size:.7rem;color:var(--muted);flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
     .logout-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:.8rem;padding:4px;border-radius:5px;}
     .logout-btn:hover{color:var(--red);}
-    
-    /* Chat */
-    .main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
-    .chat-header{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:8px;}
-    .mode-pill{background:var(--accent-lo);border:1px solid var(--accent-md);color:var(--accent);font-family:var(--mono);font-size:.72rem;padding:5px 12px;border-radius:99px;}
+    .main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
+    .chat-header{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:8px;flex-shrink:0;}
+    .mode-pill{background:var(--accent-lo);border:1px solid var(--accent-md);color:var(--accent);font-family:var(--mono);font-size:.72rem;padding:5px 12px;border-radius:99px;white-space:nowrap;}
     .hdr-actions{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
-    .hdr-btn{background:var(--surface);border:1px solid var(--border);color:var(--muted);font-family:var(--ui);font-size:.75rem;font-weight:600;padding:6px 12px;border-radius:99px;cursor:pointer;}
+    .hdr-btn{background:var(--surface);border:1px solid var(--border);color:var(--muted);font-family:var(--ui);font-size:.75rem;font-weight:600;padding:6px 12px;border-radius:99px;cursor:pointer;white-space:nowrap;transition:all .15s;}
     .hdr-btn:hover{color:var(--text);border-color:var(--muted);}
     .hdr-btn.on{background:var(--accent-lo);border-color:var(--accent-md);color:var(--accent);}
-    .theme-btn{background:var(--surface);border:1px solid var(--border);color:var(--muted);width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:1rem;display:grid;place-items:center;}
+    .theme-btn{background:var(--surface);border:1px solid var(--border);color:var(--muted);width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:1rem;display:grid;place-items:center;transition:all .15s;}
     .theme-btn:hover{color:var(--text);border-color:var(--muted);}
-    
-    .messages{flex:1;overflow-y:auto;padding:20px 18px;display:flex;flex-direction:column;gap:20px;}
+    .messages{flex:1;overflow-y:auto;padding:20px 18px;display:flex;flex-direction:column;gap:20px;scroll-behavior:smooth;}
     .messages::-webkit-scrollbar{width:4px;}
     .messages::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px;}
     .msg{display:flex;gap:12px;animation:fadeUp .2s ease;}
@@ -71,60 +80,65 @@
     .msg-body{max-width:75%;}
     .msg-role{font-family:var(--mono);font-size:.65rem;color:var(--muted);margin-bottom:5px;}
     .msg.user .msg-role{text-align:right;}
-    .msg-bubble{padding:10px 16px;border-radius:18px;font-size:.9rem;line-height:1.6;word-break:break-word;user-select:text;}
+    .msg-bubble{padding:10px 16px;border-radius:18px;font-size:.9rem;line-height:1.6;word-break:break-word;}
     .msg.user .msg-bubble{background:var(--accent);color:#fff;border-bottom-right-radius:4px;}
     .msg.ai .msg-bubble{background:var(--surface);border:1px solid var(--border);color:var(--text);border-bottom-left-radius:4px;}
-    .msg-bubble code{background:rgba(128,128,128,.12);padding:2px 5px;border-radius:4px;font-family:monospace;}
+    .msg-bubble h1,.msg-bubble h2,.msg-bubble h3{margin:12px 0 6px;font-weight:700;}
+    .msg-bubble h1{font-size:1.2rem;}.msg-bubble h2{font-size:1.05rem;}.msg-bubble h3{font-size:.95rem;}
+    .msg-bubble p{margin-bottom:8px;}
+    .msg-bubble ul,.msg-bubble ol{margin:6px 0 8px 20px;}
+    .msg-bubble code{background:rgba(128,128,128,.12);padding:2px 5px;border-radius:4px;font-family:monospace;font-size:.85em;}
     .msg-bubble pre{background:#0a0a0e;border:1px solid var(--border);border-radius:10px;padding:12px;overflow-x:auto;margin:10px 0;}
+    [data-theme="light"] .msg-bubble pre{background:#f0f0f0;}
+    .msg-bubble a{color:var(--accent);text-decoration:underline;}
     .sources-block{margin-top:10px;border-top:1px solid var(--border);padding-top:8px;}
     .sources-label{font-family:var(--mono);font-size:.62rem;color:var(--muted);margin-bottom:5px;}
     .source-item{font-family:var(--mono);font-size:.68rem;margin-bottom:3px;}
     .source-item a{color:var(--blue);text-decoration:none;}
-    .gen-image{max-width:100%;border-radius:10px;margin-top:8px;border:1px solid var(--border);}
-    
-    .typing-ind{display:flex;gap:5px;padding:6px 2px;}
+    .source-item a:hover{text-decoration:underline;}
+    .gen-image{max-width:100%;border-radius:10px;margin-top:8px;border:1px solid var(--border);display:block;}
+    .image-prompt-note{font-family:var(--mono);font-size:.68rem;color:var(--muted);margin-top:6px;font-style:italic;}
+    .typing-ind{display:flex;gap:5px;align-items:center;padding:6px 2px;}
     .typing-dot{width:7px;height:7px;background:var(--accent);border-radius:50%;animation:bounce 1.4s infinite;opacity:.4;}
     .typing-dot:nth-child(2){animation-delay:.2s;}
     .typing-dot:nth-child(3){animation-delay:.4s;}
     @keyframes bounce{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-6px);opacity:1}}
-    
-    /* Input area with voice button */
-    .input-area{padding:12px 18px 18px;border-top:1px solid var(--border);}
-    .input-wrap{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:48px;padding:5px 5px 5px 18px;}
+    .input-area{padding:12px 18px 18px;border-top:1px solid var(--border);flex-shrink:0;}
+    .input-wrap{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:48px;padding:5px 5px 5px 18px;transition:border-color .2s;}
     .input-wrap:focus-within{border-color:var(--accent);}
     #msgInput{flex:1;background:none;border:none;outline:none;color:var(--text);font-family:var(--ui);font-size:.9rem;padding:10px 0;min-width:0;}
     #msgInput::placeholder{color:var(--muted);}
-    .voice-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.2rem;padding:6px;border-radius:50%;width:36px;height:36px;display:grid;place-items:center;}
+    .voice-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.1rem;padding:6px;border-radius:50%;transition:all .15s;flex-shrink:0;display:grid;place-items:center;width:36px;height:36px;}
     .voice-btn:hover{color:var(--accent);background:var(--accent-lo);}
     .voice-btn.recording{color:var(--red);background:rgba(231,76,60,.12);animation:pulse 1s infinite;}
     @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
-    .send-btn{background:var(--accent);border:none;width:40px;height:40px;border-radius:50%;color:#fff;font-size:1rem;cursor:pointer;display:grid;place-items:center;}
+    .send-btn{background:var(--accent);border:none;width:40px;height:40px;border-radius:50%;color:#fff;font-size:1rem;cursor:pointer;display:grid;place-items:center;transition:opacity .15s;flex-shrink:0;}
     .send-btn:disabled{opacity:.4;cursor:not-allowed;}
     .input-footer{display:flex;justify-content:space-between;margin-top:8px;padding:0 4px;}
-    .status{font-family:var(--mono);font-size:.68rem;color:var(--muted);display:flex;align-items:center;gap:4px;}
-    .status.ok{color:var(--green);}
-    .status.busy{color:var(--accent);}
-    .status-dot{font-size:1rem;line-height:1;}
+    .status{font-family:var(--mono);font-size:.68rem;color:var(--muted);}
+    .status.ok::before{content:'● ';color:var(--green);}
+    .status.busy::before{content:'● ';color:var(--accent);}
+    .status.rec::before{content:'● ';color:var(--red);}
     .char-ct{font-family:var(--mono);font-size:.68rem;color:var(--muted);}
-    
+    .char-ct.warn{color:var(--red);}
     .pricing-container{max-width:1100px;margin:0 auto;padding:36px 20px;overflow-y:auto;height:100%;}
     .pricing-header{text-align:center;margin-bottom:44px;}
     .pricing-header h1{font-size:2.2rem;margin-bottom:12px;}
+    .pricing-header p{color:var(--muted);font-size:1rem;}
     .pricing-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:20px;}
-    .pricing-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:28px;width:240px;}
-    .pricing-card:hover{transform:translateY(-4px);}
-    .pricing-card.highlight{border-color:var(--accent);}
+    .pricing-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:28px;width:240px;transition:transform .2s,box-shadow .2s;}
+    .pricing-card:hover{transform:translateY(-4px);box-shadow:var(--shadow);}
+    .pricing-card.highlight{border-color:var(--accent);box-shadow:0 0 20px var(--accent-lo);}
     .plan-name{font-size:1.3rem;font-weight:700;margin-bottom:12px;}
     .plan-price{font-size:1.9rem;font-weight:800;color:var(--accent);margin-bottom:6px;}
     .plan-period{font-size:.78rem;color:var(--muted);margin-bottom:20px;}
     .plan-features{list-style:none;margin-bottom:24px;}
     .plan-features li{padding:7px 0;border-bottom:1px solid var(--border);font-size:.82rem;}
-    .plan-btn{background:var(--accent);border:none;border-radius:30px;padding:11px 20px;color:white;font-weight:700;cursor:pointer;width:100%;}
-    .plan-btn:hover{opacity:.88;}
-    .plan-btn:disabled{opacity:.5;cursor:default;}
+    .plan-btn{background:var(--accent);border:none;border-radius:30px;padding:11px 20px;color:white;font-weight:700;cursor:pointer;width:100%;transition:all .2s;font-family:var(--ui);}
+    .plan-btn:hover{opacity:.88;transform:scale(1.02);}
+    .plan-btn:disabled{opacity:.5;cursor:default;transform:none;}
     .back-link{display:inline-block;margin-bottom:20px;color:var(--accent);text-decoration:none;font-weight:600;}
     .back-link:hover{text-decoration:underline;}
-    
     @media(max-width:660px){
       .sidebar{width:56px;padding:14px 8px;}
       .logo,.logo-sub,.nav-item>span:not(.nav-icon),.usage-wrap,.user-email,.upgrade-btn{display:none;}
@@ -132,8 +146,13 @@
       .user-row{justify-content:center;padding-top:10px;}
       .msg-body{max-width:86%;}
       .msg-bubble{font-size:.85rem;padding:8px 12px;}
+      .chat-header{padding:10px 12px;}
+      .hdr-btn{font-size:.7rem;padding:5px 9px;}
+      .messages{padding:14px 12px;}
+      .input-area{padding:10px 12px 14px;}
       .pricing-grid{flex-direction:column;align-items:center;}
       .pricing-card{width:100%;max-width:320px;}
+      .pricing-header h1{font-size:1.7rem;}
     }
   </style>
 </head>
@@ -148,14 +167,14 @@
       <button class="auth-tab" id="tabSignup" onclick="switchTab('signup')">Sign Up</button>
     </div>
     <div id="loginPanel" class="auth-panel active">
-      <input class="auth-input" id="loginEmail" type="email" placeholder="Email address">
-      <input class="auth-input" id="loginPassword" type="password" placeholder="Password">
+      <input class="auth-input" id="loginEmail" type="email" placeholder="Email address" autocomplete="email">
+      <input class="auth-input" id="loginPassword" type="password" placeholder="Password" autocomplete="current-password">
       <div class="auth-err" id="loginErr"></div>
       <button class="auth-btn" onclick="doLogin()">Sign In →</button>
     </div>
     <div id="signupPanel" class="auth-panel">
-      <input class="auth-input" id="signupEmail" type="email" placeholder="Email address">
-      <input class="auth-input" id="signupPassword" type="password" placeholder="Password (min 6 chars)">
+      <input class="auth-input" id="signupEmail" type="email" placeholder="Email address" autocomplete="email">
+      <input class="auth-input" id="signupPassword" type="password" placeholder="Password (min 6 chars)" autocomplete="new-password">
       <div class="auth-err" id="signupErr"></div>
       <button class="auth-btn" onclick="doSignup()">Create Account →</button>
     </div>
@@ -167,7 +186,7 @@
     <div class="logo">Essential<span>AI</span></div>
     <div class="logo-sub">// intelligence platform</div>
     <button class="upgrade-btn" onclick="showPricing()">✨ Upgrade to Pro</button>
-    <nav class="nav">
+    <nav class="nav" id="sideNav">
       <div class="nav-item active" data-mode="chat"><span class="nav-icon">💬</span><span>Chat</span></div>
       <div class="nav-item" data-mode="deepcore"><span class="nav-icon">🔬</span><span>Deep Core</span></div>
       <div class="nav-item" data-mode="docs"><span class="nav-icon">📄</span><span>Documents</span></div>
@@ -189,35 +208,28 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
 // ============================================================
-// 🔧 REPLACE WITH YOUR PUBLISHABLE KEY
+// 🔧 PASTE YOUR VALUES HERE — only these 2 lines to change
 // ============================================================
 const SUPABASE_URL  = 'https://sfpfjjdtczvuxyhjievt.supabase.co';
-const SUPABASE_ANON = 'sb_publishable_MH7rnJ7r8_-1TzGXcieNfA';
+const SUPABASE_ANON = 'sb_publishable_MH7rnJ7r8_-1TzGXcieNfA_NXoHQZbm';
 const API_URL       = 'https://essential-ai-backend.onrender.com';
 // ============================================================
 
-const {createClient}=supabase;
-const sb=createClient(SUPABASE_URL,SUPABASE_ANON);
-let session=null,mode='chat',webSearch=false,history=[],busy=false;
+const {createClient} = supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
+let session=null, mode='chat', webSearch=false, history=[], busy=false;
 const MODE_LABELS={chat:'💬 Chat Mode',deepcore:'🔬 Deep Core Mode',docs:'📄 Document Mode',image:'🎨 Image Gen Mode'};
 
-sb.auth.onAuthStateChange((_e,s)=>{session=s;s?showApp(s.user):showAuth();});
+sb.auth.onAuthStateChange((_e,s)=>{session=s; s?showApp(s.user):showAuth();});
 
 function showApp(user){
   document.getElementById('authScreen').style.display='none';
-  document.getElementById('app').style.display='flex';
-  document.getElementById('app').classList.add('visible');
+  const app=document.getElementById('app'); app.style.display='flex'; app.classList.add('visible');
   document.getElementById('userEmail').textContent=user.email;
   document.getElementById('userInitial').textContent=user.email[0].toUpperCase();
-  showChatInterface();
-  loadUsage();
-  bindNav();
+  showChatInterface(); loadUsage(); bindNav();
 }
-
-function showAuth(){
-  document.getElementById('app').style.display='none';
-  document.getElementById('authScreen').style.display='flex';
-}
+function showAuth(){document.getElementById('app').style.display='none';document.getElementById('authScreen').style.display='flex';}
 
 function switchTab(tab){
   document.getElementById('tabLogin').classList.toggle('active',tab==='login');
@@ -230,22 +242,22 @@ async function doLogin(){
   const email=document.getElementById('loginEmail').value.trim();
   const pass=document.getElementById('loginPassword').value;
   const err=document.getElementById('loginErr');
-  err.textContent='';
+  err.style.color='var(--red)'; err.textContent='';
   if(!email||!pass){err.textContent='Email and password required.';return;}
   const {error}=await sb.auth.signInWithPassword({email,password:pass});
-  if(error)err.textContent=error.message;
+  if(error) err.textContent=error.message;
 }
 
 async function doSignup(){
   const email=document.getElementById('signupEmail').value.trim();
   const pass=document.getElementById('signupPassword').value;
   const err=document.getElementById('signupErr');
-  err.textContent='';
+  err.style.color='var(--red)'; err.textContent='';
   if(!email||!pass){err.textContent='Email and password required.';return;}
   if(pass.length<6){err.textContent='Password must be at least 6 characters.';return;}
   const {error}=await sb.auth.signUp({email,password:pass});
   if(error){err.textContent=error.message;}
-  else{err.style.color='#2ecc71';err.textContent='✅ Account created! You can now sign in.';}
+  else{err.style.color='var(--green)';err.textContent='✅ Account created! You can now sign in.';}
 }
 
 async function doLogout(){await sb.auth.signOut();}
@@ -254,16 +266,16 @@ function toggleTheme(){
   const html=document.documentElement;
   const isDark=html.getAttribute('data-theme')==='dark';
   html.setAttribute('data-theme',isDark?'light':'dark');
+  const btn=document.getElementById('themeBtn');
+  if(btn) btn.textContent=isDark?'🌙':'🌓';
 }
 
 function bindNav(){
   document.querySelectorAll('.nav-item').forEach(item=>{
     item.addEventListener('click',()=>{
       document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-      item.classList.add('active');
-      mode=item.dataset.mode;
-      updateModeUI();
-      addMessage(`Switched to ${MODE_LABELS[mode]}.`,'ai');
+      item.classList.add('active'); mode=item.dataset.mode;
+      updateModeUI(); addAiMsg('Switched to '+MODE_LABELS[mode]+'.');
     });
   });
 }
@@ -273,12 +285,12 @@ function updateModeUI(){
   const searchBtn=document.getElementById('searchBtn');
   const input=document.getElementById('msgInput');
   const searchable=['chat','deepcore'].includes(mode);
-  if(pill)pill.textContent=MODE_LABELS[mode];
+  if(pill) pill.textContent=MODE_LABELS[mode];
   if(searchBtn){
     searchBtn.style.display=searchable?'inline-flex':'none';
     if(!searchable&&webSearch){webSearch=false;searchBtn.classList.remove('on');}
   }
-  if(input)input.placeholder=mode==='image'?'Describe the image you want…':'Ask me anything…';
+  if(input) input.placeholder=mode==='image'?'Describe the image you want…':'Ask me anything…';
 }
 
 function showChatInterface(){
@@ -295,18 +307,19 @@ function showChatInterface(){
       <div class="messages" id="messages">
         <div class="msg ai"><div class="msg-av">E</div><div class="msg-body"><div class="msg-role">Essential AI</div>
         <div class="msg-bubble"><strong>Welcome to Essential AI.</strong><br>
-        Ask me anything. Switch modes in the sidebar.<br><br>
-        <span style="font-family:var(--mono);font-size:.78rem;color:var(--muted)">Free tier: 50 chats · 3 images · 5 docs/day</span>
+        Ask me anything. Switch modes in the sidebar. Enable web search for live results.<br><br>
+        Free plan resets daily. <a href="#" onclick="showPricing();return false;" style="color:var(--accent)">Upgrade to Pro</a> for more.<br><br>
+        <span style="font-family:var(--mono);font-size:.78rem;color:var(--muted)">Free tier: 50 chats · 3 images · 5 doc uploads/day</span>
         </div></div></div>
       </div>
       <div class="input-area">
         <div class="input-wrap">
-          <input id="msgInput" type="text" placeholder="Ask me anything…" maxlength="8000">
-          <button class="voice-btn" id="voiceBtn" onclick="startVoiceInput()" title="Voice input">🎙</button>
+          <input id="msgInput" type="text" placeholder="Ask me anything…" maxlength="8000" autocomplete="off">
+          <button class="voice-btn" id="voiceBtn" onclick="toggleVoice()" title="Voice input">🎙</button>
           <button class="send-btn" id="sendBtn" onclick="sendMessage()">↑</button>
         </div>
         <div class="input-footer">
-          <span class="status" id="statusEl"><span class="status-dot">●</span> Ready</span>
+          <span class="status ok" id="statusEl">Ready</span>
           <span class="char-ct" id="charCt">0 / 8000</span>
         </div>
       </div>
@@ -315,7 +328,7 @@ function showChatInterface(){
   document.getElementById('msgInput').addEventListener('keypress',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}});
   document.getElementById('msgInput').addEventListener('input',e=>{
     const el=document.getElementById('charCt');
-    if(el){el.textContent=`${e.target.value.length} / 8000`;}
+    if(el){el.textContent=`${e.target.value.length} / 8000`;el.classList.toggle('warn',e.target.value.length>7500);}
   });
 }
 
@@ -325,10 +338,26 @@ function showPricing(){
       <a href="#" onclick="showChatInterface();return false;" class="back-link">← Back to Chat</a>
       <div class="pricing-header"><h1>Choose Your Plan</h1><p>Flexible pricing for every need.</p></div>
       <div class="pricing-grid">
-        <div class="pricing-card"><div class="plan-name">Free</div><div class="plan-price">$0</div><div class="plan-period">forever</div><ul class="plan-features"><li>✅ 50 messages/day</li><li>✅ 3 images/day</li><li>✅ 5 doc uploads/day</li><li>✅ Web search</li><li>✅ Voice input</li><li>✅ 1M context</li></ul><button class="plan-btn" disabled>Current Plan</button></div>
-        <div class="pricing-card highlight"><div class="plan-name">Pro</div><div class="plan-price">$19</div><div class="plan-period">per month / <span style="color:var(--accent)">$190/year</span></div><ul class="plan-features"><li>✅ 500 messages/day</li><li>✅ 50 images/day</li><li>✅ 100 doc uploads/day</li><li>✅ Priority search</li><li>✅ Email support</li></ul><button class="plan-btn" onclick="alert('Stripe coming soon!')">Upgrade →</button></div>
-        <div class="pricing-card"><div class="plan-name">Team</div><div class="plan-price">$79</div><div class="plan-period">per month / <span style="color:var(--accent)">$790/year</span></div><ul class="plan-features"><li>✅ 2,000 messages/day</li><li>✅ 200 images/day</li><li>✅ 500 doc uploads/day</li><li>✅ Priority support</li><li>✅ Team management</li></ul><button class="plan-btn" onclick="alert('Contact us for early access!')">Contact Sales →</button></div>
-        <div class="pricing-card"><div class="plan-name">Enterprise</div><div class="plan-price">Custom</div><div class="plan-period">tailored for you</div><ul class="plan-features"><li>✅ Unlimited everything</li><li>✅ SLA guarantee</li><li>✅ SSO / SAML</li><li>✅ Dedicated support</li></ul><button class="plan-btn" onclick="alert('enterprise@essential.ai')">Contact Us →</button></div>
+        <div class="pricing-card">
+          <div class="plan-name">Free</div><div class="plan-price">$0</div><div class="plan-period">forever</div>
+          <ul class="plan-features"><li>✅ 50 messages/day</li><li>✅ 3 images/day</li><li>✅ 5 doc uploads/day</li><li>✅ Web search</li><li>✅ Voice input</li><li>✅ 1M context</li></ul>
+          <button class="plan-btn" disabled>Current Plan</button>
+        </div>
+        <div class="pricing-card highlight">
+          <div class="plan-name">Pro</div><div class="plan-price">$19</div><div class="plan-period">per month · <span style="color:var(--accent)">$190/yr</span></div>
+          <ul class="plan-features"><li>✅ 500 messages/day</li><li>✅ 50 images/day</li><li>✅ 100 doc uploads/day</li><li>✅ Priority search</li><li>✅ Voice input</li><li>✅ Email support</li></ul>
+          <button class="plan-btn" onclick="alert('Stripe coming soon!')">Upgrade →</button>
+        </div>
+        <div class="pricing-card">
+          <div class="plan-name">Team</div><div class="plan-price">$79</div><div class="plan-period">per month · <span style="color:var(--accent)">$790/yr</span></div>
+          <ul class="plan-features"><li>✅ 2,000 messages/day</li><li>✅ 200 images/day</li><li>✅ 500 doc uploads/day</li><li>✅ Priority support</li><li>✅ Team management</li><li>✅ 1M context</li></ul>
+          <button class="plan-btn" onclick="alert('Contact us for early access!')">Contact Sales →</button>
+        </div>
+        <div class="pricing-card">
+          <div class="plan-name">Enterprise</div><div class="plan-price">Custom</div><div class="plan-period">tailored for you</div>
+          <ul class="plan-features"><li>✅ Unlimited everything</li><li>✅ SLA guarantee</li><li>✅ SSO / SAML</li><li>✅ Dedicated support</li><li>✅ On-premise options</li></ul>
+          <button class="plan-btn" onclick="alert('enterprise@essential.ai')">Contact Us →</button>
+        </div>
       </div>
     </div>`;
 }
@@ -336,57 +365,43 @@ function showPricing(){
 function toggleSearch(){
   webSearch=!webSearch;
   const btn=document.getElementById('searchBtn');
-  if(btn)btn.classList.toggle('on',webSearch);
-  addMessage(webSearch?'🌐 Web search enabled.':'🌐 Web search disabled.','ai');
+  if(btn) btn.classList.toggle('on',webSearch);
+  addAiMsg(webSearch?'🌐 Web search enabled.':'🌐 Web search disabled.');
 }
 
 function clearChat(){
   history=[];
   const msgs=document.getElementById('messages');
-  if(msgs)msgs.innerHTML='';
-  addMessage('Cleared. Ready for a new conversation.','ai');
+  if(msgs) msgs.innerHTML='';
+  addAiMsg('Cleared. Ready for a new conversation.');
 }
 
-function startVoiceInput(){
+function toggleVoice(){
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SR){addMessage('❌ Voice input not supported in this browser. Use Chrome.','ai');return;}
+  if(!SR){addAiMsg('❌ Voice input not supported in this browser. Try Chrome.');return;}
   const recognition=new SR();
-  recognition.lang='en-US';
-  recognition.interimResults=false;
-  const voiceBtn=document.getElementById('voiceBtn');
-  if(voiceBtn){voiceBtn.classList.add('recording');voiceBtn.textContent='🔴';}
-  const statusEl=document.getElementById('statusEl');
-  if(statusEl){statusEl.innerHTML='<span class="status-dot">●</span> Listening...';}
+  recognition.lang='en-US'; recognition.interimResults=false; recognition.maxAlternatives=1;
+  setVoiceUI(true); setStatus('rec','Listening…');
   recognition.onresult=e=>{
-    const transcript=e.results[0][0].transcript;
+    const t=e.results[0][0].transcript;
     const input=document.getElementById('msgInput');
-    if(input)input.value=transcript;
-    sendMessage();
-    if(voiceBtn){voiceBtn.classList.remove('recording');voiceBtn.textContent='🎙';}
-    if(statusEl)statusEl.innerHTML='<span class="status-dot">●</span> Ready';
+    if(input){input.value=t;input.dispatchEvent(new Event('input'));}
+    setVoiceUI(false); setStatus('ok','Ready');
   };
-  recognition.onerror=()=>{
-    if(voiceBtn){voiceBtn.classList.remove('recording');voiceBtn.textContent='🎙';}
-    if(statusEl)statusEl.innerHTML='<span class="status-dot">●</span> Ready';
-    addMessage('❌ Voice recognition failed.','ai');
-  };
-  recognition.onend=()=>{
-    if(voiceBtn){voiceBtn.classList.remove('recording');voiceBtn.textContent='🎙';}
-  };
+  recognition.onerror=()=>{setVoiceUI(false);setStatus('ok','Ready');};
+  recognition.onend=()=>{setVoiceUI(false);setStatus('ok','Ready');};
   recognition.start();
 }
+
+function setVoiceUI(on){const btn=document.getElementById('voiceBtn');if(btn)btn.classList.toggle('recording',on);}
 
 async function sendMessage(){
   if(busy||!session)return;
   const input=document.getElementById('msgInput');
-  const text=input.value.trim();
-  if(!text)return;
-  input.value='';
-  input.dispatchEvent(new Event('input'));
-  setBusy(true);
-  addMessage(text,'user');
-  history.push({role:'user',content:text});
-  addTyping();
+  const text=input.value.trim(); if(!text)return;
+  input.value=''; input.dispatchEvent(new Event('input'));
+  setBusy(true); addUserMsg(text);
+  history.push({role:'user',content:text}); addTyping();
   try{
     const endpoint=mode==='image'?'/api/image':'/api/chat';
     const body=mode==='image'?{prompt:text}:{message:text,mode,webSearch,history:history.slice(-10)};
@@ -398,23 +413,14 @@ async function sendMessage(){
     removeTyping();
     if(!res.ok){
       const e=await res.json().catch(()=>({}));
-      addMessage('❌ Error: '+(e.error||e.message||res.status),'ai');
-      setBusy(false);
-      return;
+      addAiMsg('❌ Error: '+(e.error||e.message||res.status));
+      setBusy(false);return;
     }
     const data=await res.json();
-    if(mode==='image'){
-      addImageMsg(data.url,data.revisedPrompt||text);
-    }else{
-      history.push({role:'assistant',content:data.reply});
-      addMessage(data.reply,'ai',data.sources||[]);
-    }
+    if(mode==='image'){addImageMsg(data.url,data.revisedPrompt||text);}
+    else{history.push({role:'assistant',content:data.reply});addAiMsg(data.reply,data.sources||[]);}
     loadUsage();
-  }catch(e){
-    removeTyping();
-    console.error(e);
-    addMessage('❌ Network error — check your connection.','ai');
-  }
+  }catch(e){removeTyping();console.error(e);addAiMsg('❌ Network error — check your connection.');}
   setBusy(false);
 }
 
@@ -423,73 +429,32 @@ async function loadUsage(){
   try{
     const res=await fetch(API_URL+'/api/usage',{headers:{'Authorization':'Bearer '+session.access_token}});
     if(res.ok){
-      const d=await res.json();
-      const used=d.chats||0;
-      const txt=document.getElementById('usageTxt');
-      const fill=document.getElementById('usageFill');
+      const d=await res.json(); const used=d.chats||0;
+      const txt=document.getElementById('usageTxt'); const fill=document.getElementById('usageFill');
       if(txt)txt.textContent=used+' / 50';
       if(fill)fill.style.width=Math.min(100,(used/50)*100)+'%';
     }
   }catch(e){}
 }
 
-function addMessage(text,sender,sources=[]){
-  const container=document.getElementById('messages');
-  if(!container)return;
-  const div=document.createElement('div');
-  div.className=`msg ${sender}`;
-  const avatar=sender==='ai'?'E':'U';
-  const role=sender==='ai'?'Essential AI':'You';
-  let content=esc(text);
-  if(sender==='ai'){
-    content=md(text);
-    if(sources.length){
-      content+=`<div class="sources-block"><div class="sources-label">SOURCES</div>${sources.map((s,i)=>`<div class="source-item">${i+1}. <a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.title||s.url)}</a></div>`).join('')}</div>`;
-    }
-  }
-  div.innerHTML=`<div class="msg-av">${avatar}</div><div class="msg-body"><div class="msg-role">${role}</div><div class="msg-bubble">${content}</div></div>`;
-  container.appendChild(div);
-  scrollDown();
+function addUserMsg(text){appendMsg('<div class="msg user"><div class="msg-av">U</div><div class="msg-body"><div class="msg-role">You</div><div class="msg-bubble">'+esc(text)+'</div></div></div>');}
+function addAiMsg(text,sources=[]){
+  const src=sources.length?'<div class="sources-block"><div class="sources-label">SOURCES</div>'+sources.map((s,i)=>'<div class="source-item">'+(i+1)+'. <a href="'+esc(s.url)+'" target="_blank" rel="noopener">'+esc(s.title||s.url)+'</a></div>').join('')+'</div>':'';
+  appendMsg('<div class="msg ai"><div class="msg-av">E</div><div class="msg-body"><div class="msg-role">Essential AI</div><div class="msg-bubble">'+md(text)+src+'</div></div></div>');
 }
-
-function addImageMsg(url,prompt){
-  const container=document.getElementById('messages');
-  if(!container)return;
-  const div=document.createElement('div');
-  div.className='msg ai';
-  div.innerHTML=`<div class="msg-av">E</div><div class="msg-body"><div class="msg-role">Essential AI · DALL-E 3</div><div class="msg-bubble"><img class="gen-image" src="${esc(url)}" alt="Generated image"><div class="image-prompt-note">Prompt: ${esc(prompt)}</div></div></div></div>`;
-  container.appendChild(div);
-  scrollDown();
-}
-
-function addTyping(){
-  const container=document.getElementById('messages');
-  if(!container)return;
-  const div=document.createElement('div');
-  div.className='msg ai';
-  div.id='typing';
-  div.innerHTML='<div class="msg-av">E</div><div class="msg-body"><div class="msg-role">Essential AI</div><div class="msg-bubble"><div class="typing-ind"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div></div>';
-  container.appendChild(div);
-  scrollDown();
-}
-
-function removeTyping(){const el=document.getElementById('typing');if(el)el.remove();}
+function addImageMsg(url,prompt){appendMsg('<div class="msg ai"><div class="msg-av">E</div><div class="msg-body"><div class="msg-role">Essential AI · DALL-E 3</div><div class="msg-bubble"><img class="gen-image" src="'+esc(url)+'" alt="Generated image"><div class="image-prompt-note">Prompt: '+esc(prompt)+'</div></div></div></div>');}
+function addTyping(){const el=document.createElement('div');el.className='msg ai';el.id='typing';el.innerHTML='<div class="msg-av">E</div><div class="msg-body"><div class="msg-role">Essential AI</div><div class="msg-bubble"><div class="typing-ind"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div></div>';document.getElementById('messages')?.appendChild(el);scrollDown();}
+function removeTyping(){document.getElementById('typing')?.remove();}
+function appendMsg(html){document.getElementById('messages')?.insertAdjacentHTML('beforeend',html);scrollDown();}
 function scrollDown(){const c=document.getElementById('messages');if(c)c.scrollTop=c.scrollHeight;}
-function setBusy(b){busy=b;const btn=document.getElementById('sendBtn');if(btn)btn.disabled=b;}
+function setBusy(b){busy=b;const btn=document.getElementById('sendBtn');if(btn)btn.disabled=b;setStatus(b?'busy':'ok',b?'Thinking…':'Ready');}
+function setStatus(cls,txt){const el=document.getElementById('statusEl');if(el){el.className='status '+cls;el.textContent=txt;}}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function md(s){let m=esc(s);m=m.replace(/```(\w*)\n?([\s\S]*?)```/g,'<pre><code>$2</code></pre>');m=m.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');m=m.replace(/`([^`\n]+)`/g,'<code>$1</code>');m=m.replace(/^### (.+)$/gm,'<h3>$1</h3>');m=m.replace(/^## (.+)$/gm,'<h2>$1</h2>');m=m.replace(/^# (.+)$/gm,'<h1>$1</h1>');m=m.replace(/^\* (.+)$/gm,'<li>$1</li>');m=m.replace(/(<li>[\s\S]*?<\/li>)/g,'<ul>$1</ul>');m=m.replace(/\[([^\]]+)\]\(([^)]+)\)/g,'<a href="$2" target="_blank" rel="noopener">$1</a>');m=m.replace(/\n\n/g,'</p><p>').replace(/\n/g,'<br>');return '<p>'+m+'</p>'.replace(/<p>\s*<\/p>/g,'');}
 
-window.switchTab=switchTab;
-window.doLogin=doLogin;
-window.doSignup=doSignup;
-window.doLogout=doLogout;
-window.toggleTheme=toggleTheme;
-window.showPricing=showPricing;
-window.showChatInterface=showChatInterface;
-window.toggleSearch=toggleSearch;
-window.clearChat=clearChat;
-window.startVoiceInput=startVoiceInput;
-window.sendMessage=sendMessage;
+window.switchTab=switchTab;window.doLogin=doLogin;window.doSignup=doSignup;window.doLogout=doLogout;
+window.toggleTheme=toggleTheme;window.showPricing=showPricing;window.showChatInterface=showChatInterface;
+window.toggleSearch=toggleSearch;window.clearChat=clearChat;window.sendMessage=sendMessage;window.toggleVoice=toggleVoice;
 </script>
 </body>
 </html>
