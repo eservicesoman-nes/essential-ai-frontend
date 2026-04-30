@@ -33,8 +33,9 @@
     #app{display:none;width:100%;height:100dvh;overflow:hidden;}
     #app.visible{display:flex;}
 
-    /* Sidebar - Fixed overflow */
-    .sidebar{width:260px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:24px 16px;height:100dvh;overflow-x:hidden;}
+    /* Sidebar - with toggle functionality */
+    .sidebar{width:260px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:24px 16px;height:100dvh;overflow-x:hidden;transition:width 0.3s ease;}
+    .sidebar.collapsed{width:0;padding:0;overflow:hidden;border-right:none;}
     .logo{font-size:1.3rem;font-weight:800;padding:0 8px;margin-bottom:2px;}.logo span{color:var(--accent);}
     .logo-version{font-family:var(--mono);font-size:.6rem;color:var(--muted);padding:0 8px;margin-bottom:24px;}
     .upgrade-btn{background:linear-gradient(135deg,#FF5722,#FF3D00);border:none;border-radius:40px;padding:10px 16px;color:white;font-family:var(--ui);font-size:.75rem;font-weight:700;cursor:pointer;margin:0 8px 20px;text-align:center;box-shadow:0 2px 8px rgba(255,87,34,.3);}
@@ -55,11 +56,14 @@
     .logout-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:.8rem;}
     .logout-btn:hover{color:var(--red);}
 
-    /* Main */
+    /* Main area */
     .main{flex:1;display:flex;flex-direction:column;height:100dvh;overflow:hidden;min-width:0;position:relative;}
 
-    /* Theme toggle */
-    .theme-toggle{position:absolute;top:16px;right:20px;background:var(--bg);border:1px solid var(--border);border-radius:50%;width:36px;height:36px;display:grid;place-items:center;cursor:pointer;color:var(--muted);font-size:1rem;z-index:10;}
+    /* Header with toggle button */
+    .main-header{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-bottom:1px solid var(--border);flex-shrink:0;}
+    .sidebar-toggle{background:var(--bg);border:1px solid var(--border);border-radius:50%;width:36px;height:36px;display:grid;place-items:center;cursor:pointer;color:var(--muted);font-size:1.2rem;transition:all .15s;}
+    .sidebar-toggle:hover{color:var(--accent);border-color:var(--accent);}
+    .theme-toggle{background:var(--bg);border:1px solid var(--border);border-radius:50%;width:36px;height:36px;display:grid;place-items:center;cursor:pointer;color:var(--muted);font-size:1rem;transition:all .15s;}
     .theme-toggle:hover{color:var(--accent);border-color:var(--accent);}
 
     /* Welcome card */
@@ -68,7 +72,7 @@
     .welcome-title{font-size:1.1rem;font-weight:700;margin-bottom:6px;}
     .welcome-title span{color:var(--accent);}
     .features-row{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:10px;}
-    .feat-item{font-family:var(--mono);font-size:.6rem;font-weight:700;color:var(--accent);display:flex;align-items:center;gap:4px;white-space:nowrap;}
+    .feat-item{font-family:var(--mono);font-size:.6rem;font-weight:700;color:var(--accent);display:flex;align-items:center;gap:4px;}
     .free-tier{font-family:var(--mono);font-size:.6rem;color:var(--muted);}
 
     /* Messages — scrollable */
@@ -79,13 +83,8 @@
     @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
     .msg.user{flex-direction:row-reverse;}
 
-    /* EAI Avatar */
-    .eai-avatar{width:32px;height:32px;background:#000;border:2px solid var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-    .eai-text{display:flex;align-items:center;justify-content:center;line-height:1;}
-    .at-symbol{font-size:1rem;font-weight:700;color:var(--accent);position:relative;display:inline-block;}
-    .e-inside{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:.58rem;font-weight:900;color:#fff;}
-    .i-separate{font-size:.95rem;font-weight:800;color:var(--accent);margin-left:-3px;}
-
+    /* Avatar - White background, orange border, black e */
+    .eai-avatar{width:32px;height:32px;background:#FFFFFF;border:2px solid var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--ui);font-weight:800;font-size:1rem;color:#000000;flex-shrink:0;text-transform:lowercase;}
     .msg-user-av{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-size:.7rem;font-weight:700;flex-shrink:0;background:rgba(128,128,128,.15);border:1px solid var(--border);}
     .msg-body{max-width:80%;position:relative;}
     .msg-role{font-family:var(--mono);font-size:.6rem;color:var(--muted);margin-bottom:4px;}
@@ -114,19 +113,18 @@
     #messageInput::placeholder{color:var(--muted);}
     .send-arrow{background:var(--accent);border:none;border-radius:50%;width:38px;height:38px;display:grid;place-items:center;cursor:pointer;color:white;font-size:1.1rem;flex-shrink:0;}
     .send-arrow:disabled{opacity:.4;cursor:not-allowed;}
-    .action-buttons{display:flex;justify-content:center;gap:16px;margin-top:10px;}
-    .action-btn{background:var(--bg);border:1px solid var(--border);border-radius:40px;padding:7px 28px;font-family:var(--ui);font-size:.72rem;font-weight:600;color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .15s;}
-    .action-btn:hover{background:var(--accent-lo);border-color:var(--accent);color:var(--accent);}
-    .action-btn.recording{background:rgba(231,76,60,.12);border-color:var(--red);color:var(--red);}
-    .status-bar{display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);font-family:var(--mono);font-size:.62rem;color:var(--muted);}
-    .status-left{color:var(--green);}
+
+    /* Status bar - one line layout */
+    .status-bar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:12px;padding-top:10px;border-top:1px solid var(--border);font-family:var(--mono);font-size:.62rem;color:var(--muted);flex-wrap:wrap;}
+    .status-left{color:var(--green);white-space:nowrap;}
     .status-left::before{content:"● ";}
-    .status-left.busy{color:var(--accent);}
-    .status-left.busy::before{content:"● ";}
-    .status-stats{display:flex;gap:14px;align-items:center;flex-wrap:wrap;}
-    .upgrade-link{color:var(--accent);text-decoration:none;}
+    .status-stats{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;}
+    .status-disclaimer{text-align:center;color:var(--muted);}
+    .status-actions{display:flex;gap:8px;align-items:center;}
+    .status-action-btn{background:var(--bg);border:1px solid var(--border);border-radius:40px;padding:4px 12px;font-family:var(--ui);font-size:.62rem;font-weight:600;color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:4px;transition:all .15s;}
+    .status-action-btn:hover{background:var(--accent-lo);border-color:var(--accent);color:var(--accent);}
+    .upgrade-link{color:var(--accent);text-decoration:none;white-space:nowrap;}
     .upgrade-link:hover{text-decoration:underline;}
-    .footer-note{font-family:var(--mono);font-size:.55rem;color:var(--muted);text-align:center;margin-top:10px;padding-top:8px;border-top:1px solid var(--border);}
 
     /* Typing dots */
     @keyframes bounce{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-5px);opacity:1}}
@@ -144,17 +142,17 @@
     .plan-btn{background:var(--accent);border:none;border-radius:30px;padding:10px;color:white;font-weight:700;cursor:pointer;width:100%;font-family:var(--ui);font-size:.8rem;}
     .plan-btn:disabled{opacity:.5;cursor:default;}
 
-    /* Mobile */
+    /* Mobile - hide feature row */
     @media(max-width:700px){
       .sidebar{width:64px;padding:14px 8px;}
+      .sidebar.collapsed{width:0;padding:0;}
       .logo,.logo-version,.upgrade-btn,.nav-item>span:not(.nav-icon),.usage-wrap,.user-email{display:none;}
       .nav-item{justify-content:center;padding:10px 0;}
       .user-row{justify-content:center;}
       .main{max-width:calc(100% - 64px);}
+      .features-row{display:none;}
       .welcome-card,.messages,.input-area{padding-left:14px;padding-right:14px;}
-      .features-row{gap:8px;}
-      .feat-item{font-size:.55rem;white-space:normal;}
-      .status-stats{gap:8px;font-size:.55rem;}
+      .status-bar{flex-wrap:wrap;justify-content:center;gap:8px;}
       .pricing-grid{flex-direction:column;align-items:center;}
       .plan-card{width:100%;max-width:300px;}
     }
@@ -186,7 +184,7 @@
 </div>
 
 <div id="app">
-  <aside class="sidebar">
+  <aside class="sidebar" id="sidebar">
     <div class="logo">Essential<span>AI</span></div>
     <div class="logo-version">v3.0</div>
     <button class="upgrade-btn" onclick="showPricing()">✨ Upgrade to Pro</button>
@@ -208,7 +206,10 @@
   </aside>
 
   <main class="main">
-    <button class="theme-toggle" id="themeToggle" title="Toggle theme" onclick="toggleTheme()">🌓</button>
+    <div class="main-header">
+      <button class="sidebar-toggle" id="sidebarToggle" title="Toggle sidebar">☰</button>
+      <button class="theme-toggle" id="themeToggle" title="Toggle theme" onclick="toggleTheme()">🌓</button>
+    </div>
     <div id="mainContent" style="display:flex;flex-direction:column;height:100%;overflow:hidden;"></div>
   </main>
 </div>
@@ -232,7 +233,7 @@ const DOC_LIMIT = 5;
 const STORAGE_KEY = 'essentialai_history';
 
 const MODE_LABELS={chat:'CHAT MODE',deepcore:'DEEP CORE MODE',docs:'DOCUMENTS MODE',image:'IMAGE GEN MODE'};
-const EAI_AV = `<div class="eai-avatar"><div class="eai-text"><span class="at-symbol">@<span class="e-inside">e</span></span><span class="i-separate">i</span></div></div>`;
+const EAI_AV = `<div class="eai-avatar">e</div>`;
 
 sb.auth.onAuthStateChange((_e,s)=>{session=s; s?showApp(s.user):showAuth();});
 
@@ -282,6 +283,11 @@ function toggleTheme(){
   html.setAttribute('data-theme',html.getAttribute('data-theme')==='dark'?'light':'dark');
 }
 
+// Sidebar toggle
+document.getElementById('sidebarToggle').addEventListener('click', function() {
+  document.getElementById('sidebar').classList.toggle('collapsed');
+});
+
 // History persistence
 function saveHistoryToStorage(){
   try{localStorage.setItem(STORAGE_KEY,JSON.stringify(history.slice(-20)));}catch(e){}
@@ -328,20 +334,20 @@ function showChatInterface(){
         <input type="text" id="messageInput" placeholder="${mode==='image'?'Describe the image you want…':'Ask me anything...'}" maxlength="8000" autocomplete="off">
         <button class="send-arrow" id="sendBtn" onclick="sendMessage()">↑</button>
       </div>
-      <div class="action-buttons">
-        <button class="action-btn" id="attachBtn" onclick="handleAttach()">📎 Attach</button>
-        <button class="action-btn" id="voiceBtn" onclick="toggleVoice()">🎙 Voice</button>
-      </div>
       <div class="status-bar">
         <span class="status-left" id="statusEl">Ready</span>
         <div class="status-stats">
           <span>💬 <span id="statMsgs">${CHAT_LIMIT-chatUsed}</span> left</span>
           <span>🎨 <span id="statImages">${IMAGE_LIMIT-imagesUsed}</span> images</span>
           <span>📄 <span id="statDocs">${DOC_LIMIT-docsUsed}</span> docs</span>
-          <a href="#" class="upgrade-link" onclick="showPricing();return false;">Upgrade to Pro →</a>
+        </div>
+        <div class="status-disclaimer">Essential AI can make mistakes</div>
+        <div class="status-actions">
+          <button class="status-action-btn" id="attachBtn" onclick="handleAttach()">📎 Attach</button>
+          <button class="status-action-btn" id="voiceBtn" onclick="toggleVoice()">🎙 Voice</button>
+          <a href="#" class="upgrade-link" onclick="showPricing();return false;">Upgrade</a>
         </div>
       </div>
-      <div class="footer-note">Essential AI can make mistakes. For critical decisions, verify important information.</div>
     </div>`;
 
   document.getElementById('messageInput').addEventListener('keypress',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}});
@@ -354,16 +360,6 @@ function showChatInterface(){
   });
   if(history.length===0) addAiMsg('👋 Hi! I\'m Essential AI. Ask me anything — code, research, documents, or generate images.'+(isSearch?'\n\n🌐 Web search is ON — I have access to live information.':''));
   scrollDown();
-  updateStatsDisplay();
-}
-
-function updateStatsDisplay(){
-  const statMsgs = document.getElementById('statMsgs');
-  const statImages = document.getElementById('statImages');
-  const statDocs = document.getElementById('statDocs');
-  if(statMsgs) statMsgs.textContent = CHAT_LIMIT - chatUsed;
-  if(statImages) statImages.textContent = IMAGE_LIMIT - imagesUsed;
-  if(statDocs) statDocs.textContent = DOC_LIMIT - docsUsed;
 }
 
 function showPricing(){
@@ -488,6 +484,15 @@ async function sendMessage(){
   setBusy(false);
 }
 
+function updateStatsDisplay(){
+  const statMsgs = document.getElementById('statMsgs');
+  const statImages = document.getElementById('statImages');
+  const statDocs = document.getElementById('statDocs');
+  if(statMsgs) statMsgs.textContent = CHAT_LIMIT - chatUsed;
+  if(statImages) statImages.textContent = IMAGE_LIMIT - imagesUsed;
+  if(statDocs) statDocs.textContent = DOC_LIMIT - docsUsed;
+}
+
 async function loadUsage(){
   if(!session)return;
   try{
@@ -503,7 +508,7 @@ async function loadUsage(){
       if(fill) fill.style.width=Math.min(100,(chatUsed/50)*100)+'%';
       updateStatsDisplay();
     }
-  }catch(e){}
+  }catch(e){console.warn('Usage fetch failed:',e);}
 }
 
 // DOM helpers
