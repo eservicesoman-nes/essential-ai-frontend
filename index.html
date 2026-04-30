@@ -1,4 +1,3 @@
-so you mean this do not have the fixescat > /home/claude/index_final.html << 'HTMLEOF'
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
@@ -34,8 +33,8 @@ so you mean this do not have the fixescat > /home/claude/index_final.html << 'HT
     #app{display:none;width:100%;height:100dvh;overflow:hidden;}
     #app.visible{display:flex;}
 
-    /* Sidebar */
-    .sidebar{width:260px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:24px 16px;height:100dvh;overflow:hidden;}
+    /* Sidebar - Fixed overflow */
+    .sidebar{width:260px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:24px 16px;height:100dvh;overflow-x:hidden;}
     .logo{font-size:1.3rem;font-weight:800;padding:0 8px;margin-bottom:2px;}.logo span{color:var(--accent);}
     .logo-version{font-family:var(--mono);font-size:.6rem;color:var(--muted);padding:0 8px;margin-bottom:24px;}
     .upgrade-btn{background:linear-gradient(135deg,#FF5722,#FF3D00);border:none;border-radius:40px;padding:10px 16px;color:white;font-family:var(--ui);font-size:.75rem;font-weight:700;cursor:pointer;margin:0 8px 20px;text-align:center;box-shadow:0 2px 8px rgba(255,87,34,.3);}
@@ -45,13 +44,14 @@ so you mean this do not have the fixescat > /home/claude/index_final.html << 'HT
     .nav-item:hover{background:var(--accent-lo);color:var(--accent);}
     .nav-item.active{background:var(--accent-lo);color:var(--accent);}
     .nav-icon{font-size:1.1rem;width:24px;flex-shrink:0;}
+    .nav-item span:last-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px;}
     .usage-wrap{margin-top:auto;padding:16px 8px 0;border-top:1px solid var(--border);}
     .usage-row{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.6rem;color:var(--muted);margin-bottom:8px;}
     .usage-track{height:3px;background:var(--border);border-radius:99px;overflow:hidden;margin-bottom:16px;}
     .usage-fill{height:100%;background:var(--accent);border-radius:99px;width:0%;transition:width .4s;}
     .user-row{display:flex;align-items:center;gap:10px;padding-top:12px;}
     .user-av{width:32px;height:32px;background:var(--accent-lo);border:1px solid var(--accent-md);border-radius:50%;display:grid;place-items:center;font-size:.7rem;color:var(--accent);font-weight:700;flex-shrink:0;}
-    .user-email{font-family:var(--mono);font-size:.65rem;color:var(--muted);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .user-email{font-family:var(--mono);font-size:.65rem;color:var(--muted);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:150px;}
     .logout-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:.8rem;}
     .logout-btn:hover{color:var(--red);}
 
@@ -62,16 +62,16 @@ so you mean this do not have the fixescat > /home/claude/index_final.html << 'HT
     .theme-toggle{position:absolute;top:16px;right:20px;background:var(--bg);border:1px solid var(--border);border-radius:50%;width:36px;height:36px;display:grid;place-items:center;cursor:pointer;color:var(--muted);font-size:1rem;z-index:10;}
     .theme-toggle:hover{color:var(--accent);border-color:var(--accent);}
 
-    /* Welcome card — FIXED HEIGHT so it doesn't push messages */
-    .welcome-card{padding:16px 28px;border-bottom:1px solid var(--border);flex-shrink:0;}
+    /* Welcome card */
+    .welcome-card{padding:16px 28px;border-bottom:1px solid var(--border);flex-shrink:0;overflow-x:hidden;word-wrap:break-word;}
     .chat-mode-label{font-family:var(--mono);font-size:.7rem;color:var(--accent);letter-spacing:1px;margin-bottom:10px;}
     .welcome-title{font-size:1.1rem;font-weight:700;margin-bottom:6px;}
     .welcome-title span{color:var(--accent);}
     .features-row{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:10px;}
-    .feat-item{font-family:var(--mono);font-size:.6rem;font-weight:700;color:var(--accent);display:flex;align-items:center;gap:4px;}
+    .feat-item{font-family:var(--mono);font-size:.6rem;font-weight:700;color:var(--accent);display:flex;align-items:center;gap:4px;white-space:nowrap;}
     .free-tier{font-family:var(--mono);font-size:.6rem;color:var(--muted);}
 
-    /* Messages — SCROLLABLE, takes remaining space */
+    /* Messages — scrollable */
     .messages{flex:1;overflow-y:auto;padding:16px 28px;display:flex;flex-direction:column;gap:14px;min-height:0;}
     .messages::-webkit-scrollbar{width:4px;}
     .messages::-webkit-scrollbar-thumb{background:var(--border);border-radius:10px;}
@@ -106,7 +106,7 @@ so you mean this do not have the fixescat > /home/claude/index_final.html << 'HT
     .copy-btn{position:absolute;top:0;right:0;background:var(--accent-lo);border:1px solid var(--accent-md);border-radius:8px;padding:3px 8px;font-size:.58rem;cursor:pointer;color:var(--accent);opacity:0;transition:opacity .2s;font-family:var(--mono);}
     .msg-body:hover .copy-btn{opacity:1;}
 
-    /* Input area — fixed at bottom */
+    /* Input area */
     .input-area{padding:12px 28px 16px;border-top:1px solid var(--border);flex-shrink:0;}
     .prompt-wrapper{display:flex;align-items:center;gap:10px;background:var(--bg);border:1px solid var(--border);border-radius:60px;padding:5px 5px 5px 18px;transition:border-color .2s;}
     .prompt-wrapper:focus-within{border-color:var(--accent);}
@@ -123,9 +123,10 @@ so you mean this do not have the fixescat > /home/claude/index_final.html << 'HT
     .status-left::before{content:"● ";}
     .status-left.busy{color:var(--accent);}
     .status-left.busy::before{content:"● ";}
-    .status-stats{display:flex;gap:14px;align-items:center;}
+    .status-stats{display:flex;gap:14px;align-items:center;flex-wrap:wrap;}
     .upgrade-link{color:var(--accent);text-decoration:none;}
     .upgrade-link:hover{text-decoration:underline;}
+    .footer-note{font-family:var(--mono);font-size:.55rem;color:var(--muted);text-align:center;margin-top:10px;padding-top:8px;border-top:1px solid var(--border);}
 
     /* Typing dots */
     @keyframes bounce{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-5px);opacity:1}}
@@ -152,7 +153,7 @@ so you mean this do not have the fixescat > /home/claude/index_final.html << 'HT
       .main{max-width:calc(100% - 64px);}
       .welcome-card,.messages,.input-area{padding-left:14px;padding-right:14px;}
       .features-row{gap:8px;}
-      .feat-item{font-size:.55rem;}
+      .feat-item{font-size:.55rem;white-space:normal;}
       .status-stats{gap:8px;font-size:.55rem;}
       .pricing-grid{flex-direction:column;align-items:center;}
       .plan-card{width:100%;max-width:300px;}
@@ -224,8 +225,10 @@ const API_URL       = 'https://essential-ai-backend.onrender.com';
 
 const {createClient} = supabase;
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
-let session=null, mode='chat', history=[], busy=false, chatUsed=0;
+let session=null, mode='chat', history=[], busy=false, chatUsed=0, imagesUsed=0, docsUsed=0;
 const CHAT_LIMIT = 50;
+const IMAGE_LIMIT = 3;
+const DOC_LIMIT = 5;
 const STORAGE_KEY = 'essentialai_history';
 
 const MODE_LABELS={chat:'CHAT MODE',deepcore:'DEEP CORE MODE',docs:'DOCUMENTS MODE',image:'IMAGE GEN MODE'};
@@ -279,7 +282,7 @@ function toggleTheme(){
   html.setAttribute('data-theme',html.getAttribute('data-theme')==='dark'?'light':'dark');
 }
 
-// ── History persistence ──────────────────────────────────────
+// History persistence
 function saveHistoryToStorage(){
   try{localStorage.setItem(STORAGE_KEY,JSON.stringify(history.slice(-20)));}catch(e){}
 }
@@ -333,11 +336,12 @@ function showChatInterface(){
         <span class="status-left" id="statusEl">Ready</span>
         <div class="status-stats">
           <span>💬 <span id="statMsgs">${CHAT_LIMIT-chatUsed}</span> left</span>
-          <span>🎨 3 images</span>
-          <span>📄 5 docs</span>
+          <span>🎨 <span id="statImages">${IMAGE_LIMIT-imagesUsed}</span> images</span>
+          <span>📄 <span id="statDocs">${DOC_LIMIT-docsUsed}</span> docs</span>
           <a href="#" class="upgrade-link" onclick="showPricing();return false;">Upgrade to Pro →</a>
         </div>
       </div>
+      <div class="footer-note">Essential AI can make mistakes. For critical decisions, verify important information.</div>
     </div>`;
 
   document.getElementById('messageInput').addEventListener('keypress',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}});
@@ -350,6 +354,16 @@ function showChatInterface(){
   });
   if(history.length===0) addAiMsg('👋 Hi! I\'m Essential AI. Ask me anything — code, research, documents, or generate images.'+(isSearch?'\n\n🌐 Web search is ON — I have access to live information.':''));
   scrollDown();
+  updateStatsDisplay();
+}
+
+function updateStatsDisplay(){
+  const statMsgs = document.getElementById('statMsgs');
+  const statImages = document.getElementById('statImages');
+  const statDocs = document.getElementById('statDocs');
+  if(statMsgs) statMsgs.textContent = CHAT_LIMIT - chatUsed;
+  if(statImages) statImages.textContent = IMAGE_LIMIT - imagesUsed;
+  if(statDocs) statDocs.textContent = DOC_LIMIT - docsUsed;
 }
 
 function showPricing(){
@@ -358,23 +372,19 @@ function showPricing(){
       <a href="#" onclick="showChatInterface();return false;" style="color:var(--accent);text-decoration:none;display:inline-block;margin-bottom:24px;">← Back to Chat</a>
       <div style="text-align:center;margin-bottom:8px;"><h1 style="font-size:1.6rem;">Choose Your Plan</h1><p style="color:var(--muted);font-size:.85rem;">Flexible pricing for every need.</p></div>
       <div class="pricing-grid">
-        <div class="plan-card">
-          <div class="plan-name">Free</div><div class="plan-price">$0</div><div class="plan-period">forever</div>
+        <div class="plan-card"><div class="plan-name">Free</div><div class="plan-price">$0</div><div class="plan-period">forever</div>
           <ul class="plan-features"><li>✅ 50 messages/day</li><li>✅ 3 images/day</li><li>✅ 5 docs/day</li><li>✅ Web search</li><li>✅ Voice input</li></ul>
           <button class="plan-btn" disabled>Current Plan</button>
         </div>
-        <div class="plan-card highlight">
-          <div class="plan-name">Pro</div><div class="plan-price">$19</div><div class="plan-period">per month · $190/yr</div>
+        <div class="plan-card highlight"><div class="plan-name">Pro</div><div class="plan-price">$19</div><div class="plan-period">per month · $190/yr</div>
           <ul class="plan-features"><li>✅ 500 messages/day</li><li>✅ 50 images/day</li><li>✅ 100 docs/day</li><li>✅ Priority search</li><li>✅ Email support</li></ul>
           <button class="plan-btn" onclick="alert('Stripe coming soon!')">Upgrade →</button>
         </div>
-        <div class="plan-card">
-          <div class="plan-name">Team</div><div class="plan-price">$79</div><div class="plan-period">per month · $790/yr</div>
+        <div class="plan-card"><div class="plan-name">Team</div><div class="plan-price">$79</div><div class="plan-period">per month · $790/yr</div>
           <ul class="plan-features"><li>✅ 2,000 messages/day</li><li>✅ 200 images/day</li><li>✅ 500 docs/day</li><li>✅ Priority support</li><li>✅ Team management</li></ul>
           <button class="plan-btn" onclick="alert('Contact us for early access!')">Contact Sales →</button>
         </div>
-        <div class="plan-card">
-          <div class="plan-name">Enterprise</div><div class="plan-price">Custom</div><div class="plan-period">tailored for you</div>
+        <div class="plan-card"><div class="plan-name">Enterprise</div><div class="plan-price">Custom</div><div class="plan-period">tailored for you</div>
           <ul class="plan-features"><li>✅ Unlimited everything</li><li>✅ SLA guarantee</li><li>✅ SSO / SAML</li><li>✅ Dedicated support</li><li>✅ On-premise</li></ul>
           <button class="plan-btn" onclick="alert('enterprise@essential.ai')">Contact Us →</button>
         </div>
@@ -382,7 +392,7 @@ function showPricing(){
     </div>`;
 }
 
-// ── File attachment ──────────────────────────────────────────
+// File attachment
 function handleAttach(){
   if(mode!=='docs'){
     addAiMsg('📎 File attachment works in **Documents mode**. Please switch to 📄 Documents in the sidebar.');
@@ -397,8 +407,7 @@ function handleFileUpload(e){
   const reader=new FileReader();
   reader.onload=async(ev)=>{
     const content=ev.target.result;
-    const preview=content.substring(0,200)+(content.length>200?'...':'');
-    addUserMsg('📎 '+file.name+'\n'+preview);
+    addUserMsg('📎 '+file.name+'\n'+content.substring(0,200)+(content.length>200?'...':''));
     history.push({role:'user',content:'Please analyze this document: '+file.name+'\n\nContent:\n'+content.substring(0,4000)});
     saveHistoryToStorage();
     setBusy(true); addTyping();
@@ -423,7 +432,7 @@ function handleFileUpload(e){
   e.target.value='';
 }
 
-// ── Voice ────────────────────────────────────────────────────
+// Voice
 function toggleVoice(){
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   if(!SR){addAiMsg('❌ Voice not supported in this browser. Try Chrome.');return;}
@@ -444,7 +453,7 @@ function toggleVoice(){
   recognition.start();
 }
 
-// ── Send message ─────────────────────────────────────────────
+// Send message
 async function sendMessage(){
   if(busy||!session)return;
   const input=document.getElementById('messageInput');
@@ -466,8 +475,10 @@ async function sendMessage(){
     removeTyping();
     if(!res.ok){const e=await res.json().catch(()=>({}));addAiMsg('❌ Error: '+(e.error||res.status));setBusy(false);return;}
     const data=await res.json();
-    if(mode==='image'){addImageMsg(data.url,data.revisedPrompt||text);}
-    else{
+    if(mode==='image'){
+      addImageMsg(data.url,data.revisedPrompt||text);
+      imagesUsed++; updateStatsDisplay();
+    }else{
       history.push({role:'assistant',content:data.reply});
       saveHistoryToStorage();
       addAiMsg(data.reply,data.sources||[]);
@@ -484,17 +495,18 @@ async function loadUsage(){
     if(res.ok){
       const d=await res.json();
       chatUsed=d.chats||0;
+      imagesUsed=d.images||0;
+      docsUsed=d.docs||0;
       const txt=document.getElementById('usageTxt');
       const fill=document.getElementById('usageFill');
-      const stat=document.getElementById('statMsgs');
       if(txt) txt.textContent=chatUsed+' / 50';
       if(fill) fill.style.width=Math.min(100,(chatUsed/50)*100)+'%';
-      if(stat) stat.textContent=CHAT_LIMIT-chatUsed;
+      updateStatsDisplay();
     }
   }catch(e){}
 }
 
-// ── DOM helpers ──────────────────────────────────────────────
+// DOM helpers
 function copyMsg(btn){
   const bubble=btn.closest('.msg-body').querySelector('.msg-bubble');
   navigator.clipboard.writeText(bubble.innerText||'');
