@@ -33,9 +33,8 @@
     #app{display:none;width:100%;height:100dvh;overflow:hidden;}
     #app.visible{display:flex;}
 
-    /* Sidebar - with toggle functionality */
-    .sidebar{width:260px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:24px 16px;height:100dvh;overflow-x:hidden;transition:width 0.3s ease;}
-    .sidebar.collapsed{width:0;padding:0;overflow:hidden;border-right:none;}
+    /* Sidebar */
+    .sidebar{width:260px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:24px 16px;height:100dvh;overflow:hidden;}
     .logo{font-size:1.3rem;font-weight:800;padding:0 8px;margin-bottom:2px;}.logo span{color:var(--accent);}
     .logo-version{font-family:var(--mono);font-size:.6rem;color:var(--muted);padding:0 8px;margin-bottom:24px;}
     .upgrade-btn{background:linear-gradient(135deg,#FF5722,#FF3D00);border:none;border-radius:40px;padding:10px 16px;color:white;font-family:var(--ui);font-size:.75rem;font-weight:700;cursor:pointer;margin:0 8px 20px;text-align:center;box-shadow:0 2px 8px rgba(255,87,34,.3);}
@@ -45,29 +44,25 @@
     .nav-item:hover{background:var(--accent-lo);color:var(--accent);}
     .nav-item.active{background:var(--accent-lo);color:var(--accent);}
     .nav-icon{font-size:1.1rem;width:24px;flex-shrink:0;}
-    .nav-item span:last-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px;}
     .usage-wrap{margin-top:auto;padding:16px 8px 0;border-top:1px solid var(--border);}
     .usage-row{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.6rem;color:var(--muted);margin-bottom:8px;}
     .usage-track{height:3px;background:var(--border);border-radius:99px;overflow:hidden;margin-bottom:16px;}
     .usage-fill{height:100%;background:var(--accent);border-radius:99px;width:0%;transition:width .4s;}
     .user-row{display:flex;align-items:center;gap:10px;padding-top:12px;}
     .user-av{width:32px;height:32px;background:var(--accent-lo);border:1px solid var(--accent-md);border-radius:50%;display:grid;place-items:center;font-size:.7rem;color:var(--accent);font-weight:700;flex-shrink:0;}
-    .user-email{font-family:var(--mono);font-size:.65rem;color:var(--muted);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:150px;}
+    .user-email{font-family:var(--mono);font-size:.65rem;color:var(--muted);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
     .logout-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:.8rem;}
     .logout-btn:hover{color:var(--red);}
 
-    /* Main area */
+    /* Main */
     .main{flex:1;display:flex;flex-direction:column;height:100dvh;overflow:hidden;min-width:0;position:relative;}
 
-    /* Header with toggle button */
-    .main-header{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-bottom:1px solid var(--border);flex-shrink:0;}
-    .sidebar-toggle{background:var(--bg);border:1px solid var(--border);border-radius:50%;width:36px;height:36px;display:grid;place-items:center;cursor:pointer;color:var(--muted);font-size:1.2rem;transition:all .15s;}
-    .sidebar-toggle:hover{color:var(--accent);border-color:var(--accent);}
-    .theme-toggle{background:var(--bg);border:1px solid var(--border);border-radius:50%;width:36px;height:36px;display:grid;place-items:center;cursor:pointer;color:var(--muted);font-size:1rem;transition:all .15s;}
+    /* Theme toggle */
+    .theme-toggle{position:absolute;top:16px;right:20px;background:var(--bg);border:1px solid var(--border);border-radius:50%;width:36px;height:36px;display:grid;place-items:center;cursor:pointer;color:var(--muted);font-size:1rem;z-index:10;}
     .theme-toggle:hover{color:var(--accent);border-color:var(--accent);}
 
     /* Welcome card */
-    .welcome-card{padding:16px 28px;border-bottom:1px solid var(--border);flex-shrink:0;overflow-x:hidden;word-wrap:break-word;}
+    .welcome-card{padding:16px 28px;border-bottom:1px solid var(--border);flex-shrink:0;}
     .chat-mode-label{font-family:var(--mono);font-size:.7rem;color:var(--accent);letter-spacing:1px;margin-bottom:10px;}
     .welcome-title{font-size:1.1rem;font-weight:700;margin-bottom:6px;}
     .welcome-title span{color:var(--accent);}
@@ -75,7 +70,7 @@
     .feat-item{font-family:var(--mono);font-size:.6rem;font-weight:700;color:var(--accent);display:flex;align-items:center;gap:4px;}
     .free-tier{font-family:var(--mono);font-size:.6rem;color:var(--muted);}
 
-    /* Messages — scrollable */
+    /* Messages */
     .messages{flex:1;overflow-y:auto;padding:16px 28px;display:flex;flex-direction:column;gap:14px;min-height:0;}
     .messages::-webkit-scrollbar{width:4px;}
     .messages::-webkit-scrollbar-thumb{background:var(--border);border-radius:10px;}
@@ -83,8 +78,8 @@
     @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
     .msg.user{flex-direction:row-reverse;}
 
-    /* Avatar - White background, orange border, black e */
-    .eai-avatar{width:32px;height:32px;background:#FFFFFF;border:2px solid var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--ui);font-weight:800;font-size:1rem;color:#000000;flex-shrink:0;text-transform:lowercase;}
+    /* EAI Avatar */
+    .eai-avatar{width:32px;height:32px;background:#FFFFFF;border:2px solid var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:var(--ui);font-weight:800;font-size:1rem;color:#000000;text-transform:lowercase;}
     .msg-user-av{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-size:.7rem;font-weight:700;flex-shrink:0;background:rgba(128,128,128,.15);border:1px solid var(--border);}
     .msg-body{max-width:80%;position:relative;}
     .msg-role{font-family:var(--mono);font-size:.6rem;color:var(--muted);margin-bottom:4px;}
@@ -113,17 +108,17 @@
     #messageInput::placeholder{color:var(--muted);}
     .send-arrow{background:var(--accent);border:none;border-radius:50%;width:38px;height:38px;display:grid;place-items:center;cursor:pointer;color:white;font-size:1.1rem;flex-shrink:0;}
     .send-arrow:disabled{opacity:.4;cursor:not-allowed;}
-
-    /* Status bar - one line layout */
-    .status-bar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:12px;padding-top:10px;border-top:1px solid var(--border);font-family:var(--mono);font-size:.62rem;color:var(--muted);flex-wrap:wrap;}
-    .status-left{color:var(--green);white-space:nowrap;}
+    .action-buttons{display:flex;justify-content:center;gap:16px;margin-top:10px;}
+    .action-btn{background:var(--bg);border:1px solid var(--border);border-radius:40px;padding:7px 28px;font-family:var(--ui);font-size:.72rem;font-weight:600;color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .15s;}
+    .action-btn:hover{background:var(--accent-lo);border-color:var(--accent);color:var(--accent);}
+    .action-btn.recording{background:rgba(231,76,60,.12);border-color:var(--red);color:var(--red);}
+    .status-bar{display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);font-family:var(--mono);font-size:.62rem;color:var(--muted);}
+    .status-left{color:var(--green);}
     .status-left::before{content:"● ";}
-    .status-stats{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;}
-    .status-disclaimer{text-align:center;color:var(--muted);}
-    .status-actions{display:flex;gap:8px;align-items:center;}
-    .status-action-btn{background:var(--bg);border:1px solid var(--border);border-radius:40px;padding:4px 12px;font-family:var(--ui);font-size:.62rem;font-weight:600;color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:4px;transition:all .15s;}
-    .status-action-btn:hover{background:var(--accent-lo);border-color:var(--accent);color:var(--accent);}
-    .upgrade-link{color:var(--accent);text-decoration:none;white-space:nowrap;}
+    .status-left.busy{color:var(--accent);}
+    .status-left.busy::before{content:"● ";}
+    .status-stats{display:flex;gap:14px;align-items:center;}
+    .upgrade-link{color:var(--accent);text-decoration:none;}
     .upgrade-link:hover{text-decoration:underline;}
 
     /* Typing dots */
@@ -142,17 +137,17 @@
     .plan-btn{background:var(--accent);border:none;border-radius:30px;padding:10px;color:white;font-weight:700;cursor:pointer;width:100%;font-family:var(--ui);font-size:.8rem;}
     .plan-btn:disabled{opacity:.5;cursor:default;}
 
-    /* Mobile - hide feature row */
+    /* Mobile */
     @media(max-width:700px){
       .sidebar{width:64px;padding:14px 8px;}
-      .sidebar.collapsed{width:0;padding:0;}
       .logo,.logo-version,.upgrade-btn,.nav-item>span:not(.nav-icon),.usage-wrap,.user-email{display:none;}
       .nav-item{justify-content:center;padding:10px 0;}
       .user-row{justify-content:center;}
       .main{max-width:calc(100% - 64px);}
-      .features-row{display:none;}
       .welcome-card,.messages,.input-area{padding-left:14px;padding-right:14px;}
-      .status-bar{flex-wrap:wrap;justify-content:center;gap:8px;}
+      .features-row{gap:8px;}
+      .feat-item{font-size:.55rem;}
+      .status-stats{gap:8px;font-size:.55rem;}
       .pricing-grid{flex-direction:column;align-items:center;}
       .plan-card{width:100%;max-width:300px;}
     }
@@ -184,7 +179,7 @@
 </div>
 
 <div id="app">
-  <aside class="sidebar" id="sidebar">
+  <aside class="sidebar">
     <div class="logo">Essential<span>AI</span></div>
     <div class="logo-version">v3.0</div>
     <button class="upgrade-btn" onclick="showPricing()">✨ Upgrade to Pro</button>
@@ -206,10 +201,7 @@
   </aside>
 
   <main class="main">
-    <div class="main-header">
-      <button class="sidebar-toggle" id="sidebarToggle" title="Toggle sidebar">☰</button>
-      <button class="theme-toggle" id="themeToggle" title="Toggle theme" onclick="toggleTheme()">🌓</button>
-    </div>
+    <button class="theme-toggle" id="themeToggle" title="Toggle theme" onclick="toggleTheme()">🌓</button>
     <div id="mainContent" style="display:flex;flex-direction:column;height:100%;overflow:hidden;"></div>
   </main>
 </div>
@@ -283,11 +275,6 @@ function toggleTheme(){
   html.setAttribute('data-theme',html.getAttribute('data-theme')==='dark'?'light':'dark');
 }
 
-// Sidebar toggle
-document.getElementById('sidebarToggle').addEventListener('click', function() {
-  document.getElementById('sidebar').classList.toggle('collapsed');
-});
-
 // History persistence
 function saveHistoryToStorage(){
   try{localStorage.setItem(STORAGE_KEY,JSON.stringify(history.slice(-50)));}catch(e){}
@@ -328,11 +315,15 @@ function showChatInterface(){
       <div class="free-tier">Free tier: 50 messages/day · 3 images/day · 5 document uploads/day</div>
     </div>
     <div class="messages" id="messages"></div>
-    <input type="file" id="fileInput" accept=".txt,.pdf,.doc,.docx,.md,.json,.csv" style="display:none">
+    <input type="file" id="fileInput" accept=".txt,.md,.json,.csv" style="display:none">
     <div class="input-area">
       <div class="prompt-wrapper">
         <input type="text" id="messageInput" placeholder="${mode==='image'?'Describe the image you want…':'Ask me anything...'}" maxlength="8000" autocomplete="off">
         <button class="send-arrow" id="sendBtn" onclick="sendMessage()">↑</button>
+      </div>
+      <div class="action-buttons">
+        <button class="action-btn" id="attachBtn" onclick="handleAttach()">📎 Attach</button>
+        <button class="action-btn" id="voiceBtn" onclick="toggleVoice()">🎙 Voice</button>
       </div>
       <div class="status-bar">
         <span class="status-left" id="statusEl">Ready</span>
@@ -340,11 +331,6 @@ function showChatInterface(){
           <span>💬 <span id="statMsgs">${CHAT_LIMIT-chatUsed}</span> left</span>
           <span>🎨 <span id="statImages">${IMAGE_LIMIT-imagesUsed}</span> images</span>
           <span>📄 <span id="statDocs">${DOC_LIMIT-docsUsed}</span> docs</span>
-        </div>
-        <div class="status-disclaimer">Essential AI can make mistakes</div>
-        <div class="status-actions">
-          <button class="status-action-btn" id="attachBtn" onclick="handleAttach()">📎 Attach</button>
-          <button class="status-action-btn" id="voiceBtn" onclick="toggleVoice()">🎙 Voice</button>
           <a href="#" class="upgrade-link" onclick="showPricing();return false;">Upgrade</a>
         </div>
       </div>
@@ -353,7 +339,7 @@ function showChatInterface(){
   document.getElementById('messageInput').addEventListener('keypress',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}});
   document.getElementById('fileInput').addEventListener('change',handleFileUpload);
 
-  // Restore history messages - including images
+  // Restore history messages
   history.forEach(h=>{
     if(h.role==='user') {
       appendMsg('<div class="msg user"><div class="msg-user-av">U</div><div class="msg-body"><div class="msg-role">You</div><div class="msg-bubble">'+esc(h.content)+'</div></div></div>');
@@ -402,7 +388,7 @@ function showPricing(){
     </div>`;
 }
 
-// File attachment - FIXED: No raw content shown, doc counter works
+// ── File attachment — NO RAW CONTENT SHOWN IN CHAT ──
 function handleAttach(){
   if(mode!=='docs'){
     addAiMsg('📎 File attachment works in **Documents mode**. Please switch to 📄 Documents in the sidebar.');
@@ -415,33 +401,39 @@ function handleFileUpload(e){
   const file=e.target.files[0]; if(!file)return;
   if(file.size>5*1024*1024){addAiMsg('❌ File too large. Max 5MB.');e.target.value='';return;}
   
-  // Show simple attachment message without raw content
+  // Show clean message — NO raw content
   addUserMsg(`📎 Attached: ${file.name} (${(file.size/1024).toFixed(1)} KB) — analyzing...`);
   
   const reader=new FileReader();
   reader.onload=async(ev)=>{
     const content=ev.target.result;
-    history.push({role:'user',content:'Please analyze this document: '+file.name+'\n\nContent:\n'+content.substring(0,4000)});
+    // Send FULL content to backend (including raw for PDFs), but don't display it
+    history.push({role:'user', content: 'Please analyze this document: ' + file.name + '\n\nContent:\n' + content});
     saveHistoryToStorage();
     setBusy(true); addTyping();
     try{
       const res=await fetch(API_URL+'/api/chat',{
         method:'POST',
         headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
-        body:JSON.stringify({message:'Please analyze this document: '+file.name+'\n\n'+content.substring(0,4000),mode:'docs',webSearch:false,history:history.slice(-10)})
+        body:JSON.stringify({message:'Please analyze this document: ' + file.name + '\n\n' + content, mode:'docs', webSearch:false, history:history.slice(-10)})
       });
       removeTyping();
       if(res.ok){
         const data=await res.json();
-        history.push({role:'assistant',content:data.reply});
+        history.push({role:'assistant', content:data.reply});
         saveHistoryToStorage();
         addAiMsg(data.reply);
         // Increment document counter
         docsUsed++;
         updateStatsDisplay();
         loadUsage();
-      }else{addAiMsg('❌ Could not analyze file.');}
-    }catch(err){removeTyping();addAiMsg('❌ Network error.');}
+      } else {
+        addAiMsg('❌ Could not analyze file.');
+      }
+    } catch(err){
+      removeTyping();
+      addAiMsg('❌ Network error.');
+    }
     setBusy(false);
   };
   reader.readAsText(file);
@@ -469,7 +461,7 @@ function toggleVoice(){
   recognition.start();
 }
 
-// Send message - FIXED: Images persist to history
+// Send message — IMAGES PERSIST IN HISTORY
 async function sendMessage(){
   if(busy||!session)return;
   const input=document.getElementById('messageInput');
@@ -492,7 +484,7 @@ async function sendMessage(){
     if(!res.ok){const e=await res.json().catch(()=>({}));addAiMsg('❌ Error: '+(e.error||res.status));setBusy(false);return;}
     const data=await res.json();
     if(mode==='image'){
-      // Save image to history for persistence
+      // Save image to history for persistence across mode changes
       const imageContent = `![Image](${data.url})\n\nPrompt: ${data.revisedPrompt||text}`;
       history.push({role:'assistant', content: imageContent});
       saveHistoryToStorage();
@@ -553,9 +545,7 @@ function addAiMsg(text,sources=[]){
 }
 
 function addImageMsg(url,prompt){
-  const imageHtml = '<div class="msg ai">'+EAI_AV+'<div class="msg-body"><div class="msg-role">Essential AI · DALL-E 3</div><div class="msg-bubble"><img src="'+esc(url)+'" style="max-width:100%;border-radius:10px;margin-top:6px;"><div style="font-size:.65rem;color:var(--muted);margin-top:6px;">Prompt: '+esc(prompt)+'</div></div></div></div>';
-  appendMsg(imageHtml);
-  scrollDown();
+  appendMsg('<div class="msg ai">'+EAI_AV+'<div class="msg-body"><div class="msg-role">Essential AI · DALL-E 3</div><div class="msg-bubble"><img src="'+esc(url)+'" style="max-width:100%;border-radius:10px;margin-top:6px;"><div style="font-size:.65rem;color:var(--muted);margin-top:6px;">Prompt: '+esc(prompt)+'</div></div></div></div>');
 }
 
 function addTyping(){
