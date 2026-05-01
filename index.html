@@ -113,17 +113,20 @@
     #messageInput::placeholder{color:var(--muted);}
     .send-arrow{background:var(--accent);border:none;border-radius:50%;width:38px;height:38px;display:grid;place-items:center;cursor:pointer;color:white;font-size:1.1rem;flex-shrink:0;}
     .send-arrow:disabled{opacity:.4;cursor:not-allowed;}
-    .action-buttons{display:flex;justify-content:center;gap:16px;margin-top:10px;}
-    .action-btn{background:var(--bg);border:1px solid var(--border);border-radius:40px;padding:7px 28px;font-family:var(--ui);font-size:.72rem;font-weight:600;color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .15s;}
-    .action-btn:hover{background:var(--accent-lo);border-color:var(--accent);color:var(--accent);}
-    .action-btn.recording{background:rgba(231,76,60,.12);border-color:var(--red);color:var(--red);}
-    .status-bar{display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);font-family:var(--mono);font-size:.62rem;color:var(--muted);}
-    .status-left{color:var(--green);}
+ 
+    /* Single bottom bar — all controls in one line */
+    .bottom-bar{display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);gap:8px;flex-wrap:nowrap;}
+    .bottom-left{display:flex;align-items:center;gap:10px;min-width:0;}
+    .bottom-right{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+    .status-left{font-family:var(--mono);font-size:.62rem;color:var(--green);white-space:nowrap;}
     .status-left::before{content:"● ";}
     .status-left.busy{color:var(--accent);}
-    .status-left.busy::before{content:"● ";}
-    .status-stats{display:flex;gap:14px;align-items:center;}
-    .upgrade-link{color:var(--accent);text-decoration:none;}
+    .disclaimer{font-family:var(--mono);font-size:.58rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .action-btn-sm{background:var(--bg);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-family:var(--ui);font-size:.68rem;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap;transition:all .15s;}
+    .action-btn-sm:hover{background:var(--accent-lo);border-color:var(--accent);color:var(--accent);}
+    .action-btn-sm.recording{background:rgba(231,76,60,.12);border-color:var(--red);color:var(--red);}
+    .stat-item{font-family:var(--mono);font-size:.62rem;color:var(--muted);white-space:nowrap;}
+    .upgrade-link{color:var(--accent);text-decoration:none;font-family:var(--mono);font-size:.62rem;white-space:nowrap;}
     .upgrade-link:hover{text-decoration:underline;}
  
     /* Typing dots */
@@ -152,7 +155,10 @@
       .welcome-card,.messages,.input-area{padding-left:14px;padding-right:14px;}
       .features-row{gap:8px;}
       .feat-item{font-size:.55rem;}
-      .status-stats{gap:8px;font-size:.55rem;}
+      .disclaimer{display:none;}
+      .bottom-right{gap:5px;}
+      .stat-item{font-size:.55rem;}
+      .action-btn-sm{padding:4px 8px;font-size:.62rem;}
       .pricing-grid{flex-direction:column;align-items:center;}
       .plan-card{width:100%;max-width:300px;}
     }
@@ -223,7 +229,7 @@ const API_URL       = 'https://essential-ai-backend.onrender.com';
  
 const {createClient} = supabase;
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
-let session=null, mode='chat', history=[], busy=false, chatUsed=0, docsUsed=0;
+let session=null, mode='chat', history=[], busy=false, chatUsed=0, docsUsed=0, imagesUsed=0;
 const CHAT_LIMIT = 50;
 const STORAGE_KEY = 'essentialai_history';
  
@@ -328,17 +334,18 @@ function showChatInterface(){
         <input type="text" id="messageInput" placeholder="${mode==='image'?'Describe the image you want…':'Ask me anything...'}" maxlength="8000" autocomplete="off">
         <button class="send-arrow" id="sendBtn" onclick="sendMessage()">↑</button>
       </div>
-      <div class="action-buttons">
-        <button class="action-btn" id="attachBtn" onclick="handleAttach()">📎 Attach</button>
-        <button class="action-btn" id="voiceBtn" onclick="toggleVoice()">🎙 Voice</button>
-      </div>
-      <div class="status-bar">
-        <span class="status-left" id="statusEl">Ready</span>
-        <div class="status-stats">
-          <span>💬 <span id="statMsgs">${CHAT_LIMIT-chatUsed}</span> left</span>
-          <span>🎨 3 images</span>
-          <span>📄 5 docs</span>
-          <a href="#" class="upgrade-link" onclick="showPricing();return false;">Upgrade to Pro →</a>
+      <div class="bottom-bar">
+        <div class="bottom-left">
+          <span class="status-left" id="statusEl">Ready</span>
+          <span class="disclaimer">Essential AI can make mistakes</span>
+        </div>
+        <div class="bottom-right">
+          <button class="action-btn-sm" id="attachBtn" onclick="handleAttach()">📎 Attach</button>
+          <button class="action-btn-sm" id="voiceBtn" onclick="toggleVoice()">🎙 Voice</button>
+          <span class="stat-item">💬 <span id="statMsgs">${CHAT_LIMIT-chatUsed}</span></span>
+          <span class="stat-item">🎨 <span id="statImages">${3-imagesUsed}</span></span>
+          <span class="stat-item">📄 <span id="statDocs">${5-docsUsed}</span></span>
+          <a href="#" class="upgrade-link" onclick="showPricing();return false;">Upgrade →</a>
         </div>
       </div>
     </div>`;
@@ -531,7 +538,12 @@ async function sendMessage(){
     removeTyping();
     if(!res.ok){const e=await res.json().catch(()=>({}));addAiMsg('❌ Error: '+(e.error||res.status));setBusy(false);return;}
     const data=await res.json();
-    if(mode==='image'){addImageMsg(data.url,data.revisedPrompt||text);}
+    if(mode==='image'){
+      addImageMsg(data.url,data.revisedPrompt||text);
+      imagesUsed++;
+      const statImages=document.getElementById('statImages');
+      if(statImages) statImages.textContent=Math.max(0,3-imagesUsed);
+    }
     else{
       history.push({role:'assistant',content:data.reply});
       saveHistoryToStorage();
@@ -612,4 +624,3 @@ window.copyMsg=copyMsg;
 </script>
 </body>
 </html>
- 
