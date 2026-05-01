@@ -290,7 +290,7 @@ document.getElementById('sidebarToggle').addEventListener('click', function() {
 
 // History persistence
 function saveHistoryToStorage(){
-  try{localStorage.setItem(STORAGE_KEY,JSON.stringify(history.slice(-20)));}catch(e){}
+  try{localStorage.setItem(STORAGE_KEY,JSON.stringify(history.slice(-50)));}catch(e){}
 }
 function loadHistoryFromStorage(){
   try{
@@ -353,10 +353,24 @@ function showChatInterface(){
   document.getElementById('messageInput').addEventListener('keypress',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}});
   document.getElementById('fileInput').addEventListener('change',handleFileUpload);
 
-  // Restore history messages
+  // Restore history messages - including images
   history.forEach(h=>{
-    if(h.role==='user') appendMsg('<div class="msg user"><div class="msg-user-av">U</div><div class="msg-body"><div class="msg-role">You</div><div class="msg-bubble">'+esc(h.content)+'</div></div></div>');
-    else appendMsg('<div class="msg ai">'+EAI_AV+'<div class="msg-body"><div class="msg-role">Essential AI</div><div class="msg-bubble">'+md(h.content)+'</div><button class="copy-btn" onclick="copyMsg(this)">📋 Copy</button></div></div>');
+    if(h.role==='user') {
+      appendMsg('<div class="msg user"><div class="msg-user-av">U</div><div class="msg-body"><div class="msg-role">You</div><div class="msg-bubble">'+esc(h.content)+'</div></div></div>');
+    } else {
+      // Check if this is an image message
+      if(h.content && h.content.startsWith('![Image](')) {
+        const imgMatch = h.content.match(/!\[Image\]\((.*?)\)/);
+        if(imgMatch) {
+          const imgUrl = imgMatch[1];
+          const promptMatch = h.content.match(/Prompt: (.*)/);
+          const prompt = promptMatch ? promptMatch[1] : '';
+          appendMsg('<div class="msg ai">'+EAI_AV+'<div class="msg-body"><div class="msg-role">Essential AI · DALL-E 3</div><div class="msg-bubble"><img src="'+esc(imgUrl)+'" style="max-width:100%;border-radius:10px;margin-top:6px;"><div style="font-size:.65rem;color:var(--muted);margin-top:6px;">Prompt: '+esc(prompt)+'</div></div></div></div>');
+        }
+      } else {
+        appendMsg('<div class="msg ai">'+EAI_AV+'<div class="msg-body"><div class="msg-role">Essential AI</div><div class="msg-bubble">'+md(h.content)+'</div><button class="copy-btn" onclick="copyMsg(this)">📋 Copy</button></div></div>');
+      }
+    }
   });
   if(history.length===0) addAiMsg('👋 Hi! I\'m Essential AI. Ask me anything — code, research, documents, or generate images.'+(isSearch?'\n\n🌐 Web search is ON — I have access to live information.':''));
   scrollDown();
@@ -388,7 +402,7 @@ function showPricing(){
     </div>`;
 }
 
-// File attachment
+// File attachment - FIXED: No raw content shown, doc counter works
 function handleAttach(){
   if(mode!=='docs'){
     addAiMsg('📎 File attachment works in **Documents mode**. Please switch to 📄 Documents in the sidebar.');
@@ -400,10 +414,13 @@ function handleAttach(){
 function handleFileUpload(e){
   const file=e.target.files[0]; if(!file)return;
   if(file.size>5*1024*1024){addAiMsg('❌ File too large. Max 5MB.');e.target.value='';return;}
+  
+  // Show simple attachment message without raw content
+  addUserMsg(`📎 Attached: ${file.name} (${(file.size/1024).toFixed(1)} KB) — analyzing...`);
+  
   const reader=new FileReader();
   reader.onload=async(ev)=>{
     const content=ev.target.result;
-    addUserMsg('📎 '+file.name+'\n'+content.substring(0,200)+(content.length>200?'...':''));
     history.push({role:'user',content:'Please analyze this document: '+file.name+'\n\nContent:\n'+content.substring(0,4000)});
     saveHistoryToStorage();
     setBusy(true); addTyping();
@@ -419,6 +436,9 @@ function handleFileUpload(e){
         history.push({role:'assistant',content:data.reply});
         saveHistoryToStorage();
         addAiMsg(data.reply);
+        // Increment document counter
+        docsUsed++;
+        updateStatsDisplay();
         loadUsage();
       }else{addAiMsg('❌ Could not analyze file.');}
     }catch(err){removeTyping();addAiMsg('❌ Network error.');}
@@ -449,7 +469,7 @@ function toggleVoice(){
   recognition.start();
 }
 
-// Send message
+// Send message - FIXED: Images persist to history
 async function sendMessage(){
   if(busy||!session)return;
   const input=document.getElementById('messageInput');
@@ -472,14 +492,20 @@ async function sendMessage(){
     if(!res.ok){const e=await res.json().catch(()=>({}));addAiMsg('❌ Error: '+(e.error||res.status));setBusy(false);return;}
     const data=await res.json();
     if(mode==='image'){
-      addImageMsg(data.url,data.revisedPrompt||text);
-      imagesUsed++; updateStatsDisplay();
+      // Save image to history for persistence
+      const imageContent = `![Image](${data.url})\n\nPrompt: ${data.revisedPrompt||text}`;
+      history.push({role:'assistant', content: imageContent});
+      saveHistoryToStorage();
+      addImageMsg(data.url, data.revisedPrompt||text);
+      imagesUsed++;
+      updateStatsDisplay();
+      loadUsage();
     }else{
       history.push({role:'assistant',content:data.reply});
       saveHistoryToStorage();
       addAiMsg(data.reply,data.sources||[]);
+      loadUsage();
     }
-    loadUsage();
   }catch(e){removeTyping();console.error(e);addAiMsg('❌ Network error — check your connection.');}
   setBusy(false);
 }
@@ -526,7 +552,11 @@ function addAiMsg(text,sources=[]){
   appendMsg('<div class="msg ai">'+EAI_AV+'<div class="msg-body"><div class="msg-role">Essential AI</div><div class="msg-bubble">'+md(text)+src+'</div><button class="copy-btn" onclick="copyMsg(this)">📋 Copy</button></div></div>');
 }
 
-function addImageMsg(url,prompt){appendMsg('<div class="msg ai">'+EAI_AV+'<div class="msg-body"><div class="msg-role">Essential AI · DALL-E 3</div><div class="msg-bubble"><img src="'+esc(url)+'" style="max-width:100%;border-radius:10px;margin-top:6px;"><div style="font-size:.65rem;color:var(--muted);margin-top:6px;">Prompt: '+esc(prompt)+'</div></div></div></div>');}
+function addImageMsg(url,prompt){
+  const imageHtml = '<div class="msg ai">'+EAI_AV+'<div class="msg-body"><div class="msg-role">Essential AI · DALL-E 3</div><div class="msg-bubble"><img src="'+esc(url)+'" style="max-width:100%;border-radius:10px;margin-top:6px;"><div style="font-size:.65rem;color:var(--muted);margin-top:6px;">Prompt: '+esc(prompt)+'</div></div></div></div>';
+  appendMsg(imageHtml);
+  scrollDown();
+}
 
 function addTyping(){
   const el=document.createElement('div'); el.className='msg ai'; el.id='typing';
