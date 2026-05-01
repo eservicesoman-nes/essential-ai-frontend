@@ -218,14 +218,13 @@ const API_URL       = 'https://essential-ai-backend.onrender.com';
 
 const {createClient} = supabase;
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
-let session=null, mode='chat', history=[], busy=false, chatUsed=0, imagesUsed=0, docsUsed=0;
+let session=null, mode='chat', history=[], busy=false, chatUsed=0, docsUsed=0;
 const CHAT_LIMIT = 50;
-const IMAGE_LIMIT = 3;
-const DOC_LIMIT = 5;
 const STORAGE_KEY = 'essentialai_history';
 
 const MODE_LABELS={chat:'CHAT MODE',deepcore:'DEEP CORE MODE',docs:'DOCUMENTS MODE',image:'IMAGE GEN MODE'};
 const EAI_AV = `<div class="eai-avatar">e</div>`;
+let savedMessages = '';  // FIX 2: Preserve messages (including images) across mode switches
 
 sb.auth.onAuthStateChange((_e,s)=>{session=s; s?showApp(s.user):showAuth();});
 
@@ -268,7 +267,7 @@ async function doSignup(){
   if(error){err.textContent=error.message;}
   else{err.style.color='var(--green)';err.textContent='✅ Account created! You can now sign in.';}
 }
-async function doLogout(){history=[];saveHistoryToStorage();await sb.auth.signOut();}
+async function doLogout(){history=[];savedMessages='';saveHistoryToStorage();await sb.auth.signOut();}
 
 function toggleTheme(){
   const html=document.documentElement;
@@ -277,7 +276,7 @@ function toggleTheme(){
 
 // History persistence
 function saveHistoryToStorage(){
-  try{localStorage.setItem(STORAGE_KEY,JSON.stringify(history.slice(-50)));}catch(e){}
+  try{localStorage.setItem(STORAGE_KEY,JSON.stringify(history.slice(-20)));}catch(e){}
 }
 function loadHistoryFromStorage(){
   try{
@@ -290,6 +289,9 @@ function bindNav(){
   document.querySelectorAll('.nav-item').forEach(item=>{
     item.addEventListener('click',()=>{
       if(item.dataset.mode===mode)return;
+      // FIX 2: Save current messages HTML before switching mode
+      const msgsDiv = document.getElementById('messages');
+      if(msgsDiv) savedMessages = msgsDiv.innerHTML;
       document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
       item.classList.add('active');
       mode=item.dataset.mode;
@@ -315,7 +317,7 @@ function showChatInterface(){
       <div class="free-tier">Free tier: 50 messages/day · 3 images/day · 5 document uploads/day</div>
     </div>
     <div class="messages" id="messages"></div>
-    <input type="file" id="fileInput" accept=".txt,.md,.json,.csv" style="display:none">
+    <input type="file" id="fileInput" accept=".txt,.pdf,.doc,.docx,.md,.json,.csv" style="display:none">
     <div class="input-area">
       <div class="prompt-wrapper">
         <input type="text" id="messageInput" placeholder="${mode==='image'?'Describe the image you want…':'Ask me anything...'}" maxlength="8000" autocomplete="off">
@@ -329,9 +331,9 @@ function showChatInterface(){
         <span class="status-left" id="statusEl">Ready</span>
         <div class="status-stats">
           <span>💬 <span id="statMsgs">${CHAT_LIMIT-chatUsed}</span> left</span>
-          <span>🎨 <span id="statImages">${IMAGE_LIMIT-imagesUsed}</span> images</span>
-          <span>📄 <span id="statDocs">${DOC_LIMIT-docsUsed}</span> docs</span>
-          <a href="#" class="upgrade-link" onclick="showPricing();return false;">Upgrade</a>
+          <span>🎨 3 images</span>
+          <span>📄 5 docs</span>
+          <a href="#" class="upgrade-link" onclick="showPricing();return false;">Upgrade to Pro →</a>
         </div>
       </div>
     </div>`;
@@ -339,26 +341,18 @@ function showChatInterface(){
   document.getElementById('messageInput').addEventListener('keypress',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}});
   document.getElementById('fileInput').addEventListener('change',handleFileUpload);
 
-  // Restore history messages
-  history.forEach(h=>{
-    if(h.role==='user') {
-      appendMsg('<div class="msg user"><div class="msg-user-av">U</div><div class="msg-body"><div class="msg-role">You</div><div class="msg-bubble">'+esc(h.content)+'</div></div></div>');
-    } else {
-      // Check if this is an image message
-      if(h.content && h.content.startsWith('![Image](')) {
-        const imgMatch = h.content.match(/!\[Image\]\((.*?)\)/);
-        if(imgMatch) {
-          const imgUrl = imgMatch[1];
-          const promptMatch = h.content.match(/Prompt: (.*)/);
-          const prompt = promptMatch ? promptMatch[1] : '';
-          appendMsg('<div class="msg ai">'+EAI_AV+'<div class="msg-body"><div class="msg-role">Essential AI · DALL-E 3</div><div class="msg-bubble"><img src="'+esc(imgUrl)+'" style="max-width:100%;border-radius:10px;margin-top:6px;"><div style="font-size:.65rem;color:var(--muted);margin-top:6px;">Prompt: '+esc(prompt)+'</div></div></div></div>');
-        }
-      } else {
-        appendMsg('<div class="msg ai">'+EAI_AV+'<div class="msg-body"><div class="msg-role">Essential AI</div><div class="msg-bubble">'+md(h.content)+'</div><button class="copy-btn" onclick="copyMsg(this)">📋 Copy</button></div></div>');
-      }
-    }
-  });
-  if(history.length===0) addAiMsg('👋 Hi! I\'m Essential AI. Ask me anything — code, research, documents, or generate images.'+(isSearch?'\n\n🌐 Web search is ON — I have access to live information.':''));
+  // FIX 2: Restore saved messages if they exist (preserves images across mode switches)
+  const msgsEl = document.getElementById('messages');
+  if(savedMessages && savedMessages.length > 0) {
+    msgsEl.innerHTML = savedMessages;
+  } else if(history.length === 0) {
+    addAiMsg('👋 Hi! I\'m Essential AI. Ask me anything — code, research, documents, or generate images.'+(isSearch?'\n\n🌐 Web search is ON — I have access to live information.':''));
+  } else {
+    history.forEach(h=>{
+      if(h.role==='user') appendMsg('<div class="msg user"><div class="msg-user-av">U</div><div class="msg-body"><div class="msg-role">You</div><div class="msg-bubble">'+esc(h.content)+'</div></div></div>');
+      else appendMsg('<div class="msg ai">'+EAI_AV+'<div class="msg-body"><div class="msg-role">Essential AI</div><div class="msg-bubble">'+md(h.content)+'</div><button class="copy-btn" onclick="copyMsg(this)">📋 Copy</button></div></div>');
+    });
+  }
   scrollDown();
 }
 
@@ -368,19 +362,23 @@ function showPricing(){
       <a href="#" onclick="showChatInterface();return false;" style="color:var(--accent);text-decoration:none;display:inline-block;margin-bottom:24px;">← Back to Chat</a>
       <div style="text-align:center;margin-bottom:8px;"><h1 style="font-size:1.6rem;">Choose Your Plan</h1><p style="color:var(--muted);font-size:.85rem;">Flexible pricing for every need.</p></div>
       <div class="pricing-grid">
-        <div class="plan-card"><div class="plan-name">Free</div><div class="plan-price">$0</div><div class="plan-period">forever</div>
+        <div class="plan-card">
+          <div class="plan-name">Free</div><div class="plan-price">$0</div><div class="plan-period">forever</div>
           <ul class="plan-features"><li>✅ 50 messages/day</li><li>✅ 3 images/day</li><li>✅ 5 docs/day</li><li>✅ Web search</li><li>✅ Voice input</li></ul>
           <button class="plan-btn" disabled>Current Plan</button>
         </div>
-        <div class="plan-card highlight"><div class="plan-name">Pro</div><div class="plan-price">$19</div><div class="plan-period">per month · $190/yr</div>
+        <div class="plan-card highlight">
+          <div class="plan-name">Pro</div><div class="plan-price">$19</div><div class="plan-period">per month · $190/yr</div>
           <ul class="plan-features"><li>✅ 500 messages/day</li><li>✅ 50 images/day</li><li>✅ 100 docs/day</li><li>✅ Priority search</li><li>✅ Email support</li></ul>
           <button class="plan-btn" onclick="alert('Stripe coming soon!')">Upgrade →</button>
         </div>
-        <div class="plan-card"><div class="plan-name">Team</div><div class="plan-price">$79</div><div class="plan-period">per month · $790/yr</div>
+        <div class="plan-card">
+          <div class="plan-name">Team</div><div class="plan-price">$79</div><div class="plan-period">per month · $790/yr</div>
           <ul class="plan-features"><li>✅ 2,000 messages/day</li><li>✅ 200 images/day</li><li>✅ 500 docs/day</li><li>✅ Priority support</li><li>✅ Team management</li></ul>
           <button class="plan-btn" onclick="alert('Contact us for early access!')">Contact Sales →</button>
         </div>
-        <div class="plan-card"><div class="plan-name">Enterprise</div><div class="plan-price">Custom</div><div class="plan-period">tailored for you</div>
+        <div class="plan-card">
+          <div class="plan-name">Enterprise</div><div class="plan-price">Custom</div><div class="plan-period">tailored for you</div>
           <ul class="plan-features"><li>✅ Unlimited everything</li><li>✅ SLA guarantee</li><li>✅ SSO / SAML</li><li>✅ Dedicated support</li><li>✅ On-premise</li></ul>
           <button class="plan-btn" onclick="alert('enterprise@essential.ai')">Contact Us →</button>
         </div>
@@ -388,7 +386,7 @@ function showPricing(){
     </div>`;
 }
 
-// ── File attachment — NO RAW CONTENT SHOWN IN CHAT ──
+// ── File attachment (FIX 1: No raw preview, FIX 3: Doc counter moves) ──
 function handleAttach(){
   if(mode!=='docs'){
     addAiMsg('📎 File attachment works in **Documents mode**. Please switch to 📄 Documents in the sidebar.');
@@ -401,21 +399,20 @@ function handleFileUpload(e){
   const file=e.target.files[0]; if(!file)return;
   if(file.size>5*1024*1024){addAiMsg('❌ File too large. Max 5MB.');e.target.value='';return;}
   
-  // Show clean message — NO raw content
+  // FIX 1: Show clean message — NO raw preview content
   addUserMsg(`📎 Attached: ${file.name} (${(file.size/1024).toFixed(1)} KB) — analyzing...`);
   
   const reader=new FileReader();
   reader.onload=async(ev)=>{
     const content=ev.target.result;
-    // Send FULL content to backend (including raw for PDFs), but don't display it
-    history.push({role:'user', content: 'Please analyze this document: ' + file.name + '\n\nContent:\n' + content});
+    history.push({role:'user', content: 'Please analyze this document: ' + file.name + '\n\nContent:\n' + content.substring(0,4000)});
     saveHistoryToStorage();
     setBusy(true); addTyping();
     try{
       const res=await fetch(API_URL+'/api/chat',{
         method:'POST',
         headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
-        body:JSON.stringify({message:'Please analyze this document: ' + file.name + '\n\n' + content, mode:'docs', webSearch:false, history:history.slice(-10)})
+        body:JSON.stringify({message:'Please analyze this document: ' + file.name + '\n\n' + content.substring(0,4000), mode:'docs', webSearch:false, history:history.slice(-10)})
       });
       removeTyping();
       if(res.ok){
@@ -423,9 +420,10 @@ function handleFileUpload(e){
         history.push({role:'assistant', content:data.reply});
         saveHistoryToStorage();
         addAiMsg(data.reply);
-        // Increment document counter
+        // FIX 3: Increment document counter
         docsUsed++;
-        updateStatsDisplay();
+        const statDocs = document.getElementById('statDocs');
+        if(statDocs) statDocs.textContent = Math.max(0, 5 - docsUsed);
         loadUsage();
       } else {
         addAiMsg('❌ Could not analyze file.');
@@ -440,7 +438,7 @@ function handleFileUpload(e){
   e.target.value='';
 }
 
-// Voice
+// ── Voice ────────────────────────────────────────────────────
 function toggleVoice(){
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   if(!SR){addAiMsg('❌ Voice not supported in this browser. Try Chrome.');return;}
@@ -461,7 +459,7 @@ function toggleVoice(){
   recognition.start();
 }
 
-// Send message — IMAGES PERSIST IN HISTORY
+// ── Send message (FIX 2: Save messages HTML after each response) ──
 async function sendMessage(){
   if(busy||!session)return;
   const input=document.getElementById('messageInput');
@@ -484,31 +482,18 @@ async function sendMessage(){
     if(!res.ok){const e=await res.json().catch(()=>({}));addAiMsg('❌ Error: '+(e.error||res.status));setBusy(false);return;}
     const data=await res.json();
     if(mode==='image'){
-      // Save image to history for persistence across mode changes
-      const imageContent = `![Image](${data.url})\n\nPrompt: ${data.revisedPrompt||text}`;
-      history.push({role:'assistant', content: imageContent});
-      saveHistoryToStorage();
-      addImageMsg(data.url, data.revisedPrompt||text);
-      imagesUsed++;
-      updateStatsDisplay();
-      loadUsage();
-    }else{
+      addImageMsg(data.url,data.revisedPrompt||text);
+    } else {
       history.push({role:'assistant',content:data.reply});
       saveHistoryToStorage();
       addAiMsg(data.reply,data.sources||[]);
-      loadUsage();
     }
-  }catch(e){removeTyping();console.error(e);addAiMsg('❌ Network error — check your connection.');}
+    // FIX 2: Save messages HTML so mode switch preserves everything including images
+    const msgsDiv = document.getElementById('messages');
+    if(msgsDiv) savedMessages = msgsDiv.innerHTML;
+    loadUsage();
+  } catch(e){removeTyping();console.error(e);addAiMsg('❌ Network error — check your connection.');}
   setBusy(false);
-}
-
-function updateStatsDisplay(){
-  const statMsgs = document.getElementById('statMsgs');
-  const statImages = document.getElementById('statImages');
-  const statDocs = document.getElementById('statDocs');
-  if(statMsgs) statMsgs.textContent = CHAT_LIMIT - chatUsed;
-  if(statImages) statImages.textContent = IMAGE_LIMIT - imagesUsed;
-  if(statDocs) statDocs.textContent = DOC_LIMIT - docsUsed;
 }
 
 async function loadUsage(){
@@ -518,15 +503,14 @@ async function loadUsage(){
     if(res.ok){
       const d=await res.json();
       chatUsed=d.chats||0;
-      imagesUsed=d.images||0;
-      docsUsed=d.docs||0;
       const txt=document.getElementById('usageTxt');
       const fill=document.getElementById('usageFill');
+      const stat=document.getElementById('statMsgs');
       if(txt) txt.textContent=chatUsed+' / 50';
       if(fill) fill.style.width=Math.min(100,(chatUsed/50)*100)+'%';
-      updateStatsDisplay();
+      if(stat) stat.textContent=CHAT_LIMIT-chatUsed;
     }
-  }catch(e){console.warn('Usage fetch failed:',e);}
+  }catch(e){}
 }
 
 // DOM helpers
@@ -544,9 +528,7 @@ function addAiMsg(text,sources=[]){
   appendMsg('<div class="msg ai">'+EAI_AV+'<div class="msg-body"><div class="msg-role">Essential AI</div><div class="msg-bubble">'+md(text)+src+'</div><button class="copy-btn" onclick="copyMsg(this)">📋 Copy</button></div></div>');
 }
 
-function addImageMsg(url,prompt){
-  appendMsg('<div class="msg ai">'+EAI_AV+'<div class="msg-body"><div class="msg-role">Essential AI · DALL-E 3</div><div class="msg-bubble"><img src="'+esc(url)+'" style="max-width:100%;border-radius:10px;margin-top:6px;"><div style="font-size:.65rem;color:var(--muted);margin-top:6px;">Prompt: '+esc(prompt)+'</div></div></div></div>');
-}
+function addImageMsg(url,prompt){appendMsg('<div class="msg ai">'+EAI_AV+'<div class="msg-body"><div class="msg-role">Essential AI · DALL-E 3</div><div class="msg-bubble"><img src="'+esc(url)+'" style="max-width:100%;border-radius:10px;margin-top:6px;"><div style="font-size:.65rem;color:var(--muted);margin-top:6px;">Prompt: '+esc(prompt)+'</div></div></div></div>');}
 
 function addTyping(){
   const el=document.createElement('div'); el.className='msg ai'; el.id='typing';
