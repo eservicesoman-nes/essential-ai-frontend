@@ -548,12 +548,10 @@ function showChatInterface() {
       </div>
     </div>`;
 
-  messagesContainer = document.getElementById('messages');
-  document.getElementById('messageInput').addEventListener('keypress', e => { if (e.key === 'Enter') sendMessage(); });
-  
-  if (savedMessages && savedMessages.trim()) {
+    if (savedMessages && savedMessages.trim()) {
     messagesContainer.innerHTML = savedMessages;
   } else if (history.length === 0) {
+    // Only add welcome message ONCE
     addAiMsg('👋 Welcome to NES AI — your unified intelligence platform. What would you like to do today?');
   } else {
     history.forEach(h => {
