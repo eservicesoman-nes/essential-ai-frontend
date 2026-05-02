@@ -103,7 +103,7 @@
     /* Main Chat Area */
     .main{flex:1;display:flex;flex-direction:column;height:100dvh;overflow:hidden;min-width:0;position:relative;background:var(--bg);}
     .top-bar{position:absolute;top:16px;right:20px;display:flex;gap:12px;z-index:10;}
-    .theme-toggle,.refresh-btn{background:var(--surface);border:1px solid var(--border);border-radius:50%;width:38px;height:38px;display:grid;place-items:center;cursor:pointer;color:var(--accent);font-size:1.1rem;}
+    .theme-toggle,.clear-chat-btn{background:var(--surface);border:1px solid var(--border);border-radius:50%;width:38px;height:38px;display:grid;place-items:center;cursor:pointer;color:var(--accent);font-size:1.1rem;}
     .welcome-card{padding:20px 28px;border-bottom:1px solid var(--border);background:var(--bg);}
     .chat-mode-label{font-family:var(--mono);font-size:.85rem;color:var(--accent);font-weight:800;margin-bottom:10px;}
     .free-tier{font-family:var(--mono);font-size:.75rem;color:var(--muted);}
@@ -194,7 +194,7 @@
 
   <main class="main" id="main">
     <div class="top-bar">
-      <button class="refresh-btn" onclick="refreshChat()" title="Refresh Chat">⟳</button>
+      <button class="clear-chat-btn" onclick="clearChat()" title="Clear Chat">🗑️</button>
       <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">🌓</button>
     </div>
     <div id="mainContent" style="display:flex;flex-direction:column;height:100%;overflow:hidden;"></div>
@@ -231,14 +231,14 @@ function toggleSidebar() {
   }
 }
 
-function refreshChat() {
-  if (confirm('Refresh chat? This will clear all messages.')) {
+function clearChat() {
+  if (confirm('Clear all messages? This will reset your conversation.')) {
     history = [];
     savedMessages = '';
     localStorage.removeItem('nesai_history');
     localStorage.removeItem('nesai_messages');
-    showChatInterface();
-    addAiMsg('👋 Welcome to <strong>NES AI</strong> — your unified intelligence platform. What would you like to do today?');
+    if (messagesContainer) messagesContainer.innerHTML = '';
+    addAiMsg('👋 Welcome to NES AI — your unified intelligence platform. What would you like to do today?');
   }
 }
 
@@ -338,7 +338,6 @@ function showPricing() {
   </div>`;
 }
 
-// Voice function with proper error handling
 function toggleVoice() {
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SpeechRecognition) {
@@ -384,7 +383,6 @@ function toggleVoice() {
   recognition.start();
 }
 
-// Send message to backend
 async function sendMessage() {
   if (busy) return;
   const input = document.getElementById('messageInput');
@@ -403,7 +401,6 @@ async function sendMessage() {
   addTyping();
   
   try {
-    // Try to use real backend first
     const useSearch = (mode === 'chat' || mode === 'deepcore');
     const endpoint = mode === 'image' ? '/api/image' : '/api/chat';
     const body = mode === 'image' ? { prompt: text } : { message: text, mode, webSearch: useSearch, history: history.slice(-10) };
@@ -437,7 +434,7 @@ async function sendMessage() {
       return;
     }
     
-    // Fallback to intelligent demo response if backend not available
+    // Fallback responses
     removeTyping();
     let response = "";
     const lowerMsg = text.toLowerCase();
@@ -522,10 +519,35 @@ function showChatInterface() {
   const isSearch = (mode === 'chat' || mode === 'deepcore');
   const modeLabels = { chat: 'CHAT MODE', deepcore: 'DEEP CORE MODE (1M Context)', docs: 'DOCUMENTS MODE', image: 'IMAGE GEN MODE' };
   
-   messagesContainer = document.getElementById('messages');
+  mainContent.innerHTML = `
+    <div class="welcome-card">
+      <div class="chat-mode-label">${modeLabels[mode]}${isSearch ? ' 🌐 Web Search ON' : ''}</div>
+      <div class="free-tier">Free tier: 50 messages/day · 3 images/day · 5 document uploads/day</div>
+    </div>
+    <div class="messages" id="messages"></div>
+    <div class="input-area">
+      <div class="prompt-wrapper">
+        <input type="text" id="messageInput" placeholder="${mode === 'image' ? 'Describe the image you want…' : 'Ask me anything...'}" maxlength="8000">
+        <button class="send-arrow" id="sendBtn" onclick="sendMessage()">↑</button>
+      </div>
+      <div class="bottom-bar">
+        <div class="bottom-left">
+          <span class="status-left" id="statusEl">Ready</span>
+          <button class="action-btn-sm" id="attachBtn" onclick="handleAttach()">📎 Attach</button>
+          <button class="action-btn-sm" id="voiceBtn" onclick="toggleVoice()">🎙 Voice</button>
+          <span class="disclaimer">NES AI can make mistakes</span>
+        </div>
+        <div class="bottom-right">
+          <span class="stat-item">💬 <span class="stat-value" id="statMsgs">${CHAT_LIMIT - chatUsed}</span> left</span>
+          <span class="stat-item">🎨 <span class="stat-value" id="statImages">${3 - imagesUsed}</span> left</span>
+          <span class="stat-item">📄 <span class="stat-value" id="statDocs">${5 - docsUsed}</span> left</span>
+        </div>
+      </div>
+    </div>`;
+
+  messagesContainer = document.getElementById('messages');
   document.getElementById('messageInput').addEventListener('keypress', e => { if (e.key === 'Enter') sendMessage(); });
   
-  // FIXED: Only one welcome message, no HTML tags
   if (savedMessages && savedMessages.trim()) {
     messagesContainer.innerHTML = savedMessages;
   } else if (history.length === 0) {
@@ -588,7 +610,7 @@ window.handleAttach = handleAttach;
 window.toggleVoice = toggleVoice;
 window.copyMsg = copyMsg;
 window.toggleSidebar = toggleSidebar;
-window.refreshChat = refreshChat;
+window.clearChat = clearChat;
 </script>
 </body>
 </html>
