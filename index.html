@@ -72,7 +72,6 @@
     .auth-input{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:12px 16px;color:var(--text);font-family:var(--mono);font-size:.85rem;outline:none;width:100%;}
     .auth-input:focus{border-color:var(--accent);}
     .auth-btn{background:var(--accent);border:none;border-radius:12px;padding:12px;color:white;font-weight:700;cursor:pointer;}
-    .skip-btn{background:transparent;border:1px solid var(--border);border-radius:12px;padding:12px;color:var(--accent);font-weight:600;cursor:pointer;margin-top:8px;}
     .auth-err{font-family:var(--mono);font-size:.7rem;color:var(--red);min-height:18px;}
 
     #app{display:none;width:100%;height:100dvh;overflow:hidden;}
@@ -95,6 +94,7 @@
     .user-av{width:32px;height:32px;background:rgba(59,130,246,0.12);border:1px solid rgba(59,130,246,0.25);border-radius:50%;display:grid;place-items:center;font-size:.75rem;color:#3b82f6;font-weight:700;}
     .user-email{font-family:var(--mono);font-size:.7rem;color:#6b7b9e;flex:1;overflow:hidden;white-space:nowrap;}
     .logout-btn{background:none;border:none;color:#6b7b9e;cursor:pointer;font-size:.9rem;}
+    .logout-btn:hover{color:#e74c3c;}
 
     .main{flex:1;display:flex;flex-direction:column;height:100dvh;overflow:hidden;min-width:0;position:relative;background:var(--bg);}
     .top-bar{position:absolute;top:16px;right:20px;display:flex;gap:12px;z-index:10;}
@@ -153,14 +153,12 @@
       <input class="auth-input" id="loginPassword" type="password" placeholder="Password">
       <div class="auth-err" id="loginErr"></div>
       <button class="auth-btn" onclick="doLogin()">Sign In →</button>
-      <button class="skip-btn" onclick="skipAuth()">Continue as Guest →</button>
     </div>
     <div id="signupPanel" class="auth-panel">
       <input class="auth-input" id="signupEmail" type="email" placeholder="Email address">
       <input class="auth-input" id="signupPassword" type="password" placeholder="Password (min 6 chars)">
       <div class="auth-err" id="signupErr"></div>
       <button class="auth-btn" onclick="doSignup()">Create Account →</button>
-      <button class="skip-btn" onclick="skipAuth()">Continue as Guest →</button>
     </div>
   </div>
 </div>
@@ -181,8 +179,8 @@
       <div class="usage-row"><span>Daily messages</span><span id="usageTxt">0 / 50</span></div>
       <div class="usage-track"><div class="usage-fill" id="usageFill"></div></div>
       <div class="user-row">
-        <div class="user-av" id="userInitial">G</div>
-        <div class="user-email" id="userEmail">guest@nes.ai</div>
+        <div class="user-av" id="userInitial">?</div>
+        <div class="user-email" id="userEmail">—</div>
         <button class="logout-btn" onclick="doLogout()">✕</button>
       </div>
     </div>
@@ -197,15 +195,20 @@
   </main>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
 // ============================================================
-// NES AI — PRODUCTION READY
+// NES AI — PRODUCTION READY WITH SUPABASE AUTH
 // Backend: https://essential-ai-backend.onrender.com
 // ============================================================
 const SUPABASE_URL = 'https://sfpfjjdtczvuxyhjievt.supabase.co';
 const SUPABASE_ANON = 'sb_publishable_MH7rnJ7r8_-1TzGXcieNfA_NXoHQZbm';
 const API_URL = 'https://essential-ai-backend.onrender.com';
 
+const { createClient } = supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
+
+let session = null;
 let mode = 'chat';
 let history = [];
 let busy = false;
@@ -217,6 +220,34 @@ const LOGO_URL = 'https://files.catbox.moe/adhf8n.png';
 let savedMessages = '';
 let messagesContainer;
 let mainContent;
+
+// Auth state listener
+sb.auth.onAuthStateChange((_e, s) => {
+  session = s;
+  if (s) {
+    showApp(s.user);
+  } else {
+    showAuth();
+  }
+});
+
+function showApp(user) {
+  document.getElementById('authScreen').style.display = 'none';
+  const app = document.getElementById('app');
+  app.style.display = 'flex';
+  app.classList.add('visible');
+  document.getElementById('userEmail').textContent = user.email;
+  document.getElementById('userInitial').textContent = user.email[0].toUpperCase();
+  loadSavedData();
+  showChatInterface();
+  loadUsage();
+  bindNav();
+}
+
+function showAuth() {
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('authScreen').style.display = 'flex';
+}
 
 function toggleSidebar() {
   const sidebar = document.getElementById('sidebar');
@@ -379,8 +410,24 @@ function toggleVoice() {
   recognition.start();
 }
 
+async function loadUsage() {
+  if (!session) return;
+  try {
+    const res = await fetch(API_URL + '/api/usage', {
+      headers: { 'Authorization': 'Bearer ' + session.access_token }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      chatUsed = data.chats || 0;
+      updateStatsUI();
+    }
+  } catch (e) {
+    console.error('Failed to load usage:', e);
+  }
+}
+
 async function sendMessage() {
-  if (busy) return;
+  if (busy || !session) return;
   const input = document.getElementById('messageInput');
   const text = input.value.trim();
   if (!text) return;
@@ -399,23 +446,23 @@ async function sendMessage() {
   try {
     const useSearch = (mode === 'chat' || mode === 'deepcore');
     const endpoint = mode === 'image' ? '/api/image' : '/api/chat';
-    const body = mode === 'image' ? { prompt: text } : { message: text, mode, webSearch: useSearch, history: history.slice(-10) };
-    
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 45000);
+    const body = mode === 'image' 
+      ? { prompt: text } 
+      : { message: text, mode, webSearch: useSearch, history: history.slice(-10) };
     
     const res = await fetch(API_URL + endpoint, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-      signal: controller.signal
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + session.access_token
+      },
+      body: JSON.stringify(body)
     });
     
-    clearTimeout(timeoutId);
+    removeTyping();
     
     if (res.ok) {
       const data = await res.json();
-      removeTyping();
       if (mode === 'image') {
         addImageMsg(data.url, data.revisedPrompt || text);
         imagesUsed++;
@@ -427,18 +474,18 @@ async function sendMessage() {
         saveHistory();
         addAiMsg(aiReply);
       }
+      await loadUsage();
     } else {
-      removeTyping();
       const errorText = await res.text().catch(() => '');
       console.error('API Error:', res.status, errorText);
-      addAiMsg(`❌ API Error (${res.status}): The backend service is currently unavailable. Please try again later.`);
+      addAiMsg(`❌ Error ${res.status}: Unable to get a response from the AI. Please try again.`);
     }
     setBusy(false);
     
   } catch (error) {
     removeTyping();
     console.error('Fetch Error:', error);
-    addAiMsg(`❌ Cannot connect to the AI backend. Please ensure your backend is running at ${API_URL}`);
+    addAiMsg(`❌ Connection error: Cannot reach the AI backend. Please check your network.`);
     setBusy(false);
   }
 }
@@ -474,7 +521,7 @@ function handleAttach() {
       updateStatsUI();
       saveUsage();
       
-      // In a real implementation, you would send the file to your backend here
+      // TODO: Implement file upload to backend
       addAiMsg(`📄 I've received your document "${file.name}". In production mode, I would analyze the content and provide a detailed summary.`);
     };
     input.click();
@@ -547,15 +594,6 @@ function showChatInterface() {
 }
 
 // Auth functions
-function skipAuth() {
-  document.getElementById('authScreen').style.display = 'none';
-  document.getElementById('app').style.display = 'flex';
-  document.getElementById('app').classList.add('visible');
-  loadSavedData();
-  showChatInterface();
-  updateStatsUI();
-}
-
 function switchTab(tab) {
   const loginPanel = document.getElementById('loginPanel');
   const signupPanel = document.getElementById('signupPanel');
@@ -574,20 +612,57 @@ function switchTab(tab) {
   }
 }
 
-async function doLogin() { alert('Use "Continue as Guest" for demo, or set up Supabase.'); }
-async function doSignup() { alert('Use "Continue as Guest" for demo, or set up Supabase.'); }
-function doLogout() { if (confirm('Logout?')) { localStorage.clear(); location.reload(); } }
+async function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass = document.getElementById('loginPassword').value;
+  const err = document.getElementById('loginErr');
+  err.textContent = '';
+  if (!email || !pass) {
+    err.textContent = 'Email and password required.';
+    return;
+  }
+  const { error } = await sb.auth.signInWithPassword({ email, password: pass });
+  if (error) err.textContent = error.message;
+}
+
+async function doSignup() {
+  const email = document.getElementById('signupEmail').value.trim();
+  const pass = document.getElementById('signupPassword').value;
+  const err = document.getElementById('signupErr');
+  err.textContent = '';
+  if (!email || !pass) {
+    err.textContent = 'Email and password required.';
+    return;
+  }
+  if (pass.length < 6) {
+    err.textContent = 'Password must be at least 6 characters.';
+    return;
+  }
+  const { error } = await sb.auth.signUp({ email, password: pass });
+  if (error) {
+    err.textContent = error.message;
+  } else {
+    err.style.color = '#2ecc71';
+    err.textContent = '✅ Account created! Check your email to confirm.';
+  }
+}
+
+function doLogout() {
+  if (confirm('Logout?')) {
+    localStorage.clear();
+    sb.auth.signOut();
+    location.reload();
+  }
+}
 
 // Initialize
 mainContent = document.getElementById('mainContent');
-skipAuth();
-bindNav();
+showAuth(); // Start with auth screen (no auto guest mode)
 
 window.switchTab = switchTab;
 window.doLogin = doLogin;
 window.doSignup = doSignup;
 window.doLogout = doLogout;
-window.skipAuth = skipAuth;
 window.toggleTheme = toggleTheme;
 window.showPricing = showPricing;
 window.sendMessage = sendMessage;
