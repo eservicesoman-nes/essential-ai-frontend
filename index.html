@@ -199,6 +199,11 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<!-- Document parsing libraries -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+
 <script>
 // ============================================================
 // NES AI — PRODUCTION READY WITH SUPABASE AUTH
@@ -207,6 +212,9 @@
 const SUPABASE_URL = 'https://sfpfjjdtczvuxyhjievt.supabase.co';
 const SUPABASE_ANON = 'sb_publishable_MH7rnJ7r8_-1TzGXcieNfA_NXoHQZbm';
 const API_URL = 'https://essential-ai-backend.onrender.com';
+
+// Configure PDF.js worker
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
 const { createClient } = supabase;
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
@@ -501,8 +509,50 @@ function addImageMsg(url, prompt) {
 }
 
 // ============================================================
-// DOCUMENTS MODE - FIXED
+// DOCUMENTS MODE - FULLY FIXED (PDF, DOCX, Excel, TXT, etc.)
 // ============================================================
+async function extractFileContent(file) {
+  const fileName = file.name.toLowerCase();
+  const fileType = fileName.split('.').pop();
+  
+  if (fileType === 'txt' || fileType === 'md' || fileType === 'json' || fileType === 'csv') {
+    return await file.text();
+  }
+  
+  if (fileType === 'pdf') {
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    let fullText = '';
+    for (let i = 1; i <= Math.min(pdf.numPages, 20); i++) {
+      const page = await pdf.getPage(i);
+      const textContent = await page.getTextContent();
+      const pageText = textContent.items.map(item => item.str).join(' ');
+      fullText += pageText + '\n';
+    }
+    return fullText;
+  }
+  
+  if (fileType === 'docx') {
+    const arrayBuffer = await file.arrayBuffer();
+    const result = await mammoth.extractRawText({ arrayBuffer: arrayBuffer });
+    return result.value;
+  }
+  
+  if (fileType === 'xlsx' || fileType === 'xls' || fileType === 'csv') {
+    const data = await file.arrayBuffer();
+    const workbook = XLSX.read(data);
+    let allSheets = '';
+    workbook.SheetNames.forEach(sheetName => {
+      const worksheet = workbook.Sheets[sheetName];
+      const sheetData = XLSX.utils.sheet_to_csv(worksheet);
+      allSheets += `Sheet: ${sheetName}\n${sheetData}\n\n`;
+    });
+    return allSheets;
+  }
+  
+  throw new Error(`Unsupported file type: ${fileType}`);
+}
+
 async function handleAttach() {
   if (mode !== 'docs') {
     addAiMsg('📎 File attachment works in **Documents mode**. Switch to 📄 Documents in the sidebar.');
@@ -513,10 +563,9 @@ async function handleAttach() {
     return;
   }
   
-  // Create file input dynamically
   const fileInput = document.createElement('input');
   fileInput.type = 'file';
-  fileInput.accept = '.txt,.pdf,.doc,.docx,.md,.json,.csv';
+  fileInput.accept = '.txt,.md,.json,.csv,.pdf,.docx,.xlsx,.xls';
   fileInput.onchange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -530,29 +579,16 @@ async function handleAttach() {
     addTyping();
     
     try {
-      // Read file content
-      let content = '';
-      const fileName = file.name.toLowerCase();
+      // Extract text content from the file
+      let content = await extractFileContent(file);
+      content = content.substring(0, 8000); // Limit content length
       
-      if (fileName.endsWith('.txt') || fileName.endsWith('.md') || fileName.endsWith('.json') || fileName.endsWith('.csv')) {
-        content = await file.text();
-      } else if (fileName.endsWith('.pdf') || fileName.endsWith('.docx')) {
-        // For PDF/DOCX, we need to load libraries
-        addAiMsg("📄 PDF and DOCX files require additional libraries. In production, this would extract text from your document.");
-        docsUsed++;
-        updateStatsUI();
-        saveUsage();
-        setBusy(false);
-        removeTyping();
-        return;
-      } else {
-        addAiMsg("❌ Unsupported file type. Please upload TXT, MD, JSON, or CSV files.");
+      if (!content.trim()) {
+        addAiMsg("❌ Could not extract text from this file. It may be image-based or encrypted.");
         setBusy(false);
         removeTyping();
         return;
       }
-      
-      content = content.substring(0, 6000); // Limit content length
       
       // Send to backend for analysis
       const res = await fetch(API_URL + '/api/chat', {
@@ -587,7 +623,7 @@ async function handleAttach() {
     } catch (error) {
       removeTyping();
       console.error('Document upload error:', error);
-      addAiMsg("❌ Error reading or analyzing the document. Please try again.");
+      addAiMsg(`❌ Error reading the document: ${error.message}`);
     }
     setBusy(false);
   };
