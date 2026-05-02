@@ -115,6 +115,9 @@
     .msg-bubble{padding:12px 18px;border-radius:20px;font-size:.95rem;line-height:1.55;}
     .msg.user .msg-bubble{background:var(--accent);color:white;border-bottom-right-radius:4px;}
     .msg.ai .msg-bubble{background:var(--surface);border:1px solid var(--border);border-bottom-left-radius:4px;}
+    .sources-block{margin-top:8px;border-top:1px solid var(--border);padding-top:8px;font-size:.7rem;color:var(--muted);}
+    .sources-block a{color:var(--accent);text-decoration:none;}
+    .sources-block a:hover{text-decoration:underline;}
     .copy-btn{position:absolute;top:-5px;right:0;background:var(--accent-lo);border-radius:8px;padding:4px 10px;font-size:.65rem;cursor:pointer;color:var(--accent);opacity:0;transition:opacity .2s;}
     .msg-body:hover .copy-btn{opacity:1;}
     .input-area{padding:16px 28px 20px;border-top:1px solid var(--border);background:var(--bg);}
@@ -320,8 +323,10 @@ function addUserMsg(text) {
   saveUsage();
 }
 
-function addAiMsg(text) {
-  appendMsg(`<div class="msg ai"><img src="${LOGO_URL}" class="chat-avatar"><div class="msg-body"><div class="msg-role">NES AI</div><div class="msg-bubble">${formatMarkdown(text)}</div><button class="copy-btn" onclick="copyMsg(this)">📋 Copy</button></div></div>`);
+function addAiMsg(text, sources = []) {
+  const srcHtml = sources.length ? 
+    '<div class="sources-block">📚 Sources: ' + sources.map(s => '<a href="' + escapeHtml(s.url) + '" target="_blank" rel="noopener">' + escapeHtml(s.title || s.url) + '</a>').join(' · ') + '</div>' : '';
+  appendMsg(`<div class="msg ai"><img src="${LOGO_URL}" class="chat-avatar"><div class="msg-body"><div class="msg-role">NES AI</div><div class="msg-bubble">${formatMarkdown(text)}${srcHtml}</div><button class="copy-btn" onclick="copyMsg(this)">📋 Copy</button></div></div>`);
 }
 
 function addTyping() {
@@ -470,9 +475,10 @@ async function sendMessage() {
         saveUsage();
       } else {
         const aiReply = data.reply || data.response || "I'm not sure how to respond to that.";
-        history.push({ role: 'assistant', content: aiReply });
+        const sources = data.sources || [];
+        history.push({ role: 'assistant', content: aiReply, sources: sources });
         saveHistory();
-        addAiMsg(aiReply);
+        addAiMsg(aiReply, sources);
       }
       await loadUsage();
     } else {
@@ -494,7 +500,10 @@ function addImageMsg(url, prompt) {
   appendMsg(`<div class="msg ai"><img src="${LOGO_URL}" class="chat-avatar"><div class="msg-body"><div class="msg-role">NES AI · DALL-E 3</div><div class="msg-bubble"><img src="${escapeHtml(url)}" style="max-width:100%;border-radius:10px;max-height:300px;"><div style="font-size:.65rem;color:var(--muted);margin-top:6px;">Prompt: ${escapeHtml(prompt)}</div></div><button class="copy-btn" onclick="copyMsg(this)">📋 Copy</button></div></div>`);
 }
 
-function handleAttach() {
+// ============================================================
+// DOCUMENTS MODE - FIXED
+// ============================================================
+async function handleAttach() {
   if (mode !== 'docs') {
     addAiMsg('📎 File attachment works in **Documents mode**. Switch to 📄 Documents in the sidebar.');
     return;
@@ -504,29 +513,84 @@ function handleAttach() {
     return;
   }
   
-  const fileInput = document.getElementById('fileInput');
-  if (!fileInput) {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.txt,.pdf,.doc,.docx,.md';
-    input.onchange = async (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      if (file.size > 10 * 1024 * 1024) {
-        addAiMsg("❌ File too large. Max 10MB.");
+  // Create file input dynamically
+  const fileInput = document.createElement('input');
+  fileInput.type = 'file';
+  fileInput.accept = '.txt,.pdf,.doc,.docx,.md,.json,.csv';
+  fileInput.onchange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) {
+      addAiMsg("❌ File too large. Max 10MB.");
+      return;
+    }
+    
+    addUserMsg(`📎 Uploaded: ${file.name} (${Math.round(file.size / 1024)} KB) — analyzing...`);
+    setBusy(true);
+    addTyping();
+    
+    try {
+      // Read file content
+      let content = '';
+      const fileName = file.name.toLowerCase();
+      
+      if (fileName.endsWith('.txt') || fileName.endsWith('.md') || fileName.endsWith('.json') || fileName.endsWith('.csv')) {
+        content = await file.text();
+      } else if (fileName.endsWith('.pdf') || fileName.endsWith('.docx')) {
+        // For PDF/DOCX, we need to load libraries
+        addAiMsg("📄 PDF and DOCX files require additional libraries. In production, this would extract text from your document.");
+        docsUsed++;
+        updateStatsUI();
+        saveUsage();
+        setBusy(false);
+        removeTyping();
+        return;
+      } else {
+        addAiMsg("❌ Unsupported file type. Please upload TXT, MD, JSON, or CSV files.");
+        setBusy(false);
+        removeTyping();
         return;
       }
-      addUserMsg(`📎 Uploaded: ${file.name}`);
-      docsUsed++;
-      updateStatsUI();
-      saveUsage();
       
-      // TODO: Implement file upload to backend
-      addAiMsg(`📄 I've received your document "${file.name}". In production mode, I would analyze the content and provide a detailed summary.`);
-    };
-    input.click();
-    return;
-  }
+      content = content.substring(0, 6000); // Limit content length
+      
+      // Send to backend for analysis
+      const res = await fetch(API_URL + '/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + session.access_token
+        },
+        body: JSON.stringify({
+          message: `Please analyze this document called "${file.name}" and provide a clear summary of its key points, main topics, and any important details.\n\nDocument content:\n${content}`,
+          mode: 'docs',
+          webSearch: false,
+          history: history.slice(-6)
+        })
+      });
+      
+      removeTyping();
+      
+      if (res.ok) {
+        const data = await res.json();
+        const aiReply = data.reply || "Document analyzed successfully.";
+        history.push({ role: 'assistant', content: aiReply });
+        saveHistory();
+        addAiMsg(aiReply);
+        docsUsed++;
+        updateStatsUI();
+        saveUsage();
+        await loadUsage();
+      } else {
+        addAiMsg("❌ Could not analyze the document. Please try again.");
+      }
+    } catch (error) {
+      removeTyping();
+      console.error('Document upload error:', error);
+      addAiMsg("❌ Error reading or analyzing the document. Please try again.");
+    }
+    setBusy(false);
+  };
   fileInput.click();
 }
 
@@ -560,7 +624,6 @@ function showChatInterface() {
       <div class="free-tier">Free tier: 50 messages/day · 3 images/day · 5 document uploads/day</div>
     </div>
     <div class="messages" id="messages"></div>
-    <input type="file" id="fileInput" accept=".txt,.pdf,.doc,.docx,.md" style="display:none">
     <div class="input-area">
       <div class="prompt-wrapper">
         <input type="text" id="messageInput" placeholder="${mode === 'image' ? 'Describe the image you want…' : 'Ask me anything...'}" maxlength="8000">
@@ -657,7 +720,7 @@ function doLogout() {
 
 // Initialize
 mainContent = document.getElementById('mainContent');
-showAuth(); // Start with auth screen (no auto guest mode)
+showAuth();
 
 window.switchTab = switchTab;
 window.doLogin = doLogin;
