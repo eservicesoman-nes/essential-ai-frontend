@@ -522,36 +522,13 @@ function showChatInterface() {
   const isSearch = (mode === 'chat' || mode === 'deepcore');
   const modeLabels = { chat: 'CHAT MODE', deepcore: 'DEEP CORE MODE (1M Context)', docs: 'DOCUMENTS MODE', image: 'IMAGE GEN MODE' };
   
-  mainContent.innerHTML = `
-    <div class="welcome-card">
-      <div class="chat-mode-label">${modeLabels[mode]}${isSearch ? ' 🌐 Web Search ON' : ''}</div>
-      <div class="free-tier">Free tier: 50 messages/day · 3 images/day · 5 document uploads/day</div>
-    </div>
-    <div class="messages" id="messages"></div>
-    <div class="input-area">
-      <div class="prompt-wrapper">
-        <input type="text" id="messageInput" placeholder="${mode === 'image' ? 'Describe the image you want…' : 'Ask me anything...'}" maxlength="8000">
-        <button class="send-arrow" id="sendBtn" onclick="sendMessage()">↑</button>
-      </div>
-      <div class="bottom-bar">
-        <div class="bottom-left">
-          <span class="status-left" id="statusEl">Ready</span>
-          <button class="action-btn-sm" id="attachBtn" onclick="handleAttach()">📎 Attach</button>
-          <button class="action-btn-sm" id="voiceBtn" onclick="toggleVoice()">🎙 Voice</button>
-          <span class="disclaimer">NES AI can make mistakes</span>
-        </div>
-        <div class="bottom-right">
-          <span class="stat-item">💬 <span class="stat-value" id="statMsgs">${CHAT_LIMIT - chatUsed}</span> left</span>
-          <span class="stat-item">🎨 <span class="stat-value" id="statImages">${3 - imagesUsed}</span> left</span>
-          <span class="stat-item">📄 <span class="stat-value" id="statDocs">${5 - docsUsed}</span> left</span>
-        </div>
-      </div>
-    </div>`;
-
-    if (savedMessages && savedMessages.trim()) {
+   messagesContainer = document.getElementById('messages');
+  document.getElementById('messageInput').addEventListener('keypress', e => { if (e.key === 'Enter') sendMessage(); });
+  
+  // FIXED: Only one welcome message, no HTML tags
+  if (savedMessages && savedMessages.trim()) {
     messagesContainer.innerHTML = savedMessages;
   } else if (history.length === 0) {
-    // Only add welcome message ONCE
     addAiMsg('👋 Welcome to NES AI — your unified intelligence platform. What would you like to do today?');
   } else {
     history.forEach(h => {
