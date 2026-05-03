@@ -206,7 +206,7 @@
 
 <script>
 // ============================================================
-// NES AI — PRODUCTION READY WITH SUPABASE AUTH
+// NES AI — WITH GEMINI 1.5 FLASH INTEGRATION
 // Backend: https://essential-ai-backend.onrender.com
 // ============================================================
 const SUPABASE_URL = 'https://sfpfjjdtczvuxyhjievt.supabase.co';
@@ -461,7 +461,13 @@ async function sendMessage() {
     const endpoint = mode === 'image' ? '/api/image' : '/api/chat';
     const body = mode === 'image' 
       ? { prompt: text } 
-      : { message: text, mode, webSearch: useSearch, history: history.slice(-10) };
+      : { 
+          message: text, 
+          mode, 
+          webSearch: useSearch, 
+          history: history.slice(-10),
+          model: 'gemini-1.5-flash'  // ← GEMINI 1.5 FLASH INTEGRATED
+        };
     
     const res = await fetch(API_URL + endpoint, {
       method: 'POST',
@@ -489,6 +495,8 @@ async function sendMessage() {
         addAiMsg(aiReply, sources);
       }
       await loadUsage();
+    } else if (res.status === 429) {
+      addAiMsg("⏳ The AI is currently busy. Please wait a moment and try again. (Rate limit exceeded)");
     } else {
       const errorText = await res.text().catch(() => '');
       console.error('API Error:', res.status, errorText);
@@ -538,7 +546,7 @@ async function extractFileContent(file) {
     return result.value;
   }
   
-  if (fileType === 'xlsx' || fileType === 'xls' || fileType === 'csv') {
+  if (fileType === 'xlsx' || fileType === 'xls') {
     const data = await file.arrayBuffer();
     const workbook = XLSX.read(data);
     let allSheets = '';
@@ -579,9 +587,8 @@ async function handleAttach() {
     addTyping();
     
     try {
-      // Extract text content from the file
       let content = await extractFileContent(file);
-      content = content.substring(0, 8000); // Limit content length
+      content = content.substring(0, 8000);
       
       if (!content.trim()) {
         addAiMsg("❌ Could not extract text from this file. It may be image-based or encrypted.");
@@ -590,7 +597,6 @@ async function handleAttach() {
         return;
       }
       
-      // Send to backend for analysis
       const res = await fetch(API_URL + '/api/chat', {
         method: 'POST',
         headers: {
@@ -601,7 +607,8 @@ async function handleAttach() {
           message: `Please analyze this document called "${file.name}" and provide a clear summary of its key points, main topics, and any important details.\n\nDocument content:\n${content}`,
           mode: 'docs',
           webSearch: false,
-          history: history.slice(-6)
+          history: history.slice(-6),
+          model: 'gemini-1.5-flash'  // ← GEMINI 1.5 FLASH FOR DOCS
         })
       });
       
