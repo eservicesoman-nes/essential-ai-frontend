@@ -208,7 +208,7 @@ const PLAN_LIMITS = {
   free: { name: 'Free', price: 0, messages: 50, monthlyMessages: 1500, images: 3, monthlyImages: 15, docs: 5, monthlyDocs: 150, imageDaysActive: 5 },
   starter: { name: 'Starter', price: 7, messages: 150, monthlyMessages: 4500, images: 10, monthlyImages: 200, docs: 25, monthlyDocs: 750 },
   pro: { name: 'Pro', price: 19, messages: 500, monthlyMessages: 15000, images: 25, monthlyImages: 500, docs: 100, monthlyDocs: 3000 },
-  team: { name: 'Team', price: 0, messages: 3000, monthlyMessages: 90000, images: 100, monthlyImages: 2000, docs: 500, monthlyDocs: 15000, isContact: true },
+  team: { name: 'Team', price: 79, messages: 3000, monthlyMessages: 90000, images: 100, monthlyImages: 2000, docs: 500, monthlyDocs: 15000, isContact: false },
   enterprise: { name: 'Enterprise', price: 0, messages: -1, monthlyMessages: -1, images: -1, monthlyImages: -1, docs: -1, monthlyDocs: -1, isContact: true }
 };
 
@@ -648,8 +648,8 @@ function showPricing() {
     { name: 'Free', price: '$0', period: 'forever', features: ['50 msgs/day', '15 images/month (5 days)', '5 docs/day', 'Web search', 'Voice input'], btn: 'Current Plan', disabled: true },
     { name: 'Starter', price: '$7', period: 'per month', features: ['150 msgs/day', '200 images/month', '25 docs/day', 'Web search', 'Voice input'], btn: 'Upgrade →', onclick: "alert('Upgrade coming soon!')" },
     { name: 'Pro', price: '$19', period: 'per month', features: ['500 msgs/day', '500 images/month', '100 docs/day', 'Priority search', 'Email support'], btn: 'Upgrade →', onclick: "alert('Upgrade coming soon!')", highlight: true },
-    { name: 'Team', price: 'Contact Us', period: 'per month', features: ['3,000 msgs/day', '2,000 images/month', '500 docs/day', 'Priority support', 'Team management'], btn: 'Contact Us →', onclick: "alert('Contact us at team@nes.ai')", contact: true },
-    { name: 'Enterprise', price: 'Custom', period: 'tailored for you', features: ['Unlimited messages', 'Custom image limits', 'SLA guarantee', 'SSO / SAML', 'On-premise'], btn: 'Contact Us →', onclick: "alert('Contact us at enterprise@nes.ai')", contact: true }
+    { name: 'Team', price: '$79', period: 'per month', features: ['3,000 msgs/day', '2,000 images/month', '500 docs/day', 'Priority support', 'Team management'], btn: 'Upgrade →', onclick: "alert('Upgrade coming soon!')" },
+    { name: 'Enterprise', price: 'Contact Us', period: 'tailored for you', features: ['Unlimited messages', 'Custom image limits', 'SLA guarantee', 'SSO / SAML', 'On-premise'], btn: 'Contact Us →', onclick: "alert('Contact us at enterprise@nes.ai')", contact: true }
   ];
   document.getElementById('mainContent').innerHTML = `
     <div class="pricing-wrap">
