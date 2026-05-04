@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
   <title>NES AI — Intelligence Platform</title>
-  <meta name="description" content="NES AI — unified intelligence platform with web search, DALL-E 3, document analysis, and voice input.">
+  <meta name="description" content="NES AI — unified intelligence platform with web search, Flux image generation, document analysis, and voice input.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
@@ -27,34 +27,39 @@
     /* ── Sidebar toggle ── */
     .sb-toggle{position:fixed;left:16px;top:16px;z-index:1010;background:var(--accent);border:none;border-radius:50%;width:42px;height:42px;display:grid;place-items:center;cursor:pointer;color:#fff;font-size:1.2rem;box-shadow:0 2px 12px rgba(0,0,0,.3);}
 
-    /* ── Sidebar ── */
-    .sidebar{width:260px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:24px 16px;height:100dvh;overflow-y:auto;z-index:1000;transition:transform .3s ease;}
+    /* ── Sidebar ALWAYS DARK ── */
+    .sidebar{width:260px;flex-shrink:0;background:#0f1436 !important;border-right:1px solid #1a2154 !important;display:flex;flex-direction:column;padding:24px 16px;height:100dvh;overflow-y:auto;z-index:1000;transition:transform .3s ease;}
+    .sidebar .logo, .sidebar .logo-version, .sidebar .nav-item, .sidebar .usage-wrap *, .sidebar .user-row * { color: #e8e8ec !important; }
+    .sidebar .usage-track { background: #1a2154 !important; }
+    
     @media(max-width:900px){
       .sidebar{position:fixed;top:0;left:0;transform:translateX(-100%);}
       .sidebar.open{transform:translateX(0);}
+      .welcome-card { padding-top: 70px !important; }
     }
     @media(min-width:901px){
       .sidebar{position:relative;}
       .sidebar.collapsed{position:fixed;transform:translateX(-100%);}
-      .main.expanded{margin-left:0;}
+      .sb-toggle{display:none !important;}
     }
     .sb-logo{text-align:center;margin-bottom:16px;padding-top:8px;}
     .sb-logo img{width:80px;height:80px;object-fit:contain;border-radius:50%;}
     .sb-upgrade{background:linear-gradient(135deg,#3b82f6,#1d4ed8);border:none;border-radius:40px;padding:10px 16px;color:#fff;font-family:var(--ui);font-size:.8rem;font-weight:700;cursor:pointer;margin:0 8px 20px;text-align:center;display:block;width:calc(100% - 16px);transition:opacity .2s;}
     .sb-upgrade:hover{opacity:.88;}
     .nav{display:flex;flex-direction:column;gap:4px;flex:1;}
-    .nav-item{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:12px;cursor:pointer;color:var(--muted);font-size:.88rem;font-weight:600;transition:all .15s;}
-    .nav-item:hover,.nav-item.active{background:var(--accent-lo);color:var(--accent);}
-    .nav-icon{font-size:1.1rem;width:26px;flex-shrink:0;}
-    .usage-wrap{margin-top:auto;padding:16px 8px 0;border-top:1px solid var(--border);}
-    .usage-row{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.62rem;color:var(--muted);margin-bottom:6px;}
-    .usage-track{height:4px;background:var(--border);border-radius:99px;overflow:hidden;margin-bottom:14px;}
-    .usage-fill{height:100%;background:var(--accent);border-radius:99px;width:0%;transition:width .4s;}
+    .nav-item{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:12px;cursor:pointer;color:#6b7b9e;font-size:.88rem;font-weight:600;transition:all .15s;}
+    .nav-item:hover,.nav-item.active{background:rgba(59,130,246,0.12);color:#3b82f6;}
+    .nav-icon{font-size:1.1rem;width:26px;flex-shrink:0;color:#60a5fa;}
+    [data-theme="light"] .nav-icon{color:#2563eb;}
+    .usage-wrap{margin-top:auto;padding:16px 8px 0;border-top:1px solid #1a2154;}
+    .usage-row{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.62rem;color:#6b7b9e;margin-bottom:6px;}
+    .usage-track{height:4px;background:#1a2154;border-radius:99px;overflow:hidden;margin-bottom:14px;}
+    .usage-fill{height:100%;background:#3b82f6;border-radius:99px;width:0%;transition:width .4s;}
     .user-row{display:flex;align-items:center;gap:10px;padding-top:10px;}
-    .user-av{width:30px;height:30px;background:var(--accent-lo);border:1px solid var(--accent-md);border-radius:50%;display:grid;place-items:center;font-size:.72rem;color:var(--accent);font-weight:700;flex-shrink:0;}
-    .user-email{font-family:var(--mono);font-size:.65rem;color:var(--muted);flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
-    .logout-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:.85rem;padding:2px 6px;}
-    .logout-btn:hover{color:var(--red);}
+    .user-av{width:30px;height:30px;background:rgba(59,130,246,0.12);border:1px solid rgba(59,130,246,0.25);border-radius:50%;display:grid;place-items:center;font-size:.72rem;color:#3b82f6;font-weight:700;flex-shrink:0;}
+    .user-email{font-family:var(--mono);font-size:.65rem;color:#6b7b9e;flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+    .logout-btn{background:none;border:none;color:#6b7b9e;cursor:pointer;font-size:.85rem;padding:2px 6px;}
+    .logout-btn:hover{color:#e74c3c;}
 
     /* ── Auth ── */
     #authScreen{position:fixed;inset:0;z-index:2000;background:var(--bg);display:flex;align-items:center;justify-content:center;}
@@ -144,7 +149,7 @@
     /* ── Pricing ── */
     .pricing-wrap{flex:1;overflow-y:auto;padding:28px;min-height:0;}
     .plan-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:16px;margin-top:28px;}
-    .plan{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:24px;width:200px;}
+    .plan{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:24px;width:210px;}
     .plan.pro{border-color:var(--accent);box-shadow:0 0 20px var(--accent-lo);}
     .plan-name{font-size:1rem;font-weight:700;margin-bottom:6px;}
     .plan-price{font-size:1.6rem;font-weight:800;color:var(--accent);}
@@ -235,13 +240,21 @@
 
 <script>
 // ============================================================
-// 🔧 CONFIG — update these values
+// 🔧 CONFIG — NES AI PRODUCTION
 // ============================================================
 const SUPABASE_URL  = 'https://sfpfjjdtczvuxyhjievt.supabase.co';
 const SUPABASE_ANON = 'sb_publishable_MH7rnJ7r8_-1TzGXcieNfA_NXoHQZbm';
 const API_URL       = 'https://essential-ai-backend.onrender.com';
 const LOGO_URL      = 'https://files.catbox.moe/adhf8n.png';
 // ============================================================
+
+// Plan limits (daily)
+const PLAN_LIMITS = {
+  free: { messages: 50, images: 3, docs: 5, imageDaysActive: 5 },
+  starter: { messages: 150, images: 10, docs: 25 },
+  pro: { messages: 500, images: 25, docs: 100 },
+  team: { messages: 3000, images: 100, docs: 500 }
+};
 
 const {createClient} = supabase;
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
@@ -252,9 +265,9 @@ let mode     = 'chat';
 let history  = [];
 let busy     = false;
 let chatUsed = 0, imagesUsed = 0, docsUsed = 0;
-let allMsgsHTML = '';   // full message HTML preserved across mode switches
-const CHAT_LIMIT = 50;
-const SK = { h:'nesai_h', m:'nesai_m', u:'nesai_u' };
+let userPlan = 'free';
+let allMsgsHTML = '';
+const STORAGE_KEYS = { h:'nesai_h', m:'nesai_m', u:'nesai_u' };
 
 const MODE_LABELS = {
   chat:     'CHAT MODE',
@@ -263,7 +276,7 @@ const MODE_LABELS = {
   image:    'IMAGE GEN MODE'
 };
 
-// ── Supabase auth ─────────────────────────────────────────────
+// ── Auth ─────────────────────────────────────────────────────
 sb.auth.onAuthStateChange((_e, s) => {
   session = s;
   s ? showApp(s.user) : showAuthScreen();
@@ -277,6 +290,7 @@ function showApp(user) {
   document.getElementById('userEmail').textContent  = user.email;
   document.getElementById('userInitial').textContent = user.email[0].toUpperCase();
   loadLocal();
+  loadUserPlan();
   showChatInterface();
   loadUsageFromServer();
   bindNav();
@@ -287,7 +301,27 @@ function showAuthScreen() {
   document.getElementById('authScreen').style.display = 'flex';
 }
 
-// ── Auth actions ──────────────────────────────────────────────
+async function loadUserPlan() {
+  // In production, fetch from Supabase users table
+  // For now, default to free tier
+  userPlan = 'free';
+  updateLimitsUI();
+}
+
+function updateLimitsUI() {
+  const limits = PLAN_LIMITS[userPlan] || PLAN_LIMITS.free;
+  const msgLimitEl = document.getElementById('msgLimit');
+  const imgLimitEl = document.getElementById('imgLimit');
+  const docLimitEl = document.getElementById('docLimit');
+  if (msgLimitEl) msgLimitEl.textContent = limits.messages;
+  if (imgLimitEl) imgLimitEl.textContent = limits.images;
+  if (docLimitEl) docLimitEl.textContent = limits.docs;
+}
+
+function getCurrentLimits() {
+  return PLAN_LIMITS[userPlan] || PLAN_LIMITS.free;
+}
+
 function switchTab(tab) {
   ['login','signup'].forEach(t => {
     document.getElementById('tab'+cap(t)).classList.toggle('active', t===tab);
@@ -319,16 +353,16 @@ async function doSignup() {
 async function doLogout() {
   if(!confirm('Sign out?')) return;
   history=[]; allMsgsHTML='';
-  localStorage.removeItem(SK.h); localStorage.removeItem(SK.m);
+  localStorage.removeItem(STORAGE_KEYS.h); localStorage.removeItem(STORAGE_KEYS.m);
   await sb.auth.signOut();
 }
 
 // ── Local storage ─────────────────────────────────────────────
 function loadLocal() {
   try {
-    const h = localStorage.getItem(SK.h); if(h) history = JSON.parse(h);
-    allMsgsHTML = localStorage.getItem(SK.m) || '';
-    const u = localStorage.getItem(SK.u);
+    const h = localStorage.getItem(STORAGE_KEYS.h); if(h) history = JSON.parse(h);
+    allMsgsHTML = localStorage.getItem(STORAGE_KEYS.m) || '';
+    const u = localStorage.getItem(STORAGE_KEYS.u);
     if(u) {
       const ud = JSON.parse(u);
       if(ud.date === new Date().toDateString()) {
@@ -340,17 +374,17 @@ function loadLocal() {
 
 function saveHistory() {
   try {
-    localStorage.setItem(SK.h, JSON.stringify(history.slice(-30)));
+    localStorage.setItem(STORAGE_KEYS.h, JSON.stringify(history.slice(-30)));
     const msgs = document.getElementById('messages');
     if(msgs) {
       allMsgsHTML = msgs.innerHTML;
-      localStorage.setItem(SK.m, allMsgsHTML);
+      localStorage.setItem(STORAGE_KEYS.m, allMsgsHTML);
     }
   } catch(e) {}
 }
 
 function saveUsage() {
-  try { localStorage.setItem(SK.u, JSON.stringify({date:new Date().toDateString(),c:chatUsed,i:imagesUsed,d:docsUsed})); } catch(e) {}
+  try { localStorage.setItem(STORAGE_KEYS.u, JSON.stringify({date:new Date().toDateString(),c:chatUsed,i:imagesUsed,d:docsUsed})); } catch(e) {}
 }
 
 // ── Usage from server ─────────────────────────────────────────
@@ -369,12 +403,13 @@ async function loadUsageFromServer() {
 }
 
 function updateStats() {
-  set('statMsgs',  Math.max(0,CHAT_LIMIT-chatUsed));
-  set('statImages',Math.max(0,3-imagesUsed));
-  set('statDocs',  Math.max(0,5-docsUsed));
-  set('usageTxt',  chatUsed+' / '+CHAT_LIMIT);
+  const limits = getCurrentLimits();
+  set('statMsgs',  Math.max(0, limits.messages - chatUsed));
+  set('statImages',Math.max(0, limits.images - imagesUsed));
+  set('statDocs',  Math.max(0, limits.docs - docsUsed));
+  set('usageTxt',  chatUsed+' / '+limits.messages);
   const fill = document.getElementById('usageFill');
-  if(fill) fill.style.width = Math.min(100,(chatUsed/CHAT_LIMIT)*100)+'%';
+  if(fill) fill.style.width = Math.min(100,(chatUsed/limits.messages)*100)+'%';
 }
 
 // ── Sidebar / Nav ─────────────────────────────────────────────
@@ -384,13 +419,26 @@ function toggleSidebar() {
   else sb2.classList.toggle('collapsed');
 }
 
+// Touch swipe to close sidebar (mobile)
+let touchStartX = 0;
+document.addEventListener('touchstart', (e) => {
+  touchStartX = e.changedTouches[0].screenX;
+});
+document.addEventListener('touchend', (e) => {
+  const touchEndX = e.changedTouches[0].screenX;
+  const swipeDistance = touchEndX - touchStartX;
+  const sidebar = document.getElementById('sidebar');
+  if (swipeDistance < -50 && sidebar.classList.contains('open')) {
+    sidebar.classList.remove('open');
+  }
+});
+
 function bindNav() {
   document.querySelectorAll('.nav-item').forEach(item => {
     item.addEventListener('click', () => {
       if(item.dataset.mode === mode) return;
-      // Save current messages before switching
       const msgs = document.getElementById('messages');
-      if(msgs) { allMsgsHTML = msgs.innerHTML; localStorage.setItem(SK.m, allMsgsHTML); }
+      if(msgs) { allMsgsHTML = msgs.innerHTML; localStorage.setItem(STORAGE_KEYS.m, allMsgsHTML); }
       document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
       item.classList.add('active');
       mode = item.dataset.mode;
@@ -403,7 +451,7 @@ function bindNav() {
 function clearChat() {
   if(!confirm('Clear all messages?')) return;
   history=[]; allMsgsHTML='';
-  localStorage.removeItem(SK.h); localStorage.removeItem(SK.m);
+  localStorage.removeItem(STORAGE_KEYS.h); localStorage.removeItem(STORAGE_KEYS.m);
   const msgs = document.getElementById('messages');
   if(msgs) msgs.innerHTML = '';
   addAiMsg('👋 Cleared! What would you like to do?');
@@ -417,11 +465,12 @@ function toggleTheme() {
 // ── Chat interface ────────────────────────────────────────────
 function showChatInterface() {
   const isSearch = ['chat','deepcore'].includes(mode);
+  const limits = getCurrentLimits();
   document.getElementById('mainContent').innerHTML = `
     <div class="welcome-card">
       <div class="mode-label">${MODE_LABELS[mode]}${isSearch?' 🌐 Web Search ON':''}</div>
       <div class="version-label">NES AI v3.0</div>
-      <div class="free-tier">Free: 50 msgs/day · 3 images/day · 5 docs/day</div>
+      <div class="free-tier">Free tier: ${limits.messages} msgs/day · ${limits.images} images/day · ${limits.docs} docs/day</div>
     </div>
     <div class="messages" id="messages"></div>
     <div class="input-area">
@@ -437,9 +486,9 @@ function showChatInterface() {
           <span class="disclaimer">NES AI can make mistakes</span>
         </div>
         <div class="bottom-right">
-          <span class="stat">💬 <b id="statMsgs">${CHAT_LIMIT-chatUsed}</b></span>
-          <span class="stat">🎨 <b id="statImages">${3-imagesUsed}</b></span>
-          <span class="stat">📄 <b id="statDocs">${5-docsUsed}</b></span>
+          <span class="stat">💬 <b id="statMsgs">${limits.messages - chatUsed}</b> left</span>
+          <span class="stat">🎨 <b id="statImages">${limits.images - imagesUsed}</b> left</span>
+          <span class="stat">📄 <b id="statDocs">${limits.docs - docsUsed}</b> left</span>
         </div>
       </div>
     </div>`;
@@ -448,7 +497,6 @@ function showChatInterface() {
     if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}
   });
 
-  // Restore messages — this preserves images and all content
   const msgsEl = document.getElementById('messages');
   if(allMsgsHTML && allMsgsHTML.trim()) {
     msgsEl.innerHTML = allMsgsHTML;
@@ -456,7 +504,6 @@ function showChatInterface() {
   } else if(history.length===0) {
     addAiMsg('👋 Welcome to NES AI — your unified intelligence platform. What would you like to do today?');
   } else {
-    // Rebuild from history as fallback
     history.forEach(h => {
       if(h.role==='user') appendMsg(userBubble(h.content));
       else appendMsg(aiBubble(h.content));
@@ -470,7 +517,12 @@ async function sendMsg() {
   if(busy||!session) return;
   const input = document.getElementById('msgInput');
   const text = input.value.trim(); if(!text) return;
-  if(chatUsed>=CHAT_LIMIT){addAiMsg('⚠️ Daily limit of 50 messages reached. Upgrade to Pro for 500/day!');return;}
+  
+  const limits = getCurrentLimits();
+  if(chatUsed >= limits.messages) {
+    addAiMsg(`⚠️ Daily limit of ${limits.messages} messages reached. Upgrade for more!`);
+    return;
+  }
 
   input.value = '';
   setBusy(true);
@@ -502,9 +554,8 @@ async function sendMsg() {
       if(mode==='image') {
         appendMsg(imgBubble(data.url, data.revisedPrompt||text));
         imagesUsed++;
-        // Immediately save so image persists on mode switch
         const msgs=document.getElementById('messages');
-        if(msgs){allMsgsHTML=msgs.innerHTML;localStorage.setItem(SK.m,allMsgsHTML);}
+        if(msgs){allMsgsHTML=msgs.innerHTML;localStorage.setItem(STORAGE_KEYS.m,allMsgsHTML);}
       } else {
         const reply = data.reply || 'Sorry, I could not generate a response.';
         history.push({role:'assistant',content:reply});
@@ -512,7 +563,6 @@ async function sendMsg() {
       }
       chatUsed++;
       saveHistory(); saveUsage(); updateStats();
-      // Reload server usage silently
       loadUsageFromServer().catch(()=>{});
     } else {
       const err = await res.json().catch(()=>({}));
@@ -520,7 +570,7 @@ async function sendMsg() {
     }
   } catch(e) {
     removeTyping();
-    if(e.name==='AbortError') addAiMsg('⏱️ Request timed out. The server may be waking up — please wait 30 seconds and try again.');
+    if(e.name==='AbortError') addAiMsg('⏱️ Request timed out. The server may be waking up — please wait and try again.');
     else addAiMsg('❌ Network error. Please check your connection.');
   }
   setBusy(false);
@@ -529,7 +579,8 @@ async function sendMsg() {
 // ── File attachment ───────────────────────────────────────────
 function handleAttach() {
   if(mode!=='docs'){addAiMsg('📎 File attachment is available in **Documents mode**. Switch to 📄 Documents in the sidebar.');return;}
-  if(docsUsed>=5){addAiMsg('⚠️ Daily limit of 5 documents reached. Upgrade to Pro!');return;}
+  const limits = getCurrentLimits();
+  if(docsUsed >= limits.docs){addAiMsg(`⚠️ Daily limit of ${limits.docs} documents reached. Upgrade to Pro!`);return;}
   const inp = document.createElement('input');
   inp.type='file'; inp.accept='.txt,.md,.json,.csv,.pdf,.docx,.xlsx,.xls';
   inp.onchange = e => processFile(e.target.files[0]);
@@ -574,10 +625,8 @@ async function extractText(file) {
   const name = file.name.toLowerCase();
   const ext  = name.split('.').pop();
 
-  // Plain text formats
   if(['txt','md','json','csv'].includes(ext)) return file.text();
 
-  // PDF
   if(ext==='pdf') {
     if(typeof pdfjsLib==='undefined') await loadScript('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js');
     pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -592,7 +641,6 @@ async function extractText(file) {
     return pages.join('\n');
   }
 
-  // DOCX
   if(ext==='docx') {
     if(typeof mammoth==='undefined') await loadScript('https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js');
     const ab = await file.arrayBuffer();
@@ -600,7 +648,6 @@ async function extractText(file) {
     return r.value;
   }
 
-  // Excel / CSV
   if(['xlsx','xls'].includes(ext)) {
     if(typeof XLSX==='undefined') await loadScript('https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js');
     const ab = await file.arrayBuffer();
@@ -646,9 +693,10 @@ function toggleVoice() {
 // ── Pricing ───────────────────────────────────────────────────
 function showPricing() {
   const plans = [
-    {name:'Free',price:'$0',period:'forever',features:['50 messages/day','3 images/day','5 docs/day','Web search','Voice input'],btn:'Current Plan',disabled:true},
-    {name:'Pro',price:'$19',period:'per month · $190/yr',features:['500 messages/day','50 images/day','100 docs/day','Priority search','Email support'],btn:'Upgrade →',onclick:"alert('Stripe coming soon!')"},
-    {name:'Team',price:'$79',period:'per month · $790/yr',features:['2,000 messages/day','200 images/day','500 docs/day','Priority support','Team management'],btn:'Contact Sales →',onclick:"alert('Contact us for early access!')"},
+    {name:'Free',price:'$0',period:'forever',features:['50 messages/day','3 images/day (5 days)','5 docs/day','Web search','Voice input'],btn:'Current Plan',disabled:true},
+    {name:'Starter',price:'$7',period:'per month',features:['150 messages/day','10 images/day','25 docs/day','Web search','Voice input'],btn:'Upgrade →',onclick:"alert('Stripe coming soon!')"},
+    {name:'Pro',price:'$19',period:'per month · $190/yr',features:['500 messages/day','25 images/day','100 docs/day','Priority search','Email support'],btn:'Upgrade →',onclick:"alert('Stripe coming soon!')"},
+    {name:'Team',price:'$79',period:'per month · $790/yr',features:['3,000 messages/day','100 images/day','500 docs/day','Priority support','Team management'],btn:'Contact Sales →',onclick:"alert('Contact us for early access!')"},
     {name:'Enterprise',price:'Custom',period:'tailored for you',features:['Unlimited everything','SLA guarantee','SSO / SAML','Dedicated support','On-premise'],btn:'Contact Us →',onclick:"alert('enterprise@nes.ai')"}
   ];
   document.getElementById('mainContent').innerHTML=`
@@ -657,7 +705,7 @@ function showPricing() {
       <div style="text-align:center;margin-top:24px;margin-bottom:4px;"><h2 style="font-size:1.5rem;">Choose Your Plan</h2><p style="color:var(--muted);font-size:.85rem;margin-top:6px;">Flexible pricing for every need.</p></div>
       <div class="plan-grid">
         ${plans.map((p,i)=>`
-          <div class="plan${i===1?' pro':''}">
+          <div class="plan${i===1||i===2?' pro':''}">
             <div class="plan-name">${p.name}</div>
             <div class="plan-price">${p.price}</div>
             <div class="plan-period">${p.period}</div>
@@ -683,7 +731,7 @@ function aiBubble(text, sources=[]) {
 }
 
 function imgBubble(url, prompt) {
-  return `<div class="msg ai"><img src="${LOGO_URL}" class="chat-av"><div class="msg-body"><div class="msg-role">NES AI · DALL-E 3</div><div class="msg-bubble"><img src="${esc(url)}" style="max-width:100%;border-radius:10px;display:block;margin-bottom:6px;" onerror="this.alt='Image failed to load'"><div style="font-size:.62rem;color:var(--muted);">Prompt: ${esc(prompt)}</div></div><button class="copy-btn" onclick="copyMsg(this)">📋 Copy</button></div></div>`;
+  return `<div class="msg ai"><img src="${LOGO_URL}" class="chat-av"><div class="msg-body"><div class="msg-role">NES AI · Flux Schnell</div><div class="msg-bubble"><img src="${esc(url)}" style="max-width:100%;border-radius:10px;display:block;margin-bottom:6px;" onerror="this.alt='Image failed to load'"><div style="font-size:.62rem;color:var(--muted);">Prompt: ${esc(prompt)}</div></div><button class="copy-btn" onclick="copyMsg(this)">📋 Copy</button></div></div>`;
 }
 
 function addAiMsg(text,sources=[]){appendMsg(aiBubble(text,sources));saveHistory();}
