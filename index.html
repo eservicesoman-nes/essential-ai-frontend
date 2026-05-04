@@ -488,7 +488,7 @@ async function sendMsg() {
     const endpoint = mode === 'image' ? '/api/image' : '/api/chat';
     const body = mode === 'image'
       ? { prompt: text }
-      : { message: text, mode, webSearch: useSearch, history: history.slice(-10), model: 'gemini-2.5-flash' };
+      : { message: text, mode, webSearch: useSearch, history: history.slice(-10), model: 'gemini-3.1-flash' };
 
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 45000);
@@ -567,7 +567,7 @@ async function processFile(file) {
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token },
       body: JSON.stringify({
         message: 'Please analyze this document called "' + file.name + '" and provide a clear, well-structured summary.\n\nContent:\n' + truncated,
-        mode: 'docs', webSearch: false, history: history.slice(-4), model: 'gemini-2.5-flash'
+        mode: 'docs', webSearch: false, history: history.slice(-4), model: 'gemini-3.1-flash'
       })
     });
     removeTyping();
