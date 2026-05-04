@@ -115,8 +115,6 @@
     .plan-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:24px;margin-top:24px;}
     .plan-card{background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:28px 24px;width:240px;transition:transform .2s,box-shadow .2s;display:flex;flex-direction:column;}
     .plan-card:hover{transform:translateY(-4px);box-shadow:0 12px 24px rgba(0,0,0,.2);}
-    .plan-card.highlight{border:2px solid var(--accent);background:linear-gradient(135deg,var(--surface) 0%,var(--accent-lo) 100%);position:relative;}
-    .plan-card.highlight::before{content:"⭐ Most Popular";position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;font-size:.7rem;font-weight:600;padding:4px 12px;border-radius:20px;white-space:nowrap;}
     .plan-name{font-size:1.3rem;font-weight:700;margin-bottom:8px;text-align:center;}
     .plan-price{font-size:2rem;font-weight:800;color:var(--accent);text-align:center;margin-bottom:4px;}
     .plan-period{font-size:.7rem;color:var(--muted);text-align:center;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border);}
@@ -126,7 +124,7 @@
     .plan-action-btn{background:var(--accent);border:none;border-radius:40px;padding:12px 20px;color:#fff;font-weight:700;cursor:pointer;width:100%;font-size:.85rem;transition:all .2s;margin-top:auto;}
     .plan-action-btn:hover{transform:scale(1.02);opacity:.9;}
     .plan-action-btn:disabled{background:var(--muted);opacity:.5;cursor:default;transform:none;}
-    .plan-action-btn.contact{background:var(--surface);color:var(--accent);border:1px solid var(--accent);}
+    .plan-action-btn.contact{background:var(--accent);color:#fff;border:none;}
 
     @media(max-width:700px){
       .welcome-card,.messages,.input-area{padding-left:14px;padding-right:14px;}
@@ -650,7 +648,7 @@ function showPricing() {
     { name: 'Free', price: '$0', period: 'forever', features: ['50 msgs/day', '15 images/month (5 days)', '5 docs/day', 'Web search', 'Voice input'], btn: 'Current Plan', disabled: true },
     { name: 'Starter', price: '$7', period: 'per month', features: ['150 msgs/day', '200 images/month', '25 docs/day', 'Web search', 'Voice input'], btn: 'Upgrade →', onclick: "alert('Upgrade coming soon!')" },
     { name: 'Pro', price: '$19', period: 'per month', features: ['500 msgs/day', '500 images/month', '100 docs/day', 'Priority search', 'Email support'], btn: 'Upgrade →', onclick: "alert('Upgrade coming soon!')", highlight: true },
-    { name: 'Team', price: 'Contact Us', period: 'per month', features: ['3,000 msgs/day', '2,000 images/month', '500 docs/day', 'Priority support', 'Team management'], btn: 'Contact Sales →', onclick: "alert('Contact us at team@nes.ai')", contact: true },
+    { name: 'Team', price: 'Contact Us', period: 'per month', features: ['3,000 msgs/day', '2,000 images/month', '500 docs/day', 'Priority support', 'Team management'], btn: 'Contact Us →', onclick: "alert('Contact us at team@nes.ai')", contact: true },
     { name: 'Enterprise', price: 'Custom', period: 'tailored for you', features: ['Unlimited messages', 'Custom image limits', 'SLA guarantee', 'SSO / SAML', 'On-premise'], btn: 'Contact Us →', onclick: "alert('Contact us at enterprise@nes.ai')", contact: true }
   ];
   document.getElementById('mainContent').innerHTML = `
@@ -664,7 +662,7 @@ function showPricing() {
             <div class="plan-price">${p.price}</div>
             <div class="plan-period">${p.period}</div>
             <ul class="plan-features-list">${p.features.map(f => `<li>✅ ${f}</li>`).join('')}</ul>
-            <button class="plan-action-btn ${p.contact ? 'contact' : ''}" ${p.disabled ? 'disabled' : ''} ${p.onclick ? `onclick="${p.onclick}"` : ''}>${p.btn}</button>
+            <button class="plan-action-btn" ${p.disabled ? 'disabled' : ''} ${p.onclick ? `onclick="${p.onclick}"` : ''}>${p.btn}</button>
           </div>`).join('')}
       </div>
     </div>`;
