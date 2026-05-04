@@ -110,27 +110,31 @@
 
     @keyframes bounce{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-5px);opacity:1}}
 
-    /* Pricing */
-    .pricing-wrap{flex:1;overflow-y:auto;padding:28px;}
-    .plan-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:16px;margin-top:28px;}
-    .plan{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:24px;width:200px;}
-    .plan.pro{border-color:var(--accent);box-shadow:0 0 20px var(--accent-lo);}
-    .plan-name{font-size:1rem;font-weight:700;margin-bottom:6px;}
-    .plan-price{font-size:1.6rem;font-weight:800;color:var(--accent);}
-    .plan-period{font-size:.6rem;color:var(--muted);margin-bottom:14px;}
-    .plan-features{list-style:none;margin-bottom:18px;font-size:.75rem;}
-    .plan-features li{padding:4px 0;border-bottom:1px solid var(--border);}
-    .plan-btn{background:var(--accent);border:none;border-radius:30px;padding:9px;color:#fff;font-weight:700;cursor:pointer;width:100%;font-size:.78rem;}
-    .plan-btn.contact{background:var(--surface);color:var(--accent);border:1px solid var(--accent);}
-    .plan-btn:disabled{opacity:.5;cursor:default;}
+    /* Pricing Cards */
+    .pricing-wrap{flex:1;overflow-y:auto;padding:32px 40px;background:var(--bg);}
+    .plan-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:24px;margin-top:24px;}
+    .plan-card{background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:28px 24px;width:240px;transition:transform .2s,box-shadow .2s;display:flex;flex-direction:column;}
+    .plan-card:hover{transform:translateY(-4px);box-shadow:0 12px 24px rgba(0,0,0,.2);}
+    .plan-card.highlight{border:2px solid var(--accent);background:linear-gradient(135deg,var(--surface) 0%,var(--accent-lo) 100%);position:relative;}
+    .plan-card.highlight::before{content:"⭐ Most Popular";position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;font-size:.7rem;font-weight:600;padding:4px 12px;border-radius:20px;white-space:nowrap;}
+    .plan-name{font-size:1.3rem;font-weight:700;margin-bottom:8px;text-align:center;}
+    .plan-price{font-size:2rem;font-weight:800;color:var(--accent);text-align:center;margin-bottom:4px;}
+    .plan-period{font-size:.7rem;color:var(--muted);text-align:center;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border);}
+    .plan-features-list{list-style:none;margin-bottom:24px;flex:1;}
+    .plan-features-list li{padding:8px 0;font-size:.8rem;color:var(--text);display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);}
+    .plan-features-list li:last-child{border-bottom:none;}
+    .plan-action-btn{background:var(--accent);border:none;border-radius:40px;padding:12px 20px;color:#fff;font-weight:700;cursor:pointer;width:100%;font-size:.85rem;transition:all .2s;margin-top:auto;}
+    .plan-action-btn:hover{transform:scale(1.02);opacity:.9;}
+    .plan-action-btn:disabled{background:var(--muted);opacity:.5;cursor:default;transform:none;}
+    .plan-action-btn.contact{background:var(--surface);color:var(--accent);border:1px solid var(--accent);}
 
     @media(max-width:700px){
       .welcome-card,.messages,.input-area{padding-left:14px;padding-right:14px;}
       .disclaimer{display:none;}
       .bottom-right{gap:5px;}
       .stat{font-size:.62rem;}
-      .plan-grid{flex-direction:column;align-items:center;}
-      .plan{width:100%;max-width:280px;}
+      .pricing-wrap{padding:20px;}
+      .plan-card{width:100%;max-width:320px;}
     }
   </style>
 </head>
@@ -244,7 +248,6 @@ function showAuthScreen() {
 }
 
 async function loadUserPlan() {
-  // In production, fetch from Supabase users table. Default to free.
   userPlan = 'free';
   updateStats();
 }
@@ -264,7 +267,6 @@ function switchTab(tab) {
     document.getElementById(t + 'Panel').classList.toggle('active', t === tab);
   });
 }
-function cap(s) { return s[0].toUpperCase() + s.slice(1); }
 
 async function doLogin() {
   const email = document.getElementById('loginEmail').value.trim();
@@ -458,7 +460,6 @@ async function sendMsg() {
   const limits = getCurrentLimits();
   const resetDate = formatResetDate();
 
-  // Check monthly caps first
   if (limits.monthlyMessages !== -1 && chatUsedMonthly >= limits.monthlyMessages) {
     addAiMsg(`💬 You've reached your monthly limit of ${limits.monthlyMessages} messages. Your limit resets on ${resetDate}. Upgrade to Pro/Team for higher limits!`);
     return;
@@ -471,7 +472,6 @@ async function sendMsg() {
     addAiMsg(`📄 You've reached your monthly limit of ${limits.monthlyDocs} documents. Your limit resets on ${resetDate}. Upgrade to Pro/Team for higher limits!`);
     return;
   }
-  // Then daily caps
   if (chatUsed >= limits.messages) {
     addAiMsg(`📅 Daily limit of ${limits.messages} messages reached. Come back tomorrow!`);
     return;
@@ -647,24 +647,24 @@ function toggleVoice() {
 
 function showPricing() {
   const plans = [
-    { name: 'Free', price: '$0', period: 'forever', features: ['50 msgs/day<br>15 images/month (5 days)<br>5 docs/day<br>Web search<br>Voice input'], btn: 'Current Plan', disabled: true },
-    { name: 'Starter', price: '$7', period: 'per month', features: ['150 msgs/day<br>200 images/month<br>25 docs/day<br>Web search<br>Voice input'], btn: 'Upgrade →', onclick: "alert('Upgrade coming soon!')" },
-    { name: 'Pro', price: '$19', period: 'per month', features: ['500 msgs/day<br>500 images/month<br>100 docs/day<br>Priority search<br>Email support'], btn: 'Upgrade →', onclick: "alert('Upgrade coming soon!')" },
-    { name: 'Team', price: 'Contact Us', period: 'per month', features: ['3,000 msgs/day<br>2,000 images/month<br>500 docs/day<br>Priority support<br>Team management'], btn: 'Contact Us →', onclick: "alert('Contact us at team@nes.ai')", contact: true },
-    { name: 'Enterprise', price: 'Contact Us', period: 'tailored', features: ['Custom limits<br>Unlimited messages<br>SLA guarantee<br>SSO / SAML<br>On-premise'], btn: 'Contact Us →', onclick: "alert('Contact us at enterprise@nes.ai')", contact: true }
+    { name: 'Free', price: '$0', period: 'forever', features: ['50 msgs/day', '15 images/month (5 days)', '5 docs/day', 'Web search', 'Voice input'], btn: 'Current Plan', disabled: true },
+    { name: 'Starter', price: '$7', period: 'per month', features: ['150 msgs/day', '200 images/month', '25 docs/day', 'Web search', 'Voice input'], btn: 'Upgrade →', onclick: "alert('Upgrade coming soon!')" },
+    { name: 'Pro', price: '$19', period: 'per month', features: ['500 msgs/day', '500 images/month', '100 docs/day', 'Priority search', 'Email support'], btn: 'Upgrade →', onclick: "alert('Upgrade coming soon!')", highlight: true },
+    { name: 'Team', price: 'Contact Us', period: 'per month', features: ['3,000 msgs/day', '2,000 images/month', '500 docs/day', 'Priority support', 'Team management'], btn: 'Contact Sales →', onclick: "alert('Contact us at team@nes.ai')", contact: true },
+    { name: 'Enterprise', price: 'Custom', period: 'tailored for you', features: ['Unlimited messages', 'Custom image limits', 'SLA guarantee', 'SSO / SAML', 'On-premise'], btn: 'Contact Us →', onclick: "alert('Contact us at enterprise@nes.ai')", contact: true }
   ];
   document.getElementById('mainContent').innerHTML = `
     <div class="pricing-wrap">
-      <a href="#" onclick="showChatInterface();return false;" style="color:var(--accent);text-decoration:none;">← Back to Chat</a>
-      <div style="text-align:center;margin-top:24px;"><h2 style="font-size:1.5rem;">Choose Your Plan</h2><p style="color:var(--muted);font-size:.85rem;">Flexible pricing for every need.</p></div>
+      <a href="#" onclick="showChatInterface();return false;" style="color:var(--accent);text-decoration:none;display:inline-block;margin-bottom:24px;">← Back to Chat</a>
+      <div style="text-align:center;margin-bottom:32px;"><h1 style="font-size:1.8rem;font-weight:700;">Choose Your Plan</h1><p style="color:var(--muted);font-size:.9rem;margin-top:8px;">Flexible pricing for every need.</p></div>
       <div class="plan-grid">
         ${plans.map(p => `
-          <div class="plan ${p.name === 'Pro' ? 'pro' : ''}">
+          <div class="plan-card ${p.highlight ? 'highlight' : ''}">
             <div class="plan-name">${p.name}</div>
             <div class="plan-price">${p.price}</div>
             <div class="plan-period">${p.period}</div>
-            <ul class="plan-features">${p.features.map(f => `<li>✅ ${f}</li>`).join('')}</ul>
-            <button class="plan-btn ${p.contact ? 'contact' : ''}" ${p.disabled ? 'disabled' : ''} ${p.onclick ? `onclick="${p.onclick}"` : ''}>${p.btn}</button>
+            <ul class="plan-features-list">${p.features.map(f => `<li>✅ ${f}</li>`).join('')}</ul>
+            <button class="plan-action-btn ${p.contact ? 'contact' : ''}" ${p.disabled ? 'disabled' : ''} ${p.onclick ? `onclick="${p.onclick}"` : ''}>${p.btn}</button>
           </div>`).join('')}
       </div>
     </div>`;
