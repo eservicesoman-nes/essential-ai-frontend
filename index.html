@@ -9,25 +9,15 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
   <style>
-    /* ── Reset & Variables ── */
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-    :root{
-      --bg:#0a0e2a;--surface:#0f1436;--border:#1a2154;
-      --text:#e8e8ec;--muted:#6b7b9e;
-      --accent:#3b82f6;--accent-lo:rgba(59,130,246,.12);--accent-md:rgba(59,130,246,.25);
-      --green:#2ecc71;--red:#e74c3c;
-      --ui:'Syne',sans-serif;--mono:'DM Mono',monospace;
-    }
-    [data-theme="light"]{
-      --bg:#f3f4f6;--surface:#fff;--border:#e5e7eb;
-      --text:#111827;--muted:#6b7280;--accent:#2563eb;
-    }
-    body{font-family:var(--ui);background:var(--bg);color:var(--text);height:100dvh;display:flex;overflow:hidden;transition:background .3s,color .3s;}
+    *{margin:0;padding:0;box-sizing:border-box;}
+    :root{--bg:#0a0e2a;--surface:#0f1436;--border:#1a2154;--text:#e8e8ec;--muted:#6b7b9e;--accent:#3b82f6;--accent-lo:rgba(59,130,246,.12);--accent-md:rgba(59,130,246,.25);--green:#2ecc71;--red:#e74c3c;--ui:'Syne',sans-serif;--mono:'DM Mono',monospace;}
+    [data-theme="light"]{--bg:#f3f4f6;--surface:#fff;--border:#e5e7eb;--text:#111827;--muted:#6b7280;--accent:#2563eb;}
+    body{font-family:var(--ui);background:var(--bg);color:var(--text);height:100dvh;display:flex;overflow:hidden;}
 
-    /* ── Sidebar toggle ── */
+    /* Sidebar toggle */
     .sb-toggle{position:fixed;left:16px;top:16px;z-index:1010;background:var(--accent);border:none;border-radius:50%;width:42px;height:42px;display:grid;place-items:center;cursor:pointer;color:#fff;font-size:1.2rem;box-shadow:0 2px 12px rgba(0,0,0,.3);}
 
-    /* ── Sidebar ALWAYS DARK ── */
+    /* Sidebar ALWAYS DARK */
     .sidebar{width:260px;flex-shrink:0;background:#0f1436 !important;border-right:1px solid #1a2154 !important;display:flex;flex-direction:column;padding:24px 16px;height:100dvh;overflow-y:auto;z-index:1000;transition:transform .3s ease;}
     .sidebar .logo, .sidebar .logo-version, .sidebar .nav-item, .sidebar .usage-wrap *, .sidebar .user-row * { color: #e8e8ec !important; }
     .sidebar .usage-track { background: #1a2154 !important; }
@@ -44,130 +34,101 @@
     }
     .sb-logo{text-align:center;margin-bottom:16px;padding-top:8px;}
     .sb-logo img{width:80px;height:80px;object-fit:contain;border-radius:50%;}
-    .sb-upgrade{background:linear-gradient(135deg,#3b82f6,#1d4ed8);border:none;border-radius:40px;padding:10px 16px;color:#fff;font-family:var(--ui);font-size:.8rem;font-weight:700;cursor:pointer;margin:0 8px 20px;text-align:center;display:block;width:calc(100% - 16px);transition:opacity .2s;}
-    .sb-upgrade:hover{opacity:.88;}
+    .sb-upgrade{background:linear-gradient(135deg,#3b82f6,#1d4ed8);border:none;border-radius:40px;padding:10px 16px;color:#fff;font-family:var(--ui);font-size:.8rem;font-weight:700;cursor:pointer;margin:0 8px 20px;text-align:center;display:block;width:calc(100% - 16px);}
     .nav{display:flex;flex-direction:column;gap:4px;flex:1;}
-    .nav-item{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:12px;cursor:pointer;color:#6b7b9e;font-size:.88rem;font-weight:600;transition:all .15s;}
+    .nav-item{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:12px;cursor:pointer;color:#6b7b9e;font-size:.88rem;font-weight:600;}
     .nav-item:hover,.nav-item.active{background:rgba(59,130,246,0.12);color:#3b82f6;}
-    .nav-icon{font-size:1.1rem;width:26px;flex-shrink:0;color:#60a5fa;}
+    .nav-icon{font-size:1.1rem;width:26px;color:#60a5fa;}
     [data-theme="light"] .nav-icon{color:#2563eb;}
     .usage-wrap{margin-top:auto;padding:16px 8px 0;border-top:1px solid #1a2154;}
     .usage-row{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.62rem;color:#6b7b9e;margin-bottom:6px;}
     .usage-track{height:4px;background:#1a2154;border-radius:99px;overflow:hidden;margin-bottom:14px;}
-    .usage-fill{height:100%;background:#3b82f6;border-radius:99px;width:0%;transition:width .4s;}
+    .usage-fill{height:100%;background:#3b82f6;border-radius:99px;width:0%;}
     .user-row{display:flex;align-items:center;gap:10px;padding-top:10px;}
-    .user-av{width:30px;height:30px;background:rgba(59,130,246,0.12);border:1px solid rgba(59,130,246,0.25);border-radius:50%;display:grid;place-items:center;font-size:.72rem;color:#3b82f6;font-weight:700;flex-shrink:0;}
+    .user-av{width:30px;height:30px;background:rgba(59,130,246,0.12);border:1px solid rgba(59,130,246,0.25);border-radius:50%;display:grid;place-items:center;font-size:.72rem;color:#3b82f6;font-weight:700;}
     .user-email{font-family:var(--mono);font-size:.65rem;color:#6b7b9e;flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
     .logout-btn{background:none;border:none;color:#6b7b9e;cursor:pointer;font-size:.85rem;padding:2px 6px;}
     .logout-btn:hover{color:#e74c3c;}
 
-    /* ── Auth ── */
+    /* Auth */
     #authScreen{position:fixed;inset:0;z-index:2000;background:var(--bg);display:flex;align-items:center;justify-content:center;}
     .auth-box{width:min(400px,90vw);background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:40px;}
     .auth-logo{font-size:1.6rem;font-weight:800;text-align:center;margin-bottom:4px;}.auth-logo span{color:var(--accent);}
     .auth-sub{font-family:var(--mono);font-size:.7rem;color:var(--muted);text-align:center;margin-bottom:32px;}
     .auth-tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:24px;}
-    .auth-tab{background:none;border:none;color:var(--muted);font-family:var(--ui);font-weight:600;padding:10px 20px;cursor:pointer;transition:color .15s;}
+    .auth-tab{background:none;border:none;color:var(--muted);font-family:var(--ui);font-weight:600;padding:10px 20px;cursor:pointer;}
     .auth-tab.active{color:var(--accent);border-bottom:2px solid var(--accent);}
     .auth-panel{display:none;flex-direction:column;gap:12px;}.auth-panel.active{display:flex;}
-    .auth-input{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:12px 16px;color:var(--text);font-family:var(--mono);font-size:.85rem;outline:none;width:100%;transition:border-color .2s;}
+    .auth-input{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:12px 16px;color:var(--text);font-family:var(--mono);font-size:.85rem;outline:none;width:100%;}
     .auth-input:focus{border-color:var(--accent);}
-    .auth-btn{background:var(--accent);border:none;border-radius:12px;padding:12px;color:#fff;font-weight:700;cursor:pointer;font-family:var(--ui);transition:opacity .2s;}
-    .auth-btn:hover{opacity:.88;}
+    .auth-btn{background:var(--accent);border:none;border-radius:12px;padding:12px;color:#fff;font-weight:700;cursor:pointer;}
     .auth-err{font-family:var(--mono);font-size:.7rem;color:var(--red);min-height:18px;}
 
-    /* ── App ── */
+    /* App */
     #app{display:none;width:100%;height:100dvh;overflow:hidden;}
     #app.visible{display:flex;}
-
-    /* ── Main ── */
     .main{flex:1;display:flex;flex-direction:column;height:100dvh;overflow:hidden;min-width:0;position:relative;}
     .top-bar{position:absolute;top:14px;right:18px;display:flex;gap:10px;z-index:100;}
-    .top-btn{background:var(--surface);border:1px solid var(--border);border-radius:50%;width:38px;height:38px;display:grid;place-items:center;cursor:pointer;color:var(--accent);font-size:1.1rem;transition:border-color .15s;}
-    .top-btn:hover{border-color:var(--accent);}
-
-    /* ── Welcome card ── */
-    .welcome-card{padding:16px 28px;border-bottom:1px solid var(--border);flex-shrink:0;}
-    .mode-label{font-family:var(--mono);font-size:.8rem;color:var(--accent);font-weight:800;margin-bottom:4px;letter-spacing:.5px;}
+    .top-btn{background:var(--surface);border:1px solid var(--border);border-radius:50%;width:38px;height:38px;display:grid;place-items:center;cursor:pointer;color:var(--accent);font-size:1.1rem;}
+    .welcome-card{padding:16px 28px;border-bottom:1px solid var(--border);}
+    .mode-label{font-family:var(--mono);font-size:.8rem;color:var(--accent);font-weight:800;margin-bottom:4px;}
     .version-label{font-family:var(--mono);font-size:.6rem;color:var(--muted);margin-bottom:4px;}
     .free-tier{font-family:var(--mono);font-size:.65rem;color:var(--muted);}
-
-    /* ── Messages ── */
-    .messages{flex:1;overflow-y:auto;padding:18px 28px;display:flex;flex-direction:column;gap:16px;min-height:0;}
-    .messages::-webkit-scrollbar{width:4px;}
-    .messages::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px;}
+    .messages{flex:1;overflow-y:auto;padding:18px 28px;display:flex;flex-direction:column;gap:16px;}
     .msg{display:flex;gap:12px;animation:fadeIn .2s ease;}
     @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
     .msg.user{flex-direction:row-reverse;}
-    .chat-av{width:36px;height:36px;border-radius:50%;object-fit:contain;border:2px solid var(--accent);background:var(--surface);flex-shrink:0;}
-    .user-av-msg{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:rgba(128,128,128,.15);border:1px solid var(--border);font-size:.78rem;font-weight:700;flex-shrink:0;}
+    .chat-av{width:36px;height:36px;border-radius:50%;object-fit:contain;border:2px solid var(--accent);background:var(--surface);}
+    .user-av-msg{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:rgba(128,128,128,.15);border:1px solid var(--border);font-size:.78rem;font-weight:700;}
     .msg-body{max-width:80%;position:relative;}
     .msg-role{font-family:var(--mono);font-size:.62rem;color:var(--muted);margin-bottom:5px;}
     .msg.user .msg-role{text-align:right;}
-    .msg-bubble{padding:11px 16px;border-radius:18px;font-size:.9rem;line-height:1.6;word-break:break-word;}
+    .msg-bubble{padding:11px 16px;border-radius:18px;font-size:.9rem;line-height:1.6;}
     .msg.user .msg-bubble{background:var(--accent);color:#fff;border-bottom-right-radius:4px;}
     .msg.ai .msg-bubble{background:var(--surface);border:1px solid var(--border);border-bottom-left-radius:4px;}
-    .msg-bubble p{margin-bottom:6px;}
-    .msg-bubble ul,.msg-bubble ol{margin:4px 0 6px 18px;}
-    .msg-bubble li{margin-bottom:2px;}
-    .msg-bubble code{background:rgba(128,128,128,.12);padding:2px 5px;border-radius:4px;font-family:monospace;font-size:.85em;}
-    .msg-bubble pre{background:#050810;border:1px solid var(--border);border-radius:8px;padding:10px;overflow-x:auto;margin:8px 0;}
-    [data-theme="light"] .msg-bubble pre{background:#f1f5f9;}
-    .msg-bubble strong{font-weight:700;}
-    .msg-bubble a{color:#60a5fa;text-decoration:underline;}
-    .msg-bubble h1,.msg-bubble h2,.msg-bubble h3{margin:10px 0 4px;font-weight:700;}
     .sources-block{margin-top:8px;border-top:1px solid var(--border);padding-top:6px;font-size:.65rem;color:var(--muted);}
     .sources-block a{color:#60a5fa;text-decoration:none;}
-    .sources-block a:hover{text-decoration:underline;}
-    .copy-btn{position:absolute;top:-4px;right:0;background:var(--accent-lo);border:1px solid var(--accent-md);border-radius:8px;padding:3px 8px;font-size:.6rem;cursor:pointer;color:var(--accent);opacity:0;transition:opacity .2s;font-family:var(--mono);}
+    .copy-btn{position:absolute;top:-4px;right:0;background:var(--accent-lo);border-radius:8px;padding:3px 8px;font-size:.6rem;cursor:pointer;color:var(--accent);opacity:0;}
     .msg-body:hover .copy-btn{opacity:1;}
-
-    /* ── Input area ── */
-    .input-area{padding:12px 28px 16px;border-top:1px solid var(--border);flex-shrink:0;}
-    .prompt-wrap{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:60px;padding:5px 5px 5px 18px;transition:border-color .2s;}
+    .input-area{padding:12px 28px 16px;border-top:1px solid var(--border);}
+    .prompt-wrap{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:60px;padding:5px 5px 5px 18px;}
     .prompt-wrap:focus-within{border-color:var(--accent);}
-    #msgInput{flex:1;background:none;border:none;outline:none;color:var(--text);font-family:var(--ui);font-size:.95rem;padding:11px 0;min-width:0;}
-    #msgInput::placeholder{color:var(--muted);}
-    .send-btn{background:var(--accent);border:none;border-radius:50%;width:42px;height:42px;display:grid;place-items:center;cursor:pointer;color:#fff;font-size:1.1rem;flex-shrink:0;transition:opacity .15s;}
-    .send-btn:disabled{opacity:.4;cursor:not-allowed;}
+    #msgInput{flex:1;background:none;border:none;outline:none;color:var(--text);font-family:var(--ui);font-size:.95rem;padding:11px 0;}
+    .send-btn{background:var(--accent);border:none;border-radius:50%;width:42px;height:42px;display:grid;place-items:center;cursor:pointer;color:#fff;font-size:1.1rem;}
+    .send-btn:disabled{opacity:.4;}
     .bottom-bar{display:flex;justify-content:space-between;align-items:center;margin-top:9px;padding-top:9px;border-top:1px solid var(--border);gap:8px;}
-    .bottom-left{display:flex;align-items:center;gap:8px;min-width:0;flex-wrap:nowrap;}
-    .bottom-right{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+    .bottom-left{display:flex;align-items:center;gap:8px;}
+    .bottom-right{display:flex;align-items:center;gap:8px;}
     .status-dot{font-family:var(--mono);font-size:.72rem;color:var(--green);white-space:nowrap;}
     .status-dot::before{content:"● ";}
     .status-dot.busy{color:var(--accent);}
-    .disclaimer{font-family:var(--mono);font-size:.6rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-    .act-btn{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-family:var(--ui);font-size:.72rem;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap;transition:all .15s;}
-    .act-btn:hover{background:var(--accent-lo);border-color:var(--accent);color:var(--accent);}
-    .act-btn.rec{background:rgba(231,76,60,.12);border-color:var(--red);color:var(--red);}
-    .stat{font-family:var(--mono);font-size:.7rem;color:var(--muted);white-space:nowrap;}
+    .disclaimer{font-family:var(--mono);font-size:.6rem;color:var(--muted);}
+    .act-btn{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:.72rem;font-weight:600;color:var(--muted);cursor:pointer;}
+    .act-btn:hover{background:var(--accent-lo);color:var(--accent);}
+    .stat{font-family:var(--mono);font-size:.7rem;color:var(--muted);}
     .stat b{color:var(--accent);}
 
-    /* ── Typing ── */
     @keyframes bounce{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-5px);opacity:1}}
 
-    /* ── Pricing ── */
-    .pricing-wrap{flex:1;overflow-y:auto;padding:28px;min-height:0;}
+    /* Pricing */
+    .pricing-wrap{flex:1;overflow-y:auto;padding:28px;}
     .plan-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:16px;margin-top:28px;}
-    .plan{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:24px;width:210px;}
+    .plan{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:24px;width:200px;}
     .plan.pro{border-color:var(--accent);box-shadow:0 0 20px var(--accent-lo);}
     .plan-name{font-size:1rem;font-weight:700;margin-bottom:6px;}
     .plan-price{font-size:1.6rem;font-weight:800;color:var(--accent);}
     .plan-period{font-size:.6rem;color:var(--muted);margin-bottom:14px;}
     .plan-features{list-style:none;margin-bottom:18px;font-size:.75rem;}
     .plan-features li{padding:4px 0;border-bottom:1px solid var(--border);}
-    .plan-btn{background:var(--accent);border:none;border-radius:30px;padding:9px;color:#fff;font-weight:700;cursor:pointer;width:100%;font-family:var(--ui);font-size:.78rem;transition:opacity .2s;}
-    .plan-btn:hover{opacity:.88;}
+    .plan-btn{background:var(--accent);border:none;border-radius:30px;padding:9px;color:#fff;font-weight:700;cursor:pointer;width:100%;font-size:.78rem;}
+    .plan-btn.contact{background:var(--surface);color:var(--accent);border:1px solid var(--accent);}
     .plan-btn:disabled{opacity:.5;cursor:default;}
 
-    /* ── Mobile ── */
     @media(max-width:700px){
       .welcome-card,.messages,.input-area{padding-left:14px;padding-right:14px;}
       .disclaimer{display:none;}
       .bottom-right{gap:5px;}
       .stat{font-size:.62rem;}
-      .act-btn{padding:4px 9px;font-size:.66rem;}
-      .msg-bubble{font-size:.85rem;}
       .plan-grid{flex-direction:column;align-items:center;}
       .plan{width:100%;max-width:280px;}
     }
@@ -175,10 +136,8 @@
 </head>
 <body>
 
-<!-- Sidebar toggle -->
 <button class="sb-toggle" onclick="toggleSidebar()">☰</button>
 
-<!-- Auth Screen -->
 <div id="authScreen">
   <div class="auth-box">
     <div class="auth-logo">NES<span>AI</span></div>
@@ -188,26 +147,23 @@
       <button class="auth-tab" id="tabSignup" onclick="switchTab('signup')">Sign Up</button>
     </div>
     <div id="loginPanel" class="auth-panel active">
-      <input class="auth-input" id="loginEmail" type="email" placeholder="Email address" autocomplete="email">
-      <input class="auth-input" id="loginPassword" type="password" placeholder="Password" autocomplete="current-password">
+      <input class="auth-input" id="loginEmail" type="email" placeholder="Email address">
+      <input class="auth-input" id="loginPassword" type="password" placeholder="Password">
       <div class="auth-err" id="loginErr"></div>
       <button class="auth-btn" onclick="doLogin()">Sign In →</button>
     </div>
     <div id="signupPanel" class="auth-panel">
-      <input class="auth-input" id="signupEmail" type="email" placeholder="Email address" autocomplete="email">
-      <input class="auth-input" id="signupPassword" type="password" placeholder="Password (min 6 chars)" autocomplete="new-password">
+      <input class="auth-input" id="signupEmail" type="email" placeholder="Email address">
+      <input class="auth-input" id="signupPassword" type="password" placeholder="Password (min 6 chars)">
       <div class="auth-err" id="signupErr"></div>
       <button class="auth-btn" onclick="doSignup()">Create Account →</button>
     </div>
   </div>
 </div>
 
-<!-- App -->
 <div id="app">
   <aside class="sidebar" id="sidebar">
-    <div class="sb-logo">
-      <img src="https://files.catbox.moe/adhf8n.png" alt="NES AI">
-    </div>
+    <div class="sb-logo"><img src="https://files.catbox.moe/adhf8n.png" alt="NES AI"></div>
     <button class="sb-upgrade" onclick="showPricing()">✨ Upgrade to Pro</button>
     <nav class="nav">
       <div class="nav-item active" data-mode="chat"><span class="nav-icon">💬</span><span>Chat</span></div>
@@ -235,59 +191,45 @@
   </main>
 </div>
 
-<!-- Libraries -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-
 <script>
 // ============================================================
-// 🔧 CONFIG — NES AI PRODUCTION
+// NES AI — FINAL PRODUCTION VERSION
 // ============================================================
-const SUPABASE_URL  = 'https://sfpfjjdtczvuxyhjievt.supabase.co';
+const SUPABASE_URL = 'https://sfpfjjdtczvuxyhjievt.supabase.co';
 const SUPABASE_ANON = 'sb_publishable_MH7rnJ7r8_-1TzGXcieNfA_NXoHQZbm';
-const API_URL       = 'https://essential-ai-backend.onrender.com';
-const LOGO_URL      = 'https://files.catbox.moe/adhf8n.png';
-// ============================================================
+const API_URL = 'https://essential-ai-backend.onrender.com';
+const LOGO_URL = 'https://files.catbox.moe/adhf8n.png';
 
-// Plan limits (daily)
+// Plan limits (daily + monthly)
 const PLAN_LIMITS = {
-  free: { messages: 50, images: 3, docs: 5, imageDaysActive: 5 },
-  starter: { messages: 150, images: 10, docs: 25 },
-  pro: { messages: 500, images: 25, docs: 100 },
-  team: { messages: 3000, images: 100, docs: 500 }
+  free: { name: 'Free', price: 0, messages: 50, monthlyMessages: 1500, images: 3, monthlyImages: 15, docs: 5, monthlyDocs: 150, imageDaysActive: 5 },
+  starter: { name: 'Starter', price: 7, messages: 150, monthlyMessages: 4500, images: 10, monthlyImages: 200, docs: 25, monthlyDocs: 750 },
+  pro: { name: 'Pro', price: 19, messages: 500, monthlyMessages: 15000, images: 25, monthlyImages: 500, docs: 100, monthlyDocs: 3000 },
+  team: { name: 'Team', price: 0, messages: 3000, monthlyMessages: 90000, images: 100, monthlyImages: 2000, docs: 500, monthlyDocs: 15000, isContact: true },
+  enterprise: { name: 'Enterprise', price: 0, messages: -1, monthlyMessages: -1, images: -1, monthlyImages: -1, docs: -1, monthlyDocs: -1, isContact: true }
 };
 
-const {createClient} = supabase;
+const { createClient } = supabase;
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
 
-// ── State ─────────────────────────────────────────────────────
-let session  = null;
-let mode     = 'chat';
-let history  = [];
-let busy     = false;
+let session = null, mode = 'chat', history = [], busy = false;
 let chatUsed = 0, imagesUsed = 0, docsUsed = 0;
+let chatUsedMonthly = 0, imagesUsedMonthly = 0, docsUsedMonthly = 0;
 let userPlan = 'free';
 let allMsgsHTML = '';
-const STORAGE_KEYS = { h:'nesai_h', m:'nesai_m', u:'nesai_u' };
+const STORAGE_KEYS = { h: 'nesai_h', m: 'nesai_m', u: 'nesai_u', mu: 'nesai_mu' };
 
-const MODE_LABELS = {
-  chat:     'CHAT MODE',
-  deepcore: 'DEEP CORE MODE',
-  docs:     'DOCUMENTS MODE',
-  image:    'IMAGE GEN MODE'
-};
+const MODE_LABELS = { chat: 'CHAT MODE', deepcore: 'DEEP CORE MODE', docs: 'DOCUMENTS MODE', image: 'IMAGE GEN MODE' };
 
-// ── Auth ─────────────────────────────────────────────────────
-sb.auth.onAuthStateChange((_e, s) => {
-  session = s;
-  s ? showApp(s.user) : showAuthScreen();
-});
+// Auth
+sb.auth.onAuthStateChange((_e, s) => { session = s; s ? showApp(s.user) : showAuthScreen(); });
 
 function showApp(user) {
   document.getElementById('authScreen').style.display = 'none';
-  const app = document.getElementById('app');
-  app.style.display = 'flex';
-  app.classList.add('visible');
-  document.getElementById('userEmail').textContent  = user.email;
+  document.getElementById('app').style.display = 'flex';
+  document.getElementById('app').classList.add('visible');
+  document.getElementById('userEmail').textContent = user.email;
   document.getElementById('userInitial').textContent = user.email[0].toUpperCase();
   loadLocal();
   loadUserPlan();
@@ -302,180 +244,177 @@ function showAuthScreen() {
 }
 
 async function loadUserPlan() {
-  // In production, fetch from Supabase users table
-  // For now, default to free tier
+  // In production, fetch from Supabase users table. Default to free.
   userPlan = 'free';
-  updateLimitsUI();
+  updateStats();
 }
 
-function updateLimitsUI() {
-  const limits = PLAN_LIMITS[userPlan] || PLAN_LIMITS.free;
-  const msgLimitEl = document.getElementById('msgLimit');
-  const imgLimitEl = document.getElementById('imgLimit');
-  const docLimitEl = document.getElementById('docLimit');
-  if (msgLimitEl) msgLimitEl.textContent = limits.messages;
-  if (imgLimitEl) imgLimitEl.textContent = limits.images;
-  if (docLimitEl) docLimitEl.textContent = limits.docs;
-}
+function getCurrentLimits() { return PLAN_LIMITS[userPlan] || PLAN_LIMITS.free; }
 
-function getCurrentLimits() {
-  return PLAN_LIMITS[userPlan] || PLAN_LIMITS.free;
+function formatResetDate() {
+  const date = new Date();
+  date.setMonth(date.getMonth() + 1);
+  date.setDate(1);
+  return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 }
 
 function switchTab(tab) {
-  ['login','signup'].forEach(t => {
-    document.getElementById('tab'+cap(t)).classList.toggle('active', t===tab);
-    document.getElementById(t+'Panel').classList.toggle('active', t===tab);
+  ['login', 'signup'].forEach(t => {
+    document.getElementById('tab' + (t === 'login' ? 'Login' : 'Signup')).classList.toggle('active', t === tab);
+    document.getElementById(t + 'Panel').classList.toggle('active', t === tab);
   });
 }
-function cap(s){ return s[0].toUpperCase()+s.slice(1); }
+function cap(s) { return s[0].toUpperCase() + s.slice(1); }
 
 async function doLogin() {
-  const email = v('loginEmail'), pass = v('loginPassword');
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass = document.getElementById('loginPassword').value;
   const err = document.getElementById('loginErr');
-  err.style.color='var(--red)'; err.textContent='';
-  if(!email||!pass){err.textContent='Email and password required.';return;}
-  const {error} = await sb.auth.signInWithPassword({email,password:pass});
-  if(error) err.textContent = error.message;
+  err.textContent = '';
+  if (!email || !pass) { err.textContent = 'Email and password required.'; return; }
+  const { error } = await sb.auth.signInWithPassword({ email, password: pass });
+  if (error) err.textContent = error.message;
 }
 
 async function doSignup() {
-  const email = v('signupEmail'), pass = v('signupPassword');
+  const email = document.getElementById('signupEmail').value.trim();
+  const pass = document.getElementById('signupPassword').value;
   const err = document.getElementById('signupErr');
-  err.style.color='var(--red)'; err.textContent='';
-  if(!email||!pass){err.textContent='Email and password required.';return;}
-  if(pass.length<6){err.textContent='Password must be at least 6 characters.';return;}
-  const {error} = await sb.auth.signUp({email,password:pass});
-  if(error){err.textContent=error.message;}
-  else{err.style.color='var(--green)';err.textContent='✅ Account created! You can now sign in.';}
+  err.textContent = '';
+  if (!email || !pass) { err.textContent = 'Email and password required.'; return; }
+  if (pass.length < 6) { err.textContent = 'Password must be at least 6 characters.'; return; }
+  const { error } = await sb.auth.signUp({ email, password: pass });
+  if (error) { err.textContent = error.message; }
+  else { err.style.color = '#2ecc71'; err.textContent = '✅ Account created! You can now sign in.'; }
 }
 
 async function doLogout() {
-  if(!confirm('Sign out?')) return;
-  history=[]; allMsgsHTML='';
+  if (!confirm('Sign out?')) return;
+  history = []; allMsgsHTML = '';
   localStorage.removeItem(STORAGE_KEYS.h); localStorage.removeItem(STORAGE_KEYS.m);
   await sb.auth.signOut();
 }
 
-// ── Local storage ─────────────────────────────────────────────
 function loadLocal() {
   try {
-    const h = localStorage.getItem(STORAGE_KEYS.h); if(h) history = JSON.parse(h);
+    const h = localStorage.getItem(STORAGE_KEYS.h); if (h) history = JSON.parse(h);
     allMsgsHTML = localStorage.getItem(STORAGE_KEYS.m) || '';
     const u = localStorage.getItem(STORAGE_KEYS.u);
-    if(u) {
+    if (u) {
       const ud = JSON.parse(u);
-      if(ud.date === new Date().toDateString()) {
-        chatUsed=ud.c||0; imagesUsed=ud.i||0; docsUsed=ud.d||0;
+      if (ud.date === new Date().toDateString()) {
+        chatUsed = ud.c || 0; imagesUsed = ud.i || 0; docsUsed = ud.d || 0;
       }
     }
-  } catch(e) {}
+    const mu = localStorage.getItem(STORAGE_KEYS.mu);
+    if (mu) {
+      const mud = JSON.parse(mu);
+      const currentMonth = new Date().getMonth() + '-' + new Date().getFullYear();
+      if (mud.month === currentMonth) {
+        chatUsedMonthly = mud.c || 0; imagesUsedMonthly = mud.i || 0; docsUsedMonthly = mud.d || 0;
+      } else {
+        chatUsedMonthly = 0; imagesUsedMonthly = 0; docsUsedMonthly = 0;
+      }
+    }
+  } catch (e) { }
 }
 
 function saveHistory() {
   try {
     localStorage.setItem(STORAGE_KEYS.h, JSON.stringify(history.slice(-30)));
     const msgs = document.getElementById('messages');
-    if(msgs) {
-      allMsgsHTML = msgs.innerHTML;
-      localStorage.setItem(STORAGE_KEYS.m, allMsgsHTML);
-    }
-  } catch(e) {}
+    if (msgs) { allMsgsHTML = msgs.innerHTML; localStorage.setItem(STORAGE_KEYS.m, allMsgsHTML); }
+  } catch (e) { }
 }
 
 function saveUsage() {
-  try { localStorage.setItem(STORAGE_KEYS.u, JSON.stringify({date:new Date().toDateString(),c:chatUsed,i:imagesUsed,d:docsUsed})); } catch(e) {}
+  try {
+    localStorage.setItem(STORAGE_KEYS.u, JSON.stringify({ date: new Date().toDateString(), c: chatUsed, i: imagesUsed, d: docsUsed }));
+    const currentMonth = new Date().getMonth() + '-' + new Date().getFullYear();
+    localStorage.setItem(STORAGE_KEYS.mu, JSON.stringify({ month: currentMonth, c: chatUsedMonthly, i: imagesUsedMonthly, d: docsUsedMonthly }));
+  } catch (e) { }
 }
 
-// ── Usage from server ─────────────────────────────────────────
 async function loadUsageFromServer() {
-  if(!session) return;
+  if (!session) return;
   try {
-    const res = await fetch(API_URL+'/api/usage', {headers:{'Authorization':'Bearer '+session.access_token}});
-    if(res.ok) {
+    const res = await fetch(API_URL + '/api/usage', { headers: { 'Authorization': 'Bearer ' + session.access_token } });
+    if (res.ok) {
       const d = await res.json();
       chatUsed = d.chats || chatUsed;
       imagesUsed = d.images || imagesUsed;
       docsUsed = d.docs || docsUsed;
       updateStats();
     }
-  } catch(e) {}
+  } catch (e) { }
 }
 
 function updateStats() {
   const limits = getCurrentLimits();
-  set('statMsgs',  Math.max(0, limits.messages - chatUsed));
-  set('statImages',Math.max(0, limits.images - imagesUsed));
-  set('statDocs',  Math.max(0, limits.docs - docsUsed));
-  set('usageTxt',  chatUsed+' / '+limits.messages);
+  document.getElementById('statMsgs').innerHTML = Math.max(0, limits.messages - chatUsed);
+  document.getElementById('statImages').innerHTML = Math.max(0, limits.images - imagesUsed);
+  document.getElementById('statDocs').innerHTML = Math.max(0, limits.docs - docsUsed);
+  document.getElementById('usageTxt').innerHTML = chatUsed + ' / ' + limits.messages;
   const fill = document.getElementById('usageFill');
-  if(fill) fill.style.width = Math.min(100,(chatUsed/limits.messages)*100)+'%';
+  if (fill) fill.style.width = Math.min(100, (chatUsed / limits.messages) * 100) + '%';
 }
 
-// ── Sidebar / Nav ─────────────────────────────────────────────
 function toggleSidebar() {
-  const sb2 = document.getElementById('sidebar');
-  if(window.innerWidth<=900) sb2.classList.toggle('open');
-  else sb2.classList.toggle('collapsed');
+  const sb = document.getElementById('sidebar');
+  if (window.innerWidth <= 900) sb.classList.toggle('open');
+  else sb.classList.toggle('collapsed');
 }
 
-// Touch swipe to close sidebar (mobile)
 let touchStartX = 0;
-document.addEventListener('touchstart', (e) => {
-  touchStartX = e.changedTouches[0].screenX;
-});
+document.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX; });
 document.addEventListener('touchend', (e) => {
   const touchEndX = e.changedTouches[0].screenX;
-  const swipeDistance = touchEndX - touchStartX;
   const sidebar = document.getElementById('sidebar');
-  if (swipeDistance < -50 && sidebar.classList.contains('open')) {
-    sidebar.classList.remove('open');
-  }
+  if (touchEndX - touchStartX < -50 && sidebar.classList.contains('open')) sidebar.classList.remove('open');
 });
 
 function bindNav() {
   document.querySelectorAll('.nav-item').forEach(item => {
     item.addEventListener('click', () => {
-      if(item.dataset.mode === mode) return;
+      if (item.dataset.mode === mode) return;
       const msgs = document.getElementById('messages');
-      if(msgs) { allMsgsHTML = msgs.innerHTML; localStorage.setItem(STORAGE_KEYS.m, allMsgsHTML); }
+      if (msgs) { allMsgsHTML = msgs.innerHTML; localStorage.setItem(STORAGE_KEYS.m, allMsgsHTML); }
       document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
       item.classList.add('active');
       mode = item.dataset.mode;
       showChatInterface();
-      if(window.innerWidth<=900) document.getElementById('sidebar').classList.remove('open');
+      if (window.innerWidth <= 900) document.getElementById('sidebar').classList.remove('open');
     });
   });
 }
 
 function clearChat() {
-  if(!confirm('Clear all messages?')) return;
-  history=[]; allMsgsHTML='';
+  if (!confirm('Clear all messages?')) return;
+  history = []; allMsgsHTML = '';
   localStorage.removeItem(STORAGE_KEYS.h); localStorage.removeItem(STORAGE_KEYS.m);
   const msgs = document.getElementById('messages');
-  if(msgs) msgs.innerHTML = '';
+  if (msgs) msgs.innerHTML = '';
   addAiMsg('👋 Cleared! What would you like to do?');
 }
 
 function toggleTheme() {
   const html = document.documentElement;
-  html.setAttribute('data-theme', html.getAttribute('data-theme')==='dark'?'light':'dark');
+  html.setAttribute('data-theme', html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
 }
 
-// ── Chat interface ────────────────────────────────────────────
 function showChatInterface() {
-  const isSearch = ['chat','deepcore'].includes(mode);
+  const isSearch = ['chat', 'deepcore'].includes(mode);
   const limits = getCurrentLimits();
   document.getElementById('mainContent').innerHTML = `
     <div class="welcome-card">
-      <div class="mode-label">${MODE_LABELS[mode]}${isSearch?' 🌐 Web Search ON':''}</div>
+      <div class="mode-label">${MODE_LABELS[mode]}${isSearch ? ' 🌐 Web Search ON' : ''}</div>
       <div class="version-label">NES AI v3.0</div>
-      <div class="free-tier">Free tier: ${limits.messages} msgs/day · ${limits.images} images/day · ${limits.docs} docs/day</div>
+      <div class="free-tier">Free: ${limits.messages} msgs/day · ${limits.images} images/day · ${limits.docs} docs/day</div>
     </div>
     <div class="messages" id="messages"></div>
     <div class="input-area">
       <div class="prompt-wrap">
-        <input type="text" id="msgInput" placeholder="${mode==='image'?'Describe the image you want…':'Ask me anything...'}" maxlength="8000" autocomplete="off">
+        <input type="text" id="msgInput" placeholder="${mode === 'image' ? 'Describe the image you want…' : 'Ask me anything...'}" maxlength="8000" autocomplete="off">
         <button class="send-btn" id="sendBtn" onclick="sendMsg()">↑</button>
       </div>
       <div class="bottom-bar">
@@ -493,316 +432,266 @@ function showChatInterface() {
       </div>
     </div>`;
 
-  document.getElementById('msgInput').addEventListener('keypress', e => {
-    if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}
-  });
+  document.getElementById('msgInput').addEventListener('keypress', e => { if (e.key === 'Enter') sendMsg(); });
 
   const msgsEl = document.getElementById('messages');
-  if(allMsgsHTML && allMsgsHTML.trim()) {
+  if (allMsgsHTML && allMsgsHTML.trim()) {
     msgsEl.innerHTML = allMsgsHTML;
     msgsEl.scrollTop = msgsEl.scrollHeight;
-  } else if(history.length===0) {
+  } else if (history.length === 0) {
     addAiMsg('👋 Welcome to NES AI — your unified intelligence platform. What would you like to do today?');
   } else {
     history.forEach(h => {
-      if(h.role==='user') appendMsg(userBubble(h.content));
-      else appendMsg(aiBubble(h.content));
+      if (h.role === 'user') appendMsg(userBubble(h.content));
+      else appendMsg(aiBubble(h.content, h.sources || []));
     });
     msgsEl.scrollTop = msgsEl.scrollHeight;
   }
 }
 
-// ── Send message ──────────────────────────────────────────────
 async function sendMsg() {
-  if(busy||!session) return;
+  if (busy || !session) return;
   const input = document.getElementById('msgInput');
-  const text = input.value.trim(); if(!text) return;
-  
+  const text = input.value.trim();
+  if (!text) return;
+
   const limits = getCurrentLimits();
-  if(chatUsed >= limits.messages) {
-    addAiMsg(`⚠️ Daily limit of ${limits.messages} messages reached. Upgrade for more!`);
+  const resetDate = formatResetDate();
+
+  // Check monthly caps first
+  if (limits.monthlyMessages !== -1 && chatUsedMonthly >= limits.monthlyMessages) {
+    addAiMsg(`💬 You've reached your monthly limit of ${limits.monthlyMessages} messages. Your limit resets on ${resetDate}. Upgrade to Pro/Team for higher limits!`);
+    return;
+  }
+  if (limits.monthlyImages !== -1 && imagesUsedMonthly >= limits.monthlyImages) {
+    addAiMsg(`✨ You've reached your monthly limit of ${limits.monthlyImages} images. Your limit resets on ${resetDate}. Upgrade to Pro/Team for higher limits!`);
+    return;
+  }
+  if (limits.monthlyDocs !== -1 && docsUsedMonthly >= limits.monthlyDocs) {
+    addAiMsg(`📄 You've reached your monthly limit of ${limits.monthlyDocs} documents. Your limit resets on ${resetDate}. Upgrade to Pro/Team for higher limits!`);
+    return;
+  }
+  // Then daily caps
+  if (chatUsed >= limits.messages) {
+    addAiMsg(`📅 Daily limit of ${limits.messages} messages reached. Come back tomorrow!`);
     return;
   }
 
   input.value = '';
   setBusy(true);
   appendMsg(userBubble(text));
-  history.push({role:'user',content:text});
+  history.push({ role: 'user', content: text });
   addTyping();
 
   try {
-    const useSearch = ['chat','deepcore'].includes(mode);
-    const endpoint  = mode==='image'?'/api/image':'/api/chat';
-    const body = mode==='image'
-      ? {prompt:text}
-      : {message:text, mode, webSearch:useSearch, history:history.slice(-10), model:'gemini-2.5-flash'};
+    const useSearch = ['chat', 'deepcore'].includes(mode);
+    const endpoint = mode === 'image' ? '/api/image' : '/api/chat';
+    const body = mode === 'image'
+      ? { prompt: text }
+      : { message: text, mode, webSearch: useSearch, history: history.slice(-10), model: 'gemini-2.5-flash' };
 
     const controller = new AbortController();
-    const timeout = setTimeout(()=>controller.abort(), 45000);
-
-    const res = await fetch(API_URL+endpoint, {
-      method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
-      body:JSON.stringify(body),
-      signal:controller.signal
+    const timeout = setTimeout(() => controller.abort(), 45000);
+    const res = await fetch(API_URL + endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token },
+      body: JSON.stringify(body),
+      signal: controller.signal
     });
     clearTimeout(timeout);
     removeTyping();
 
-    if(res.ok) {
+    if (res.ok) {
       const data = await res.json();
-      if(mode==='image') {
-        appendMsg(imgBubble(data.url, data.revisedPrompt||text));
+      if (mode === 'image') {
+        appendMsg(imgBubble(data.url, data.revisedPrompt || text));
         imagesUsed++;
-        const msgs=document.getElementById('messages');
-        if(msgs){allMsgsHTML=msgs.innerHTML;localStorage.setItem(STORAGE_KEYS.m,allMsgsHTML);}
+        imagesUsedMonthly++;
+        const msgs = document.getElementById('messages');
+        if (msgs) { allMsgsHTML = msgs.innerHTML; localStorage.setItem(STORAGE_KEYS.m, allMsgsHTML); }
       } else {
         const reply = data.reply || 'Sorry, I could not generate a response.';
-        history.push({role:'assistant',content:reply});
-        appendMsg(aiBubble(reply, data.sources||[]));
+        const sources = data.sources || [];
+        history.push({ role: 'assistant', content: reply, sources: sources });
+        appendMsg(aiBubble(reply, sources));
       }
       chatUsed++;
+      chatUsedMonthly++;
       saveHistory(); saveUsage(); updateStats();
-      loadUsageFromServer().catch(()=>{});
+      loadUsageFromServer().catch(() => { });
     } else {
-      const err = await res.json().catch(()=>({}));
-      addAiMsg('❌ Error '+(err.error||res.status)+'. Please try again.');
+      const err = await res.json().catch(() => ({}));
+      addAiMsg('❌ Error ' + (err.error || res.status) + '. Please try again.');
     }
-  } catch(e) {
+  } catch (e) {
     removeTyping();
-    if(e.name==='AbortError') addAiMsg('⏱️ Request timed out. The server may be waking up — please wait and try again.');
-    else addAiMsg('❌ Network error. Please check your connection.');
+    addAiMsg('❌ Network error. Please check your connection.');
   }
   setBusy(false);
 }
 
-// ── File attachment ───────────────────────────────────────────
 function handleAttach() {
-  if(mode!=='docs'){addAiMsg('📎 File attachment is available in **Documents mode**. Switch to 📄 Documents in the sidebar.');return;}
+  if (mode !== 'docs') {
+    addAiMsg('📎 File attachment is available in **Documents mode**. Switch to 📄 Documents in the sidebar.');
+    return;
+  }
   const limits = getCurrentLimits();
-  if(docsUsed >= limits.docs){addAiMsg(`⚠️ Daily limit of ${limits.docs} documents reached. Upgrade to Pro!`);return;}
+  const resetDate = formatResetDate();
+  if (limits.monthlyDocs !== -1 && docsUsedMonthly >= limits.monthlyDocs) {
+    addAiMsg(`📄 You've reached your monthly limit of ${limits.monthlyDocs} documents. Your limit resets on ${resetDate}. Upgrade to Pro/Team for higher limits!`);
+    return;
+  }
+  if (docsUsed >= limits.docs) {
+    addAiMsg(`📅 Daily limit of ${limits.docs} documents reached. Come back tomorrow!`);
+    return;
+  }
   const inp = document.createElement('input');
-  inp.type='file'; inp.accept='.txt,.md,.json,.csv,.pdf,.docx,.xlsx,.xls';
+  inp.type = 'file';
+  inp.accept = '.txt,.md,.json,.csv,.pdf,.docx,.xlsx,.xls';
   inp.onchange = e => processFile(e.target.files[0]);
   inp.click();
 }
 
 async function processFile(file) {
-  if(!file) return;
-  if(file.size>10*1024*1024){addAiMsg('❌ File too large. Max 10MB.');return;}
-  appendMsg(userBubble('📎 '+file.name+' ('+Math.round(file.size/1024)+' KB) — analyzing…'));
+  if (!file) return;
+  if (file.size > 10 * 1024 * 1024) { addAiMsg('❌ File too large. Max 10MB.'); return; }
+  appendMsg(userBubble('📎 ' + file.name + ' (' + Math.round(file.size / 1024) + ' KB) — analyzing…'));
   setBusy(true); addTyping();
   try {
     const content = await extractText(file);
-    if(!content.trim()){removeTyping();addAiMsg('❌ Could not extract text from this file. It may be image-based or password protected.');setBusy(false);return;}
-    const truncated = content.substring(0,7000);
-    history.push({role:'user',content:'Analyze document "'+file.name+'":\n'+truncated});
-    const res = await fetch(API_URL+'/api/chat',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
-      body:JSON.stringify({
-        message:'Please analyze this document called "'+file.name+'" and provide a clear, well-structured summary of its key points and important details. Write in plain paragraphs.\n\nContent:\n'+truncated,
-        mode:'docs', webSearch:false, history:history.slice(-4), model:'gemini-2.5-flash'
+    if (!content.trim()) { removeTyping(); addAiMsg('❌ Could not extract text from this file.'); setBusy(false); return; }
+    const truncated = content.substring(0, 7000);
+    history.push({ role: 'user', content: 'Analyze document "' + file.name + '":\n' + truncated });
+    const res = await fetch(API_URL + '/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token },
+      body: JSON.stringify({
+        message: 'Please analyze this document called "' + file.name + '" and provide a clear, well-structured summary.\n\nContent:\n' + truncated,
+        mode: 'docs', webSearch: false, history: history.slice(-4), model: 'gemini-2.5-flash'
       })
     });
     removeTyping();
-    if(res.ok){
+    if (res.ok) {
       const data = await res.json();
-      const reply = data.reply||'Document analyzed.';
-      history.push({role:'assistant',content:reply});
+      const reply = data.reply || 'Document analyzed.';
+      history.push({ role: 'assistant', content: reply });
       appendMsg(aiBubble(reply));
       docsUsed++;
+      docsUsedMonthly++;
     } else { addAiMsg('❌ Could not analyze file. Please try again.'); }
     saveHistory(); saveUsage(); updateStats();
-  } catch(err) {
+  } catch (err) {
     removeTyping();
-    addAiMsg('❌ Error reading file: '+err.message);
+    addAiMsg('❌ Error reading file: ' + err.message);
   }
   setBusy(false);
 }
 
 async function extractText(file) {
   const name = file.name.toLowerCase();
-  const ext  = name.split('.').pop();
-
-  if(['txt','md','json','csv'].includes(ext)) return file.text();
-
-  if(ext==='pdf') {
-    if(typeof pdfjsLib==='undefined') await loadScript('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js');
-    pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-    const ab  = await file.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument({data:ab}).promise;
+  const ext = name.split('.').pop();
+  if (['txt', 'md', 'json', 'csv'].includes(ext)) return file.text();
+  if (ext === 'pdf') {
+    if (typeof pdfjsLib === 'undefined') await loadScript('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js');
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    const ab = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: ab }).promise;
     const pages = [];
-    for(let i=1;i<=Math.min(pdf.numPages,20);i++){
+    for (let i = 1; i <= Math.min(pdf.numPages, 20); i++) {
       const page = await pdf.getPage(i);
-      const tc   = await page.getTextContent();
-      pages.push(tc.items.map(s=>s.str).join(' '));
+      const tc = await page.getTextContent();
+      pages.push(tc.items.map(s => s.str).join(' '));
     }
     return pages.join('\n');
   }
-
-  if(ext==='docx') {
-    if(typeof mammoth==='undefined') await loadScript('https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js');
+  if (ext === 'docx') {
+    if (typeof mammoth === 'undefined') await loadScript('https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js');
     const ab = await file.arrayBuffer();
-    const r  = await mammoth.extractRawText({arrayBuffer:ab});
+    const r = await mammoth.extractRawText({ arrayBuffer: ab });
     return r.value;
   }
-
-  if(['xlsx','xls'].includes(ext)) {
-    if(typeof XLSX==='undefined') await loadScript('https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js');
+  if (['xlsx', 'xls'].includes(ext)) {
+    if (typeof XLSX === 'undefined') await loadScript('https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js');
     const ab = await file.arrayBuffer();
     const wb = XLSX.read(ab);
-    return wb.SheetNames.map(n=>'Sheet: '+n+'\n'+XLSX.utils.sheet_to_csv(wb.Sheets[n])).join('\n\n');
+    return wb.SheetNames.map(n => 'Sheet: ' + n + '\n' + XLSX.utils.sheet_to_csv(wb.Sheets[n])).join('\n\n');
   }
-
-  throw new Error('Unsupported file type: .'+ext+'. Supported: .txt .pdf .docx .xlsx .csv .md .json');
+  throw new Error('Unsupported file type');
 }
 
 function loadScript(src) {
-  return new Promise((resolve,reject)=>{
-    if(document.querySelector('script[src="'+src+'"]')){resolve();return;}
-    const s=document.createElement('script'); s.src=src; s.onload=resolve; s.onerror=reject;
+  return new Promise((resolve, reject) => {
+    if (document.querySelector('script[src="' + src + '"]')) { resolve(); return; }
+    const s = document.createElement('script'); s.src = src; s.onload = resolve; s.onerror = reject;
     document.head.appendChild(s);
   });
 }
 
-// ── Voice input ───────────────────────────────────────────────
 function toggleVoice() {
-  const SR = window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SR){addAiMsg('❌ Voice not supported in this browser. Please use Chrome or Edge.');return;}
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { addAiMsg('❌ Voice not supported in this browser.'); return; }
   const btn = document.getElementById('voiceBtn');
   const recognition = new SR();
-  recognition.lang='en-US'; recognition.interimResults=false;
-  btn?.classList.add('rec');
-  setStatus('busy','Listening…');
+  recognition.lang = 'en-US';
+  btn.classList.add('rec');
+  setStatus('busy', 'Listening…');
   recognition.onresult = e => {
-    const t = e.results[0][0].transcript;
-    const inp = document.getElementById('msgInput');
-    if(inp) inp.value = t;
-    btn?.classList.remove('rec');
-    setStatus('ok','Ready');
+    document.getElementById('msgInput').value = e.results[0][0].transcript;
+    btn.classList.remove('rec');
+    setStatus('ok', 'Ready');
     sendMsg();
   };
-  recognition.onerror = recognition.onend = () => {
-    btn?.classList.remove('rec');
-    setStatus('ok','Ready');
-  };
+  recognition.onerror = recognition.onend = () => { btn.classList.remove('rec'); setStatus('ok', 'Ready'); };
   recognition.start();
 }
 
-// ── Pricing ───────────────────────────────────────────────────
 function showPricing() {
   const plans = [
-    {name:'Free',price:'$0',period:'forever',features:['50 messages/day','3 images/day (5 days)','5 docs/day','Web search','Voice input'],btn:'Current Plan',disabled:true},
-    {name:'Starter',price:'$7',period:'per month',features:['150 messages/day','10 images/day','25 docs/day','Web search','Voice input'],btn:'Upgrade →',onclick:"alert('Stripe coming soon!')"},
-    {name:'Pro',price:'$19',period:'per month · $190/yr',features:['500 messages/day','25 images/day','100 docs/day','Priority search','Email support'],btn:'Upgrade →',onclick:"alert('Stripe coming soon!')"},
-    {name:'Team',price:'$79',period:'per month · $790/yr',features:['3,000 messages/day','100 images/day','500 docs/day','Priority support','Team management'],btn:'Contact Sales →',onclick:"alert('Contact us for early access!')"},
-    {name:'Enterprise',price:'Custom',period:'tailored for you',features:['Unlimited everything','SLA guarantee','SSO / SAML','Dedicated support','On-premise'],btn:'Contact Us →',onclick:"alert('enterprise@nes.ai')"}
+    { name: 'Free', price: '$0', period: 'forever', features: ['50 msgs/day<br>15 images/month (5 days)<br>5 docs/day<br>Web search<br>Voice input'], btn: 'Current Plan', disabled: true },
+    { name: 'Starter', price: '$7', period: 'per month', features: ['150 msgs/day<br>200 images/month<br>25 docs/day<br>Web search<br>Voice input'], btn: 'Upgrade →', onclick: "alert('Upgrade coming soon!')" },
+    { name: 'Pro', price: '$19', period: 'per month', features: ['500 msgs/day<br>500 images/month<br>100 docs/day<br>Priority search<br>Email support'], btn: 'Upgrade →', onclick: "alert('Upgrade coming soon!')" },
+    { name: 'Team', price: 'Contact Us', period: 'per month', features: ['3,000 msgs/day<br>2,000 images/month<br>500 docs/day<br>Priority support<br>Team management'], btn: 'Contact Us →', onclick: "alert('Contact us at team@nes.ai')", contact: true },
+    { name: 'Enterprise', price: 'Contact Us', period: 'tailored', features: ['Custom limits<br>Unlimited messages<br>SLA guarantee<br>SSO / SAML<br>On-premise'], btn: 'Contact Us →', onclick: "alert('Contact us at enterprise@nes.ai')", contact: true }
   ];
-  document.getElementById('mainContent').innerHTML=`
+  document.getElementById('mainContent').innerHTML = `
     <div class="pricing-wrap">
       <a href="#" onclick="showChatInterface();return false;" style="color:var(--accent);text-decoration:none;">← Back to Chat</a>
-      <div style="text-align:center;margin-top:24px;margin-bottom:4px;"><h2 style="font-size:1.5rem;">Choose Your Plan</h2><p style="color:var(--muted);font-size:.85rem;margin-top:6px;">Flexible pricing for every need.</p></div>
+      <div style="text-align:center;margin-top:24px;"><h2 style="font-size:1.5rem;">Choose Your Plan</h2><p style="color:var(--muted);font-size:.85rem;">Flexible pricing for every need.</p></div>
       <div class="plan-grid">
-        ${plans.map((p,i)=>`
-          <div class="plan${i===1||i===2?' pro':''}">
+        ${plans.map(p => `
+          <div class="plan ${p.name === 'Pro' ? 'pro' : ''}">
             <div class="plan-name">${p.name}</div>
             <div class="plan-price">${p.price}</div>
             <div class="plan-period">${p.period}</div>
-            <ul class="plan-features">${p.features.map(f=>`<li>✅ ${f}</li>`).join('')}</ul>
-            <button class="plan-btn" ${p.disabled?'disabled':''} ${p.onclick?`onclick="${p.onclick}"`:''}>
-              ${p.btn}
-            </button>
+            <ul class="plan-features">${p.features.map(f => `<li>✅ ${f}</li>`).join('')}</ul>
+            <button class="plan-btn ${p.contact ? 'contact' : ''}" ${p.disabled ? 'disabled' : ''} ${p.onclick ? `onclick="${p.onclick}"` : ''}>${p.btn}</button>
           </div>`).join('')}
       </div>
     </div>`;
 }
 
-// ── DOM helpers ───────────────────────────────────────────────
-function userBubble(text) {
-  return `<div class="msg user"><div class="user-av-msg">U</div><div class="msg-body"><div class="msg-role">You</div><div class="msg-bubble">${esc(text)}</div></div></div>`;
-}
-
-function aiBubble(text, sources=[]) {
-  const src = sources.length
-    ? '<div class="sources-block">📚 Sources: '+sources.map(s=>'<a href="'+esc(s.url)+'" target="_blank" rel="noopener">'+esc(s.title||s.url)+'</a>').join(' · ')+'</div>'
-    : '';
+function userBubble(text) { return `<div class="msg user"><div class="user-av-msg">U</div><div class="msg-body"><div class="msg-role">You</div><div class="msg-bubble">${esc(text)}</div></div></div>`; }
+function aiBubble(text, sources = []) {
+  const src = sources.length ? '<div class="sources-block">📚 Sources: ' + sources.map(s => '<a href="' + esc(s.url) + '" target="_blank">' + esc(s.title || s.url) + '</a>').join(' · ') + '</div>' : '';
   return `<div class="msg ai"><img src="${LOGO_URL}" class="chat-av"><div class="msg-body"><div class="msg-role">NES AI</div><div class="msg-bubble">${md(text)}${src}</div><button class="copy-btn" onclick="copyMsg(this)">📋 Copy</button></div></div>`;
 }
+function imgBubble(url, prompt) { return `<div class="msg ai"><img src="${LOGO_URL}" class="chat-av"><div class="msg-body"><div class="msg-role">NES AI · Flux</div><div class="msg-bubble"><img src="${esc(url)}" style="max-width:100%;border-radius:10px;"><div style="font-size:.62rem;color:var(--muted);margin-top:6px;">Prompt: ${esc(prompt)}</div></div><button class="copy-btn" onclick="copyMsg(this)">📋 Copy</button></div></div>`; }
+function addAiMsg(text, sources = []) { appendMsg(aiBubble(text, sources)); saveHistory(); }
+function addTyping() { const el = document.createElement('div'); el.className = 'msg ai'; el.id = 'typing'; el.innerHTML = `<img src="${LOGO_URL}" class="chat-av"><div class="msg-body"><div class="msg-role">NES AI</div><div class="msg-bubble"><div style="display:flex;gap:5px;"><div style="width:7px;height:7px;background:var(--accent);border-radius:50%;animation:bounce 1.4s infinite;"></div><div style="width:7px;height:7px;background:var(--accent);border-radius:50%;animation:bounce 1.4s .2s infinite;"></div><div style="width:7px;height:7px;background:var(--accent);border-radius:50%;animation:bounce 1.4s .4s infinite;"></div></div></div></div>`; document.getElementById('messages')?.appendChild(el); scroll(); }
+function removeTyping() { document.getElementById('typing')?.remove(); }
+function appendMsg(html) { document.getElementById('messages')?.insertAdjacentHTML('beforeend', html); scroll(); saveHistory(); }
+function scroll() { const c = document.getElementById('messages'); if (c) c.scrollTop = c.scrollHeight; }
+function copyMsg(btn) { const bubble = btn.closest('.msg-body').querySelector('.msg-bubble'); navigator.clipboard.writeText(bubble.innerText || ''); btn.textContent = '✓'; setTimeout(() => btn.textContent = '📋 Copy', 2000); }
+function setBusy(b) { busy = b; document.getElementById('sendBtn').disabled = b; setStatus(b ? 'busy' : 'ok', b ? 'Thinking…' : 'Ready'); }
+function setStatus(cls, txt) { const el = document.getElementById('statusEl'); if (el) { el.className = 'status-dot' + (cls === 'busy' ? ' busy' : ''); el.textContent = txt; } }
+function esc(s) { return String(s || '').replace(/[&<>]/g, function (m) { if (m === '&') return '&amp;'; if (m === '<') return '&lt;'; if (m === '>') return '&gt;'; return m; }); }
+function md(s) { let m = esc(s); m = m.replace(/```(\w*)\n?([\s\S]*?)```/g, '<pre><code>$2</code></pre>'); m = m.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>'); m = m.replace(/`([^`\n]+)`/g, '<code>$1</code>'); m = m.replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br>'); return '<p>' + m + '</p>'.replace(/<p>\s*<\/p>/g, ''); }
 
-function imgBubble(url, prompt) {
-  return `<div class="msg ai"><img src="${LOGO_URL}" class="chat-av"><div class="msg-body"><div class="msg-role">NES AI · Flux Schnell</div><div class="msg-bubble"><img src="${esc(url)}" style="max-width:100%;border-radius:10px;display:block;margin-bottom:6px;" onerror="this.alt='Image failed to load'"><div style="font-size:.62rem;color:var(--muted);">Prompt: ${esc(prompt)}</div></div><button class="copy-btn" onclick="copyMsg(this)">📋 Copy</button></div></div>`;
-}
-
-function addAiMsg(text,sources=[]){appendMsg(aiBubble(text,sources));saveHistory();}
-
-function addTyping(){
-  const el=document.createElement('div'); el.className='msg ai'; el.id='typing';
-  el.innerHTML=`<img src="${LOGO_URL}" class="chat-av"><div class="msg-body"><div class="msg-role">NES AI</div><div class="msg-bubble"><div style="display:flex;gap:5px;padding:3px 0;"><div style="width:7px;height:7px;background:var(--accent);border-radius:50%;animation:bounce 1.4s infinite;opacity:.4;"></div><div style="width:7px;height:7px;background:var(--accent);border-radius:50%;animation:bounce 1.4s .2s infinite;opacity:.4;"></div><div style="width:7px;height:7px;background:var(--accent);border-radius:50%;animation:bounce 1.4s .4s infinite;opacity:.4;"></div></div></div></div>`;
-  document.getElementById('messages')?.appendChild(el);
-  scroll();
-}
-
-function removeTyping(){document.getElementById('typing')?.remove();}
-
-function appendMsg(html){
-  document.getElementById('messages')?.insertAdjacentHTML('beforeend',html);
-  scroll();
-  saveHistory();
-}
-
-function scroll(){
-  const c=document.getElementById('messages');
-  if(c) requestAnimationFrame(()=>c.scrollTop=c.scrollHeight);
-}
-
-function copyMsg(btn){
-  const bubble=btn.closest('.msg-body').querySelector('.msg-bubble');
-  navigator.clipboard.writeText(bubble.innerText||'').catch(()=>{});
-  btn.textContent='✓'; setTimeout(()=>btn.textContent='📋 Copy',2000);
-}
-
-function setBusy(b){
-  busy=b;
-  const btn=document.getElementById('sendBtn');
-  if(btn) btn.disabled=b;
-  setStatus(b?'busy':'ok', b?'Thinking…':'Ready');
-}
-
-function setStatus(cls,txt){
-  const el=document.getElementById('statusEl');
-  if(el){el.className='status-dot'+(cls==='busy'?' busy':'');el.textContent=txt;}
-}
-
-function v(id){return (document.getElementById(id)||{}).value||'';}
-function set(id,val){const e=document.getElementById(id);if(e)e.textContent=val;}
-
-function esc(s){
-  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-function md(s){
-  let m=esc(s);
-  m=m.replace(/```(\w*)\n?([\s\S]*?)```/g,'<pre><code>$2</code></pre>');
-  m=m.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
-  m=m.replace(/`([^`\n]+)`/g,'<code>$1</code>');
-  m=m.replace(/^### (.+)$/gm,'<h3 style="margin:10px 0 4px;font-size:.92rem;">$1</h3>');
-  m=m.replace(/^## (.+)$/gm,'<h2 style="margin:12px 0 5px;font-size:1rem;">$1</h2>');
-  m=m.replace(/^# (.+)$/gm,'<h1 style="margin:12px 0 5px;font-size:1.1rem;">$1</h1>');
-  m=m.replace(/^\d+\. (.+)$/gm,'<li>$1</li>');
-  m=m.replace(/^\* (.+)$/gm,'<li>$1</li>');
-  m=m.replace(/(<li>[\s\S]*?<\/li>)/g,'<ul style="margin:4px 0 8px 16px;">$1</ul>');
-  m=m.replace(/\[([^\]]+)\]\(([^)]+)\)/g,'<a href="$2" target="_blank" rel="noopener">$1</a>');
-  m=m.replace(/\n\n/g,'</p><p>').replace(/\n/g,'<br>');
-  return '<p>'+m+'</p>'.replace(/<p>\s*<\/p>/g,'');
-}
-
-// ── Global exports ────────────────────────────────────────────
-window.switchTab=switchTab; window.doLogin=doLogin; window.doSignup=doSignup;
-window.doLogout=doLogout; window.toggleTheme=toggleTheme; window.showPricing=showPricing;
-window.showChatInterface=showChatInterface; window.sendMsg=sendMsg;
-window.handleAttach=handleAttach; window.toggleVoice=toggleVoice;
-window.copyMsg=copyMsg; window.toggleSidebar=toggleSidebar; window.clearChat=clearChat;
+window.switchTab = switchTab; window.doLogin = doLogin; window.doSignup = doSignup; window.doLogout = doLogout;
+window.toggleTheme = toggleTheme; window.showPricing = showPricing; window.showChatInterface = showChatInterface;
+window.sendMsg = sendMsg; window.handleAttach = handleAttach; window.toggleVoice = toggleVoice;
+window.copyMsg = copyMsg; window.toggleSidebar = toggleSidebar; window.clearChat = clearChat;
+window.formatResetDate = formatResetDate;
 </script>
 </body>
 </html>
