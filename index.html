@@ -19,8 +19,6 @@
       --card:#0f1436;--card2:#161b22;--border2:#21262d;
     }
     body{font-family:var(--ui);background:var(--bg);color:var(--text);height:100dvh;display:flex;overflow:hidden;}
-
-    /* ── SIDEBAR ── */
     .sb-toggle{position:fixed;left:16px;top:16px;z-index:1010;background:var(--accent);border:none;border-radius:50%;width:42px;height:42px;display:grid;place-items:center;cursor:pointer;color:#fff;font-size:1.2rem;box-shadow:0 2px 12px rgba(0,0,0,.3);}
     .sidebar{width:240px;flex-shrink:0;background:#0d1117!important;border-right:1px solid #1a2332!important;display:flex;flex-direction:column;padding:0;height:100dvh;overflow-y:auto;z-index:1000;transition:transform .3s ease;}
     @media(max-width:900px){.sidebar{position:fixed;top:0;left:0;transform:translateX(-100%);}.sidebar.open{transform:translateX(0);}.welcome-card{padding-top:70px!important;}}
@@ -57,8 +55,6 @@
     .role-chip{font-size:.55rem;padding:1px 6px;border-radius:6px;background:#1a3a6e;color:var(--nes-blue);font-family:var(--mono);white-space:nowrap;}
     .logout-btn{background:none;border:none;color:#6b7b9e;cursor:pointer;font-size:.8rem;padding:2px 6px;}
     .logout-btn:hover{color:#e74c3c;}
-
-    /* ── AUTH ── */
     #authScreen{position:fixed;inset:0;z-index:2000;background:var(--bg);display:flex;align-items:center;justify-content:center;}
     .auth-box{width:min(400px,90vw);background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:40px;}
     .auth-logo{font-size:1.6rem;font-weight:800;text-align:center;margin-bottom:4px;}
@@ -73,8 +69,6 @@
     .auth-input:focus{border-color:var(--nes-blue);}
     .auth-btn{background:var(--nes-btn-grad);border:none;border-radius:12px;padding:12px;color:#fff;font-weight:700;cursor:pointer;}
     .auth-err{font-family:var(--mono);font-size:.7rem;color:var(--red);min-height:18px;}
-
-    /* ── APP ── */
     #app{display:none;width:100%;height:100dvh;overflow:hidden;}
     #app.visible{display:flex;}
     .main{flex:1;display:flex;flex-direction:column;height:100dvh;overflow:hidden;min-width:0;position:relative;}
@@ -118,11 +112,7 @@
     .stat{font-family:var(--mono);font-size:.72rem;color:#8b949e;}
     .stat b{color:var(--nes-blue);}
     @keyframes bounce{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-5px);opacity:1}}
-
-    /* ── PAGE ── */
     .page{flex:1;overflow-y:auto;padding:16px 20px;background:var(--bg);}
-
-    /* ── CEO DASHBOARD ── */
     .alert-bar{border-radius:8px;padding:9px 14px;margin-bottom:14px;display:flex;align-items:center;gap:10px;font-size:.8rem;font-weight:600;}
     .alert-warn{background:rgba(210,153,34,.1);border:1px solid rgba(210,153,34,.4);color:#d29922;}
     .alert-good{background:rgba(63,185,80,.1);border:1px solid rgba(63,185,80,.4);color:#3fb950;}
@@ -159,8 +149,6 @@
     .topp{background:#0d2818;color:#3fb950;}
     .twatch{background:#0c1f35;color:var(--nes-blue);}
     .trisk{background:#2d1f00;color:#d29922;}
-
-    /* ── LEADS ── */
     .leads-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;}
     .leads-table{background:#0d1117;border:1px solid #1a2332;border-radius:8px;overflow:hidden;}
     .lt-header{display:grid;grid-template-columns:2fr 1.5fr 1fr 1fr 80px;gap:8px;padding:8px 14px;border-bottom:1px solid #1a2332;font-family:var(--mono);font-size:.65rem;color:#6b7b9e;text-transform:uppercase;letter-spacing:.08em;}
@@ -178,15 +166,13 @@
     .tabs-bar{display:flex;gap:4px;margin-bottom:12px;}
     .tab-btn{font-size:.75rem;padding:5px 12px;border-radius:6px;border:1px solid #1a2332;background:transparent;color:#8b949e;cursor:pointer;font-family:var(--mono);}
     .tab-btn.active{background:#0c1f35;color:var(--nes-blue);border-color:var(--nes-blue);}
-
-    /* ── NES COMMAND ── */
     .command-wrap{display:flex;flex:1;overflow:hidden;height:calc(100dvh - 60px);}
     .command-iframe{width:100%;height:100%;border:none;}
-
-    /* ── CLIENT MANAGER ── */
-    .cm-layout{display:grid;grid-template-columns:190px 1fr;gap:12px;}
+    .cm-layout{display:grid;grid-template-columns:200px 1fr;gap:12px;}
     .client-list{background:#0d1117;border:1px solid #1a2332;border-radius:8px;overflow:hidden;}
-    .cl-header{padding:8px 12px;border-bottom:1px solid #1a2332;font-family:var(--mono);font-size:.65rem;color:#6b7b9e;text-transform:uppercase;letter-spacing:.08em;}
+    .cl-header{padding:8px 12px;border-bottom:1px solid #1a2332;font-family:var(--mono);font-size:.65rem;color:#6b7b9e;text-transform:uppercase;letter-spacing:.08em;display:flex;align-items:center;justify-content:space-between;}
+    .cl-add-btn{background:var(--nes-btn-grad);border:none;border-radius:6px;padding:3px 10px;color:#fff;font-size:.65rem;font-weight:700;cursor:pointer;font-family:var(--mono);letter-spacing:.02em;}
+    .cl-add-btn:hover{opacity:.85;}
     .client-item{display:flex;align-items:center;gap:8px;padding:9px 12px;cursor:pointer;border-bottom:1px solid #0a0f1e;}
     .client-item:hover{background:#0c1526;}
     .client-item.active{background:#0c1f35;border-left:2px solid var(--nes-blue);}
@@ -230,9 +216,6 @@
     .cf-lbl{font-size:.65rem;color:#8b949e;margin-bottom:3px;font-family:var(--mono);}
     .cf-val{font-size:.75rem;color:var(--nes-blue);font-family:var(--mono);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
     .cf-empty{font-size:.75rem;color:#484f58;font-style:italic;font-family:var(--mono);}
-    .add-client-btn{background:var(--nes-btn-grad);border:none;border-radius:8px;padding:7px 14px;color:#fff;font-size:.75rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;}
-
-    /* ── PRICING ── */
     .pricing-wrap{flex:1;overflow-y:auto;padding:32px 40px;background:var(--bg);}
     .plan-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:24px;margin-top:24px;}
     .plan-card{background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:28px 24px;width:240px;transition:transform .2s,box-shadow .2s;display:flex;flex-direction:column;}
@@ -246,7 +229,14 @@
     .plan-action-btn{background:var(--nes-btn-grad);border:none;border-radius:40px;padding:12px 20px;color:#fff;font-weight:700;cursor:pointer;width:100%;font-size:.85rem;transition:all .2s;margin-top:auto;}
     .plan-action-btn:hover{transform:scale(1.02);opacity:.9;}
     .plan-action-btn:disabled{background:var(--muted);opacity:.5;cursor:default;transform:none;}
-
+    /* Form styles */
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+    .form-field{display:flex;flex-direction:column;gap:4px;}
+    .form-label{font-family:var(--mono);font-size:.68rem;color:#8b949e;}
+    .form-input{background:#0d1117;border:1px solid #1a2332;border-radius:7px;padding:8px 12px;color:#e6edf3;font-family:var(--mono);font-size:.8rem;outline:none;width:100%;}
+    .form-input:focus{border-color:var(--nes-blue);}
+    .form-submit{background:var(--nes-btn-grad);border:none;border-radius:8px;padding:11px 24px;color:#fff;font-weight:700;cursor:pointer;margin-top:14px;width:100%;font-size:.85rem;}
+    .form-submit:hover{opacity:.9;}
     @media(max-width:700px){
       .welcome-card,.messages,.input-area{padding-left:14px;padding-right:14px;}
       .disclaimer{display:none;}
@@ -255,6 +245,7 @@
       .kgrid3{grid-template-columns:1fr 1fr;}
       .row2,.cm-layout{grid-template-columns:1fr;}
       .lt-header,.lt-row{grid-template-columns:1fr 1fr;}
+      .form-grid{grid-template-columns:1fr;}
     }
   </style>
 </head>
@@ -338,7 +329,7 @@
     <div id="mainContent" style="display:flex;flex-direction:column;height:100%;overflow:hidden;"></div>
   </main>
 </div>
-
+============================================================================================
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
 const SUPABASE_URL='https://sfpfjjdtczvuxyhjievt.supabase.co';
@@ -346,7 +337,7 @@ const SUPABASE_ANON='sb_publishable_MH7rnJ7r8_-1TzGXcieNfA_NXoHQZbm';
 const API_URL='https://essential-ai-backend.onrender.com';
 const LOGO_URL='https://files.catbox.moe/adhf8n.png';
 const ROCKET_URL='https://chat.essential-services.org';
-
+========================================================================================
 const PLAN_LIMITS={
   free:{name:'Free',price:0,messages:50,monthlyMessages:1500,images:3,monthlyImages:15,docs:5,monthlyDocs:150},
   starter:{name:'Starter',price:7,messages:150,monthlyMessages:4500,images:10,monthlyImages:200,docs:25,monthlyDocs:750},
@@ -642,9 +633,9 @@ async function showClientManager(){
   const mc=document.getElementById('mainContent');
   mc.style.overflow='hidden';
   mc.innerHTML=`
-    <div style="padding:12px 20px;border-bottom:1px solid #1a2332;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;">
-      <div><div style="font-family:var(--mono);font-size:.82rem;color:var(--nes-blue);font-weight:800;">CLIENT MANAGER</div><div style="font-family:var(--mono);font-size:.68rem;color:#8b949e;">NES Admin only · Manage all clients</div></div>
-      <button class="add-client-btn" onclick="showAddClientForm()">+ Add client</button>
+    <div style="padding:12px 20px;border-bottom:1px solid #1a2332;flex-shrink:0;">
+      <div style="font-family:var(--mono);font-size:.82rem;color:var(--nes-blue);font-weight:800;">CLIENT MANAGER</div>
+      <div style="font-family:var(--mono);font-size:.68rem;color:#8b949e;">NES Admin only · Manage all clients</div>
     </div>
     <div class="page" id="cmContent"><div style="text-align:center;padding:40px;color:#8b949e;font-family:var(--mono);font-size:.8rem;">Loading clients...</div></div>`;
   await loadClientsFromDB();
@@ -674,16 +665,22 @@ function renderClientManagerFull(clients,activeId=null){
     </div>
     <div class="cm-layout">
       <div class="client-list" id="clientListEl">
-        <div class="cl-header">Clients (${clients.length})</div>
-        ${clients.length===0?'<div style="padding:16px;text-align:center;color:#8b949e;font-family:var(--mono);font-size:.75rem;">No clients yet<br>Click + Add client</div>':
-        clients.map((c,i)=>`
+        <div class="cl-header">
+          <span>Clients (${clients.length})</span>
+          <button class="cl-add-btn" onclick="showAddClientForm()">+ Add</button>
+        </div>
+        ${clients.length===0
+          ?'<div style="padding:20px 12px;text-align:center;color:#8b949e;font-family:var(--mono);font-size:.75rem;line-height:1.6;">No clients yet.<br>Click <strong style="color:var(--nes-blue);">+ Add</strong> to create one.</div>'
+          :clients.map((c,i)=>`
           <div class="client-item ${c.id===active?.id?'active':''}" onclick="selectClientDB('${c.id}')">
             <div class="ci-av" style="background:${colors[i%5]};color:${textColors[i%5]};">${(c.name||'?').substring(0,2).toUpperCase()}</div>
             <div class="ci-name">${c.name}</div>
             <div class="ci-dot" style="background:${c.status==='active'?'#3fb950':'#d29922'}"></div>
           </div>`).join('')}
       </div>
-      ${active?renderClientDetail(active,colors,textColors,clients.findIndex(c=>c.id===active.id)):'<div style="flex:1;display:flex;align-items:center;justify-content:center;color:#8b949e;font-family:var(--mono);font-size:.8rem;">Select a client</div>'}
+      ${active
+        ?renderClientDetail(active,colors,textColors,clients.findIndex(c=>c.id===active.id))
+        :'<div style="flex:1;display:flex;align-items:center;justify-content:center;color:#8b949e;font-family:var(--mono);font-size:.8rem;flex-direction:column;gap:8px;"><span style="font-size:1.5rem;">🏢</span><span>Select a client or add a new one</span></div>'}
     </div>`;
 }
 
@@ -756,8 +753,10 @@ function renderClientDetail(c,colors,textColors,idx){
 async function saveClientModules(clientId){
   const toggles=document.querySelectorAll('.toggle[data-module]');
   const modules={};toggles.forEach(t=>{modules[t.dataset.module]=t.classList.contains('on');});
-  try{await sb.from('clients').update({modules}).eq('id',clientId);alert('✅ Modules saved!');}
-  catch(e){alert('Error: '+e.message);}
+  try{
+    await sb.from('clients').update({modules}).eq('id',clientId);
+    showToast('✅ Modules saved!');
+  }catch(e){alert('Error: '+e.message);}
 }
 
 async function selectClientDB(id){window._activeClientId=id;await loadClientsFromDB();}
@@ -768,68 +767,160 @@ function searchClients(query){
   const listEl=document.getElementById('clientListEl');
   const colors=['#1a3a6e','#2d1f00','#0d2818','#2d0e0e','#1a2332'];
   const textColors=['#409cff','#d29922','#3fb950','#f85149','#8b949e'];
-  listEl.innerHTML=`<div class="cl-header">Clients (${filtered.length})</div>`+
-    filtered.map((c,i)=>`<div class="client-item ${c.id===window._activeClientId?'active':''}" onclick="selectClientDB('${c.id}')"><div class="ci-av" style="background:${colors[i%5]};color:${textColors[i%5]};">${(c.name||'?').substring(0,2).toUpperCase()}</div><div class="ci-name">${c.name}</div><div class="ci-dot" style="background:${c.status==='active'?'#3fb950':'#d29922'}"></div></div>`).join('');
+  listEl.innerHTML=`
+    <div class="cl-header">
+      <span>Clients (${filtered.length})</span>
+      <button class="cl-add-btn" onclick="showAddClientForm()">+ Add</button>
+    </div>`+
+    (filtered.length===0
+      ?'<div style="padding:20px 12px;text-align:center;color:#8b949e;font-family:var(--mono);font-size:.75rem;">No match found</div>'
+      :filtered.map((c,i)=>`<div class="client-item ${c.id===window._activeClientId?'active':''}" onclick="selectClientDB('${c.id}')"><div class="ci-av" style="background:${colors[i%5]};color:${textColors[i%5]};">${(c.name||'?').substring(0,2).toUpperCase()}</div><div class="ci-name">${c.name}</div><div class="ci-dot" style="background:${c.status==='active'?'#3fb950':'#d29922'}"></div></div>`).join(''));
 }
 
 function showAddClientForm(){
   const mc=document.getElementById('mainContent');
   mc.innerHTML=`
     <div style="padding:12px 20px;border-bottom:1px solid #1a2332;flex-shrink:0;display:flex;align-items:center;gap:12px;">
-      <button onclick="showClientManager()" style="background:none;border:none;color:#8b949e;cursor:pointer;font-size:1.2rem;">←</button>
-      <div style="font-family:var(--mono);font-size:.82rem;color:var(--nes-blue);font-weight:800;">ADD NEW CLIENT</div>
+      <button onclick="showClientManager()" style="background:none;border:none;color:#8b949e;cursor:pointer;font-size:1.2rem;line-height:1;">←</button>
+      <div>
+        <div style="font-family:var(--mono);font-size:.82rem;color:var(--nes-blue);font-weight:800;">ADD NEW CLIENT</div>
+        <div style="font-family:var(--mono);font-size:.68rem;color:#8b949e;">Fill in the details below</div>
+      </div>
     </div>
-    <div class="page"><div style="max-width:600px;">${clientFormFields()}<button onclick="saveNewClient()" style="background:var(--nes-btn-grad);border:none;border-radius:8px;padding:10px 24px;color:#fff;font-weight:700;cursor:pointer;margin-top:12px;width:100%;">Create Client →</button></div></div>`;
+    <div class="page">
+      <div style="max-width:640px;">
+        ${clientFormFields()}
+        <button class="form-submit" onclick="saveNewClient()">Create Client →</button>
+      </div>
+    </div>`;
 }
 
 function showEditClientForm(clientId){
-  const client=(window._clients||[]).find(c=>c.id===clientId);if(!client)return;
+  const client=(window._clients||[]).find(c=>c.id===clientId);
+  if(!client)return;
   const mc=document.getElementById('mainContent');
   mc.innerHTML=`
     <div style="padding:12px 20px;border-bottom:1px solid #1a2332;flex-shrink:0;display:flex;align-items:center;gap:12px;">
-      <button onclick="showClientManager()" style="background:none;border:none;color:#8b949e;cursor:pointer;font-size:1.2rem;">←</button>
-      <div style="font-family:var(--mono);font-size:.82rem;color:var(--nes-blue);font-weight:800;">EDIT — ${client.name}</div>
+      <button onclick="showClientManager()" style="background:none;border:none;color:#8b949e;cursor:pointer;font-size:1.2rem;line-height:1;">←</button>
+      <div>
+        <div style="font-family:var(--mono);font-size:.82rem;color:var(--nes-blue);font-weight:800;">EDIT — ${client.name}</div>
+        <div style="font-family:var(--mono);font-size:.68rem;color:#8b949e;">Update client details</div>
+      </div>
     </div>
-    <div class="page"><div style="max-width:600px;">${clientFormFields(client)}<button onclick="updateClient('${clientId}')" style="background:var(--nes-btn-grad);border:none;border-radius:8px;padding:10px 24px;color:#fff;font-weight:700;cursor:pointer;margin-top:12px;width:100%;">Save Changes →</button></div></div>`;
+    <div class="page">
+      <div style="max-width:640px;">
+        ${clientFormFields(client)}
+        <button class="form-submit" onclick="updateClient('${clientId}')">Save Changes →</button>
+      </div>
+    </div>`;
 }
 
 function clientFormFields(c={}){
-  const fields=[['Company name *','name','text',c.name||''],['Email','email','email',c.email||''],['Website','website','text',c.website||''],['Industry','industry','text',c.industry||''],['Region','region','text',c.region||'Oman'],['Facebook token','facebook_token','text',c.facebook_token||''],['LinkedIn token','linkedin_token','text',c.linkedin_token||''],['WhatsApp Phone ID','whatsapp_phone_id','text',c.whatsapp_phone_id||''],['Cal.com link','calcom_link','text',c.calcom_link||''],['Vapi assistant ID','vapi_assistant_id','text',c.vapi_assistant_id||''],['Primary colour','primary_color','text',c.primary_color||'#1a56db']];
-  const inputStyle='width:100%;background:#0d1117;border:1px solid #1a2332;border-radius:7px;padding:8px 12px;color:#e6edf3;font-family:var(--mono);font-size:.8rem;outline:none;';
-  const lblStyle='font-family:var(--mono);font-size:.68rem;color:#8b949e;margin-bottom:4px;';
-  return`<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-    ${fields.map(([lbl,id,type,val])=>`<div><div style="${lblStyle}">${lbl}</div><input id="field_${id}" type="${type}" value="${val}" style="${inputStyle}"></div>`).join('')}
-    <div><div style="${lblStyle}">Plan</div><select id="field_plan" style="${inputStyle}"><option value="starter" ${c.plan==='starter'?'selected':''}>Starter</option><option value="growth" ${c.plan==='growth'?'selected':''}>Growth</option><option value="enterprise" ${c.plan==='enterprise'?'selected':''}>Enterprise</option></select></div>
-    <div><div style="${lblStyle}">Status</div><select id="field_status" style="${inputStyle}"><option value="active" ${c.status==='active'?'selected':''}>Active</option><option value="onboarding" ${c.status==='onboarding'?'selected':''}>Onboarding</option><option value="inactive" ${c.status==='inactive'?'selected':''}>Inactive</option></select></div>
-  </div>`;
+  const s='background:#0d1117;border:1px solid #1a2332;border-radius:7px;padding:8px 12px;color:#e6edf3;font-family:var(--mono);font-size:.8rem;outline:none;width:100%;';
+  const l='font-family:var(--mono);font-size:.68rem;color:#8b949e;margin-bottom:4px;display:block;';
+  const fields=[
+    ['Company name *','name','text',c.name||''],
+    ['Email','email','email',c.email||''],
+    ['Website','website','url',c.website||''],
+    ['Industry','industry','text',c.industry||''],
+    ['Region','region','text',c.region||'Oman'],
+    ['Facebook token','facebook_token','text',c.facebook_token||''],
+    ['LinkedIn token','linkedin_token','text',c.linkedin_token||''],
+    ['WhatsApp Phone ID','whatsapp_phone_id','text',c.whatsapp_phone_id||''],
+    ['Cal.com link','calcom_link','text',c.calcom_link||''],
+    ['Vapi assistant ID','vapi_assistant_id','text',c.vapi_assistant_id||''],
+    ['Primary colour','primary_color','text',c.primary_color||'#1a56db'],
+  ];
+  return`
+    <div class="form-grid">
+      ${fields.map(([lbl,id,type,val])=>`
+        <div class="form-field">
+          <label style="${l}">${lbl}</label>
+          <input id="field_${id}" type="${type}" value="${esc(val)}" style="${s}" placeholder="${lbl.replace(' *','')}">
+        </div>`).join('')}
+      <div class="form-field">
+        <label style="${l}">Plan</label>
+        <select id="field_plan" style="${s}">
+          <option value="starter" ${c.plan==='starter'?'selected':''}>Starter</option>
+          <option value="growth" ${c.plan==='growth'?'selected':''}>Growth</option>
+          <option value="enterprise" ${c.plan==='enterprise'?'selected':''}>Enterprise</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label style="${l}">Status</label>
+        <select id="field_status" style="${s}">
+          <option value="active" ${(c.status||'active')==='active'?'selected':''}>Active</option>
+          <option value="onboarding" ${c.status==='onboarding'?'selected':''}>Onboarding</option>
+          <option value="inactive" ${c.status==='inactive'?'selected':''}>Inactive</option>
+        </select>
+      </div>
+    </div>`;
 }
 
 function getFormData(){
   const fields=['name','email','website','industry','region','facebook_token','linkedin_token','whatsapp_phone_id','calcom_link','vapi_assistant_id','primary_color','plan','status'];
-  const data={};fields.forEach(f=>{const el=document.getElementById('field_'+f);if(el)data[f]=el.value;});return data;
+  const data={};
+  fields.forEach(f=>{const el=document.getElementById('field_'+f);if(el)data[f]=el.value.trim();});
+  return data;
 }
 
 async function saveNewClient(){
-  const data=getFormData();if(!data.name){alert('Company name is required');return;}
-  try{const{error}=await sb.from('clients').insert([data]);if(error)throw error;await showClientManager();}
-  catch(e){alert('Error: '+e.message);}
+  const data=getFormData();
+  if(!data.name){alert('Company name is required');return;}
+  const btn=document.querySelector('.form-submit');
+  if(btn){btn.disabled=true;btn.textContent='Creating...';}
+  try{
+    const{error}=await sb.from('clients').insert([data]);
+    if(error)throw error;
+    window._activeClientId=null;
+    await showClientManager();
+    showToast('✅ Client created!');
+  }catch(e){
+    alert('Error: '+e.message);
+    if(btn){btn.disabled=false;btn.textContent='Create Client →';}
+  }
 }
 
 async function updateClient(clientId){
-  const data=getFormData();if(!data.name){alert('Company name is required');return;}
-  try{const{error}=await sb.from('clients').update(data).eq('id',clientId);if(error)throw error;await showClientManager();}
-  catch(e){alert('Error: '+e.message);}
+  const data=getFormData();
+  if(!data.name){alert('Company name is required');return;}
+  const btn=document.querySelector('.form-submit');
+  if(btn){btn.disabled=true;btn.textContent='Saving...';}
+  try{
+    const{error}=await sb.from('clients').update(data).eq('id',clientId);
+    if(error)throw error;
+    window._activeClientId=clientId;
+    await showClientManager();
+    showToast('✅ Client updated!');
+  }catch(e){
+    alert('Error: '+e.message);
+    if(btn){btn.disabled=false;btn.textContent='Save Changes →';}
+  }
 }
 
 async function deleteClient(clientId){
-  if(!confirm('Delete this client? This cannot be undone.'))return;
-  try{await sb.from('clients').delete().eq('id',clientId);window._activeClientId=null;await showClientManager();}
-  catch(e){alert('Error: '+e.message);}
+  const client=(window._clients||[]).find(c=>c.id===clientId);
+  if(!confirm(`Delete "${client?.name||'this client'}"? This cannot be undone.`))return;
+  try{
+    const{error}=await sb.from('clients').delete().eq('id',clientId);
+    if(error)throw error;
+    window._activeClientId=null;
+    await showClientManager();
+    showToast('🗑️ Client deleted');
+  }catch(e){alert('Error: '+e.message);}
+}
+
+function showToast(msg){
+  const t=document.createElement('div');
+  t.textContent=msg;
+  t.style.cssText='position:fixed;bottom:24px;right:24px;background:#161b22;border:1px solid #1a2332;color:#e6edf3;font-family:var(--mono);font-size:.78rem;padding:10px 18px;border-radius:8px;z-index:9999;animation:fadeIn .2s ease;box-shadow:0 4px 16px rgba(0,0,0,.4);';
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(),2800);
 }
 
 function selectClient(id){selectClientDB(id);}
 function cmTab(name,el){
-  ['modules','creds','branding'].forEach(t=>{document.getElementById('cm-'+t).style.display=t===name?'block':'none';});
+  ['modules','creds','branding'].forEach(t=>{const el2=document.getElementById('cm-'+t);if(el2)el2.style.display=t===name?'block':'none';});
   document.querySelectorAll('.cm-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');
 }
 function addClient(){showAddClientForm();}
@@ -873,7 +964,6 @@ function showChatInterface(mode='chat'){
   else{history.forEach(h=>{if(h.role==='user')appendMsg(userBubble(h.content));else appendMsg(aiBubble(h.content,h.sources||[]));});msgsEl.scrollTop=msgsEl.scrollHeight;}
 }
 
-// ── SEND ──
 async function sendMsg(){
   if(busy||!session)return;
   const input=document.getElementById('msgInput');const text=input.value.trim();if(!text)return;
@@ -897,7 +987,6 @@ async function sendMsg(){
   setBusy(false);
 }
 
-// ── FILES ──
 function handleAttach(){
   if(currentView!=='docs'){addAiMsg('📎 File attachment is available in Documents mode.');return;}
   const inp=document.createElement('input');inp.type='file';inp.accept='.txt,.md,.json,.csv,.pdf,.docx,.xlsx,.xls';inp.onchange=e=>processFile(e.target.files[0]);inp.click();
@@ -926,7 +1015,17 @@ async function extractText(file){
 }
 function loadScript(src){return new Promise((resolve,reject)=>{if(document.querySelector('script[src="'+src+'"]')){resolve();return;}const s=document.createElement('script');s.src=src;s.onload=resolve;s.onerror=reject;document.head.appendChild(s);});}
 function toggleVoice(){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){addAiMsg('❌ Voice not supported.');return;}const btn=document.getElementById('voiceBtn');const recognition=new SR();recognition.lang='en-US';btn.style.color='#f85149';setStatus('busy','Listening…');recognition.onresult=e=>{document.getElementById('msgInput').value=e.results[0][0].transcript;btn.style.color='';setStatus('ok','Ready');sendMsg();};recognition.onerror=recognition.onend=()=>{btn.style.color='';setStatus('ok','Ready');};recognition.start();}
-function showPricing(){const plans=[{name:'Free',price:'$0',period:'forever',features:['50 msgs/day','15 images/month','5 docs/day','Web search','Voice input'],btn:'Current Plan',disabled:true},{name:'Starter',price:'$7',period:'per month',features:['150 msgs/day','200 images/month','25 docs/day','Web search','Voice input'],btn:'Upgrade →',onclick:"alert('Coming soon!)"},{name:'Pro',price:'$19',period:'per month',features:['500 msgs/day','500 images/month','100 docs/day','Priority search','Email support'],btn:'Upgrade →',onclick:"alert('Coming soon!')"},{name:'Enterprise',price:'Contact Us',period:'tailored for you',features:['Unlimited messages','SLA guarantee','SSO / SAML','On-premise','Custom limits'],btn:'Contact Us →',onclick:"alert('nesadmin@essential-services.org')"}];document.getElementById('mainContent').innerHTML=`<div class="pricing-wrap"><a href="#" onclick="showView('chat');return false;" style="color:var(--nes-blue);text-decoration:none;display:inline-block;margin-bottom:24px;">← Back to Chat</a><div style="text-align:center;margin-bottom:32px;"><h1 style="font-size:1.8rem;font-weight:700;">Choose Your Plan</h1></div><div class="plan-grid">${plans.map(p=>`<div class="plan-card"><div class="plan-name">${p.name}</div><div class="plan-price">${p.price}</div><div class="plan-period">${p.period}</div><ul class="plan-features-list">${p.features.map(f=>`<li>✅ ${f}</li>`).join('')}</ul><button class="plan-action-btn" ${p.disabled?'disabled':''} ${p.onclick?`onclick="${p.onclick}"`:''} >${p.btn}</button></div>`).join('')}</div></div>`;}
+
+function showPricing(){
+  const plans=[
+    {name:'Free',price:'$0',period:'forever',features:['50 msgs/day','15 images/month','5 docs/day','Web search','Voice input'],btn:'Current Plan',disabled:true},
+    {name:'Starter',price:'$7',period:'per month',features:['150 msgs/day','200 images/month','25 docs/day','Web search','Voice input'],btn:'Upgrade →',onclick:"alert('Coming soon!')"},
+    {name:'Pro',price:'$19',period:'per month',features:['500 msgs/day','500 images/month','100 docs/day','Priority search','Email support'],btn:'Upgrade →',onclick:"alert('Coming soon!')"},
+    {name:'Enterprise',price:'Contact Us',period:'tailored for you',features:['Unlimited messages','SLA guarantee','SSO / SAML','On-premise','Custom limits'],btn:'Contact Us →',onclick:"alert('office@essential-services.org')"}
+  ];
+  document.getElementById('mainContent').innerHTML=`<div class="pricing-wrap"><a href="#" onclick="showView('chat');return false;" style="color:var(--nes-blue);text-decoration:none;display:inline-block;margin-bottom:24px;">← Back to Chat</a><div style="text-align:center;margin-bottom:32px;"><h1 style="font-size:1.8rem;font-weight:700;">Choose Your Plan</h1></div><div class="plan-grid">${plans.map(p=>`<div class="plan-card"><div class="plan-name">${p.name}</div><div class="plan-price">${p.price}</div><div class="plan-period">${p.period}</div><ul class="plan-features-list">${p.features.map(f=>`<li>✅ ${f}</li>`).join('')}</ul><button class="plan-action-btn" ${p.disabled?'disabled':''} ${p.onclick?`onclick="${p.onclick}"`:''} >${p.btn}</button></div>`).join('')}</div></div>`;
+}
+
 function loadLocal(){try{const h=localStorage.getItem(STORAGE_KEYS.h);if(h)history=JSON.parse(h);allMsgsHTML=localStorage.getItem(STORAGE_KEYS.m)||'';const u=localStorage.getItem(STORAGE_KEYS.u);if(u){const ud=JSON.parse(u);if(ud.date===new Date().toDateString()){chatUsed=ud.c||0;imagesUsed=ud.i||0;docsUsed=ud.d||0;}}const mu=localStorage.getItem(STORAGE_KEYS.mu);if(mu){const mud=JSON.parse(mu);const cm=new Date().getMonth()+'-'+new Date().getFullYear();if(mud.month===cm){chatUsedMonthly=mud.c||0;imagesUsedMonthly=mud.i||0;docsUsedMonthly=mud.d||0;}}}catch(e){}}
 function saveHistory(){try{localStorage.setItem(STORAGE_KEYS.h,JSON.stringify(history.slice(-30)));const msgs=document.getElementById('messages');if(msgs){allMsgsHTML=msgs.innerHTML;localStorage.setItem(STORAGE_KEYS.m,allMsgsHTML);}}catch(e){}}
 function saveUsage(){try{localStorage.setItem(STORAGE_KEYS.u,JSON.stringify({date:new Date().toDateString(),c:chatUsed,i:imagesUsed,d:docsUsed}));const cm=new Date().getMonth()+'-'+new Date().getFullYear();localStorage.setItem(STORAGE_KEYS.mu,JSON.stringify({month:cm,c:chatUsedMonthly,i:imagesUsedMonthly,d:docsUsedMonthly}));}catch(e){}}
@@ -946,11 +1045,12 @@ function scroll(){const c=document.getElementById('messages');if(c)c.scrollTop=c
 function copyMsg(btn){const bubble=btn.closest('.msg-body').querySelector('.msg-bubble');navigator.clipboard.writeText(bubble.innerText||'');btn.textContent='✓';setTimeout(()=>btn.textContent='📋 Copy',2000);}
 function setBusy(b){busy=b;const sb=document.getElementById('sendBtn');if(sb)sb.disabled=b;setStatus(b?'busy':'ok',b?'Thinking…':'Ready');}
 function setStatus(cls,txt){const el=document.getElementById('statusEl');if(el){el.className='status-dot'+(cls==='busy'?' busy':'');el.textContent=txt;}}
-function esc(s){return String(s||'').replace(/[&<>]/g,m=>m==='&'?'&amp;':m==='<'?'&lt;':'&gt;');}
+function esc(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
 function md(s){let m=esc(s);m=m.replace(/```(\w*)\n?([\s\S]*?)```/g,'<pre><code>$2</code></pre>');m=m.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');m=m.replace(/`([^`\n]+)`/g,'<code>$1</code>');m=m.replace(/\n\n/g,'</p><p>').replace(/\n/g,'<br>');return'<p>'+m+'</p>'.replace(/<p>\s*<\/p>/g,'');}
 let touchStartX=0;
 document.addEventListener('touchstart',e=>{touchStartX=e.changedTouches[0].screenX;});
 document.addEventListener('touchend',e=>{const tx=e.changedTouches[0].screenX;const sb=document.getElementById('sidebar');if(tx-touchStartX<-50&&sb.classList.contains('open'))sb.classList.remove('open');});
+
 window.switchTab=switchTab;window.doLogin=doLogin;window.doSignup=doSignup;window.doLogout=doLogout;
 window.toggleTheme=toggleTheme;window.showPricing=showPricing;window.showView=showView;
 window.sendMsg=sendMsg;window.handleAttach=handleAttach;window.toggleVoice=toggleVoice;
@@ -961,6 +1061,7 @@ window.selectClientDB=selectClientDB;window.searchClients=searchClients;
 window.showAddClientForm=showAddClientForm;window.showEditClientForm=showEditClientForm;
 window.saveNewClient=saveNewClient;window.updateClient=updateClient;
 window.deleteClient=deleteClient;window.saveClientModules=saveClientModules;
+window.showClientManager=showClientManager;window.showToast=showToast;
 </script>
 </body>
 </html>
