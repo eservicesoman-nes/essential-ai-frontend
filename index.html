@@ -825,7 +825,7 @@ async function showClientManager() {
       </div>
       <button class="add-client-btn" onclick="showAddClientForm()">+ Add client</button>
     </div>
-    <div class="page" id="cmContent">
+    <div style="padding:8px 20px;border-bottom:1px solid #1a2332;">   <button class="add-client-btn" onclick="showAddClientForm()">+ Add client</button> </div>
       <div style="text-align:center;padding:40px;color:#484f58;font-family:var(--mono);font-size:.78rem;">Loading clients...</div>
     </div>`;
   await loadClientsFromDB();
