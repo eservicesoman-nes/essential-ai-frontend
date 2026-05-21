@@ -823,122 +823,261 @@ async function showClientManager() {
         <div style="font-family:var(--mono);font-size:.78rem;color:var(--nes-blue);font-weight:800;">CLIENT MANAGER</div>
         <div style="font-family:var(--mono);font-size:.6rem;color:#484f58;">NES Admin only · Manage all clients</div>
       </div>
-      <button class="add-client-btn" onclick="addClient()">+ Add client</button>
+      <button class="add-client-btn" onclick="showAddClientForm()">+ Add client</button>
     </div>
     <div class="page" id="cmContent">
       <div style="text-align:center;padding:40px;color:#484f58;font-family:var(--mono);font-size:.78rem;">Loading clients...</div>
     </div>`;
-
-  renderClientManager();
+  await loadClientsFromDB();
 }
 
-function renderClientManager(activeId=null) {
-  const clients = [
-    {id:'tc',name:'TechCorp Oman',av:'TC',bg:'#1a3a6e',tc:'#409cff',plan:'Growth',leads:23,chats:183,posts:84,status:'active'},
-    {id:'gp',name:'Gulf Ports LLC',av:'GP',bg:'#2d1f00',tc:'#d29922',plan:'Enterprise',leads:47,chats:240,posts:112,status:'active'},
-    {id:'ar',name:'Al Rashdi Medical',av:'AR',bg:'#0d2818',tc:'#3fb950',plan:'Starter',leads:8,chats:44,posts:0,status:'onboarding'},
-  ];
-  const active=clients.find(c=>c.id===activeId)||clients[0];
+async function loadClientsFromDB() {
+  try {
+    const { data: clients, error } = await sb.from('clients').select('*').order('created_at',{ascending:false});
+    if(error) throw error;
+    window._clients = clients || [];
+    renderClientManagerFull(clients||[], window._activeClientId||null);
+    document.getElementById('clientCount').textContent = clients?.length||0;
+  } catch(e) {
+    document.getElementById('cmContent').innerHTML=`<div style="text-align:center;padding:40px;color:#f85149;font-family:var(--mono);">Error loading clients: ${e.message}</div>`;
+  }
+}
 
+function renderClientManagerFull(clients, activeId=null) {
+  const active = clients.find(c=>c.id===activeId)||clients[0]||null;
+  window._activeClientId = active?.id||null;
+  const colors = ['#1a3a6e','#2d1f00','#0d2818','#2d0e0e','#1a2332'];
+  const textColors = ['#409cff','#d29922','#3fb950','#f85149','#8b949e'];
   document.getElementById('cmContent').innerHTML=`
+    <div style="margin-bottom:10px;">
+      <input type="text" id="clientSearch" placeholder="🔍 Search clients..." onkeyup="searchClients(this.value)"
+        style="width:100%;background:#0d1117;border:1px solid #1a2332;border-radius:8px;padding:8px 14px;color:#e6edf3;font-family:var(--mono);font-size:.78rem;outline:none;">
+    </div>
     <div class="cm-layout">
-      <div class="client-list">
+      <div class="client-list" id="clientListEl">
         <div class="cl-header">Clients (${clients.length})</div>
-        ${clients.map(c=>`
-          <div class="client-item ${c.id===active.id?'active':''}" onclick="selectClient('${c.id}')">
-            <div class="ci-av" style="background:${c.bg};color:${c.tc};">${c.av}</div>
+        ${clients.length===0?'<div style="padding:20px;text-align:center;color:#484f58;font-family:var(--mono);font-size:.72rem;">No clients yet — click + Add client</div>':
+        clients.map((c,i)=>`
+          <div class="client-item ${c.id===active?.id?'active':''}" onclick="selectClientDB('${c.id}')">
+            <div class="ci-av" style="background:${colors[i%5]};color:${textColors[i%5]};">${(c.name||'?').substring(0,2).toUpperCase()}</div>
             <div class="ci-name">${c.name}</div>
             <div class="ci-dot" style="background:${c.status==='active'?'#3fb950':'#d29922'}"></div>
           </div>`).join('')}
       </div>
-      <div class="cm-detail">
-        <div class="cm-top">
-          <div class="cm-client-info">
-            <div class="cm-av" style="background:${active.bg};color:${active.tc};">${active.av}</div>
-            <div>
-              <div class="cm-name">${active.name}</div>
-              <span class="cm-plan ${active.plan==='Growth'?'plan-g':active.plan==='Enterprise'?'plan-e':'plan-s'}">${active.plan}</span>
-            </div>
-          </div>
-          <div class="cm-actions">
-            <button class="cm-btn">Edit</button>
-            <button class="cm-btn">Billing</button>
-            <button class="cm-btn primary">Save</button>
+      ${active ? renderClientDetail(active, colors, textColors, clients.findIndex(c=>c.id===active.id)) : '<div style="flex:1;display:flex;align-items:center;justify-content:center;color:#484f58;font-family:var(--mono);font-size:.78rem;">Select a client</div>'}
+    </div>`;
+}
+
+function renderClientDetail(c, colors, textColors, idx) {
+  const modules = c.modules || {};
+  const moduleList = [
+    ['🤖','ai_chatbot','AI Chatbot','24/7 website assistant'],
+    ['👥','lead_capture','Lead Capture','Form → Supabase → alerts'],
+    ['📱','social_media','Social Media','FB · LinkedIn · Instagram'],
+    ['📊','ceo_dashboard','CEO Dashboard','KPIs · pipeline · intel'],
+    ['💬','nes_command','NES Command','Team communications'],
+    ['📰','intel_feed','Intelligence Feed','Daily market briefing'],
+    ['📞','sara_receptionist','Sara AI Receptionist','1-min callback on lead'],
+    ['💬','whatsapp_alerts','WhatsApp Alerts','Lead + team alerts'],
+    ['📧','email_notifications','Email Notifications','Lead emails to team'],
+    ['☪️','islam360','Islam360','GCC / Europe version'],
+  ];
+  return `
+    <div class="cm-detail">
+      <div class="cm-top">
+        <div class="cm-client-info">
+          <div class="cm-av" style="background:${colors[idx%5]};color:${textColors[idx%5]};">${(c.name||'?').substring(0,2).toUpperCase()}</div>
+          <div>
+            <div class="cm-name">${c.name}</div>
+            <span class="cm-plan ${c.plan==='growth'?'plan-g':c.plan==='enterprise'?'plan-e':'plan-s'}">${c.plan||'starter'}</span>
           </div>
         </div>
-        <div class="cm-stats">
-          <div class="cm-stat"><div class="cs-lbl">Leads/month</div><div class="cs-val">${active.leads}</div></div>
-          <div class="cm-stat"><div class="cs-lbl">AI chats</div><div class="cs-val">${active.chats}</div></div>
-          <div class="cm-stat"><div class="cs-lbl">Social posts</div><div class="cs-val">${active.posts}</div></div>
-          <div class="cm-stat"><div class="cs-lbl">Status</div><div class="cs-val" style="font-size:.9rem;color:${active.status==='active'?'#3fb950':'#d29922'}">${active.status}</div></div>
+        <div class="cm-actions">
+          <button class="cm-btn" onclick="showEditClientForm('${c.id}')">Edit</button>
+          <button class="cm-btn" onclick="alert('Billing management coming soon')">Billing</button>
+          <button class="cm-btn" style="background:#2d0e0e;border-color:#f85149;color:#f85149;" onclick="deleteClient('${c.id}')">Delete</button>
+          <button class="cm-btn primary" onclick="saveClientModules('${c.id}')">Save</button>
         </div>
-        <div class="cm-tabs">
-          <div class="cm-tab active" onclick="cmTab('modules',this)">Modules</div>
-          <div class="cm-tab" onclick="cmTab('creds',this)">Credentials</div>
-          <div class="cm-tab" onclick="cmTab('branding',this)">Branding</div>
+      </div>
+      <div class="cm-stats">
+        <div class="cm-stat"><div class="cs-lbl">Plan</div><div class="cs-val" style="font-size:.9rem;text-transform:capitalize;">${c.plan||'starter'}</div></div>
+        <div class="cm-stat"><div class="cs-lbl">Status</div><div class="cs-val" style="font-size:.9rem;color:${c.status==='active'?'#3fb950':'#d29922'}">${c.status||'active'}</div></div>
+        <div class="cm-stat"><div class="cs-lbl">Industry</div><div class="cs-val" style="font-size:.9rem;">${c.industry||'—'}</div></div>
+        <div class="cm-stat"><div class="cs-lbl">Region</div><div class="cs-val" style="font-size:.9rem;">${c.region||'—'}</div></div>
+      </div>
+      <div class="cm-tabs">
+        <div class="cm-tab active" onclick="cmTab('modules',this)">Modules</div>
+        <div class="cm-tab" onclick="cmTab('creds',this)">Credentials</div>
+        <div class="cm-tab" onclick="cmTab('branding',this)">Branding</div>
+      </div>
+      <div class="cm-content">
+        <div id="cm-modules">
+          <div class="modules-grid">
+            ${moduleList.map(([icon,key,name,desc])=>`
+              <div class="mod">
+                <span class="mod-icon">${icon}</span>
+                <div style="flex:1;"><div class="mod-name">${name}</div><div class="mod-desc">${desc}</div></div>
+                <button class="toggle ${modules[key]?'on':'off'}" data-module="${key}" onclick="this.classList.toggle('on');this.classList.toggle('off')"><div class="toggle-knob"></div></button>
+              </div>`).join('')}
+          </div>
         </div>
-        <div class="cm-content">
-          <div id="cm-modules">
-            <div class="modules-grid">
-              ${[
-                ['🤖','AI Chatbot','24/7 website assistant',true],
-                ['👥','Lead Capture','Form → Supabase → alerts',true],
-                ['📱','Social Media','FB · LinkedIn · Instagram',true],
-                ['📊','CEO Dashboard','KPIs · pipeline · intel',true],
-                ['💬','NES Command','Team communications',true],
-                ['📰','Intelligence Feed','Daily market briefing',true],
-                ['📞','Sara AI Receptionist','1-min callback on lead',false],
-                ['💬','WhatsApp Alerts','Lead + team alerts',false],
-                ['📧','Email Notifications','Lead emails to team',true],
-                ['☪️','Islam360','GCC / Europe version',false],
-              ].map(([icon,name,desc,on])=>`
-                <div class="mod">
-                  <span class="mod-icon">${icon}</span>
-                  <div style="flex:1;"><div class="mod-name">${name}</div><div class="mod-desc">${desc}</div></div>
-                  <button class="toggle ${on?'on':'off'}" onclick="this.classList.toggle('on');this.classList.toggle('off')"><div class="toggle-knob"></div></button>
-                </div>`).join('')}
-            </div>
+        <div id="cm-creds" style="display:none;">
+          <div class="creds-grid">
+            ${[['Facebook token','facebook_token'],['LinkedIn token','linkedin_token'],['WhatsApp Phone ID','whatsapp_phone_id'],['Cal.com link','calcom_link'],['Lead email','email'],['Website URL','website'],['Vapi assistant ID','vapi_assistant_id']].map(([lbl,key])=>`
+              <div class="cred-field">
+                <div class="cf-lbl">${lbl}</div>
+                ${c[key]?`<div class="cf-val">${c[key]}</div>`:`<div class="cf-empty">Not configured</div>`}
+              </div>`).join('')}
           </div>
-          <div id="cm-creds" style="display:none;">
-            <div class="creds-grid">
-              ${[
-                ['Facebook token','EAABwzL...k9Xn'],
-                ['LinkedIn token','AQX7k...mP2'],
-                ['WhatsApp Phone ID',''],
-                ['Cal.com link','cal.com/'+active.name.toLowerCase().replace(/\s/g,'')+'/demo'],
-                ['Lead email','leads@company.om'],
-                ['Website URL','company.om'],
-                ['Instagram ID',''],
-                ['Vapi assistant ID',''],
-              ].map(([lbl,val])=>`
-                <div class="cred-field">
-                  <div class="cf-lbl">${lbl}</div>
-                  ${val?`<div class="cf-val">${val}</div>`:`<div class="cf-empty">Not configured</div>`}
-                </div>`).join('')}
-            </div>
-          </div>
-          <div id="cm-branding" style="display:none;">
-            <div class="creds-grid">
-              ${[
-                ['Logo URL','cdn.company.om/logo.png'],
-                ['Primary colour','#1a56db'],
-                ['Company name',active.name],
-                ['Region','Oman · GCC'],
-                ['Industry','Technology · ICT'],
-                ['Language','English · Arabic'],
-              ].map(([lbl,val])=>`
-                <div class="cred-field">
-                  <div class="cf-lbl">${lbl}</div>
-                  <div class="cf-val">${val}</div>
-                </div>`).join('')}
-            </div>
+        </div>
+        <div id="cm-branding" style="display:none;">
+          <div class="creds-grid">
+            ${[['Company name','name'],['Primary colour','primary_color'],['Region','region'],['Industry','industry'],['Website','website']].map(([lbl,key])=>`
+              <div class="cred-field">
+                <div class="cf-lbl">${lbl}</div>
+                <div class="${c[key]?'cf-val':'cf-empty'}">${c[key]||'Not set'}</div>
+              </div>`).join('')}
           </div>
         </div>
       </div>
     </div>`;
 }
 
-function selectClient(id) { renderClientManager(id); }
+async function saveClientModules(clientId) {
+  const toggles = document.querySelectorAll('.toggle[data-module]');
+  const modules = {};
+  toggles.forEach(t=>{ modules[t.dataset.module] = t.classList.contains('on'); });
+  try {
+    await sb.from('clients').update({modules}).eq('id',clientId);
+    alert('✅ Modules saved successfully!');
+  } catch(e) { alert('Error saving: '+e.message); }
+}
+
+async function selectClientDB(id) {
+  window._activeClientId = id;
+  await loadClientsFromDB();
+}
+
+function searchClients(query) {
+  const clients = window._clients||[];
+  const filtered = query ? clients.filter(c=>c.name?.toLowerCase().includes(query.toLowerCase())||c.email?.toLowerCase().includes(query.toLowerCase())) : clients;
+  const listEl = document.getElementById('clientListEl');
+  const colors=['#1a3a6e','#2d1f00','#0d2818','#2d0e0e','#1a2332'];
+  const textColors=['#409cff','#d29922','#3fb950','#f85149','#8b949e'];
+  listEl.innerHTML=`<div class="cl-header">Clients (${filtered.length})</div>`+
+    filtered.map((c,i)=>`
+      <div class="client-item ${c.id===window._activeClientId?'active':''}" onclick="selectClientDB('${c.id}')">
+        <div class="ci-av" style="background:${colors[i%5]};color:${textColors[i%5]};">${(c.name||'?').substring(0,2).toUpperCase()}</div>
+        <div class="ci-name">${c.name}</div>
+        <div class="ci-dot" style="background:${c.status==='active'?'#3fb950':'#d29922'}"></div>
+      </div>`).join('');
+}
+
+function showAddClientForm() {
+  const mc = document.getElementById('mainContent');
+  mc.innerHTML=`
+    <div style="padding:12px 20px;border-bottom:1px solid #1a2332;flex-shrink:0;display:flex;align-items:center;gap:12px;">
+      <button onclick="showClientManager()" style="background:none;border:none;color:#8b949e;cursor:pointer;font-size:1.2rem;">←</button>
+      <div style="font-family:var(--mono);font-size:.78rem;color:var(--nes-blue);font-weight:800;">ADD NEW CLIENT</div>
+    </div>
+    <div class="page">
+      <div style="max-width:600px;">
+        ${clientFormFields()}
+        <button onclick="saveNewClient()" style="background:var(--nes-btn-grad);border:none;border-radius:8px;padding:10px 24px;color:#fff;font-weight:700;cursor:pointer;margin-top:12px;width:100%;">Create Client →</button>
+      </div>
+    </div>`;
+}
+
+function showEditClientForm(clientId) {
+  const client = (window._clients||[]).find(c=>c.id===clientId);
+  if(!client) return;
+  const mc = document.getElementById('mainContent');
+  mc.innerHTML=`
+    <div style="padding:12px 20px;border-bottom:1px solid #1a2332;flex-shrink:0;display:flex;align-items:center;gap:12px;">
+      <button onclick="showClientManager()" style="background:none;border:none;color:#8b949e;cursor:pointer;font-size:1.2rem;">←</button>
+      <div style="font-family:var(--mono);font-size:.78rem;color:var(--nes-blue);font-weight:800;">EDIT CLIENT — ${client.name}</div>
+    </div>
+    <div class="page">
+      <div style="max-width:600px;">
+        ${clientFormFields(client)}
+        <button onclick="updateClient('${clientId}')" style="background:var(--nes-btn-grad);border:none;border-radius:8px;padding:10px 24px;color:#fff;font-weight:700;cursor:pointer;margin-top:12px;width:100%;">Save Changes →</button>
+      </div>
+    </div>`;
+}
+
+function clientFormFields(c={}) {
+  const fields = [
+    ['Company name *','name','text',c.name||''],
+    ['Email','email','email',c.email||''],
+    ['Website','website','text',c.website||''],
+    ['Industry','industry','text',c.industry||''],
+    ['Region','region','text',c.region||'Oman'],
+    ['Facebook token','facebook_token','text',c.facebook_token||''],
+    ['LinkedIn token','linkedin_token','text',c.linkedin_token||''],
+    ['WhatsApp Phone ID','whatsapp_phone_id','text',c.whatsapp_phone_id||''],
+    ['Cal.com link','calcom_link','text',c.calcom_link||''],
+    ['Vapi assistant ID','vapi_assistant_id','text',c.vapi_assistant_id||''],
+    ['Primary colour','primary_color','text',c.primary_color||'#1a56db'],
+  ];
+  const planSel=`<div style="margin-bottom:8px;"><div style="font-family:var(--mono);font-size:.65rem;color:#8b949e;margin-bottom:4px;">Plan</div>
+    <select id="field_plan" style="width:100%;background:#0d1117;border:1px solid #1a2332;border-radius:7px;padding:8px 12px;color:#e6edf3;font-family:var(--mono);font-size:.78rem;outline:none;">
+      <option value="starter" ${c.plan==='starter'?'selected':''}>Starter</option>
+      <option value="growth" ${c.plan==='growth'?'selected':''}>Growth</option>
+      <option value="enterprise" ${c.plan==='enterprise'?'selected':''}>Enterprise</option>
+    </select></div>`;
+  const statusSel=`<div style="margin-bottom:8px;"><div style="font-family:var(--mono);font-size:.65rem;color:#8b949e;margin-bottom:4px;">Status</div>
+    <select id="field_status" style="width:100%;background:#0d1117;border:1px solid #1a2332;border-radius:7px;padding:8px 12px;color:#e6edf3;font-family:var(--mono);font-size:.78rem;outline:none;">
+      <option value="active" ${c.status==='active'?'selected':''}>Active</option>
+      <option value="onboarding" ${c.status==='onboarding'?'selected':''}>Onboarding</option>
+      <option value="inactive" ${c.status==='inactive'?'selected':''}>Inactive</option>
+    </select></div>`;
+  return `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+    ${fields.map(([lbl,id,type,val])=>`
+      <div style="margin-bottom:4px;">
+        <div style="font-family:var(--mono);font-size:.65rem;color:#8b949e;margin-bottom:4px;">${lbl}</div>
+        <input id="field_${id}" type="${type}" value="${val}" style="width:100%;background:#0d1117;border:1px solid #1a2332;border-radius:7px;padding:8px 12px;color:#e6edf3;font-family:var(--mono);font-size:.78rem;outline:none;">
+      </div>`).join('')}
+    ${planSel}${statusSel}
+  </div>`;
+}
+
+function getFormData() {
+  const fields=['name','email','website','industry','region','facebook_token','linkedin_token','whatsapp_phone_id','calcom_link','vapi_assistant_id','primary_color','plan','status'];
+  const data={};
+  fields.forEach(f=>{ const el=document.getElementById('field_'+f); if(el) data[f]=el.value; });
+  return data;
+}
+
+async function saveNewClient() {
+  const data = getFormData();
+  if(!data.name){alert('Company name is required');return;}
+  try {
+    const { error } = await sb.from('clients').insert([data]);
+    if(error) throw error;
+    await showClientManager();
+  } catch(e) { alert('Error creating client: '+e.message); }
+}
+
+async function updateClient(clientId) {
+  const data = getFormData();
+  if(!data.name){alert('Company name is required');return;}
+  try {
+    const { error } = await sb.from('clients').update(data).eq('id',clientId);
+    if(error) throw error;
+    await showClientManager();
+  } catch(e) { alert('Error updating client: '+e.message); }
+}
+
+async function deleteClient(clientId) {
+  if(!confirm('Delete this client? This cannot be undone.')) return;
+  try {
+    await sb.from('clients').delete().eq('id',clientId);
+    window._activeClientId = null;
+    await showClientManager();
+  } catch(e) { alert('Error deleting: '+e.message); }
+}
+
+function selectClient(id) { selectClientDB(id); }
 function cmTab(name,el) {
   ['modules','creds','branding'].forEach(t=>{
     document.getElementById('cm-'+t).style.display=t===name?'block':'none';
@@ -946,7 +1085,7 @@ function cmTab(name,el) {
   document.querySelectorAll('.cm-tab').forEach(t=>t.classList.remove('active'));
   el.classList.add('active');
 }
-function addClient() { alert('Add client form coming soon — will create Supabase row and spin up workflows automatically.'); }
+function addClient() { showAddClientForm(); }
 
 // ── CHAT INTERFACE ──
 function showChatInterface(mode='chat') {
@@ -980,7 +1119,6 @@ function showChatInterface(mode='chat') {
         </div>
       </div>
     </div>`;
-
   document.getElementById('msgInput').addEventListener('keypress',e=>{if(e.key==='Enter')sendMsg();});
   const msgsEl=document.getElementById('messages');
   if(allMsgsHTML&&allMsgsHTML.trim()){msgsEl.innerHTML=allMsgsHTML;msgsEl.scrollTop=msgsEl.scrollHeight;}
@@ -1130,6 +1268,10 @@ window.sendMsg=sendMsg;window.handleAttach=handleAttach;window.toggleVoice=toggl
 window.copyMsg=copyMsg;window.toggleSidebar=toggleSidebar;window.clearChat=clearChat;
 window.filterLeads=filterLeads;window.exportLeads=exportLeads;window.selectClient=selectClient;
 window.cmTab=cmTab;window.addClient=addClient;window.addCountry=addCountry;
+window.selectClientDB=selectClientDB;window.searchClients=searchClients;
+window.showAddClientForm=showAddClientForm;window.showEditClientForm=showEditClientForm;
+window.saveNewClient=saveNewClient;window.updateClient=updateClient;
+window.deleteClient=deleteClient;window.saveClientModules=saveClientModules;
 </script>
 </body>
 </html>
