@@ -10,121 +10,259 @@
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
   <style>
     *{margin:0;padding:0;box-sizing:border-box;}
-    :root{--bg:#0a0e2a;--surface:#0f1436;--border:#1a2154;--text:#e8e8ec;--muted:#6b7b9e;--accent:#3b82f6;--accent-lo:rgba(59,130,246,.12);--accent-md:rgba(59,130,246,.25);--green:#2ecc71;--red:#e74c3c;--ui:'Syne',sans-serif;--mono:'DM Mono',monospace;}
-    [data-theme="light"]{--bg:#f3f4f6;--surface:#fff;--border:#e5e7eb;--text:#111827;--muted:#6b7280;--accent:#2563eb;}
+    :root{
+      --bg:#0a0e2a;--surface:#0f1436;--border:#1a2154;--text:#e8e8ec;--muted:#6b7b9e;
+      --accent:#3b82f6;--accent-lo:rgba(59,130,246,.12);--accent-md:rgba(59,130,246,.25);
+      --green:#2ecc71;--red:#e74c3c;--amber:#d29922;--purple:#7f77dd;
+      --ui:'Syne',sans-serif;--mono:'DM Mono',monospace;
+      /* NES Brand */
+      --nes-blue:#409cff;--nes-btn-grad:linear-gradient(135deg,#1a56db,#2563eb);
+      --card:#0f1436;--card2:#161b22;--border2:#21262d;
+    }
     body{font-family:var(--ui);background:var(--bg);color:var(--text);height:100dvh;display:flex;overflow:hidden;}
 
-    /* Sidebar toggle */
+    /* ── SIDEBAR ── */
     .sb-toggle{position:fixed;left:16px;top:16px;z-index:1010;background:var(--accent);border:none;border-radius:50%;width:42px;height:42px;display:grid;place-items:center;cursor:pointer;color:#fff;font-size:1.2rem;box-shadow:0 2px 12px rgba(0,0,0,.3);}
+    .sidebar{width:240px;flex-shrink:0;background:#0d1117!important;border-right:1px solid #1a2332!important;display:flex;flex-direction:column;padding:0;height:100dvh;overflow-y:auto;z-index:1000;transition:transform .3s ease;}
+    @media(max-width:900px){.sidebar{position:fixed;top:0;left:0;transform:translateX(-100%);}.sidebar.open{transform:translateX(0);}.welcome-card{padding-top:70px!important;}}
+    @media(min-width:901px){.sidebar{position:relative;}.sidebar.collapsed{position:fixed;transform:translateX(-100%);}.sb-toggle{display:none!important;}}
 
-    /* Sidebar ALWAYS DARK */
-    .sidebar{width:260px;flex-shrink:0;background:#0f1436 !important;border-right:1px solid #1a2154 !important;display:flex;flex-direction:column;padding:24px 16px;height:100dvh;overflow-y:auto;z-index:1000;transition:transform .3s ease;}
-    .sidebar .logo, .sidebar .logo-version, .sidebar .nav-item, .sidebar .usage-wrap *, .sidebar .user-row * { color: #e8e8ec !important; }
-    .sidebar .usage-track { background: #1a2154 !important; }
-    
-    @media(max-width:900px){
-      .sidebar{position:fixed;top:0;left:0;transform:translateX(-100%);}
-      .sidebar.open{transform:translateX(0);}
-      .welcome-card { padding-top: 70px !important; }
-    }
-    @media(min-width:901px){
-      .sidebar{position:relative;}
-      .sidebar.collapsed{position:fixed;transform:translateX(-100%);}
-      .sb-toggle{display:none !important;}
-    }
-    .sb-logo{text-align:center;margin-bottom:16px;padding-top:8px;}
-    .sb-logo img{width:80px;height:80px;object-fit:contain;border-radius:50%;}
-    .sb-upgrade{background:linear-gradient(135deg,#3b82f6,#1d4ed8);border:none;border-radius:40px;padding:10px 16px;color:#fff;font-family:var(--ui);font-size:.8rem;font-weight:700;cursor:pointer;margin:0 8px 20px;text-align:center;display:block;width:calc(100% - 16px);}
-    .nav{display:flex;flex-direction:column;gap:4px;flex:1;}
-    .nav-item{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:12px;cursor:pointer;color:#6b7b9e;font-size:.88rem;font-weight:600;}
-    .nav-item:hover,.nav-item.active{background:rgba(59,130,246,0.12);color:#3b82f6;}
-    .nav-icon{font-size:1.1rem;width:26px;color:#60a5fa;}
-    [data-theme="light"] .nav-icon{color:#2563eb;}
-    .usage-wrap{margin-top:auto;padding:16px 8px 0;border-top:1px solid #1a2154;}
-    .usage-row{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.62rem;color:#6b7b9e;margin-bottom:6px;}
-    .usage-track{height:4px;background:#1a2154;border-radius:99px;overflow:hidden;margin-bottom:14px;}
-    .usage-fill{height:100%;background:#3b82f6;border-radius:99px;width:0%;}
-    .user-row{display:flex;align-items:center;gap:10px;padding-top:10px;}
-    .user-av{width:30px;height:30px;background:rgba(59,130,246,0.12);border:1px solid rgba(59,130,246,0.25);border-radius:50%;display:grid;place-items:center;font-size:.72rem;color:#3b82f6;font-weight:700;}
-    .user-email{font-family:var(--mono);font-size:.65rem;color:#6b7b9e;flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
-    .logout-btn{background:none;border:none;color:#6b7b9e;cursor:pointer;font-size:.85rem;padding:2px 6px;}
+    .sb-logo{text-align:center;padding:20px 16px 0;}
+    .sb-logo img{width:72px;height:72px;object-fit:contain;border-radius:50%;}
+    .sb-brand{text-align:center;padding:8px 0 4px;font-family:var(--ui);font-size:1.1rem;font-weight:800;letter-spacing:.02em;}
+    .sb-brand .nes{color:var(--nes-blue);}
+    .sb-brand .ai{color:#fff;}
+    .sb-ver{text-align:center;font-family:var(--mono);font-size:.6rem;color:#484f58;margin-bottom:12px;}
+    .sb-upgrade{background:var(--nes-btn-grad);border:none;border-radius:40px;padding:10px 16px;color:#fff;font-family:var(--ui);font-size:.8rem;font-weight:700;cursor:pointer;margin:0 12px 4px;text-align:center;display:block;width:calc(100% - 24px);transition:opacity .2s;}
+    .sb-upgrade:hover{opacity:.9;}
+
+    .nav-section{padding:0 8px;margin-bottom:2px;}
+    .nav-label{font-size:.65rem;color:#484f58;letter-spacing:.1em;padding:10px 8px 4px;text-transform:uppercase;font-family:var(--mono);}
+    .nav{display:flex;flex-direction:column;gap:2px;}
+    .nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;cursor:pointer;color:#8b949e;font-size:.82rem;font-weight:600;transition:all .15s;}
+    .nav-item:hover,.nav-item.active{background:rgba(59,130,246,.12);color:var(--nes-blue);}
+    .nav-icon{font-size:1rem;width:20px;text-align:center;}
+    .nav-badge{margin-left:auto;font-size:.6rem;padding:1px 6px;border-radius:8px;}
+    .nb-blue{background:#1a3a6e;color:var(--nes-blue);}
+    .nb-green{background:#0d2818;color:#3fb950;}
+    .nb-orange{background:#2d1b0e;color:#f0883e;}
+    .nb-red{background:#2d0e0e;color:#f85149;}
+
+    /* NES Admin only button */
+    .client-mgr-btn{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;cursor:pointer;color:var(--nes-blue);font-size:.82rem;font-weight:700;background:#0c1f35;border:1px solid rgba(64,156,255,.2);margin:4px 8px;transition:all .15s;}
+    .client-mgr-btn:hover{background:#1a3a6e;border-color:var(--nes-blue);}
+
+    .sb-divider{height:1px;background:#1a2332;margin:8px 12px;}
+
+    .usage-wrap{margin-top:auto;padding:12px 12px 0;border-top:1px solid #1a2332;}
+    .usage-row{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.6rem;color:#6b7b9e;margin-bottom:5px;}
+    .usage-track{height:3px;background:#1a2332;border-radius:99px;overflow:hidden;margin-bottom:12px;}
+    .usage-fill{height:100%;background:var(--nes-blue);border-radius:99px;width:0%;}
+    .user-row{display:flex;align-items:center;gap:8px;padding-bottom:12px;}
+    .user-av{width:28px;height:28px;background:rgba(64,156,255,.12);border:1px solid rgba(64,156,255,.25);border-radius:50%;display:grid;place-items:center;font-size:.68rem;color:var(--nes-blue);font-weight:700;}
+    .user-email{font-family:var(--mono);font-size:.6rem;color:#6b7b9e;flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+    .role-chip{font-size:.55rem;padding:1px 6px;border-radius:6px;background:#1a3a6e;color:var(--nes-blue);font-family:var(--mono);white-space:nowrap;}
+    .logout-btn{background:none;border:none;color:#6b7b9e;cursor:pointer;font-size:.8rem;padding:2px 6px;}
     .logout-btn:hover{color:#e74c3c;}
 
-    /* Auth */
+    /* ── AUTH ── */
     #authScreen{position:fixed;inset:0;z-index:2000;background:var(--bg);display:flex;align-items:center;justify-content:center;}
     .auth-box{width:min(400px,90vw);background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:40px;}
-    .auth-logo{font-size:1.6rem;font-weight:800;text-align:center;margin-bottom:4px;}.auth-logo span{color:var(--accent);}
+    .auth-logo{font-size:1.6rem;font-weight:800;text-align:center;margin-bottom:4px;}
+    .auth-logo .nes{color:var(--nes-blue);}
+    .auth-logo .ai{color:#fff;}
     .auth-sub{font-family:var(--mono);font-size:.7rem;color:var(--muted);text-align:center;margin-bottom:32px;}
     .auth-tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:24px;}
     .auth-tab{background:none;border:none;color:var(--muted);font-family:var(--ui);font-weight:600;padding:10px 20px;cursor:pointer;}
-    .auth-tab.active{color:var(--accent);border-bottom:2px solid var(--accent);}
+    .auth-tab.active{color:var(--nes-blue);border-bottom:2px solid var(--nes-blue);}
     .auth-panel{display:none;flex-direction:column;gap:12px;}.auth-panel.active{display:flex;}
     .auth-input{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:12px 16px;color:var(--text);font-family:var(--mono);font-size:.85rem;outline:none;width:100%;}
-    .auth-input:focus{border-color:var(--accent);}
-    .auth-btn{background:var(--accent);border:none;border-radius:12px;padding:12px;color:#fff;font-weight:700;cursor:pointer;}
+    .auth-input:focus{border-color:var(--nes-blue);}
+    .auth-btn{background:var(--nes-btn-grad);border:none;border-radius:12px;padding:12px;color:#fff;font-weight:700;cursor:pointer;}
     .auth-err{font-family:var(--mono);font-size:.7rem;color:var(--red);min-height:18px;}
 
-    /* App */
+    /* ── APP ── */
     #app{display:none;width:100%;height:100dvh;overflow:hidden;}
     #app.visible{display:flex;}
     .main{flex:1;display:flex;flex-direction:column;height:100dvh;overflow:hidden;min-width:0;position:relative;}
     .top-bar{position:absolute;top:14px;right:18px;display:flex;gap:10px;z-index:100;}
-    .top-btn{background:var(--surface);border:1px solid var(--border);border-radius:50%;width:38px;height:38px;display:grid;place-items:center;cursor:pointer;color:var(--accent);font-size:1.1rem;}
-    .welcome-card{padding:16px 28px;border-bottom:1px solid var(--border);}
-    .mode-label{font-family:var(--mono);font-size:.8rem;color:var(--accent);font-weight:800;margin-bottom:4px;}
-    .version-label{font-family:var(--mono);font-size:.6rem;color:var(--muted);margin-bottom:4px;}
-    .free-tier{font-family:var(--mono);font-size:.65rem;color:var(--muted);}
-    .messages{flex:1;overflow-y:auto;padding:18px 28px;display:flex;flex-direction:column;gap:16px;}
+    .top-btn{background:var(--surface);border:1px solid var(--border);border-radius:50%;width:38px;height:38px;display:grid;place-items:center;cursor:pointer;color:var(--nes-blue);font-size:1.1rem;}
+    .welcome-card{padding:14px 24px;border-bottom:1px solid var(--border);}
+    .mode-label{font-family:var(--mono);font-size:.78rem;color:var(--nes-blue);font-weight:800;margin-bottom:3px;}
+    .version-label{font-family:var(--mono);font-size:.6rem;color:var(--muted);margin-bottom:3px;}
+    .free-tier{font-family:var(--mono);font-size:.62rem;color:var(--muted);}
+    .messages{flex:1;overflow-y:auto;padding:18px 24px;display:flex;flex-direction:column;gap:16px;}
     .msg{display:flex;gap:12px;animation:fadeIn .2s ease;}
     @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
     .msg.user{flex-direction:row-reverse;}
-    .chat-av{width:36px;height:36px;border-radius:50%;object-fit:contain;border:2px solid var(--accent);background:var(--surface);}
+    .chat-av{width:36px;height:36px;border-radius:50%;object-fit:contain;border:2px solid var(--nes-blue);background:var(--surface);}
     .user-av-msg{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:rgba(128,128,128,.15);border:1px solid var(--border);font-size:.78rem;font-weight:700;}
     .msg-body{max-width:80%;position:relative;}
     .msg-role{font-family:var(--mono);font-size:.62rem;color:var(--muted);margin-bottom:5px;}
     .msg.user .msg-role{text-align:right;}
     .msg-bubble{padding:11px 16px;border-radius:18px;font-size:.9rem;line-height:1.6;}
-    .msg.user .msg-bubble{background:var(--accent);color:#fff;border-bottom-right-radius:4px;}
+    .msg.user .msg-bubble{background:var(--nes-btn-grad);color:#fff;border-bottom-right-radius:4px;}
     .msg.ai .msg-bubble{background:var(--surface);border:1px solid var(--border);border-bottom-left-radius:4px;}
     .sources-block{margin-top:8px;border-top:1px solid var(--border);padding-top:6px;font-size:.65rem;color:var(--muted);}
     .sources-block a{color:#60a5fa;text-decoration:none;}
-    .copy-btn{position:absolute;top:-4px;right:0;background:var(--accent-lo);border-radius:8px;padding:3px 8px;font-size:.6rem;cursor:pointer;color:var(--accent);opacity:0;}
+    .copy-btn{position:absolute;top:-4px;right:0;background:var(--accent-lo);border-radius:8px;padding:3px 8px;font-size:.6rem;cursor:pointer;color:var(--nes-blue);opacity:0;}
     .msg-body:hover .copy-btn{opacity:1;}
-    .input-area{padding:12px 28px 16px;border-top:1px solid var(--border);}
+    .input-area{padding:10px 24px 14px;border-top:1px solid var(--border);}
     .prompt-wrap{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:60px;padding:5px 5px 5px 18px;}
-    .prompt-wrap:focus-within{border-color:var(--accent);}
+    .prompt-wrap:focus-within{border-color:var(--nes-blue);}
     #msgInput{flex:1;background:none;border:none;outline:none;color:var(--text);font-family:var(--ui);font-size:.95rem;padding:11px 0;}
-    .send-btn{background:var(--accent);border:none;border-radius:50%;width:42px;height:42px;display:grid;place-items:center;cursor:pointer;color:#fff;font-size:1.1rem;}
+    .send-btn{background:var(--nes-btn-grad);border:none;border-radius:50%;width:42px;height:42px;display:grid;place-items:center;cursor:pointer;color:#fff;font-size:1.1rem;}
     .send-btn:disabled{opacity:.4;}
-    .bottom-bar{display:flex;justify-content:space-between;align-items:center;margin-top:9px;padding-top:9px;border-top:1px solid var(--border);gap:8px;}
+    .bottom-bar{display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);gap:8px;}
     .bottom-left{display:flex;align-items:center;gap:8px;}
     .bottom-right{display:flex;align-items:center;gap:8px;}
     .status-dot{font-family:var(--mono);font-size:.72rem;color:var(--green);white-space:nowrap;}
     .status-dot::before{content:"● ";}
-    .status-dot.busy{color:var(--accent);}
+    .status-dot.busy{color:var(--nes-blue);}
     .disclaimer{font-family:var(--mono);font-size:.6rem;color:var(--muted);}
     .act-btn{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:.72rem;font-weight:600;color:var(--muted);cursor:pointer;}
-    .act-btn:hover{background:var(--accent-lo);color:var(--accent);}
+    .act-btn:hover{background:var(--accent-lo);color:var(--nes-blue);}
     .stat{font-family:var(--mono);font-size:.7rem;color:var(--muted);}
-    .stat b{color:var(--accent);}
-
+    .stat b{color:var(--nes-blue);}
     @keyframes bounce{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-5px);opacity:1}}
 
-    /* Pricing Cards */
+    /* ── PAGE WRAPPER ── */
+    .page{flex:1;overflow-y:auto;padding:20px 24px;background:var(--bg);}
+    .page-header{margin-bottom:20px;}
+    .page-title{font-family:var(--mono);font-size:.78rem;color:var(--nes-blue);font-weight:800;letter-spacing:.05em;margin-bottom:3px;}
+    .page-sub{font-family:var(--mono);font-size:.62rem;color:#484f58;}
+
+    /* ── CEO DASHBOARD ── */
+    .alert-bar{border-radius:8px;padding:9px 14px;margin-bottom:14px;display:flex;align-items:center;gap:10px;font-size:.78rem;}
+    .alert-warn{background:rgba(210,153,34,.08);border:1px solid rgba(210,153,34,.3);color:#d29922;}
+    .alert-good{background:rgba(63,185,80,.08);border:1px solid rgba(63,185,80,.3);color:#3fb950;}
+    .kgrid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:8px;}
+    .kgrid2{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:14px;}
+    .kcard{background:#0d1117;border:1px solid #1a2332;border-radius:8px;padding:12px;}
+    .kcard.hot{border-color:var(--nes-blue);}
+    .kcard.warn{border-color:#d29922;}
+    .kcard.danger{border-color:#f85149;}
+    .klbl{font-size:.68rem;color:#8b949e;margin-bottom:4px;font-family:var(--mono);}
+    .kval{font-size:1.4rem;font-weight:700;color:#e6edf3;line-height:1;}
+    .kdelta{font-size:.68rem;margin-top:3px;font-family:var(--mono);}
+    .kup{color:#3fb950;}.kdn{color:#f85149;}.kneu{color:#8b949e;}
+    .kbar{height:2px;background:#1a2332;border-radius:1px;margin-top:8px;overflow:hidden;}
+    .kfill{height:100%;border-radius:1px;}
+    .row2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}
+    .dash-card{background:#0d1117;border:1px solid #1a2332;border-radius:8px;padding:12px;}
+    .dc-title{font-family:var(--mono);font-size:.65rem;color:#484f58;letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px;}
+    .pipe-track{height:6px;border-radius:3px;display:flex;gap:1px;overflow:hidden;margin-bottom:7px;}
+    .pipe-seg{height:100%;}
+    .pipe-legend{display:grid;grid-template-columns:repeat(2,1fr);gap:4px;}
+    .pipe-item{display:flex;align-items:center;gap:5px;font-size:.65rem;color:#8b949e;font-family:var(--mono);}
+    .pipe-dot{width:6px;height:6px;border-radius:1px;flex-shrink:0;}
+    .pipe-num{color:#e6edf3;font-weight:600;}
+    .geo-row{display:flex;align-items:center;gap:6px;margin-bottom:5px;}
+    .geo-name{font-size:.68rem;color:#8b949e;width:70px;font-family:var(--mono);}
+    .geo-track{flex:1;height:3px;background:#1a2332;border-radius:2px;overflow:hidden;}
+    .geo-fill{height:100%;border-radius:2px;}
+    .geo-n{font-size:.68rem;color:#e6edf3;font-weight:600;width:16px;text-align:right;font-family:var(--mono);}
+    .intel-item{background:#0d1117;border:1px solid #1a2332;border-radius:7px;padding:10px 12px;margin-bottom:6px;display:flex;gap:10px;}
+    .ititle{font-size:.8rem;color:#e6edf3;line-height:1.4;font-weight:600;}
+    .isub{font-size:.68rem;color:#8b949e;margin-top:2px;font-family:var(--mono);}
+    .itag{font-size:.6rem;padding:1px 6px;border-radius:6px;margin-top:5px;display:inline-block;font-family:var(--mono);}
+    .topp{background:#0d2818;color:#3fb950;}
+    .twatch{background:#0c1f35;color:var(--nes-blue);}
+    .trisk{background:#2d1f00;color:#d29922;}
+    .team-card{background:#0d1117;border:1px solid #1a2332;border-radius:8px;overflow:hidden;margin-bottom:14px;}
+    .team-row{display:flex;align-items:center;gap:9px;padding:8px 12px;border-bottom:1px solid #1a2332;}
+    .team-row:last-child{border-bottom:none;}
+    .tav{width:26px;height:26px;border-radius:50%;background:#1c2a3a;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;color:var(--nes-blue);flex-shrink:0;}
+    .tname{font-size:.78rem;color:#e6edf3;flex:1;}
+    .tactivity{font-size:.68rem;color:#8b949e;font-family:var(--mono);}
+    .tdot{display:inline-block;width:5px;height:5px;border-radius:50%;margin-right:4px;vertical-align:middle;}
+
+    /* ── LEADS PAGE ── */
+    .leads-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;}
+    .leads-table{background:#0d1117;border:1px solid #1a2332;border-radius:8px;overflow:hidden;}
+    .lt-header{display:grid;grid-template-columns:2fr 1.5fr 1fr 1fr 80px;gap:8px;padding:8px 14px;border-bottom:1px solid #1a2332;font-family:var(--mono);font-size:.6rem;color:#484f58;text-transform:uppercase;letter-spacing:.08em;}
+    .lt-row{display:grid;grid-template-columns:2fr 1.5fr 1fr 1fr 80px;gap:8px;padding:10px 14px;border-bottom:1px solid #0a0f1e;align-items:center;}
+    .lt-row:last-child{border-bottom:none;}
+    .lt-row:hover{background:#0c1526;}
+    .lead-name{font-size:.8rem;color:#e6edf3;font-weight:600;}
+    .lead-email{font-size:.65rem;color:#8b949e;font-family:var(--mono);}
+    .lead-industry{font-size:.72rem;color:#8b949e;}
+    .lead-time{font-size:.65rem;color:#484f58;font-family:var(--mono);}
+    .lead-badge{font-size:.6rem;padding:2px 8px;border-radius:8px;text-align:center;font-family:var(--mono);}
+    .lbhot{background:#2d0e0e;color:#f85149;}
+    .lbnew{background:#0c1f35;color:var(--nes-blue);}
+    .lbwarm{background:#2d1f00;color:#d29922;}
+    .tabs-bar{display:flex;gap:4px;margin-bottom:12px;}
+    .tab-btn{font-size:.72rem;padding:5px 12px;border-radius:6px;border:1px solid #1a2332;background:transparent;color:#8b949e;cursor:pointer;font-family:var(--mono);}
+    .tab-btn.active{background:#0c1f35;color:var(--nes-blue);border-color:var(--nes-blue);}
+
+    /* ── NES COMMAND CENTRE ── */
+    .command-wrap{display:flex;flex:1;overflow:hidden;height:calc(100dvh - 60px);}
+    .command-iframe{width:100%;height:100%;border:none;}
+
+    /* ── CLIENT MANAGER ── */
+    .cm-layout{display:grid;grid-template-columns:180px 1fr;gap:12px;}
+    .client-list{background:#0d1117;border:1px solid #1a2332;border-radius:8px;overflow:hidden;}
+    .cl-header{padding:8px 12px;border-bottom:1px solid #1a2332;font-family:var(--mono);font-size:.6rem;color:#484f58;text-transform:uppercase;letter-spacing:.08em;}
+    .client-item{display:flex;align-items:center;gap:8px;padding:9px 12px;cursor:pointer;border-bottom:1px solid #0a0f1e;}
+    .client-item:hover{background:#0c1526;}
+    .client-item.active{background:#0c1f35;border-left:2px solid var(--nes-blue);}
+    .ci-av{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;flex-shrink:0;}
+    .ci-name{font-size:.72rem;color:#8b949e;flex:1;line-height:1.3;}
+    .client-item.active .ci-name{color:#e6edf3;}
+    .ci-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+    .cm-detail{background:#0d1117;border:1px solid #1a2332;border-radius:8px;overflow:hidden;}
+    .cm-top{padding:12px 14px;border-bottom:1px solid #1a2332;display:flex;align-items:center;justify-content:space-between;}
+    .cm-client-info{display:flex;align-items:center;gap:10px;}
+    .cm-av{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.9rem;font-weight:700;flex-shrink:0;}
+    .cm-name{font-size:.9rem;font-weight:700;color:#e6edf3;}
+    .cm-plan{font-size:.6rem;padding:2px 7px;border-radius:6px;margin-top:2px;display:inline-block;font-family:var(--mono);}
+    .plan-g{background:#0d2818;color:#3fb950;}
+    .plan-e{background:#2d1f00;color:#d29922;}
+    .plan-s{background:#0c1f35;color:var(--nes-blue);}
+    .cm-actions{display:flex;gap:6px;}
+    .cm-btn{font-size:.7rem;padding:5px 10px;border-radius:6px;border:1px solid #1a2332;background:transparent;color:#8b949e;cursor:pointer;}
+    .cm-btn.primary{border-color:var(--nes-blue);color:var(--nes-blue);background:#0c1f35;}
+    .cm-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:12px 14px;border-bottom:1px solid #1a2332;}
+    .cm-stat{background:#161b22;border:1px solid #1a2332;border-radius:6px;padding:8px 10px;}
+    .cs-lbl{font-size:.62rem;color:#8b949e;margin-bottom:3px;font-family:var(--mono);}
+    .cs-val{font-size:1.2rem;font-weight:700;color:#e6edf3;}
+    .cm-tabs{display:flex;border-bottom:1px solid #1a2332;}
+    .cm-tab{font-size:.72rem;padding:8px 14px;color:#8b949e;cursor:pointer;border-bottom:2px solid transparent;font-family:var(--mono);}
+    .cm-tab.active{color:var(--nes-blue);border-bottom-color:var(--nes-blue);}
+    .cm-content{padding:12px 14px;}
+    .modules-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+    .mod{background:#161b22;border:1px solid #1a2332;border-radius:7px;padding:9px 11px;display:flex;align-items:center;gap:9px;}
+    .mod-icon{font-size:.9rem;color:#8b949e;width:18px;flex-shrink:0;}
+    .mod-name{font-size:.78rem;color:#e6edf3;font-weight:600;flex:1;}
+    .mod-desc{font-size:.62rem;color:#8b949e;font-family:var(--mono);}
+    .toggle{width:32px;height:17px;border-radius:9px;border:none;cursor:pointer;position:relative;flex-shrink:0;transition:background .2s;}
+    .toggle.on{background:var(--nes-btn-grad);}
+    .toggle.off{background:#21262d;}
+    .toggle-knob{width:11px;height:11px;border-radius:50%;background:#fff;position:absolute;top:3px;transition:left .2s;}
+    .toggle.on .toggle-knob{left:18px;}
+    .toggle.off .toggle-knob{left:3px;}
+    .creds-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+    .cred-field{background:#161b22;border:1px solid #1a2332;border-radius:6px;padding:8px 10px;}
+    .cf-lbl{font-size:.6rem;color:#8b949e;margin-bottom:3px;font-family:var(--mono);}
+    .cf-val{font-size:.72rem;color:var(--nes-blue);font-family:var(--mono);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .cf-empty{font-size:.72rem;color:#484f58;font-style:italic;font-family:var(--mono);}
+    .add-client-btn{background:var(--nes-btn-grad);border:none;border-radius:8px;padding:7px 14px;color:#fff;font-size:.72rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;}
+
+    /* ── PRICING ── */
     .pricing-wrap{flex:1;overflow-y:auto;padding:32px 40px;background:var(--bg);}
     .plan-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:24px;margin-top:24px;}
     .plan-card{background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:28px 24px;width:240px;transition:transform .2s,box-shadow .2s;display:flex;flex-direction:column;}
     .plan-card:hover{transform:translateY(-4px);box-shadow:0 12px 24px rgba(0,0,0,.2);}
     .plan-name{font-size:1.3rem;font-weight:700;margin-bottom:8px;text-align:center;}
-    .plan-price{font-size:2rem;font-weight:800;color:var(--accent);text-align:center;margin-bottom:4px;}
+    .plan-price{font-size:2rem;font-weight:800;color:var(--nes-blue);text-align:center;margin-bottom:4px;}
     .plan-period{font-size:.7rem;color:var(--muted);text-align:center;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border);}
     .plan-features-list{list-style:none;margin-bottom:24px;flex:1;}
     .plan-features-list li{padding:8px 0;font-size:.8rem;color:var(--text);display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);}
     .plan-features-list li:last-child{border-bottom:none;}
-    .plan-action-btn{background:var(--accent);border:none;border-radius:40px;padding:12px 20px;color:#fff;font-weight:700;cursor:pointer;width:100%;font-size:.85rem;transition:all .2s;margin-top:auto;}
+    .plan-action-btn{background:var(--nes-btn-grad);border:none;border-radius:40px;padding:12px 20px;color:#fff;font-weight:700;cursor:pointer;width:100%;font-size:.85rem;transition:all .2s;margin-top:auto;}
     .plan-action-btn:hover{transform:scale(1.02);opacity:.9;}
     .plan-action-btn:disabled{background:var(--muted);opacity:.5;cursor:default;transform:none;}
-    .plan-action-btn.contact{background:var(--accent);color:#fff;border:none;}
 
     @media(max-width:700px){
       .welcome-card,.messages,.input-area{padding-left:14px;padding-right:14px;}
@@ -133,6 +271,9 @@
       .stat{font-size:.62rem;}
       .pricing-wrap{padding:20px;}
       .plan-card{width:100%;max-width:320px;}
+      .kgrid3{grid-template-columns:1fr 1fr;}
+      .row2,.cm-layout{grid-template-columns:1fr;}
+      .lt-header,.lt-row{grid-template-columns:1fr 1fr;}
     }
   </style>
 </head>
@@ -140,9 +281,10 @@
 
 <button class="sb-toggle" onclick="toggleSidebar()">☰</button>
 
+<!-- AUTH -->
 <div id="authScreen">
   <div class="auth-box">
-    <div class="auth-logo">NES<span>AI</span></div>
+    <div class="auth-logo"><span class="nes">NES</span><span class="ai">AI</span></div>
     <div class="auth-sub">// intelligence platform v3.0</div>
     <div class="auth-tabs">
       <button class="auth-tab active" id="tabLogin" onclick="switchTab('login')">Sign In</button>
@@ -163,22 +305,51 @@
   </div>
 </div>
 
+<!-- APP -->
 <div id="app">
   <aside class="sidebar" id="sidebar">
     <div class="sb-logo"><img src="https://files.catbox.moe/adhf8n.png" alt="NES AI"></div>
-    <button class="sb-upgrade" onclick="showPricing()">✨ Upgrade to Pro</button>
-    <nav class="nav">
-      <div class="nav-item active" data-mode="chat"><span class="nav-icon">💬</span><span>Chat</span></div>
-      <div class="nav-item" data-mode="deepcore"><span class="nav-icon">🔬</span><span>Deep Core</span></div>
-      <div class="nav-item" data-mode="docs"><span class="nav-icon">📄</span><span>Documents</span></div>
-      <div class="nav-item" data-mode="image"><span class="nav-icon">🎨</span><span>Image Gen</span></div>
-    </nav>
+    <div class="sb-brand"><span class="nes">NES</span><span class="ai">AI</span></div>
+    <div class="sb-ver">// intelligence platform v3.0</div>
+    <button class="sb-upgrade" onclick="showPricing()">✦ Upgrade to Pro</button>
+
+    <div class="nav-section">
+      <div class="nav-label">Workspace</div>
+      <div class="nav nav-workspace">
+        <div class="nav-item active" data-view="chat"><span class="nav-icon">💬</span><span>Chat</span></div>
+        <div class="nav-item" data-view="deepcore"><span class="nav-icon">🔬</span><span>Deep Core</span></div>
+        <div class="nav-item" data-view="docs"><span class="nav-icon">📄</span><span>Documents</span></div>
+        <div class="nav-item" data-view="image"><span class="nav-icon">🎨</span><span>Image Gen</span></div>
+      </div>
+    </div>
+
+    <div class="nav-section" id="intelligenceSection" style="display:none;">
+      <div class="nav-label">Intelligence</div>
+      <div class="nav">
+        <div class="nav-item" data-view="ceo"><span class="nav-icon">📊</span><span>CEO Dashboard</span><span class="nav-badge nb-blue">Live</span></div>
+        <div class="nav-item" data-view="command"><span class="nav-icon">💬</span><span>NES Command</span><span class="nav-badge nb-orange" id="commandBadge" style="display:none;">5</span></div>
+        <div class="nav-item" data-view="leads"><span class="nav-icon">👥</span><span>Leads</span><span class="nav-badge nb-red" id="leadsBadge">—</span></div>
+      </div>
+    </div>
+
+    <div class="sb-divider"></div>
+
+    <!-- NES Admin only -->
+    <div id="clientMgrSection" style="display:none;padding:0 8px 8px;">
+      <div class="client-mgr-btn" onclick="showView('clientmgr')">
+        <span style="font-size:1rem;">🏢</span>
+        <span style="flex:1;">Client Manager</span>
+        <span class="nav-badge nb-blue" id="clientCount">0</span>
+      </div>
+    </div>
+
     <div class="usage-wrap">
       <div class="usage-row"><span>Daily messages</span><span id="usageTxt">0 / 50</span></div>
       <div class="usage-track"><div class="usage-fill" id="usageFill"></div></div>
       <div class="user-row">
         <div class="user-av" id="userInitial">?</div>
         <div class="user-email" id="userEmail">—</div>
+        <span class="role-chip" id="roleChip">staff</span>
         <button class="logout-btn" onclick="doLogout()">✕</button>
       </div>
     </div>
@@ -196,225 +367,603 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
 // ============================================================
-// NES AI — FINAL PRODUCTION VERSION
+// NES AI — UNIFIED INTELLIGENCE PLATFORM v3.1
+// Role-based access: nesadmin, ceo, manager, staff
 // ============================================================
 const SUPABASE_URL = 'https://sfpfjjdtczvuxyhjievt.supabase.co';
 const SUPABASE_ANON = 'sb_publishable_MH7rnJ7r8_-1TzGXcieNfA_NXoHQZbm';
 const API_URL = 'https://essential-ai-backend.onrender.com';
 const LOGO_URL = 'https://files.catbox.moe/adhf8n.png';
+const ROCKET_URL = 'https://chat.essential-services.org';
 
-// Plan limits (daily + monthly)
 const PLAN_LIMITS = {
-  free: { name: 'Free', price: 0, messages: 50, monthlyMessages: 1500, images: 3, monthlyImages: 15, docs: 5, monthlyDocs: 150, imageDaysActive: 5 },
-  starter: { name: 'Starter', price: 7, messages: 150, monthlyMessages: 4500, images: 10, monthlyImages: 200, docs: 25, monthlyDocs: 750 },
-  pro: { name: 'Pro', price: 19, messages: 500, monthlyMessages: 15000, images: 25, monthlyImages: 500, docs: 100, monthlyDocs: 3000 },
-  team: { name: 'Team', price: 79, messages: 3000, monthlyMessages: 90000, images: 100, monthlyImages: 2000, docs: 500, monthlyDocs: 15000, isContact: false },
-  enterprise: { name: 'Enterprise', price: 0, messages: -1, monthlyMessages: -1, images: -1, monthlyImages: -1, docs: -1, monthlyDocs: -1, isContact: true }
+  free:{name:'Free',price:0,messages:50,monthlyMessages:1500,images:3,monthlyImages:15,docs:5,monthlyDocs:150},
+  starter:{name:'Starter',price:7,messages:150,monthlyMessages:4500,images:10,monthlyImages:200,docs:25,monthlyDocs:750},
+  pro:{name:'Pro',price:19,messages:500,monthlyMessages:15000,images:25,monthlyImages:500,docs:100,monthlyDocs:3000},
+  team:{name:'Team',price:79,messages:3000,monthlyMessages:90000,images:100,monthlyImages:2000,docs:500,monthlyDocs:15000},
+  enterprise:{name:'Enterprise',price:0,messages:-1,monthlyMessages:-1,images:-1,monthlyImages:-1,docs:-1,monthlyDocs:-1,isContact:true}
 };
 
 const { createClient } = supabase;
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
 
-let session = null, mode = 'chat', history = [], busy = false;
-let chatUsed = 0, imagesUsed = 0, docsUsed = 0;
-let chatUsedMonthly = 0, imagesUsedMonthly = 0, docsUsedMonthly = 0;
-let userPlan = 'free';
-let allMsgsHTML = '';
-const STORAGE_KEYS = { h: 'nesai_h', m: 'nesai_m', u: 'nesai_u', mu: 'nesai_mu' };
+let session=null, currentView='chat', history=[], busy=false;
+let chatUsed=0, imagesUsed=0, docsUsed=0;
+let chatUsedMonthly=0, imagesUsedMonthly=0, docsUsedMonthly=0;
+let userPlan='free', userRole='staff', allMsgsHTML='';
+const STORAGE_KEYS={h:'nesai_h',m:'nesai_m',u:'nesai_u',mu:'nesai_mu'};
+const MODE_LABELS={chat:'CHAT MODE',deepcore:'DEEP CORE MODE',docs:'DOCUMENTS MODE',image:'IMAGE GEN MODE'};
 
-const MODE_LABELS = { chat: 'CHAT MODE', deepcore: 'DEEP CORE MODE', docs: 'DOCUMENTS MODE', image: 'IMAGE GEN MODE' };
+// ── AUTH ──
+sb.auth.onAuthStateChange((_e,s)=>{ session=s; s?showApp(s.user):showAuthScreen(); });
 
-// Auth
-sb.auth.onAuthStateChange((_e, s) => { session = s; s ? showApp(s.user) : showAuthScreen(); });
-
-function showApp(user) {
-  document.getElementById('authScreen').style.display = 'none';
-  document.getElementById('app').style.display = 'flex';
+async function showApp(user) {
+  document.getElementById('authScreen').style.display='none';
+  document.getElementById('app').style.display='flex';
   document.getElementById('app').classList.add('visible');
-  document.getElementById('userEmail').textContent = user.email;
-  document.getElementById('userInitial').textContent = user.email[0].toUpperCase();
+  document.getElementById('userEmail').textContent=user.email;
+  document.getElementById('userInitial').textContent=user.email[0].toUpperCase();
   loadLocal();
-  loadUserPlan();
-  showChatInterface();
+  await loadUserRole(user);
+  await loadUserPlan();
+  setupNavForRole();
+  showView('chat');
   loadUsageFromServer();
   bindNav();
 }
 
+async function loadUserRole(user) {
+  try {
+    const { data } = await sb.from('profiles').select('role').eq('id', user.id).single();
+    userRole = data?.role || 'staff';
+  } catch(e) { userRole = 'staff'; }
+  document.getElementById('roleChip').textContent = userRole;
+}
+
+function setupNavForRole() {
+  const intel = document.getElementById('intelligenceSection');
+  const clientMgr = document.getElementById('clientMgrSection');
+
+  // Show intelligence section for nesadmin, ceo, manager
+  if (['nesadmin','ceo','manager'].includes(userRole)) {
+    intel.style.display = 'block';
+  }
+
+  // CEO Dashboard — nesadmin + ceo only
+  const ceoNav = document.querySelector('[data-view="ceo"]');
+  if (!['nesadmin','ceo'].includes(userRole) && ceoNav) ceoNav.style.display='none';
+
+  // Client Manager — nesadmin ONLY
+  if (userRole === 'nesadmin') {
+    clientMgr.style.display = 'block';
+    loadClientCount();
+  }
+
+  // Load lead count badge
+  loadLeadCount();
+}
+
+async function loadClientCount() {
+  try {
+    const { count } = await sb.from('clients').select('*', {count:'exact',head:true});
+    document.getElementById('clientCount').textContent = count || 0;
+  } catch(e) { document.getElementById('clientCount').textContent = '0'; }
+}
+
+async function loadLeadCount() {
+  try {
+    const today = new Date().toISOString().split('T')[0];
+    const { count } = await sb.from('leads').select('*',{count:'exact',head:true}).gte('created_at', today);
+    const badge = document.getElementById('leadsBadge');
+    badge.textContent = count || 0;
+    if (count > 0) badge.style.background='#2d0e0e', badge.style.color='#f85149';
+  } catch(e) {}
+}
+
 function showAuthScreen() {
-  document.getElementById('app').style.display = 'none';
-  document.getElementById('authScreen').style.display = 'flex';
+  document.getElementById('app').style.display='none';
+  document.getElementById('authScreen').style.display='flex';
 }
 
-async function loadUserPlan() {
-  userPlan = 'free';
-  updateStats();
-}
-
-function getCurrentLimits() { return PLAN_LIMITS[userPlan] || PLAN_LIMITS.free; }
-
-function formatResetDate() {
-  const date = new Date();
-  date.setMonth(date.getMonth() + 1);
-  date.setDate(1);
-  return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-}
+async function loadUserPlan() { userPlan='free'; updateStats(); }
+function getCurrentLimits() { return PLAN_LIMITS[userPlan]||PLAN_LIMITS.free; }
 
 function switchTab(tab) {
-  ['login', 'signup'].forEach(t => {
-    document.getElementById('tab' + (t === 'login' ? 'Login' : 'Signup')).classList.toggle('active', t === tab);
-    document.getElementById(t + 'Panel').classList.toggle('active', t === tab);
+  ['login','signup'].forEach(t=>{
+    document.getElementById('tab'+(t==='login'?'Login':'Signup')).classList.toggle('active',t===tab);
+    document.getElementById(t+'Panel').classList.toggle('active',t===tab);
   });
 }
 
 async function doLogin() {
-  const email = document.getElementById('loginEmail').value.trim();
-  const pass = document.getElementById('loginPassword').value;
-  const err = document.getElementById('loginErr');
-  err.textContent = '';
-  if (!email || !pass) { err.textContent = 'Email and password required.'; return; }
-  const { error } = await sb.auth.signInWithPassword({ email, password: pass });
-  if (error) err.textContent = error.message;
+  const email=document.getElementById('loginEmail').value.trim();
+  const pass=document.getElementById('loginPassword').value;
+  const err=document.getElementById('loginErr'); err.textContent='';
+  if(!email||!pass){err.textContent='Email and password required.';return;}
+  const{error}=await sb.auth.signInWithPassword({email,password:pass});
+  if(error) err.textContent=error.message;
 }
 
 async function doSignup() {
-  const email = document.getElementById('signupEmail').value.trim();
-  const pass = document.getElementById('signupPassword').value;
-  const err = document.getElementById('signupErr');
-  err.textContent = '';
-  if (!email || !pass) { err.textContent = 'Email and password required.'; return; }
-  if (pass.length < 6) { err.textContent = 'Password must be at least 6 characters.'; return; }
-  const { error } = await sb.auth.signUp({ email, password: pass });
-  if (error) { err.textContent = error.message; }
-  else { err.style.color = '#2ecc71'; err.textContent = '✅ Account created! You can now sign in.'; }
+  const email=document.getElementById('signupEmail').value.trim();
+  const pass=document.getElementById('signupPassword').value;
+  const err=document.getElementById('signupErr'); err.textContent='';
+  if(!email||!pass){err.textContent='Email and password required.';return;}
+  if(pass.length<6){err.textContent='Password must be at least 6 characters.';return;}
+  const{error}=await sb.auth.signUp({email,password:pass});
+  if(error){err.textContent=error.message;}
+  else{err.style.color='#2ecc71';err.textContent='✅ Account created! You can now sign in.';}
 }
 
 async function doLogout() {
-  if (!confirm('Sign out?')) return;
-  history = []; allMsgsHTML = '';
-  localStorage.removeItem(STORAGE_KEYS.h); localStorage.removeItem(STORAGE_KEYS.m);
+  if(!confirm('Sign out?'))return;
+  history=[];allMsgsHTML='';
+  localStorage.removeItem(STORAGE_KEYS.h);localStorage.removeItem(STORAGE_KEYS.m);
   await sb.auth.signOut();
 }
 
-function loadLocal() {
-  try {
-    const h = localStorage.getItem(STORAGE_KEYS.h); if (h) history = JSON.parse(h);
-    allMsgsHTML = localStorage.getItem(STORAGE_KEYS.m) || '';
-    const u = localStorage.getItem(STORAGE_KEYS.u);
-    if (u) {
-      const ud = JSON.parse(u);
-      if (ud.date === new Date().toDateString()) {
-        chatUsed = ud.c || 0; imagesUsed = ud.i || 0; docsUsed = ud.d || 0;
-      }
-    }
-    const mu = localStorage.getItem(STORAGE_KEYS.mu);
-    if (mu) {
-      const mud = JSON.parse(mu);
-      const currentMonth = new Date().getMonth() + '-' + new Date().getFullYear();
-      if (mud.month === currentMonth) {
-        chatUsedMonthly = mud.c || 0; imagesUsedMonthly = mud.i || 0; docsUsedMonthly = mud.d || 0;
-      } else {
-        chatUsedMonthly = 0; imagesUsedMonthly = 0; docsUsedMonthly = 0;
-      }
-    }
-  } catch (e) { }
-}
-
-function saveHistory() {
-  try {
-    localStorage.setItem(STORAGE_KEYS.h, JSON.stringify(history.slice(-30)));
-    const msgs = document.getElementById('messages');
-    if (msgs) { allMsgsHTML = msgs.innerHTML; localStorage.setItem(STORAGE_KEYS.m, allMsgsHTML); }
-  } catch (e) { }
-}
-
-function saveUsage() {
-  try {
-    localStorage.setItem(STORAGE_KEYS.u, JSON.stringify({ date: new Date().toDateString(), c: chatUsed, i: imagesUsed, d: docsUsed }));
-    const currentMonth = new Date().getMonth() + '-' + new Date().getFullYear();
-    localStorage.setItem(STORAGE_KEYS.mu, JSON.stringify({ month: currentMonth, c: chatUsedMonthly, i: imagesUsedMonthly, d: docsUsedMonthly }));
-  } catch (e) { }
-}
-
-async function loadUsageFromServer() {
-  if (!session) return;
-  try {
-    const res = await fetch(API_URL + '/api/usage', { headers: { 'Authorization': 'Bearer ' + session.access_token } });
-    if (res.ok) {
-      const d = await res.json();
-      chatUsed = d.chats || chatUsed;
-      imagesUsed = d.images || imagesUsed;
-      docsUsed = d.docs || docsUsed;
-      updateStats();
-    }
-  } catch (e) { }
-}
-
-function updateStats() {
-  const limits = getCurrentLimits();
-  document.getElementById('statMsgs').innerHTML = Math.max(0, limits.messages - chatUsed);
-  document.getElementById('statImages').innerHTML = Math.max(0, limits.images - imagesUsed);
-  document.getElementById('statDocs').innerHTML = Math.max(0, limits.docs - docsUsed);
-  document.getElementById('usageTxt').innerHTML = chatUsed + ' / ' + limits.messages;
-  const fill = document.getElementById('usageFill');
-  if (fill) fill.style.width = Math.min(100, (chatUsed / limits.messages) * 100) + '%';
-}
-
-function toggleSidebar() {
-  const sb = document.getElementById('sidebar');
-  if (window.innerWidth <= 900) sb.classList.toggle('open');
-  else sb.classList.toggle('collapsed');
-}
-
-let touchStartX = 0;
-document.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX; });
-document.addEventListener('touchend', (e) => {
-  const touchEndX = e.changedTouches[0].screenX;
-  const sidebar = document.getElementById('sidebar');
-  if (touchEndX - touchStartX < -50 && sidebar.classList.contains('open')) sidebar.classList.remove('open');
-});
-
+// ── NAVIGATION ──
 function bindNav() {
-  document.querySelectorAll('.nav-item').forEach(item => {
-    item.addEventListener('click', () => {
-      if (item.dataset.mode === mode) return;
-      const msgs = document.getElementById('messages');
-      if (msgs) { allMsgsHTML = msgs.innerHTML; localStorage.setItem(STORAGE_KEYS.m, allMsgsHTML); }
-      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelectorAll('.nav-item[data-view]').forEach(item=>{
+    item.addEventListener('click',()=>{
+      const v=item.dataset.view;
+      document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
       item.classList.add('active');
-      mode = item.dataset.mode;
-      showChatInterface();
-      if (window.innerWidth <= 900) document.getElementById('sidebar').classList.remove('open');
+      showView(v);
+      if(window.innerWidth<=900) document.getElementById('sidebar').classList.remove('open');
     });
   });
 }
 
-function clearChat() {
-  if (!confirm('Clear all messages?')) return;
-  history = []; allMsgsHTML = '';
-  localStorage.removeItem(STORAGE_KEYS.h); localStorage.removeItem(STORAGE_KEYS.m);
-  const msgs = document.getElementById('messages');
-  if (msgs) msgs.innerHTML = '';
-  addAiMsg('👋 Cleared! What would you like to do?');
+function showView(view) {
+  currentView = view;
+  const mc = document.getElementById('mainContent');
+
+  if(['chat','deepcore','docs','image'].includes(view)) {
+    showChatInterface(view);
+  } else if(view==='ceo') {
+    showCEODashboard();
+  } else if(view==='command') {
+    showCommandCentre();
+  } else if(view==='leads') {
+    showLeadsPage();
+  } else if(view==='clientmgr') {
+    showClientManager();
+  } else if(view==='pricing') {
+    showPricing();
+  }
 }
 
-function toggleTheme() {
-  const html = document.documentElement;
-  html.setAttribute('data-theme', html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+// ── CEO DASHBOARD ──
+async function showCEODashboard() {
+  const mc = document.getElementById('mainContent');
+  mc.style.overflow='hidden';
+  mc.innerHTML=`
+    <div style="padding:12px 20px;border-bottom:1px solid #1a2332;flex-shrink:0;">
+      <div style="font-family:var(--mono);font-size:.78rem;color:var(--nes-blue);font-weight:800;">CEO DASHBOARD</div>
+      <div style="font-family:var(--mono);font-size:.6rem;color:#484f58;">Live · ${new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</div>
+    </div>
+    <div class="page" id="ceoDashContent">
+      <div style="text-align:center;padding:40px;color:#484f58;font-family:var(--mono);font-size:.78rem;">Loading dashboard...</div>
+    </div>`;
+
+  // Load real data
+  let leads=[], leadsToday=0, totalLeads=0;
+  try {
+    const today = new Date().toISOString().split('T')[0];
+    const {data:allLeads} = await sb.from('leads').select('*').order('created_at',{ascending:false}).limit(50);
+    leads = allLeads || [];
+    totalLeads = leads.length;
+    leadsToday = leads.filter(l=>l.created_at?.startsWith(today)).length;
+  } catch(e){}
+
+  // Industry breakdown
+  const industries = {};
+  leads.forEach(l=>{ const ind=l.industry||'Other'; industries[ind]=(industries[ind]||0)+1; });
+  const topIndustries = Object.entries(industries).sort((a,b)=>b[1]-a[1]).slice(0,4);
+
+  // Pipeline value estimate
+  const valueMap = {'Government':2500,'Ports & Customs':2500,'Aviation & Airports':2500,'Technology':1200,'Healthcare':800,'Finance & Banking':600};
+  const pipelineValue = leads.reduce((sum,l)=>sum+(valueMap[l.industry]||400),0);
+
+  // Uncontacted leads (no follow-up indicator - just new leads > 48hrs)
+  const fortyEightHrsAgo = new Date(Date.now()-48*60*60*1000).toISOString();
+  const uncontacted = leads.filter(l=>l.created_at<fortyEightHrsAgo && l.status!=='contacted').length;
+
+  document.getElementById('ceoDashContent').innerHTML=`
+    ${uncontacted>0?`<div class="alert-bar alert-warn">⚠️ ${uncontacted} lead${uncontacted>1?'s':''} uncontacted 48h+ — follow up today</div>`:`<div class="alert-bar alert-good">✅ All systems operational — platform running smoothly</div>`}
+
+    <div style="font-family:var(--mono);font-size:.6rem;color:#484f58;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;">Performance</div>
+    <div class="kgrid3">
+      <div class="kcard hot">
+        <div class="klbl">Pipeline value</div>
+        <div class="kval">OMR ${Math.round(pipelineValue/3.85).toLocaleString()}</div>
+        <div class="kdelta kup">Est. from ${totalLeads} leads</div>
+        <div class="kbar"><div class="kfill" style="width:72%;background:var(--nes-blue)"></div></div>
+      </div>
+      <div class="kcard">
+        <div class="klbl">New leads today</div>
+        <div class="kval">${leadsToday}</div>
+        <div class="kdelta kneu">Total: ${totalLeads}</div>
+        <div class="kbar"><div class="kfill" style="width:${Math.min(100,leadsToday*10)}%;background:#3fb950"></div></div>
+      </div>
+      <div class="kcard ${uncontacted>0?'warn':''}">
+        <div class="klbl">Needs follow-up</div>
+        <div class="kval">${uncontacted}</div>
+        <div class="kdelta ${uncontacted>0?'kdn':'kneu'}">${uncontacted>0?'Action required':'All followed up'}</div>
+        <div class="kbar"><div class="kfill" style="width:${Math.min(100,uncontacted*20)}%;background:${uncontacted>0?'#f85149':'#3fb950'}"></div></div>
+      </div>
+    </div>
+
+    <div class="row2">
+      <div class="dash-card">
+        <div class="dc-title">Lead pipeline</div>
+        <div class="pipe-track">
+          <div class="pipe-seg" style="width:35%;background:var(--nes-blue);border-radius:3px 0 0 3px"></div>
+          <div class="pipe-seg" style="width:28%;background:#7f77dd"></div>
+          <div class="pipe-seg" style="width:20%;background:#3fb950"></div>
+          <div class="pipe-seg" style="width:17%;background:#484f58;border-radius:0 3px 3px 0"></div>
+        </div>
+        <div class="pipe-legend">
+          <div class="pipe-item"><div class="pipe-dot" style="background:var(--nes-blue)"></div>New <span class="pipe-num">${Math.round(totalLeads*.35)}</span></div>
+          <div class="pipe-item"><div class="pipe-dot" style="background:#7f77dd"></div>Contacted <span class="pipe-num">${Math.round(totalLeads*.28)}</span></div>
+          <div class="pipe-item"><div class="pipe-dot" style="background:#3fb950"></div>Qualified <span class="pipe-num">${Math.round(totalLeads*.20)}</span></div>
+          <div class="pipe-item"><div class="pipe-dot" style="background:#484f58"></div>Closed <span class="pipe-num">${Math.round(totalLeads*.17)}</span></div>
+        </div>
+      </div>
+      <div class="dash-card">
+        <div class="dc-title">Lead geography <span style="font-size:.55rem;color:#484f58;cursor:pointer;" onclick="addCountry()">(+ add)</span></div>
+        <div id="geoRows">
+          ${buildGeoRows(leads)}
+        </div>
+      </div>
+    </div>
+
+    <div class="dash-card" style="margin-bottom:14px;">
+      <div class="dc-title">Industry breakdown</div>
+      ${topIndustries.map(([ind,cnt])=>`
+        <div class="geo-row">
+          <div class="geo-name">${ind.split(' ')[0]}</div>
+          <div class="geo-track"><div class="geo-fill" style="width:${Math.round(cnt/totalLeads*100)||0}%;background:var(--nes-blue)"></div></div>
+          <div class="geo-n">${cnt}</div>
+        </div>`).join('')}
+    </div>
+
+    <div style="font-family:var(--mono);font-size:.6rem;color:#484f58;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;">Market Intelligence</div>
+    <div class="intel-item">
+      <span style="font-size:1.1rem">🏛️</span>
+      <div>
+        <div class="ititle">Oman Ministry of Education — AI Learning Platform RFP</div>
+        <div class="isub">OMR 1.6M tender · deadline June 15 · NES directly positioned</div>
+        <span class="itag topp">Opportunity</span>
+      </div>
+    </div>
+    <div class="intel-item">
+      <span style="font-size:1.1rem">🇦🇪</span>
+      <div>
+        <div class="ititle">UAE Smart Government AI Framework 2026 launched</div>
+        <div class="isub">GCC benchmark Oman will follow · position NES as implementation partner</div>
+        <span class="itag twatch">Watch</span>
+      </div>
+    </div>
+    <div class="intel-item">
+      <span style="font-size:1.1rem">🤖</span>
+      <div>
+        <div class="ititle">OpenAI expands Middle East enterprise presence</div>
+        <div class="isub">Increases demand for local AI implementation partners</div>
+        <span class="itag trisk">Monitor</span>
+      </div>
+    </div>`;
 }
 
-function showChatInterface() {
-  const isSearch = ['chat', 'deepcore'].includes(mode);
-  const limits = getCurrentLimits();
-  document.getElementById('mainContent').innerHTML = `
+function buildGeoRows(leads) {
+  const geoMap = {};
+  leads.forEach(l=>{
+    const country = detectCountry(l.email||'');
+    geoMap[country]=(geoMap[country]||0)+1;
+  });
+  if(Object.keys(geoMap).length===0) {
+    geoMap['Oman']=leads.length||0;
+  }
+  const total=leads.length||1;
+  const colors=['var(--nes-blue)','#7f77dd','#3fb950','#484f58','#d29922'];
+  return Object.entries(geoMap).sort((a,b)=>b[1]-a[1]).map(([country,cnt],i)=>`
+    <div class="geo-row">
+      <div class="geo-name">${country}</div>
+      <div class="geo-track"><div class="geo-fill" style="width:${Math.round(cnt/total*100)}%;background:${colors[i%colors.length]}"></div></div>
+      <div class="geo-n">${cnt}</div>
+    </div>`).join('');
+}
+
+function detectCountry(email) {
+  if(email.endsWith('.om')||email.includes('oman')) return 'Oman';
+  if(email.endsWith('.ae')||email.includes('uae')||email.includes('dubai')) return 'UAE';
+  if(email.endsWith('.sa')||email.includes('saudi')) return 'Saudi Arabia';
+  if(email.endsWith('.kw')) return 'Kuwait';
+  if(email.endsWith('.bh')) return 'Bahrain';
+  if(email.endsWith('.qa')) return 'Qatar';
+  if(email.endsWith('.uk')||email.endsWith('.co.uk')) return 'UK';
+  if(email.endsWith('.de')) return 'Germany';
+  if(email.includes('gmail')||email.includes('yahoo')||email.includes('hotmail')) return 'Oman';
+  return 'Other';
+}
+
+function addCountry() {
+  const country = prompt('Add country name:');
+  if(country) alert('Country "'+country+'" will appear automatically when leads with that domain register.');
+}
+
+// ── NES COMMAND CENTRE ──
+function showCommandCentre() {
+  const mc = document.getElementById('mainContent');
+  mc.style.overflow='hidden';
+  mc.innerHTML=`
+    <div style="padding:12px 20px;border-bottom:1px solid #1a2332;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <div style="font-family:var(--mono);font-size:.78rem;color:var(--nes-blue);font-weight:800;">NES COMMAND CENTRE</div>
+        <div style="font-family:var(--mono);font-size:.6rem;color:#484f58;">Internal team communications</div>
+      </div>
+      <a href="${ROCKET_URL}" target="_blank" style="font-size:.7rem;color:var(--nes-blue);text-decoration:none;font-family:var(--mono);padding:4px 10px;border:1px solid rgba(64,156,255,.3);border-radius:6px;">Open full ↗</a>
+    </div>
+    <div class="command-wrap">
+      <iframe class="command-iframe" src="${ROCKET_URL}" title="NES Command Centre" allow="microphone; camera"></iframe>
+    </div>`;
+}
+
+// ── LEADS PAGE ──
+async function showLeadsPage() {
+  const mc = document.getElementById('mainContent');
+  mc.style.overflow='hidden';
+  mc.innerHTML=`
+    <div style="padding:12px 20px;border-bottom:1px solid #1a2332;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <div style="font-family:var(--mono);font-size:.78rem;color:var(--nes-blue);font-weight:800;">LEADS</div>
+        <div style="font-family:var(--mono);font-size:.6rem;color:#484f58;" id="leadsSubtitle">Loading...</div>
+      </div>
+      <div style="display:flex;gap:6px;">
+        <button onclick="exportLeads()" style="font-size:.7rem;padding:5px 10px;border-radius:6px;border:1px solid #1a2332;background:transparent;color:#8b949e;cursor:pointer;font-family:var(--mono);">Export CSV</button>
+      </div>
+    </div>
+    <div class="page" id="leadsContent">
+      <div style="text-align:center;padding:40px;color:#484f58;font-family:var(--mono);font-size:.78rem;">Loading leads...</div>
+    </div>`;
+
+  try {
+    const { data: leads, error } = await sb.from('leads').select('*').order('created_at',{ascending:false}).limit(100);
+    if(error) throw error;
+
+    const today = new Date().toISOString().split('T')[0];
+    const todayLeads = (leads||[]).filter(l=>l.created_at?.startsWith(today)).length;
+    document.getElementById('leadsSubtitle').textContent = `${leads?.length||0} total · ${todayLeads} today`;
+
+    const valueMap={'Government':2500,'Ports & Customs':2500,'Aviation & Airports':2500,'Technology':1200,'Healthcare':800,'Finance & Banking':600};
+    const pipeline = (leads||[]).reduce((s,l)=>s+(valueMap[l.industry]||400),0);
+
+    document.getElementById('leadsContent').innerHTML=`
+      <div class="leads-stats">
+        <div class="kcard hot"><div class="klbl">Total leads</div><div class="kval">${leads?.length||0}</div><div class="kdelta kup">${todayLeads} today</div></div>
+        <div class="kcard"><div class="klbl">Est. pipeline</div><div class="kval">OMR ${Math.round(pipeline/3.85).toLocaleString()}</div><div class="kdelta kneu">Based on industry</div></div>
+        <div class="kcard"><div class="klbl">This week</div><div class="kval">${(leads||[]).filter(l=>new Date(l.created_at)>new Date(Date.now()-7*24*60*60*1000)).length}</div><div class="kdelta kneu">Last 7 days</div></div>
+      </div>
+      <div class="tabs-bar">
+        <button class="tab-btn active" onclick="filterLeads('all',this)">All</button>
+        <button class="tab-btn" onclick="filterLeads('today',this)">Today</button>
+        <button class="tab-btn" onclick="filterLeads('week',this)">This week</button>
+      </div>
+      <div class="leads-table" id="leadsTable">
+        <div class="lt-header">
+          <div>Name / Email</div><div>Industry</div><div>Phone</div><div>Date</div><div>Status</div>
+        </div>
+        <div id="leadsRows">
+          ${renderLeadRows(leads||[])}
+        </div>
+      </div>`;
+
+    window._allLeads = leads||[];
+  } catch(e) {
+    document.getElementById('leadsContent').innerHTML=`<div style="text-align:center;padding:40px;color:#f85149;font-family:var(--mono);">Error loading leads: ${e.message}</div>`;
+  }
+}
+
+function renderLeadRows(leads) {
+  if(!leads.length) return '<div style="padding:20px;text-align:center;color:#484f58;font-family:var(--mono);font-size:.78rem;">No leads found</div>';
+  return leads.map(l=>{
+    const date = new Date(l.created_at);
+    const timeAgo = getTimeAgo(date);
+    const badge = getBadge(l, date);
+    return `<div class="lt-row">
+      <div><div class="lead-name">${l.name||'—'}</div><div class="lead-email">${l.email||'—'}</div></div>
+      <div class="lead-industry">${l.industry||'General Business'}</div>
+      <div class="lead-email">${l.phone||'—'}</div>
+      <div class="lead-time">${timeAgo}</div>
+      <div><span class="lead-badge ${badge.cls}">${badge.label}</span></div>
+    </div>`;
+  }).join('');
+}
+
+function getBadge(lead, date) {
+  const hrs = (Date.now()-date.getTime())/3600000;
+  const highValue = ['Government','Ports & Customs','Aviation & Airports'].includes(lead.industry);
+  if(highValue&&hrs<24) return {cls:'lbhot',label:'Hot'};
+  if(hrs<24) return {cls:'lbnew',label:'New'};
+  return {cls:'lbwarm',label:'Warm'};
+}
+
+function getTimeAgo(date) {
+  const hrs = Math.floor((Date.now()-date.getTime())/3600000);
+  if(hrs<1) return 'Just now';
+  if(hrs<24) return hrs+'h ago';
+  const days = Math.floor(hrs/24);
+  return days+'d ago';
+}
+
+function filterLeads(filter, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  let filtered = window._allLeads||[];
+  if(filter==='today') filtered=filtered.filter(l=>l.created_at?.startsWith(new Date().toISOString().split('T')[0]));
+  if(filter==='week') filtered=filtered.filter(l=>new Date(l.created_at)>new Date(Date.now()-7*24*60*60*1000));
+  document.getElementById('leadsRows').innerHTML=renderLeadRows(filtered);
+}
+
+function exportLeads() {
+  const leads=window._allLeads||[];
+  const csv=['Name,Email,Phone,Industry,Message,Date',...leads.map(l=>`"${l.name||''}","${l.email||''}","${l.phone||''}","${l.industry||''}","${(l.message||'').replace(/"/g,"'")}","${l.created_at||''}"`)].join('\n');
+  const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);a.download='nes-leads-'+new Date().toISOString().split('T')[0]+'.csv';a.click();
+}
+
+// ── CLIENT MANAGER (nesadmin only) ──
+async function showClientManager() {
+  if(userRole!=='nesadmin'){addAiMsg('⛔ Access denied. Client Manager is for NES Admin only.');return;}
+  const mc=document.getElementById('mainContent');
+  mc.style.overflow='hidden';
+  mc.innerHTML=`
+    <div style="padding:12px 20px;border-bottom:1px solid #1a2332;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <div style="font-family:var(--mono);font-size:.78rem;color:var(--nes-blue);font-weight:800;">CLIENT MANAGER</div>
+        <div style="font-family:var(--mono);font-size:.6rem;color:#484f58;">NES Admin only · Manage all clients</div>
+      </div>
+      <button class="add-client-btn" onclick="addClient()">+ Add client</button>
+    </div>
+    <div class="page" id="cmContent">
+      <div style="text-align:center;padding:40px;color:#484f58;font-family:var(--mono);font-size:.78rem;">Loading clients...</div>
+    </div>`;
+
+  renderClientManager();
+}
+
+function renderClientManager(activeId=null) {
+  const clients = [
+    {id:'tc',name:'TechCorp Oman',av:'TC',bg:'#1a3a6e',tc:'#409cff',plan:'Growth',leads:23,chats:183,posts:84,status:'active'},
+    {id:'gp',name:'Gulf Ports LLC',av:'GP',bg:'#2d1f00',tc:'#d29922',plan:'Enterprise',leads:47,chats:240,posts:112,status:'active'},
+    {id:'ar',name:'Al Rashdi Medical',av:'AR',bg:'#0d2818',tc:'#3fb950',plan:'Starter',leads:8,chats:44,posts:0,status:'onboarding'},
+  ];
+  const active=clients.find(c=>c.id===activeId)||clients[0];
+
+  document.getElementById('cmContent').innerHTML=`
+    <div class="cm-layout">
+      <div class="client-list">
+        <div class="cl-header">Clients (${clients.length})</div>
+        ${clients.map(c=>`
+          <div class="client-item ${c.id===active.id?'active':''}" onclick="selectClient('${c.id}')">
+            <div class="ci-av" style="background:${c.bg};color:${c.tc};">${c.av}</div>
+            <div class="ci-name">${c.name}</div>
+            <div class="ci-dot" style="background:${c.status==='active'?'#3fb950':'#d29922'}"></div>
+          </div>`).join('')}
+      </div>
+      <div class="cm-detail">
+        <div class="cm-top">
+          <div class="cm-client-info">
+            <div class="cm-av" style="background:${active.bg};color:${active.tc};">${active.av}</div>
+            <div>
+              <div class="cm-name">${active.name}</div>
+              <span class="cm-plan ${active.plan==='Growth'?'plan-g':active.plan==='Enterprise'?'plan-e':'plan-s'}">${active.plan}</span>
+            </div>
+          </div>
+          <div class="cm-actions">
+            <button class="cm-btn">Edit</button>
+            <button class="cm-btn">Billing</button>
+            <button class="cm-btn primary">Save</button>
+          </div>
+        </div>
+        <div class="cm-stats">
+          <div class="cm-stat"><div class="cs-lbl">Leads/month</div><div class="cs-val">${active.leads}</div></div>
+          <div class="cm-stat"><div class="cs-lbl">AI chats</div><div class="cs-val">${active.chats}</div></div>
+          <div class="cm-stat"><div class="cs-lbl">Social posts</div><div class="cs-val">${active.posts}</div></div>
+          <div class="cm-stat"><div class="cs-lbl">Status</div><div class="cs-val" style="font-size:.9rem;color:${active.status==='active'?'#3fb950':'#d29922'}">${active.status}</div></div>
+        </div>
+        <div class="cm-tabs">
+          <div class="cm-tab active" onclick="cmTab('modules',this)">Modules</div>
+          <div class="cm-tab" onclick="cmTab('creds',this)">Credentials</div>
+          <div class="cm-tab" onclick="cmTab('branding',this)">Branding</div>
+        </div>
+        <div class="cm-content">
+          <div id="cm-modules">
+            <div class="modules-grid">
+              ${[
+                ['🤖','AI Chatbot','24/7 website assistant',true],
+                ['👥','Lead Capture','Form → Supabase → alerts',true],
+                ['📱','Social Media','FB · LinkedIn · Instagram',true],
+                ['📊','CEO Dashboard','KPIs · pipeline · intel',true],
+                ['💬','NES Command','Team communications',true],
+                ['📰','Intelligence Feed','Daily market briefing',true],
+                ['📞','Sara AI Receptionist','1-min callback on lead',false],
+                ['💬','WhatsApp Alerts','Lead + team alerts',false],
+                ['📧','Email Notifications','Lead emails to team',true],
+                ['☪️','Islam360','GCC / Europe version',false],
+              ].map(([icon,name,desc,on])=>`
+                <div class="mod">
+                  <span class="mod-icon">${icon}</span>
+                  <div style="flex:1;"><div class="mod-name">${name}</div><div class="mod-desc">${desc}</div></div>
+                  <button class="toggle ${on?'on':'off'}" onclick="this.classList.toggle('on');this.classList.toggle('off')"><div class="toggle-knob"></div></button>
+                </div>`).join('')}
+            </div>
+          </div>
+          <div id="cm-creds" style="display:none;">
+            <div class="creds-grid">
+              ${[
+                ['Facebook token','EAABwzL...k9Xn'],
+                ['LinkedIn token','AQX7k...mP2'],
+                ['WhatsApp Phone ID',''],
+                ['Cal.com link','cal.com/'+active.name.toLowerCase().replace(/\s/g,'')+'/demo'],
+                ['Lead email','leads@company.om'],
+                ['Website URL','company.om'],
+                ['Instagram ID',''],
+                ['Vapi assistant ID',''],
+              ].map(([lbl,val])=>`
+                <div class="cred-field">
+                  <div class="cf-lbl">${lbl}</div>
+                  ${val?`<div class="cf-val">${val}</div>`:`<div class="cf-empty">Not configured</div>`}
+                </div>`).join('')}
+            </div>
+          </div>
+          <div id="cm-branding" style="display:none;">
+            <div class="creds-grid">
+              ${[
+                ['Logo URL','cdn.company.om/logo.png'],
+                ['Primary colour','#1a56db'],
+                ['Company name',active.name],
+                ['Region','Oman · GCC'],
+                ['Industry','Technology · ICT'],
+                ['Language','English · Arabic'],
+              ].map(([lbl,val])=>`
+                <div class="cred-field">
+                  <div class="cf-lbl">${lbl}</div>
+                  <div class="cf-val">${val}</div>
+                </div>`).join('')}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function selectClient(id) { renderClientManager(id); }
+function cmTab(name,el) {
+  ['modules','creds','branding'].forEach(t=>{
+    document.getElementById('cm-'+t).style.display=t===name?'block':'none';
+  });
+  document.querySelectorAll('.cm-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+}
+function addClient() { alert('Add client form coming soon — will create Supabase row and spin up workflows automatically.'); }
+
+// ── CHAT INTERFACE ──
+function showChatInterface(mode='chat') {
+  currentView=mode;
+  const isSearch=['chat','deepcore'].includes(mode);
+  const limits=getCurrentLimits();
+  document.getElementById('mainContent').style.overflow='hidden';
+  document.getElementById('mainContent').innerHTML=`
     <div class="welcome-card">
-      <div class="mode-label">${MODE_LABELS[mode]}${isSearch ? ' 🌐 Web Search ON' : ''}</div>
+      <div class="mode-label">${MODE_LABELS[mode]}${isSearch?' 🌐 Web Search ON':''}</div>
       <div class="version-label">NES AI v3.0</div>
       <div class="free-tier">Free: ${limits.messages} msgs/day · ${limits.images} images/day · ${limits.docs} docs/day</div>
     </div>
     <div class="messages" id="messages"></div>
     <div class="input-area">
       <div class="prompt-wrap">
-        <input type="text" id="msgInput" placeholder="${mode === 'image' ? 'Describe the image you want…' : 'Ask me anything...'}" maxlength="8000" autocomplete="off">
+        <input type="text" id="msgInput" placeholder="${mode==='image'?'Describe the image you want…':'Ask me anything...'}" maxlength="8000" autocomplete="off">
         <button class="send-btn" id="sendBtn" onclick="sendMsg()">↑</button>
       </div>
       <div class="bottom-bar">
@@ -425,271 +974,162 @@ function showChatInterface() {
           <span class="disclaimer">NES AI can make mistakes</span>
         </div>
         <div class="bottom-right">
-          <span class="stat">💬 <b id="statMsgs">${limits.messages - chatUsed}</b> left</span>
-          <span class="stat">🎨 <b id="statImages">${limits.images - imagesUsed}</b> left</span>
-          <span class="stat">📄 <b id="statDocs">${limits.docs - docsUsed}</b> left</span>
+          <span class="stat">💬 <b id="statMsgs">${limits.messages-chatUsed}</b> left</span>
+          <span class="stat">🎨 <b id="statImages">${limits.images-imagesUsed}</b> left</span>
+          <span class="stat">📄 <b id="statDocs">${limits.docs-docsUsed}</b> left</span>
         </div>
       </div>
     </div>`;
 
-  document.getElementById('msgInput').addEventListener('keypress', e => { if (e.key === 'Enter') sendMsg(); });
-
-  const msgsEl = document.getElementById('messages');
-  if (allMsgsHTML && allMsgsHTML.trim()) {
-    msgsEl.innerHTML = allMsgsHTML;
-    msgsEl.scrollTop = msgsEl.scrollHeight;
-  } else if (history.length === 0) {
-    addAiMsg('👋 Welcome to NES AI — your unified intelligence platform. What would you like to do today?');
-  } else {
-    history.forEach(h => {
-      if (h.role === 'user') appendMsg(userBubble(h.content));
-      else appendMsg(aiBubble(h.content, h.sources || []));
-    });
-    msgsEl.scrollTop = msgsEl.scrollHeight;
-  }
+  document.getElementById('msgInput').addEventListener('keypress',e=>{if(e.key==='Enter')sendMsg();});
+  const msgsEl=document.getElementById('messages');
+  if(allMsgsHTML&&allMsgsHTML.trim()){msgsEl.innerHTML=allMsgsHTML;msgsEl.scrollTop=msgsEl.scrollHeight;}
+  else if(history.length===0){addAiMsg('👋 Welcome to NES AI — your unified intelligence platform. What would you like to do today?');}
+  else{history.forEach(h=>{if(h.role==='user')appendMsg(userBubble(h.content));else appendMsg(aiBubble(h.content,h.sources||[]));});msgsEl.scrollTop=msgsEl.scrollHeight;}
 }
 
+// ── SEND MESSAGE ──
 async function sendMsg() {
-  if (busy || !session) return;
-  const input = document.getElementById('msgInput');
-  const text = input.value.trim();
-  if (!text) return;
-
-  const limits = getCurrentLimits();
-  const resetDate = formatResetDate();
-
-  if (limits.monthlyMessages !== -1 && chatUsedMonthly >= limits.monthlyMessages) {
-    addAiMsg(`💬 You've reached your monthly limit of ${limits.monthlyMessages} messages. Your limit resets on ${resetDate}. Upgrade to Pro/Team for higher limits!`);
-    return;
-  }
-  if (limits.monthlyImages !== -1 && imagesUsedMonthly >= limits.monthlyImages) {
-    addAiMsg(`✨ You've reached your monthly limit of ${limits.monthlyImages} images. Your limit resets on ${resetDate}. Upgrade to Pro/Team for higher limits!`);
-    return;
-  }
-  if (limits.monthlyDocs !== -1 && docsUsedMonthly >= limits.monthlyDocs) {
-    addAiMsg(`📄 You've reached your monthly limit of ${limits.monthlyDocs} documents. Your limit resets on ${resetDate}. Upgrade to Pro/Team for higher limits!`);
-    return;
-  }
-  if (chatUsed >= limits.messages) {
-    addAiMsg(`📅 Daily limit of ${limits.messages} messages reached. Come back tomorrow!`);
-    return;
-  }
-
-  input.value = '';
-  setBusy(true);
-  appendMsg(userBubble(text));
-  history.push({ role: 'user', content: text });
-  addTyping();
-
-  try {
-    const useSearch = ['chat', 'deepcore'].includes(mode);
-    const endpoint = mode === 'image' ? '/api/image' : '/api/chat';
-    const body = mode === 'image'
-      ? { prompt: text }
-      : { message: text, mode, webSearch: useSearch, history: history.slice(-10), model: 'gemini-3.1-flash' };
-
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 45000);
-    const res = await fetch(API_URL + endpoint, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token },
-      body: JSON.stringify(body),
-      signal: controller.signal
-    });
-    clearTimeout(timeout);
-    removeTyping();
-
-    if (res.ok) {
-      const data = await res.json();
-      if (mode === 'image') {
-        appendMsg(imgBubble(data.url, data.revisedPrompt || text));
-        imagesUsed++;
-        imagesUsedMonthly++;
-        const msgs = document.getElementById('messages');
-        if (msgs) { allMsgsHTML = msgs.innerHTML; localStorage.setItem(STORAGE_KEYS.m, allMsgsHTML); }
-      } else {
-        const reply = data.reply || 'Sorry, I could not generate a response.';
-        const sources = data.sources || [];
-        history.push({ role: 'assistant', content: reply, sources: sources });
-        appendMsg(aiBubble(reply, sources));
-      }
-      chatUsed++;
-      chatUsedMonthly++;
-      saveHistory(); saveUsage(); updateStats();
-      loadUsageFromServer().catch(() => { });
-    } else {
-      const err = await res.json().catch(() => ({}));
-      addAiMsg('❌ Error ' + (err.error || res.status) + '. Please try again.');
-    }
-  } catch (e) {
-    removeTyping();
-    addAiMsg('❌ Network error. Please check your connection.');
-  }
+  if(busy||!session)return;
+  const input=document.getElementById('msgInput');
+  const text=input.value.trim();
+  if(!text)return;
+  const limits=getCurrentLimits();
+  if(chatUsed>=limits.messages&&limits.messages!==-1){addAiMsg('📅 Daily limit reached. Come back tomorrow!');return;}
+  input.value='';setBusy(true);appendMsg(userBubble(text));history.push({role:'user',content:text});addTyping();
+  try{
+    const useSearch=['chat','deepcore'].includes(currentView);
+    const endpoint=currentView==='image'?'/api/image':'/api/chat';
+    const body=currentView==='image'?{prompt:text}:{message:text,mode:currentView,webSearch:useSearch,history:history.slice(-10),model:'gemini-3.1-flash'};
+    const controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),45000);
+    const res=await fetch(API_URL+endpoint,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify(body),signal:controller.signal});
+    clearTimeout(timeout);removeTyping();
+    if(res.ok){
+      const data=await res.json();
+      if(currentView==='image'){appendMsg(imgBubble(data.url,data.revisedPrompt||text));imagesUsed++;imagesUsedMonthly++;}
+      else{const reply=data.reply||'Sorry, I could not generate a response.';const sources=data.sources||[];history.push({role:'assistant',content:reply,sources});appendMsg(aiBubble(reply,sources));}
+      chatUsed++;chatUsedMonthly++;saveHistory();saveUsage();updateStats();
+    }else{const err=await res.json().catch(()=>({}));addAiMsg('❌ Error '+(err.error||res.status)+'. Please try again.');}
+  }catch(e){removeTyping();addAiMsg('❌ Network error. Please check your connection.');}
   setBusy(false);
 }
 
-function handleAttach() {
-  if (mode !== 'docs') {
-    addAiMsg('📎 File attachment is available in **Documents mode**. Switch to 📄 Documents in the sidebar.');
-    return;
-  }
-  const limits = getCurrentLimits();
-  const resetDate = formatResetDate();
-  if (limits.monthlyDocs !== -1 && docsUsedMonthly >= limits.monthlyDocs) {
-    addAiMsg(`📄 You've reached your monthly limit of ${limits.monthlyDocs} documents. Your limit resets on ${resetDate}. Upgrade to Pro/Team for higher limits!`);
-    return;
-  }
-  if (docsUsed >= limits.docs) {
-    addAiMsg(`📅 Daily limit of ${limits.docs} documents reached. Come back tomorrow!`);
-    return;
-  }
-  const inp = document.createElement('input');
-  inp.type = 'file';
-  inp.accept = '.txt,.md,.json,.csv,.pdf,.docx,.xlsx,.xls';
-  inp.onchange = e => processFile(e.target.files[0]);
-  inp.click();
+// ── FILE HANDLING ──
+function handleAttach(){
+  if(currentView!=='docs'){addAiMsg('📎 File attachment is available in Documents mode.');return;}
+  const inp=document.createElement('input');inp.type='file';inp.accept='.txt,.md,.json,.csv,.pdf,.docx,.xlsx,.xls';inp.onchange=e=>processFile(e.target.files[0]);inp.click();
 }
-
-async function processFile(file) {
-  if (!file) return;
-  if (file.size > 10 * 1024 * 1024) { addAiMsg('❌ File too large. Max 10MB.'); return; }
-  appendMsg(userBubble('📎 ' + file.name + ' (' + Math.round(file.size / 1024) + ' KB) — analyzing…'));
-  setBusy(true); addTyping();
-  try {
-    const content = await extractText(file);
-    if (!content.trim()) { removeTyping(); addAiMsg('❌ Could not extract text from this file.'); setBusy(false); return; }
-    const truncated = content.substring(0, 7000);
-    history.push({ role: 'user', content: 'Analyze document "' + file.name + '":\n' + truncated });
-    const res = await fetch(API_URL + '/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token },
-      body: JSON.stringify({
-        message: 'Please analyze this document called "' + file.name + '" and provide a clear, well-structured summary.\n\nContent:\n' + truncated,
-        mode: 'docs', webSearch: false, history: history.slice(-4), model: 'gemini-3.1-flash'
-      })
-    });
+async function processFile(file){
+  if(!file)return;if(file.size>10*1024*1024){addAiMsg('❌ File too large. Max 10MB.');return;}
+  appendMsg(userBubble('📎 '+file.name+' ('+Math.round(file.size/1024)+' KB) — analyzing…'));setBusy(true);addTyping();
+  try{
+    const content=await extractText(file);if(!content.trim()){removeTyping();addAiMsg('❌ Could not extract text.');setBusy(false);return;}
+    const truncated=content.substring(0,7000);history.push({role:'user',content:'Analyze document "'+file.name+'":\n'+truncated});
+    const res=await fetch(API_URL+'/api/chat',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify({message:'Please analyze this document called "'+file.name+'" and provide a clear summary.\n\nContent:\n'+truncated,mode:'docs',webSearch:false,history:history.slice(-4),model:'gemini-3.1-flash'})});
     removeTyping();
-    if (res.ok) {
-      const data = await res.json();
-      const reply = data.reply || 'Document analyzed.';
-      history.push({ role: 'assistant', content: reply });
-      appendMsg(aiBubble(reply));
-      docsUsed++;
-      docsUsedMonthly++;
-    } else { addAiMsg('❌ Could not analyze file. Please try again.'); }
-    saveHistory(); saveUsage(); updateStats();
-  } catch (err) {
-    removeTyping();
-    addAiMsg('❌ Error reading file: ' + err.message);
-  }
+    if(res.ok){const data=await res.json();const reply=data.reply||'Document analyzed.';history.push({role:'assistant',content:reply});appendMsg(aiBubble(reply));docsUsed++;docsUsedMonthly++;}
+    else{addAiMsg('❌ Could not analyze file.');}
+    saveHistory();saveUsage();updateStats();
+  }catch(err){removeTyping();addAiMsg('❌ Error reading file: '+err.message);}
   setBusy(false);
 }
-
-async function extractText(file) {
-  const name = file.name.toLowerCase();
-  const ext = name.split('.').pop();
-  if (['txt', 'md', 'json', 'csv'].includes(ext)) return file.text();
-  if (ext === 'pdf') {
-    if (typeof pdfjsLib === 'undefined') await loadScript('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js');
-    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-    const ab = await file.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument({ data: ab }).promise;
-    const pages = [];
-    for (let i = 1; i <= Math.min(pdf.numPages, 20); i++) {
-      const page = await pdf.getPage(i);
-      const tc = await page.getTextContent();
-      pages.push(tc.items.map(s => s.str).join(' '));
-    }
-    return pages.join('\n');
-  }
-  if (ext === 'docx') {
-    if (typeof mammoth === 'undefined') await loadScript('https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js');
-    const ab = await file.arrayBuffer();
-    const r = await mammoth.extractRawText({ arrayBuffer: ab });
-    return r.value;
-  }
-  if (['xlsx', 'xls'].includes(ext)) {
-    if (typeof XLSX === 'undefined') await loadScript('https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js');
-    const ab = await file.arrayBuffer();
-    const wb = XLSX.read(ab);
-    return wb.SheetNames.map(n => 'Sheet: ' + n + '\n' + XLSX.utils.sheet_to_csv(wb.Sheets[n])).join('\n\n');
-  }
+async function extractText(file){
+  const ext=file.name.split('.').pop().toLowerCase();
+  if(['txt','md','json','csv'].includes(ext))return file.text();
+  if(ext==='pdf'){if(typeof pdfjsLib==='undefined')await loadScript('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js');pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';const ab=await file.arrayBuffer();const pdf=await pdfjsLib.getDocument({data:ab}).promise;const pages=[];for(let i=1;i<=Math.min(pdf.numPages,20);i++){const page=await pdf.getPage(i);const tc=await page.getTextContent();pages.push(tc.items.map(s=>s.str).join(' '));}return pages.join('\n');}
+  if(ext==='docx'){if(typeof mammoth==='undefined')await loadScript('https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js');const ab=await file.arrayBuffer();const r=await mammoth.extractRawText({arrayBuffer:ab});return r.value;}
+  if(['xlsx','xls'].includes(ext)){if(typeof XLSX==='undefined')await loadScript('https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js');const ab=await file.arrayBuffer();const wb=XLSX.read(ab);return wb.SheetNames.map(n=>'Sheet: '+n+'\n'+XLSX.utils.sheet_to_csv(wb.Sheets[n])).join('\n\n');}
   throw new Error('Unsupported file type');
 }
+function loadScript(src){return new Promise((resolve,reject)=>{if(document.querySelector('script[src="'+src+'"]')){resolve();return;}const s=document.createElement('script');s.src=src;s.onload=resolve;s.onerror=reject;document.head.appendChild(s);});}
 
-function loadScript(src) {
-  return new Promise((resolve, reject) => {
-    if (document.querySelector('script[src="' + src + '"]')) { resolve(); return; }
-    const s = document.createElement('script'); s.src = src; s.onload = resolve; s.onerror = reject;
-    document.head.appendChild(s);
-  });
-}
-
-function toggleVoice() {
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SR) { addAiMsg('❌ Voice not supported in this browser.'); return; }
-  const btn = document.getElementById('voiceBtn');
-  const recognition = new SR();
-  recognition.lang = 'en-US';
-  btn.classList.add('rec');
-  setStatus('busy', 'Listening…');
-  recognition.onresult = e => {
-    document.getElementById('msgInput').value = e.results[0][0].transcript;
-    btn.classList.remove('rec');
-    setStatus('ok', 'Ready');
-    sendMsg();
-  };
-  recognition.onerror = recognition.onend = () => { btn.classList.remove('rec'); setStatus('ok', 'Ready'); };
+// ── VOICE ──
+function toggleVoice(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){addAiMsg('❌ Voice not supported in this browser.');return;}
+  const btn=document.getElementById('voiceBtn');const recognition=new SR();recognition.lang='en-US';
+  btn.style.color='#f85149';setStatus('busy','Listening…');
+  recognition.onresult=e=>{document.getElementById('msgInput').value=e.results[0][0].transcript;btn.style.color='';setStatus('ok','Ready');sendMsg();};
+  recognition.onerror=recognition.onend=()=>{btn.style.color='';setStatus('ok','Ready');};
   recognition.start();
 }
 
-function showPricing() {
-  const plans = [
-    { name: 'Free', price: '$0', period: 'forever', features: ['50 msgs/day', '15 images/month (5 days)', '5 docs/day', 'Web search', 'Voice input'], btn: 'Current Plan', disabled: true },
-    { name: 'Starter', price: '$7', period: 'per month', features: ['150 msgs/day', '200 images/month', '25 docs/day', 'Web search', 'Voice input'], btn: 'Upgrade →', onclick: "alert('Upgrade coming soon!')" },
-    { name: 'Pro', price: '$19', period: 'per month', features: ['500 msgs/day', '500 images/month', '100 docs/day', 'Priority search', 'Email support'], btn: 'Upgrade →', onclick: "alert('Upgrade coming soon!')", highlight: true },
-    { name: 'Team', price: '$79', period: 'per month', features: ['3,000 msgs/day', '2,000 images/month', '500 docs/day', 'Priority support', 'Team management'], btn: 'Upgrade →', onclick: "alert('Upgrade coming soon!')" },
-    { name: 'Enterprise', price: 'Contact Us', period: 'tailored for you', features: ['Unlimited messages', 'Custom image limits', 'SLA guarantee', 'SSO / SAML', 'On-premise'], btn: 'Contact Us →', onclick: "alert('Contact us at enterprise@nes.ai')", contact: true }
+// ── PRICING ──
+function showPricing(){
+  const plans=[
+    {name:'Free',price:'$0',period:'forever',features:['50 msgs/day','15 images/month','5 docs/day','Web search','Voice input'],btn:'Current Plan',disabled:true},
+    {name:'Starter',price:'$7',period:'per month',features:['150 msgs/day','200 images/month','25 docs/day','Web search','Voice input'],btn:'Upgrade →',onclick:"alert('Upgrade coming soon!')"},
+    {name:'Pro',price:'$19',period:'per month',features:['500 msgs/day','500 images/month','100 docs/day','Priority search','Email support'],btn:'Upgrade →',onclick:"alert('Upgrade coming soon!')",highlight:true},
+    {name:'Team',price:'$79',period:'per month',features:['3,000 msgs/day','2,000 images/month','500 docs/day','Priority support','Team management'],btn:'Upgrade →',onclick:"alert('Upgrade coming soon!')"},
+    {name:'Enterprise',price:'Contact Us',period:'tailored for you',features:['Unlimited messages','Custom image limits','SLA guarantee','SSO / SAML','On-premise'],btn:'Contact Us →',onclick:"alert('Contact us at nesadmin@essential-services.org')"}
   ];
-  document.getElementById('mainContent').innerHTML = `
+  document.getElementById('mainContent').innerHTML=`
     <div class="pricing-wrap">
-      <a href="#" onclick="showChatInterface();return false;" style="color:var(--accent);text-decoration:none;display:inline-block;margin-bottom:24px;">← Back to Chat</a>
+      <a href="#" onclick="showView('chat');return false;" style="color:var(--nes-blue);text-decoration:none;display:inline-block;margin-bottom:24px;">← Back to Chat</a>
       <div style="text-align:center;margin-bottom:32px;"><h1 style="font-size:1.8rem;font-weight:700;">Choose Your Plan</h1><p style="color:var(--muted);font-size:.9rem;margin-top:8px;">Flexible pricing for every need.</p></div>
       <div class="plan-grid">
-        ${plans.map(p => `
-          <div class="plan-card ${p.highlight ? 'highlight' : ''}">
-            <div class="plan-name">${p.name}</div>
-            <div class="plan-price">${p.price}</div>
-            <div class="plan-period">${p.period}</div>
-            <ul class="plan-features-list">${p.features.map(f => `<li>✅ ${f}</li>`).join('')}</ul>
-            <button class="plan-action-btn" ${p.disabled ? 'disabled' : ''} ${p.onclick ? `onclick="${p.onclick}"` : ''}>${p.btn}</button>
-          </div>`).join('')}
+        ${plans.map(p=>`<div class="plan-card"><div class="plan-name">${p.name}</div><div class="plan-price">${p.price}</div><div class="plan-period">${p.period}</div><ul class="plan-features-list">${p.features.map(f=>`<li>✅ ${f}</li>`).join('')}</ul><button class="plan-action-btn" ${p.disabled?'disabled':''} ${p.onclick?`onclick="${p.onclick}"`:''} >${p.btn}</button></div>`).join('')}
       </div>
     </div>`;
 }
 
-function userBubble(text) { return `<div class="msg user"><div class="user-av-msg">U</div><div class="msg-body"><div class="msg-role">You</div><div class="msg-bubble">${esc(text)}</div></div></div>`; }
-function aiBubble(text, sources = []) {
-  const src = sources.length ? '<div class="sources-block">📚 Sources: ' + sources.map(s => '<a href="' + esc(s.url) + '" target="_blank">' + esc(s.title || s.url) + '</a>').join(' · ') + '</div>' : '';
-  return `<div class="msg ai"><img src="${LOGO_URL}" class="chat-av"><div class="msg-body"><div class="msg-role">NES AI</div><div class="msg-bubble">${md(text)}${src}</div><button class="copy-btn" onclick="copyMsg(this)">📋 Copy</button></div></div>`;
+// ── UTILITIES ──
+function loadLocal(){
+  try{
+    const h=localStorage.getItem(STORAGE_KEYS.h);if(h)history=JSON.parse(h);
+    allMsgsHTML=localStorage.getItem(STORAGE_KEYS.m)||'';
+    const u=localStorage.getItem(STORAGE_KEYS.u);
+    if(u){const ud=JSON.parse(u);if(ud.date===new Date().toDateString()){chatUsed=ud.c||0;imagesUsed=ud.i||0;docsUsed=ud.d||0;}}
+    const mu=localStorage.getItem(STORAGE_KEYS.mu);
+    if(mu){const mud=JSON.parse(mu);const cm=new Date().getMonth()+'-'+new Date().getFullYear();if(mud.month===cm){chatUsedMonthly=mud.c||0;imagesUsedMonthly=mud.i||0;docsUsedMonthly=mud.d||0;}}
+  }catch(e){}
 }
-function imgBubble(url, prompt) { return `<div class="msg ai"><img src="${LOGO_URL}" class="chat-av"><div class="msg-body"><div class="msg-role">NES AI · Flux</div><div class="msg-bubble"><img src="${esc(url)}" style="max-width:100%;border-radius:10px;"><div style="font-size:.62rem;color:var(--muted);margin-top:6px;">Prompt: ${esc(prompt)}</div></div><button class="copy-btn" onclick="copyMsg(this)">📋 Copy</button></div></div>`; }
-function addAiMsg(text, sources = []) { appendMsg(aiBubble(text, sources)); saveHistory(); }
-function addTyping() { const el = document.createElement('div'); el.className = 'msg ai'; el.id = 'typing'; el.innerHTML = `<img src="${LOGO_URL}" class="chat-av"><div class="msg-body"><div class="msg-role">NES AI</div><div class="msg-bubble"><div style="display:flex;gap:5px;"><div style="width:7px;height:7px;background:var(--accent);border-radius:50%;animation:bounce 1.4s infinite;"></div><div style="width:7px;height:7px;background:var(--accent);border-radius:50%;animation:bounce 1.4s .2s infinite;"></div><div style="width:7px;height:7px;background:var(--accent);border-radius:50%;animation:bounce 1.4s .4s infinite;"></div></div></div></div>`; document.getElementById('messages')?.appendChild(el); scroll(); }
-function removeTyping() { document.getElementById('typing')?.remove(); }
-function appendMsg(html) { document.getElementById('messages')?.insertAdjacentHTML('beforeend', html); scroll(); saveHistory(); }
-function scroll() { const c = document.getElementById('messages'); if (c) c.scrollTop = c.scrollHeight; }
-function copyMsg(btn) { const bubble = btn.closest('.msg-body').querySelector('.msg-bubble'); navigator.clipboard.writeText(bubble.innerText || ''); btn.textContent = '✓'; setTimeout(() => btn.textContent = '📋 Copy', 2000); }
-function setBusy(b) { busy = b; document.getElementById('sendBtn').disabled = b; setStatus(b ? 'busy' : 'ok', b ? 'Thinking…' : 'Ready'); }
-function setStatus(cls, txt) { const el = document.getElementById('statusEl'); if (el) { el.className = 'status-dot' + (cls === 'busy' ? ' busy' : ''); el.textContent = txt; } }
-function esc(s) { return String(s || '').replace(/[&<>]/g, function (m) { if (m === '&') return '&amp;'; if (m === '<') return '&lt;'; if (m === '>') return '&gt;'; return m; }); }
-function md(s) { let m = esc(s); m = m.replace(/```(\w*)\n?([\s\S]*?)```/g, '<pre><code>$2</code></pre>'); m = m.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>'); m = m.replace(/`([^`\n]+)`/g, '<code>$1</code>'); m = m.replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br>'); return '<p>' + m + '</p>'.replace(/<p>\s*<\/p>/g, ''); }
+function saveHistory(){
+  try{localStorage.setItem(STORAGE_KEYS.h,JSON.stringify(history.slice(-30)));const msgs=document.getElementById('messages');if(msgs){allMsgsHTML=msgs.innerHTML;localStorage.setItem(STORAGE_KEYS.m,allMsgsHTML);}}catch(e){}
+}
+function saveUsage(){
+  try{localStorage.setItem(STORAGE_KEYS.u,JSON.stringify({date:new Date().toDateString(),c:chatUsed,i:imagesUsed,d:docsUsed}));const cm=new Date().getMonth()+'-'+new Date().getFullYear();localStorage.setItem(STORAGE_KEYS.mu,JSON.stringify({month:cm,c:chatUsedMonthly,i:imagesUsedMonthly,d:docsUsedMonthly}));}catch(e){}
+}
+async function loadUsageFromServer(){
+  if(!session)return;
+  try{const res=await fetch(API_URL+'/api/usage',{headers:{'Authorization':'Bearer '+session.access_token}});if(res.ok){const d=await res.json();chatUsed=d.chats||chatUsed;imagesUsed=d.images||imagesUsed;docsUsed=d.docs||docsUsed;updateStats();}}catch(e){}
+}
+function updateStats(){
+  const limits=getCurrentLimits();
+  const sm=document.getElementById('statMsgs');const si=document.getElementById('statImages');const sd=document.getElementById('statDocs');
+  if(sm)sm.textContent=Math.max(0,limits.messages-chatUsed);
+  if(si)si.textContent=Math.max(0,limits.images-imagesUsed);
+  if(sd)sd.textContent=Math.max(0,limits.docs-docsUsed);
+  document.getElementById('usageTxt').textContent=chatUsed+' / '+limits.messages;
+  const fill=document.getElementById('usageFill');if(fill)fill.style.width=Math.min(100,(chatUsed/limits.messages)*100)+'%';
+}
+function toggleSidebar(){const sb=document.getElementById('sidebar');if(window.innerWidth<=900)sb.classList.toggle('open');else sb.classList.toggle('collapsed');}
+function clearChat(){if(!confirm('Clear all messages?'))return;history=[];allMsgsHTML='';localStorage.removeItem(STORAGE_KEYS.h);localStorage.removeItem(STORAGE_KEYS.m);const msgs=document.getElementById('messages');if(msgs)msgs.innerHTML='';addAiMsg('👋 Cleared! What would you like to do?');}
+function toggleTheme(){const html=document.documentElement;html.setAttribute('data-theme',html.getAttribute('data-theme')==='dark'?'light':'dark');}
+function userBubble(text){return`<div class="msg user"><div class="user-av-msg">U</div><div class="msg-body"><div class="msg-role">You</div><div class="msg-bubble">${esc(text)}</div></div></div>`;}
+function aiBubble(text,sources=[]){const src=sources.length?'<div class="sources-block">📚 Sources: '+sources.map(s=>'<a href="'+esc(s.url)+'" target="_blank">'+esc(s.title||s.url)+'</a>').join(' · ')+'</div>':'';return`<div class="msg ai"><img src="${LOGO_URL}" class="chat-av"><div class="msg-body"><div class="msg-role">NES AI</div><div class="msg-bubble">${md(text)}${src}</div><button class="copy-btn" onclick="copyMsg(this)">📋 Copy</button></div></div>`;}
+function imgBubble(url,prompt){return`<div class="msg ai"><img src="${LOGO_URL}" class="chat-av"><div class="msg-body"><div class="msg-role">NES AI · Flux</div><div class="msg-bubble"><img src="${esc(url)}" style="max-width:100%;border-radius:10px;"><div style="font-size:.62rem;color:var(--muted);margin-top:6px;">Prompt: ${esc(prompt)}</div></div><button class="copy-btn" onclick="copyMsg(this)">📋 Copy</button></div></div>`;}
+function addAiMsg(text,sources=[]){appendMsg(aiBubble(text,sources));saveHistory();}
+function addTyping(){const el=document.createElement('div');el.className='msg ai';el.id='typing';el.innerHTML=`<img src="${LOGO_URL}" class="chat-av"><div class="msg-body"><div class="msg-role">NES AI</div><div class="msg-bubble"><div style="display:flex;gap:5px;"><div style="width:7px;height:7px;background:var(--nes-blue);border-radius:50%;animation:bounce 1.4s infinite;"></div><div style="width:7px;height:7px;background:var(--nes-blue);border-radius:50%;animation:bounce 1.4s .2s infinite;"></div><div style="width:7px;height:7px;background:var(--nes-blue);border-radius:50%;animation:bounce 1.4s .4s infinite;"></div></div></div></div>`;document.getElementById('messages')?.appendChild(el);scroll();}
+function removeTyping(){document.getElementById('typing')?.remove();}
+function appendMsg(html){document.getElementById('messages')?.insertAdjacentHTML('beforeend',html);scroll();saveHistory();}
+function scroll(){const c=document.getElementById('messages');if(c)c.scrollTop=c.scrollHeight;}
+function copyMsg(btn){const bubble=btn.closest('.msg-body').querySelector('.msg-bubble');navigator.clipboard.writeText(bubble.innerText||'');btn.textContent='✓';setTimeout(()=>btn.textContent='📋 Copy',2000);}
+function setBusy(b){busy=b;const sb=document.getElementById('sendBtn');if(sb)sb.disabled=b;setStatus(b?'busy':'ok',b?'Thinking…':'Ready');}
+function setStatus(cls,txt){const el=document.getElementById('statusEl');if(el){el.className='status-dot'+(cls==='busy'?' busy':'');el.textContent=txt;}}
+function esc(s){return String(s||'').replace(/[&<>]/g,m=>m==='&'?'&amp;':m==='<'?'&lt;':'&gt;');}
+function md(s){let m=esc(s);m=m.replace(/```(\w*)\n?([\s\S]*?)```/g,'<pre><code>$2</code></pre>');m=m.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');m=m.replace(/`([^`\n]+)`/g,'<code>$1</code>');m=m.replace(/\n\n/g,'</p><p>').replace(/\n/g,'<br>');return'<p>'+m+'</p>'.replace(/<p>\s*<\/p>/g,'');}
 
-window.switchTab = switchTab; window.doLogin = doLogin; window.doSignup = doSignup; window.doLogout = doLogout;
-window.toggleTheme = toggleTheme; window.showPricing = showPricing; window.showChatInterface = showChatInterface;
-window.sendMsg = sendMsg; window.handleAttach = handleAttach; window.toggleVoice = toggleVoice;
-window.copyMsg = copyMsg; window.toggleSidebar = toggleSidebar; window.clearChat = clearChat;
-window.formatResetDate = formatResetDate;
+let touchStartX=0;
+document.addEventListener('touchstart',e=>{touchStartX=e.changedTouches[0].screenX;});
+document.addEventListener('touchend',e=>{const tx=e.changedTouches[0].screenX;const sb=document.getElementById('sidebar');if(tx-touchStartX<-50&&sb.classList.contains('open'))sb.classList.remove('open');});
+
+window.switchTab=switchTab;window.doLogin=doLogin;window.doSignup=doSignup;window.doLogout=doLogout;
+window.toggleTheme=toggleTheme;window.showPricing=showPricing;window.showView=showView;
+window.sendMsg=sendMsg;window.handleAttach=handleAttach;window.toggleVoice=toggleVoice;
+window.copyMsg=copyMsg;window.toggleSidebar=toggleSidebar;window.clearChat=clearChat;
+window.filterLeads=filterLeads;window.exportLeads=exportLeads;window.selectClient=selectClient;
+window.cmTab=cmTab;window.addClient=addClient;window.addCountry=addCountry;
 </script>
 </body>
 </html>
