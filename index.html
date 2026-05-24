@@ -26,6 +26,24 @@
       --card:#ffffff;--card2:#f6f8fa;--border2:#d0d7de;--nes-blue:#0969da;
       --nes-btn-grad:linear-gradient(135deg,#1a56db,#2563eb);
     }
+    [data-theme="light"] .sidebar{background:#ffffff!important;border-right:1px solid #d0d7de!important;}
+    [data-theme="light"] .nav-label{color:#656d76!important;}
+    [data-theme="light"] .nav-item{color:#656d76!important;}
+    [data-theme="light"] .nav-item:hover,[data-theme="light"] .nav-item.active{background:rgba(9,105,218,.08)!important;color:#0969da!important;}
+    [data-theme="light"] .nav-item.active{border-left-color:#0969da!important;}
+    [data-theme="light"] .sb-brand-name .ai{color:#1f2328!important;}
+    [data-theme="light"] .sb-brand-sub{color:#656d76!important;}
+    [data-theme="light"] .sb-upgrade{background:linear-gradient(135deg,#1a56db,#2563eb)!important;}
+    [data-theme="light"] .sb-divider{background:#d0d7de!important;}
+    [data-theme="light"] .usage-wrap{border-top:1px solid #d0d7de!important;}
+    [data-theme="light"] .usage-track{background:#d0d7de!important;}
+    [data-theme="light"] .user-av{background:rgba(9,105,218,.08)!important;border-color:rgba(9,105,218,.2)!important;}
+    [data-theme="light"] .role-chip{background:#e8f0fe!important;color:#0969da!important;}
+    [data-theme="light"] .logout-btn{border-color:#d0d7de!important;color:#656d76!important;}
+    [data-theme="light"] .client-mgr-btn{background:rgba(9,105,218,.08)!important;border-color:rgba(9,105,218,.2)!important;}
+    [data-theme="light"] .recent-item:hover{background:rgba(9,105,218,.06)!important;}
+    [data-theme="light"] .avatar-ring{background:#e8f0fe!important;border-color:#0969da!important;}
+    [data-theme="light"] .avatar-online{border-color:#ffffff!important;}
     body{font-family:var(--ui);background:var(--bg);color:var(--text);height:100dvh;display:flex;overflow:hidden;}
 
     /* ── SIDEBAR ── */
@@ -261,7 +279,7 @@
     .cm-av{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:700;flex-shrink:0;}
     .cm-name{font-size:.9rem;font-weight:700;color:var(--text);}
     .cm-plan{font-size:.6rem;padding:2px 7px;border-radius:6px;margin-top:2px;display:inline-block;font-family:var(--mono);}
-    .plan-g{background:#0d2818;color:#3fb950;}
+    .plan-p{background:#0d2818;color:#3fb950;} .plan-g{background:#0d2818;color:#3fb950;}
     .plan-e{background:#2d1f00;color:#d29922;}
     .plan-s{background:#0c1f35;color:var(--nes-blue);}
     .cm-actions{display:flex;gap:5px;flex-wrap:wrap;}
@@ -374,7 +392,7 @@
     <div class="sb-header">
       <div class="avatar-wrap">
         <div class="avatar-ring">
-          <div class="avatar-mid"><div class="avatar-dot"></div></div>
+          <img src="https://files.catbox.moe/adhf8n.png" class="avatar-logo" alt="NES">
         </div>
         <div class="avatar-online"></div>
       </div>
@@ -597,6 +615,8 @@ function bindNav(){
 function showView(view){
   currentView=view;
   localStorage.setItem('nesai_view',view);
+  // Hide team hub if switching away
+  if(view!=='command'&&window._teamHubVisible)hideTeamHub();
   // Show/hide clear button — only for chat views
   const clearBtn=document.getElementById('clearBtn');
   if(clearBtn)clearBtn.style.display=['chat','deepcore','docs','image'].includes(view)?'grid':'none';
@@ -638,30 +658,49 @@ async function showCEODashboard(){
   const uncontacted=leads.filter(l=>l.created_at<fortyEightHrsAgo&&l.status!=='contacted').length;
   const colors=['var(--nes-blue)','#7f77dd','#3fb950','#d29922','#484f58'];
   const geoRows=Object.entries(countries).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([c,n],i)=>`
-    <div class="geo-row"><div class="geo-name">${c}</div><div class="geo-track"><div class="geo-fill" style="width:${Math.round(n/totalLeads*100)||0}%;background:${colors[i%5]}"></div></div><div class="geo-n">${n}</div></div>`).join('');
+    <div class="geo-row"><div class="geo-name">${c}</div><div class="geo-track"><div class="geo-fill" style="width:${Math.round(n/totalLeads*100)||0}%;background:${colors[i%5]};box-shadow:0 0 4px ${colors[i%5]}"></div></div><div class="geo-n">${n}</div></div>`).join('');
+  // Fetch weather
+  fetch('https://wttr.in/Muscat?format=j1').then(r=>r.json()).then(w=>{
+    const c=w.current_condition[0];
+    const desc=c.weatherDesc[0].value;
+    const temp=c.temp_C;
+    const feels=c.FeelsLikeC;
+    const humidity=c.humidity;
+    const icons={'Sunny':'ti-sun','Clear':'ti-moon-stars','Partly cloudy':'ti-cloud-sun','Cloudy':'ti-cloud','Overcast':'ti-cloud','Mist':'ti-mist','Fog':'ti-mist','Rain':'ti-cloud-rain','Drizzle':'ti-cloud-drizzle','Thunderstorm':'ti-storm','Snow':'ti-snowflake','Blizzard':'ti-snowflake'};
+    const iconKey=Object.keys(icons).find(k=>desc.includes(k))||'Sunny';
+    const wi=document.getElementById('weatherIcon');
+    const wd=document.getElementById('weatherDesc');
+    const wt=document.getElementById('weatherTemp');
+    const wf=document.getElementById('weatherFeels');
+    if(wi)wi.className='ti '+(icons[iconKey]||'ti-sun')+' ';wi.style.cssText='font-size:22px;color:var(--nes-blue);filter:drop-shadow(0 0 4px var(--nes-blue))';
+    if(wd)wd.textContent=desc+' · Humidity '+humidity+'%';
+    if(wt)wt.textContent=temp+'°C';
+    if(wf)wf.textContent='Feels like '+feels+'°C';
+  }).catch(()=>{const wd=document.getElementById('weatherDesc');if(wd)wd.textContent='Weather unavailable';});
+
   document.getElementById('ceoDashContent').innerHTML=`
     ${uncontacted>0
       ?`<div class="alert-bar alert-warn"><i class="ti ti-alert-triangle"></i> ${uncontacted} lead${uncontacted>1?'s':''} uncontacted 48h+ — follow up today</div>`
       :`<div class="alert-bar alert-good"><i class="ti ti-circle-check"></i> All systems operational — platform running smoothly</div>`}
-    <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:7px;">Performance</div>
+    <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:7px;display:flex;align-items:center;gap:5px;"><i class="ti ti-chart-bar" style="font-size:12px;color:var(--nes-blue);filter:drop-shadow(0 0 3px var(--nes-blue))"></i>Performance</div>
     <div class="kgrid3">
-      <div class="kcard hot"><div class="klbl">Pipeline value</div><div class="kval" style="color:var(--nes-blue);">OMR ${Math.round(pipelineValue/3.85).toLocaleString()}</div><div class="kdelta kup">Est. from ${totalLeads} leads</div><div class="kbar"><div class="kfill" style="width:72%;background:var(--nes-blue)"></div></div></div>
-      <div class="kcard"><div class="klbl">New leads today</div><div class="kval">${leadsToday}</div><div class="kdelta kneu">Total: ${totalLeads}</div><div class="kbar"><div class="kfill" style="width:${Math.min(100,leadsToday*10)}%;background:#3fb950"></div></div></div>
-      <div class="kcard ${uncontacted>0?'warn':''}" ><div class="klbl">Needs follow-up</div><div class="kval">${uncontacted}</div><div class="kdelta ${uncontacted>0?'kdn':'kneu'}">${uncontacted>0?'Action required':'All followed up'}</div><div class="kbar"><div class="kfill" style="width:${Math.min(100,uncontacted*20)}%;background:${uncontacted>0?'#f85149':'#3fb950'}"></div></div></div>
+      <div class="kcard hot"><div class="klbl" style="display:flex;align-items:center;gap:4px;"><i class="ti ti-trending-up" style="font-size:11px;color:var(--nes-blue);filter:drop-shadow(0 0 3px var(--nes-blue))"></i>Pipeline value</div><div class="kval" style="color:var(--nes-blue);">OMR ${Math.round(pipelineValue/3.85).toLocaleString()}</div><div class="kdelta kup">Est. from ${totalLeads} leads</div><div class="kbar"><div class="kfill" style="width:72%;background:var(--nes-blue)"></div></div></div>
+      <div class="kcard"><div class="klbl" style="display:flex;align-items:center;gap:4px;"><i class="ti ti-users" style="font-size:11px;color:#3fb950;filter:drop-shadow(0 0 3px #3fb950)"></i>New leads today</div><div class="kval">${leadsToday}</div><div class="kdelta kneu">Total: ${totalLeads}</div><div class="kbar"><div class="kfill" style="width:${Math.min(100,leadsToday*10)}%;background:#3fb950"></div></div></div>
+      <div class="kcard ${uncontacted>0?'warn':''}" ><div class="klbl" style="display:flex;align-items:center;gap:4px;"><i class="ti ti-bell" style="font-size:11px;color:${uncontacted>0?'#f85149':'#3fb950'};filter:drop-shadow(0 0 3px ${uncontacted>0?'#f85149':'#3fb950'})"></i>Needs follow-up</div><div class="kval">${uncontacted}</div><div class="kdelta ${uncontacted>0?'kdn':'kneu'}">${uncontacted>0?'Action required':'All followed up'}</div><div class="kbar"><div class="kfill" style="width:${Math.min(100,uncontacted*20)}%;background:${uncontacted>0?'#f85149':'#3fb950'}"></div></div></div>
     </div>
     <div class="row2">
       <div class="dash-card">
         <div class="dc-title">Lead pipeline</div>
         <div class="pipe-track">
-          <div class="pipe-seg" style="width:35%;background:var(--nes-blue);border-radius:3px 0 0 3px"></div>
-          <div class="pipe-seg" style="width:28%;background:#7f77dd"></div>
-          <div class="pipe-seg" style="width:20%;background:#3fb950"></div>
+          <div class="pipe-seg" style="width:35%;background:var(--nes-blue);border-radius:3px 0 0 3px;box-shadow:0 0 4px var(--nes-blue)"></div>
+          <div class="pipe-seg" style="width:28%;background:#7f77dd;box-shadow:0 0 4px #7f77dd"></div>
+          <div class="pipe-seg" style="width:20%;background:#3fb950;box-shadow:0 0 4px #3fb950"></div>
           <div class="pipe-seg" style="width:17%;background:#484f58;border-radius:0 3px 3px 0"></div>
         </div>
         <div class="pipe-legend">
-          <div class="pipe-item"><div class="pipe-dot" style="background:var(--nes-blue)"></div>New <span class="pipe-num">${Math.round(totalLeads*.35)}</span></div>
-          <div class="pipe-item"><div class="pipe-dot" style="background:#7f77dd"></div>Contacted <span class="pipe-num">${Math.round(totalLeads*.28)}</span></div>
-          <div class="pipe-item"><div class="pipe-dot" style="background:#3fb950"></div>Qualified <span class="pipe-num">${Math.round(totalLeads*.20)}</span></div>
+          <div class="pipe-item"><div class="pipe-dot" style="background:var(--nes-blue);box-shadow:0 0 3px var(--nes-blue)"></div>New <span class="pipe-num">${Math.round(totalLeads*.35)}</span></div>
+          <div class="pipe-item"><div class="pipe-dot" style="background:#7f77dd;box-shadow:0 0 3px #7f77dd"></div>Contacted <span class="pipe-num">${Math.round(totalLeads*.28)}</span></div>
+          <div class="pipe-item"><div class="pipe-dot" style="background:#3fb950;box-shadow:0 0 3px #3fb950"></div>Qualified <span class="pipe-num">${Math.round(totalLeads*.20)}</span></div>
           <div class="pipe-item"><div class="pipe-dot" style="background:#484f58"></div>Closed <span class="pipe-num">${Math.round(totalLeads*.17)}</span></div>
         </div>
       </div>
@@ -670,10 +709,21 @@ async function showCEODashboard(){
         ${geoRows||'<div style="color:var(--muted);font-family:var(--mono);font-size:.75rem;">No leads yet</div>'}
       </div>
     </div>
-    <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:7px;">Market Intelligence</div>
-    <div class="intel-item"><span class="itag itag-opp">OPP</span><div><div class="ititle">Oman Ministry of Education — AI Learning Platform RFP</div><div class="isub">OMR 1.6M tender · Deadline June 15 · NES directly positioned</div></div></div>
-    <div class="intel-item"><span class="itag itag-watch">WATCH</span><div><div class="ititle">UAE Smart Government AI Framework 2026 launched</div><div class="isub">GCC benchmark — Oman expected to follow · Position NES as implementation partner</div></div></div>
-    <div class="intel-item"><span class="itag itag-risk">RISK</span><div><div class="ititle">OpenAI expands Middle East enterprise presence</div><div class="isub">Increases demand for local AI implementation partners</div></div></div>`;
+    <div id="weatherCard" style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 13px;margin-bottom:10px;display:flex;align-items:center;gap:12px;">
+      <i class="ti ti-cloud" style="font-size:22px;color:var(--nes-blue);filter:drop-shadow(0 0 4px var(--nes-blue))" id="weatherIcon"></i>
+      <div style="flex:1">
+        <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px;display:flex;align-items:center;gap:4px;"><i class="ti ti-map-pin" style="font-size:10px"></i>WEATHER — MUSCAT</div>
+        <div id="weatherDesc" style="font-size:.85rem;font-weight:600;color:var(--text)">Loading...</div>
+      </div>
+      <div style="text-align:right">
+        <div id="weatherTemp" style="font-size:1.4rem;font-weight:700;color:var(--nes-blue)">—</div>
+        <div id="weatherFeels" style="font-size:.65rem;color:var(--muted);font-family:var(--mono)">Feels like —</div>
+      </div>
+    </div>
+    <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:7px;display:flex;align-items:center;gap:5px;"><i class="ti ti-radar" style="font-size:12px;color:var(--nes-blue);filter:drop-shadow(0 0 3px var(--nes-blue))"></i>Market Intelligence</div>
+    <div class="intel-item"><i class="ti ti-target" style="font-size:14px;color:#3fb950;filter:drop-shadow(0 0 4px #3fb950);flex-shrink:0;margin-top:1px"></i><div style="flex:1"><div class="ititle">Oman Ministry of Education — AI Learning Platform RFP</div><div class="isub">OMR 1.6M tender · Deadline June 15 · NES directly positioned</div></div><span class="itag itag-opp">OPP</span></div>
+    <div class="intel-item"><i class="ti ti-eye" style="font-size:14px;color:var(--nes-blue);filter:drop-shadow(0 0 4px var(--nes-blue));flex-shrink:0;margin-top:1px"></i><div style="flex:1"><div class="ititle">UAE Smart Government AI Framework 2026 launched</div><div class="isub">GCC benchmark — Oman expected to follow · Position NES as implementation partner</div></div><span class="itag itag-watch">WATCH</span></div>
+    <div class="intel-item"><i class="ti ti-alert-triangle" style="font-size:14px;color:#d29922;filter:drop-shadow(0 0 4px #d29922);flex-shrink:0;margin-top:1px"></i><div style="flex:1"><div class="ititle">OpenAI expands Middle East enterprise presence</div><div class="isub">Increases demand for local AI implementation partners</div></div><span class="itag itag-risk">RISK</span></div>`;
 }
 
 function detectCountry(email){
@@ -699,12 +749,23 @@ function detectCountry(email){
 function showCommandCentre(){
   const mc=document.getElementById('mainContent');
   mc.style.overflow='hidden';
-  mc.innerHTML=`
-    <div style="padding:11px 18px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;">
-      <div><div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;">TEAM HUB</div><div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">Internal team communications</div></div>
-
-    </div>
-    <div class="command-wrap"><iframe class="command-iframe" src="${ROCKET_URL}" title="NES Team Hub" allow="microphone; camera"></iframe></div>`;
+  let hub=document.getElementById('teamHubWrapper');
+  if(!hub){
+    hub=document.createElement('div');
+    hub.id='teamHubWrapper';
+    hub.style.cssText='position:absolute;top:0;left:228px;right:0;bottom:0;background:var(--bg);z-index:50;display:flex;flex-direction:column;';
+    hub.innerHTML=`<div style="padding:11px 18px;border-bottom:1px solid var(--border);flex-shrink:0;"><div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;">TEAM HUB</div><div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">Internal team communications</div></div><div class="command-wrap"><iframe id="teamHubIframe" class="command-iframe" src="${ROCKET_URL}" title="NES Team Hub" allow="microphone; camera"></iframe></div>`;
+    document.getElementById('app').appendChild(hub);
+  }
+  hub.style.display='flex';
+  mc.style.display='none';
+  window._teamHubVisible=true;
+}
+function hideTeamHub(){
+  const hub=document.getElementById('teamHubWrapper');
+  if(hub)hub.style.display='none';
+  document.getElementById('mainContent').style.display='flex';
+  window._teamHubVisible=false;
 }
 
 // ── LEADS ──
@@ -727,9 +788,9 @@ async function showLeadsPage(){
     const pipeline=(leads||[]).reduce((s,l)=>s+(valueMap[l.industry]||400),0);
     document.getElementById('leadsContent').innerHTML=`
       <div class="leads-stats">
-        <div class="kcard hot"><div class="klbl">Total leads</div><div class="kval" style="color:var(--nes-blue)">${leads?.length||0}</div><div class="kdelta kup">${todayLeads} today</div></div>
-        <div class="kcard"><div class="klbl">Est. pipeline</div><div class="kval">OMR ${Math.round(pipeline/3.85).toLocaleString()}</div><div class="kdelta kneu">Based on industry</div></div>
-        <div class="kcard"><div class="klbl">This week</div><div class="kval">${(leads||[]).filter(l=>new Date(l.created_at)>new Date(Date.now()-7*24*60*60*1000)).length}</div><div class="kdelta kneu">Last 7 days</div></div>
+        <div class="kcard hot"><div class="klbl" style="display:flex;align-items:center;gap:4px;"><i class="ti ti-users" style="font-size:11px;color:var(--nes-blue);filter:drop-shadow(0 0 3px var(--nes-blue))"></i>Total leads</div><div class="kval" style="color:var(--nes-blue)">${leads?.length||0}</div><div class="kdelta kup">${todayLeads} today</div></div>
+        <div class="kcard"><div class="klbl" style="display:flex;align-items:center;gap:4px;"><i class="ti ti-currency-dollar" style="font-size:11px;color:#3fb950;filter:drop-shadow(0 0 3px #3fb950)"></i>Est. pipeline</div><div class="kval">OMR ${Math.round(pipeline/3.85).toLocaleString()}</div><div class="kdelta kneu">Based on industry</div></div>
+        <div class="kcard"><div class="klbl" style="display:flex;align-items:center;gap:4px;"><i class="ti ti-calendar-week" style="font-size:11px;color:#7f77dd;filter:drop-shadow(0 0 3px #7f77dd)"></i>This week</div><div class="kval">${(leads||[]).filter(l=>new Date(l.created_at)>new Date(Date.now()-7*24*60*60*1000)).length}</div><div class="kdelta kneu">Last 7 days</div></div>
       </div>
       <div class="tabs-bar">
         <button class="tab-btn active" onclick="filterLeads('all',this)">All</button>
@@ -1092,7 +1153,7 @@ function clientFormFields(c={}){
       <div class="form-field"><label class="form-label">Plan</label>
         <select id="field_plan" class="form-select">
           <option value="starter" ${c.plan==='starter'?'selected':''}>Starter</option>
-          <option value="growth" ${c.plan==='growth'?'selected':''}>Growth</option>
+          <option value="growth" ${c.plan==='growth'?'selected':''}>Pro</option>
           <option value="enterprise" ${c.plan==='enterprise'?'selected':''}>Enterprise</option>
         </select>
       </div>
@@ -1332,7 +1393,7 @@ window.saveNewClient=saveNewClient;window.updateClient=updateClient;
 window.deleteClient=deleteClient;window.saveClientModules=saveClientModules;
 window.saveClientCreds=saveClientCreds;window.saveClientBranding=saveClientBranding;
 window.saveClientAgents=saveClientAgents;window.saveClientBilling=saveClientBilling;
-window.showClientManager=showClientManager;window.showToast=showToast;
+window.showClientManager=showClientManager;window.showToast=showToast;window.hideTeamHub=hideTeamHub;
 window.selectClientDB=selectClientDB;window.restoreChat=restoreChat;
 </script>
 </body>
