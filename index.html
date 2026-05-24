@@ -24,6 +24,7 @@
       --accent:#0969da;--accent-lo:rgba(9,105,218,.08);--accent-md:rgba(9,105,218,.15);
       --green:#1a7f37;--red:#cf222e;--amber:#9a6700;--purple:#6639ba;
       --card:#ffffff;--card2:#f6f8fa;--border2:#d0d7de;--nes-blue:#0969da;
+      --nes-btn-grad:linear-gradient(135deg,#1a56db,#2563eb);
     }
     body{font-family:var(--ui);background:var(--bg);color:var(--text);height:100dvh;display:flex;overflow:hidden;}
 
@@ -264,7 +265,7 @@
     .plan-e{background:#2d1f00;color:#d29922;}
     .plan-s{background:#0c1f35;color:var(--nes-blue);}
     .cm-actions{display:flex;gap:5px;flex-wrap:wrap;}
-    .cm-btn{font-size:.7rem;padding:4px 9px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;}
+    .cm-btn{font-size:.7rem;padding:4px 9px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer;transition:all .15s;}
     .cm-btn.primary{border-color:var(--nes-blue);color:var(--nes-blue);background:#0c1f35;}
     .cm-btn.danger{border-color:#f85149;color:#f85149;background:#2d0e0e;}
     .cm-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;padding:10px 13px;border-bottom:1px solid var(--border);}
@@ -332,7 +333,10 @@
       .row2,.cm-layout{grid-template-columns:1fr;}
       .lt-header,.lt-row{grid-template-columns:1fr 1fr;}
       .form-grid,.creds-grid,.modules-grid{grid-template-columns:1fr;}
-      .bottom-right{gap:7px;}
+      .bottom-right{gap:5px;}
+      .bottom-bar{flex-wrap:wrap;gap:5px;}
+      .stat-item{font-size:.62rem;}
+      .stat-item b{font-size:.62rem;}
     }
   </style>
 </head>
@@ -441,11 +445,15 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
+// ============================================================
+// ⚙️  NES AI — CONFIGURATION (UPDATE THESE VALUES)
+// ============================================================
 const SUPABASE_URL='https://sfpfjjdtczvuxyhjievt.supabase.co';
 const SUPABASE_ANON='sb_publishable_MH7rnJ7r8_-1TzGXcieNfA_NXoHQZbm';
 const API_URL='https://api.essential-services.org';
 const ROCKET_URL='https://chat.essential-services.org';
 const LOGO_URL='https://files.catbox.moe/adhf8n.png';
+// ============================================================
 
 const PLAN_LIMITS={
   free:{name:'Free',price:0,messages:50,images:3,docs:5},
@@ -474,7 +482,8 @@ async function showApp(user){
   await loadUserRole(user);
   await loadUserPlan();
   setupNavForRole();
-  showView('chat');
+  const savedView=localStorage.getItem('nesai_view')||'chat';
+  showView(savedView);
   loadUsageFromServer();
   bindNav();
 }
@@ -587,6 +596,7 @@ function bindNav(){
 
 function showView(view){
   currentView=view;
+  localStorage.setItem('nesai_view',view);
   // Show/hide clear button — only for chat views
   const clearBtn=document.getElementById('clearBtn');
   if(clearBtn)clearBtn.style.display=['chat','deepcore','docs','image'].includes(view)?'grid':'none';
@@ -692,7 +702,7 @@ function showCommandCentre(){
   mc.innerHTML=`
     <div style="padding:11px 18px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;">
       <div><div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;">TEAM HUB</div><div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">Internal team communications</div></div>
-      <a href="${ROCKET_URL}" target="_blank" style="font-size:.7rem;color:var(--nes-blue);text-decoration:none;font-family:var(--mono);padding:4px 9px;border:1px solid rgba(64,156,255,.3);border-radius:6px;">Open full ↗</a>
+
     </div>
     <div class="command-wrap"><iframe class="command-iframe" src="${ROCKET_URL}" title="NES Team Hub" allow="microphone; camera"></iframe></div>`;
 }
@@ -1206,7 +1216,7 @@ async function processFile(file){
     const content=await extractText(file);if(!content.trim()){removeTyping();addAiMsg('Could not extract text.');setBusy(false);return;}
     const truncated=content.substring(0,7000);
     history.push({role:'user',content:'Analyze: "'+file.name+'":\n'+truncated});
-    const res=await fetch(API_URL+'/api/chat',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify({message:'Analyze this document "'+file.name+'" and provide a comprehensive summary with key insights.\n\nContent:\n'+truncated,mode:'docs',webSearch:false,history:history.slice(-4)})});
+    const res=await fetch(API_URL+'/api/chat',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify({message:'Analyze and transcribe this document "'+file.name+'". Provide the full content, key information, and a summary. Do not introduce yourself.\n\nContent:\n'+truncated,mode:'docs',webSearch:false,history:history.slice(-4)})});
     removeTyping();
     if(res.ok){const data=await res.json();const reply=data.reply||'Document analyzed.';history.push({role:'assistant',content:reply});appendMsg(aiBubble(reply));docsUsed++;}
     else{addAiMsg('Could not analyze file.');}
