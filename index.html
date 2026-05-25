@@ -1223,27 +1223,14 @@ function clientFormFields(c={}){
         </select>
       </div>
     </div>
-    <div class="form-section">Social Media Credentials</div>
+    <div class="form-section">Branding & Contact</div>
     <div class="form-grid">
-      <div class="form-field"><label class="form-label">Facebook Token</label><input id="field_facebook_token" type="text" value="${esc(c.facebook_token||'')} " class="form-input" placeholder="EAAo..."></div>
-      <div class="form-field"><label class="form-label">Facebook Page ID</label><input id="field_facebook_page_id" type="text" value="${esc(c.facebook_page_id||'')} " class="form-input" placeholder="232464..."></div>
-      <div class="form-field"><label class="form-label">Instagram Business ID</label><input id="field_instagram_business_id" type="text" value="${esc(c.instagram_business_id||'')} " class="form-input" placeholder="17841..."></div>
-      <div class="form-field"><label class="form-label">Instagram User Token</label><input id="field_instagram_user_token" type="text" value="${esc(c.instagram_user_token||'')} " class="form-input" placeholder="EAAN..."></div>
-      <div class="form-field"><label class="form-label">LinkedIn Token</label><input id="field_linkedin_token" type="text" value="${esc(c.linkedin_token||'')} " class="form-input" placeholder="LinkedIn token"></div>
-    </div>
-    <div class="form-section">WhatsApp & Messaging</div>
-    <div class="form-grid">
-      <div class="form-field"><label class="form-label">WhatsApp Phone ID</label><input id="field_whatsapp_phone_id" type="text" value="${esc(c.whatsapp_phone_id||'')} " class="form-input" placeholder="Phone number ID"></div>
-      <div class="form-field"><label class="form-label">WhatsApp Token</label><input id="field_whatsapp_token" type="text" value="${esc(c.whatsapp_token||'')} " class="form-input" placeholder="WhatsApp token"></div>
-      <div class="form-field"><label class="form-label">Telegram Bot Token</label><input id="field_telegram_bot_token" type="text" value="${esc(c.telegram_bot_token||'')} " class="form-input" placeholder="Bot token"></div>
-      <div class="form-field"><label class="form-label">Telegram Chat ID</label><input id="field_telegram_chat_id" type="text" value="${esc(c.telegram_chat_id||'')} " class="form-input" placeholder="Chat ID"></div>
-    </div>
-    <div class="form-section">Booking & Notifications</div>
-    <div class="form-grid">
-      <div class="form-field"><label class="form-label">Cal.com Link</label><input id="field_calcom_link" type="text" value="${esc(c.calcom_link||'')} " class="form-input" placeholder="cal.com/..."></div>
       <div class="form-field"><label class="form-label">Lead Notification Email</label><input id="field_lead_email" type="email" value="${esc(c.lead_email||c.email||'')} " class="form-input" placeholder="leads@company.com"></div>
-      <div class="form-field"><label class="form-label">Vapi Assistant ID</label><input id="field_vapi_assistant_id" type="text" value="${esc(c.vapi_assistant_id||'')} " class="form-input" placeholder="Vapi ID"></div>
       <div class="form-field"><label class="form-label">Primary Colour</label><input id="field_primary_color" type="text" value="${esc(c.primary_color||'#1a56db')} " class="form-input" placeholder="#1a56db"></div>
+      <div class="form-field"><label class="form-label">Logo URL</label><input id="field_logo_url" type="text" value="${esc(c.logo_url||'')} " class="form-input" placeholder="https://..."></div>
+    </div>
+    <div style="background:rgba(64,156,255,.08);border:1px solid rgba(64,156,255,.2);border-radius:8px;padding:10px 14px;margin:8px 0;font-family:var(--mono);font-size:.72rem;color:var(--nes-blue);">
+      <i class="ti ti-info-circle"></i> Credentials (WhatsApp, Facebook, LinkedIn etc) are entered in the <strong>Credentials tab</strong> after creating the client.
     </div>
     <div class="form-section">Plan & Status</div>
     <div class="form-grid">
@@ -1265,7 +1252,7 @@ function clientFormFields(c={}){
 }
 
 function getFormData(){
-  const fields=['name','email','website','industry','region','language','facebook_token','facebook_page_id','instagram_business_id','instagram_user_token','linkedin_token','whatsapp_phone_id','whatsapp_token','telegram_bot_token','telegram_chat_id','calcom_link','lead_email','vapi_assistant_id','primary_color','plan','status'];
+  const fields=['name','email','website','industry','region','language','lead_email','primary_color','logo_url','plan','status'];
   const data={};
   fields.forEach(f=>{const el=document.getElementById('field_'+f);if(el)data[f]=el.value.trim();});
   return data;
