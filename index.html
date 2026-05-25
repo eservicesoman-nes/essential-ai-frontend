@@ -27,6 +27,9 @@
       --nes-btn-grad:linear-gradient(135deg,#1a56db,#2563eb);
     }
     [data-theme="light"] .sidebar{background:#ffffff!important;border-right:1px solid #d0d7de!important;}
+    [data-theme="light"] .sb-header{background:#ffffff!important;}
+    [data-theme="light"] .usage-wrap{background:#ffffff!important;}
+    [data-theme="light"] .nav-section{background:#ffffff!important;}
     [data-theme="light"] .nav-label{color:#656d76!important;}
     [data-theme="light"] .nav-item{color:#656d76!important;}
     [data-theme="light"] .nav-item:hover,[data-theme="light"] .nav-item.active{background:rgba(9,105,218,.08)!important;color:#0969da!important;}
@@ -956,7 +959,7 @@ function renderClientDetail(c,colors,textColors,idx){
           <div class="cm-av" style="background:${colors[idx%5]};color:${textColors[idx%5]};">${(c.name||'?').substring(0,2).toUpperCase()}</div>
           <div>
             <div class="cm-name">${c.name}</div>
-            <span class="cm-plan ${c.plan==='growth'?'plan-g':c.plan==='enterprise'?'plan-e':'plan-s'}">${c.plan||'starter'}</span>
+            <span class="cm-plan ${c.plan==='growth'?'plan-g':c.plan==='enterprise'?'plan-e':'plan-s'}">${c.plan==='growth'?'Pro':c.plan||'starter'}</span>
           </div>
         </div>
         <div class="cm-actions">
@@ -1011,10 +1014,13 @@ function renderClientDetail(c,colors,textColors,idx){
             ].map(([lbl,key])=>`
               <div class="cred-field">
                 <div class="cf-lbl">${lbl}</div>
-                <input class="cf-input" type="text" value="${esc(c[key]||'')} " placeholder="Not configured" data-field="${key}">
+                <input class="cf-input" type="text" value="${esc((window._clientCreds&&window._clientCreds[c.id]&&window._clientCreds[c.id][key])||'')} " placeholder="Not configured" data-field="${key}">
               </div>`).join('')}
           </div>
-          <button class="form-submit" style="margin-top:10px;" onclick="saveClientCreds('${c.id}')"><i class="ti ti-device-floppy"></i> Save Credentials</button>
+          <div style="display:flex;gap:8px;margin-top:10px;">
+            <button class="form-submit" style="flex:1;" onclick="saveClientCreds('${c.id}')"><i class="ti ti-device-floppy"></i> Save Credentials</button>
+            <button onclick="addCustomCredField('${c.id}')" style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--muted);cursor:pointer;font-size:.8rem;white-space:nowrap;"><i class="ti ti-plus"></i> Add Field</button>
+          </div>
         </div>
 
         <div id="cm-branding" style="display:none;">
@@ -1054,7 +1060,7 @@ function renderClientDetail(c,colors,textColors,idx){
             ].map(([lbl,key])=>`
               <div class="cred-field">
                 <div class="cf-lbl">${lbl}</div>
-                <input class="cf-input" type="text" value="${esc(String(c[key]||'')||'')}" placeholder="Not configured" data-field="${key}">
+                <input class="cf-input" type="text" value="${esc(String((window._clientCreds&&window._clientCreds[c.id]&&window._clientCreds[c.id][key])||c[key]||'')||'')}" placeholder="Not configured" data-field="${key}">
               </div>`).join('')}
           </div>
           <button class="form-submit" style="margin-top:10px;" onclick="saveClientAgents('${c.id}')"><i class="ti ti-device-floppy"></i> Save Agent Settings</button>
@@ -1085,9 +1091,24 @@ function renderClientDetail(c,colors,textColors,idx){
 }
 
 async function saveClientCreds(id){
-  const data={};
-  document.querySelectorAll('#cm-creds [data-field]').forEach(el=>{data[el.dataset.field]=el.value.trim();});
-  try{await sb.from('clients').update(data).eq('id',id);showToast('Credentials saved');}catch(e){alert('Error: '+e.message);}
+  const creds={};
+  document.querySelectorAll('#cm-creds [data-field]').forEach(el=>{
+    if(el.dataset.field) creds[el.dataset.field]=el.value.trim();
+  });
+  const btn=document.querySelector('#cm-creds .form-submit');
+  if(btn){btn.disabled=true;btn.textContent='Saving...';}
+  try{
+    const res=await fetch(API_URL+'/api/client/'+id+'/credentials',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
+      body:JSON.stringify({credentials:creds})
+    });
+    if(!res.ok){const e=await res.json();throw new Error(e.error||'Save failed');}
+    showToast('Credentials saved ✓');
+    // Refresh client data
+    await loadClientsFromDB();
+  }catch(e){alert('Error saving credentials: '+e.message);}
+  finally{if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-device-floppy"></i> Save Credentials';}}
 }
 async function saveClientBranding(id){
   const data={};
@@ -1095,9 +1116,21 @@ async function saveClientBranding(id){
   try{await sb.from('clients').update(data).eq('id',id);showToast('Branding saved');}catch(e){alert('Error: '+e.message);}
 }
 async function saveClientAgents(id){
-  const data={};
-  document.querySelectorAll('#cm-agents [data-field]').forEach(el=>{data[el.dataset.field]=el.value.trim();});
-  try{await sb.from('clients').update(data).eq('id',id);showToast('Agent settings saved');}catch(e){alert('Error: '+e.message);}
+  const settings={};
+  document.querySelectorAll('#cm-agents [data-field]').forEach(el=>{settings[el.dataset.field]=el.value.trim();});
+  const btn=document.querySelector('#cm-agents .form-submit');
+  if(btn){btn.disabled=true;btn.textContent='Saving...';}
+  try{
+    const res=await fetch(API_URL+'/api/client/'+id+'/credentials',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
+      body:JSON.stringify({settings})
+    });
+    if(!res.ok){const e=await res.json();throw new Error(e.error||'Save failed');}
+    showToast('Agent settings saved ✓');
+    await loadClientsFromDB();
+  }catch(e){alert('Error: '+e.message);}
+  finally{if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-device-floppy"></i> Save Agent Settings';}}
 }
 async function saveClientBilling(id){
   const data={};
@@ -1111,7 +1144,24 @@ async function saveClientModules(clientId){
   try{await sb.from('clients').update({modules}).eq('id',clientId);showToast('Modules saved');}catch(e){alert('Error: '+e.message);}
 }
 
-async function selectClientDB(id){window._activeClientId=id;await loadClientsFromDB();}
+async function selectClientDB(id){
+  window._activeClientId=id;
+  // Load decrypted credentials from backend
+  try{
+    const res=await fetch(API_URL+'/api/client/'+id+'/credentials',{
+      headers:{'Authorization':'Bearer '+session.access_token}
+    });
+    if(res.ok){
+      const data=await res.json();
+      if(!window._clientCreds)window._clientCreds={};
+      // Merge credentials + settings so both tabs can read them
+      const creds=data.credentials&&typeof data.credentials==='string'?JSON.parse(data.credentials):data.credentials||{};
+      const setts=data.settings&&typeof data.settings==='string'?JSON.parse(data.settings):data.settings||{};
+      window._clientCreds[id]={...creds,...setts};
+    }
+  }catch(e){console.warn('Could not load credentials:',e.message);}
+  await loadClientsFromDB();
+}
 
 function searchClients(query){
   const clients=window._clients||[];
@@ -1875,7 +1925,22 @@ window.showAddDealModal=showAddDealModal;window.saveDeal=saveDeal;
 window.showAddReferrerModal=showAddReferrerModal;window.saveReferrer=saveReferrer;
 window.showContactDetail=showContactDetail;window.filterContacts=filterContacts;
 window.filterContactsBySource=filterContactsBySource;
+
+function addCustomCredField(clientId){
+  const grid=document.querySelector('#cm-creds .creds-grid');
+  if(!grid)return;
+  const label=prompt('Field name (e.g. stripe_key):');
+  if(!label||!label.trim())return;
+  const key=label.trim().toLowerCase().replace(/\s+/g,'_').replace(/[^a-z0-9_]/g,'');
+  const div=document.createElement('div');
+  div.className='cred-field';
+  div.innerHTML=`<div class="cf-lbl">${label.trim()}</div><input class="cf-input" type="text" placeholder="Value" data-field="${key}">`;
+  grid.appendChild(div);
+  showToast('Field added — save to store it');
+}
+
 window.selectClientDB=selectClientDB;window.restoreChat=restoreChat;
+window.addCustomCredField=addCustomCredField;
 </script>
 </body>
 </html>
