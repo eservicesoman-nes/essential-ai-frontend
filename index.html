@@ -957,7 +957,7 @@ function renderClientDetail(c,colors,textColors,idx){
     ['ti-brand-whatsapp','whatsapp_alerts','WhatsApp Alerts','Lead + team alerts'],
     ['ti-mail','email_notifications','Email Notifications','Lead emails to team'],
     ['ti-phone-call','adam_consultant','Adam AI Consultant','Enterprise voice agent'],
-    ['ti-headset','nina_advisor','Nina Follow-up Advisor','Re-engagement calls'],
+    ['ti-headset','layla_advisor','Layla Follow-up Advisor','Re-engagement calls'],
     ['ti-moon','islam360','Islam360','GCC / Europe version'],
   ];
   return`
@@ -1060,7 +1060,7 @@ function renderClientDetail(c,colors,textColors,idx){
           <div class="creds-grid">
             ${[
               ['Sara Assistant ID','sara_assistant_id'],
-              ['Nina Assistant ID','nina_assistant_id'],
+              ['Layla Assistant ID','layla_assistant_id'],
               ['Adam Assistant ID','adam_assistant_id'],
               ['Riley Assistant ID','riley_assistant_id'],
               ['Agent Language','agent_language'],
@@ -1215,6 +1215,7 @@ function clientFormFields(c={}){
       <div class="form-field"><label class="form-label">Website</label><input id="field_website" type="text" value="${esc(c.website||'')} " class="form-input" placeholder="https://..."></div>
       <div class="form-field"><label class="form-label">Industry</label><input id="field_industry" type="text" value="${esc(c.industry||'')} " class="form-input" placeholder="Industry"></div>
       <div class="form-field"><label class="form-label">Region</label><input id="field_region" type="text" value="${esc(c.region||'Oman')} " class="form-input" placeholder="Oman"></div>
+      <div class="form-field"><label class="form-label">Country</label><input id="field_country" type="text" value="${esc(c.country||'Oman')} " class="form-input" placeholder="Oman"></div>
       <div class="form-field"><label class="form-label">Language</label>
         <select id="field_language" class="form-select">
           <option value="English" ${c.language==='English'?'selected':''}>English</option>
@@ -1252,7 +1253,7 @@ function clientFormFields(c={}){
 }
 
 function getFormData(){
-  const fields=['name','email','website','industry','region','language','lead_email','primary_color','logo_url','plan','status'];
+  const fields=['name','email','website','industry','region','country','language','lead_email','primary_color','logo_url','plan','status'];
   const data={};
   fields.forEach(f=>{const el=document.getElementById('field_'+f);if(el)data[f]=el.value.trim();});
   return data;
