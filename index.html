@@ -341,6 +341,36 @@
     .plan-action-btn{background:var(--nes-btn-grad);border:none;border-radius:40px;padding:11px 18px;color:#fff;font-weight:700;cursor:pointer;width:100%;font-size:.82rem;margin-top:auto;}
     .plan-action-btn:disabled{background:var(--muted);opacity:.5;cursor:default;}
 
+    /* Sales Portal */
+    .sales-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px;}
+    .sales-tabs{display:flex;gap:4px;margin-bottom:12px;flex-wrap:wrap;}
+    .contact-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:6px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:all .15s;}
+    .contact-card:hover{background:var(--accent-lo);border-color:var(--accent);}
+    .contact-av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;flex-shrink:0;}
+    .contact-name{font-size:.82rem;font-weight:600;color:var(--text);}
+    .contact-meta{font-size:.68rem;color:var(--muted);font-family:var(--mono);}
+    .deal-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:6px;}
+    .deal-name{font-size:.82rem;font-weight:600;color:var(--text);margin-bottom:3px;}
+    .deal-meta{font-size:.68rem;color:var(--muted);font-family:var(--mono);display:flex;gap:10px;flex-wrap:wrap;}
+    .deal-value{font-size:.9rem;font-weight:700;color:var(--nes-blue);}
+    .stage-badge{font-size:.6rem;padding:2px 7px;border-radius:6px;font-family:var(--mono);font-weight:700;}
+    .stage-lead{background:#0c1f35;color:#409cff;}
+    .stage-qualified{background:#0d2818;color:#3fb950;}
+    .stage-proposal{background:#2d1f00;color:#d29922;}
+    .stage-negotiation{background:#2d1500;color:#f0883e;}
+    .stage-won{background:#0d2818;color:#3fb950;}
+    .stage-lost{background:#2d0e0e;color:#f85149;}
+    .pipeline-board{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:12px;overflow-x:auto;}
+    .pipeline-col{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px;min-width:140px;}
+    .pipeline-col-title{font-size:.65rem;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;text-align:center;}
+    .pipeline-deal{background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:7px 9px;margin-bottom:5px;}
+    .pipeline-deal-name{font-size:.72rem;font-weight:600;color:var(--text);margin-bottom:2px;}
+    .pipeline-deal-val{font-size:.7rem;color:var(--nes-blue);font-family:var(--mono);}
+    .comm-row{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 80px;gap:8px;padding:9px 13px;border-bottom:1px solid rgba(26,35,50,.5);align-items:center;font-size:.78rem;}
+    .comm-header{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 80px;gap:8px;padding:7px 13px;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:.62rem;color:var(--muted);text-transform:uppercase;}
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:2000;display:flex;align-items:center;justify-content:center;}
+    .modal-box{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;width:min(500px,90vw);max-height:80vh;overflow-y:auto;}
+    .modal-title{font-size:1rem;font-weight:700;color:var(--text);margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;}
     /* Toast */
     .toast{position:fixed;bottom:24px;right:24px;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:.75rem;padding:9px 16px;border-radius:8px;z-index:9999;animation:fadeIn .2s ease;box-shadow:0 4px 16px rgba(0,0,0,.3);}
 
@@ -420,6 +450,7 @@
         <div class="nav-item" data-view="ceo"><i class="ti ti-chart-pie"></i><span>CEO Dashboard</span><span class="nav-badge nb-blue">Live</span></div>
         <div class="nav-item" data-view="command"><i class="ti ti-terminal-2"></i><span>Team Hub</span><span class="nav-badge nb-orange" id="commandBadge" style="display:none;">5</span></div>
         <div class="nav-item" data-view="leads"><i class="ti ti-user-check"></i><span>Leads</span><span class="nav-badge nb-red" id="leadsBadge">—</span></div>
+        <div class="nav-item" id="salesNav" data-view="sales" style="display:none;"><i class="ti ti-chart-arrows"></i><span>Sales Portal</span></div>
       </div>
     </div>
 
@@ -518,6 +549,8 @@ function setupNavForRole(){
   const ceoNav=document.querySelector('[data-view="ceo"]');
   if(!['nesadmin','ceo'].includes(userRole)&&ceoNav)ceoNav.style.display='none';
   if(userRole==='nesadmin'){clientMgr.style.display='block';loadClientCount();}
+  const salesNav=document.getElementById('salesNav');
+  if(['nesadmin','manager'].includes(userRole)&&salesNav)salesNav.style.display='flex';
   loadLeadCount();
 }
 
@@ -625,6 +658,7 @@ function showView(view){
   else if(view==='command'){showCommandCentre();}
   else if(view==='leads'){showLeadsPage();}
   else if(view==='clientmgr'){showClientManager();}
+  else if(view==='sales'){showSalesPortal();}
   else if(view==='pricing'){showPricing();}
 }
 
@@ -1296,6 +1330,447 @@ async function extractText(file){
 function loadScript(src){return new Promise((resolve,reject)=>{if(document.querySelector('script[src="'+src+'"]'))  {resolve();return;}const s=document.createElement('script');s.src=src;s.onload=resolve;s.onerror=reject;document.head.appendChild(s);});}
 function toggleVoice(){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){addAiMsg('Voice not supported in this browser.');return;}const btn=document.getElementById('voiceBtn');const recognition=new SR();recognition.lang='en-US';btn.style.color='#f85149';setStatus('busy','Listening…');recognition.onresult=e=>{document.getElementById('msgInput').value=e.results[0][0].transcript;btn.style.color='';setStatus('ok','Ready');sendMsg();};recognition.onerror=recognition.onend=()=>{btn.style.color='';setStatus('ok','Ready');};recognition.start();}
 
+
+// ── SALES PORTAL ──
+let _salesTab='contacts';
+let _salesContacts=[];
+let _salesDeals=[];
+let _salesReferrers=[];
+
+async function showSalesPortal(){
+  const mc=document.getElementById('mainContent');
+  mc.style.overflow='hidden';
+  mc.innerHTML=`
+    <div style="padding:11px 18px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;display:flex;align-items:center;gap:6px;">
+          <i class="ti ti-chart-arrows" style="filter:drop-shadow(0 0 3px var(--nes-blue))"></i>SALES PORTAL
+        </div>
+        <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">Contacts · Pipeline · Commissions</div>
+      </div>
+      <button onclick="showAddContactModal()" style="background:var(--nes-btn-grad);border:none;border-radius:8px;padding:6px 14px;color:#fff;font-size:.75rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;">
+        <i class="ti ti-plus"></i> Add Contact
+      </button>
+    </div>
+    <div class="page" id="salesContent">
+      <div style="text-align:center;padding:40px;color:var(--muted);font-family:var(--mono);font-size:.8rem;">Loading sales data...</div>
+    </div>`;
+  await loadSalesData();
+}
+
+async function loadSalesData(){
+  try{
+    const[{data:contacts},{data:deals},{data:referrers}]=await Promise.all([
+      sb.from('sales_contacts').select('*').order('created_at',{ascending:false}),
+      sb.from('sales_deals').select('*').order('created_at',{ascending:false}),
+      sb.from('sales_referrers').select('*').order('created_at',{ascending:false})
+    ]);
+    _salesContacts=contacts||[];
+    _salesDeals=deals||[];
+    _salesReferrers=referrers||[];
+  }catch(e){
+    _salesContacts=[];_salesDeals=[];_salesReferrers=[];
+  }
+  renderSalesPortal(_salesTab);
+}
+
+function renderSalesPortal(tab){
+  _salesTab=tab;
+  const totalPipeline=_salesDeals.reduce((s,d)=>s+(parseFloat(d.value)||0),0);
+  const wonDeals=_salesDeals.filter(d=>d.stage==='won');
+  const wonValue=wonDeals.reduce((s,d)=>s+(parseFloat(d.value)||0),0);
+  const openDeals=_salesDeals.filter(d=>!['won','lost'].includes(d.stage));
+  const totalComm=_salesReferrers.reduce((s,r)=>s+(parseFloat(r.commission_earned)||0),0);
+  const colors=['#1a3a6e','#2d1f00','#0d2818','#2d0e0e','#1a2332'];
+  const textColors=['#409cff','#d29922','#3fb950','#f85149','#8b949e'];
+
+  document.getElementById('salesContent').innerHTML=`
+    <div class="sales-grid">
+      <div class="kcard hot">
+        <div class="klbl" style="display:flex;align-items:center;gap:4px;"><i class="ti ti-users" style="font-size:11px;color:var(--nes-blue);filter:drop-shadow(0 0 3px var(--nes-blue))"></i>Contacts</div>
+        <div class="kval" style="color:var(--nes-blue)">${_salesContacts.length}</div>
+        <div class="kdelta kneu">Total in CRM</div>
+      </div>
+      <div class="kcard">
+        <div class="klbl" style="display:flex;align-items:center;gap:4px;"><i class="ti ti-trending-up" style="font-size:11px;color:#3fb950;filter:drop-shadow(0 0 3px #3fb950)"></i>Pipeline</div>
+        <div class="kval">OMR ${Math.round(totalPipeline).toLocaleString()}</div>
+        <div class="kdelta kneu">${openDeals.length} open deals</div>
+      </div>
+      <div class="kcard">
+        <div class="klbl" style="display:flex;align-items:center;gap:4px;"><i class="ti ti-trophy" style="font-size:11px;color:#d29922;filter:drop-shadow(0 0 3px #d29922)"></i>Won</div>
+        <div class="kval" style="color:#3fb950">OMR ${Math.round(wonValue).toLocaleString()}</div>
+        <div class="kdelta kneu">${wonDeals.length} deals closed</div>
+      </div>
+      <div class="kcard">
+        <div class="klbl" style="display:flex;align-items:center;gap:4px;"><i class="ti ti-coin" style="font-size:11px;color:#7f77dd;filter:drop-shadow(0 0 3px #7f77dd)"></i>Commissions</div>
+        <div class="kval" style="color:#7f77dd">OMR ${Math.round(totalComm).toLocaleString()}</div>
+        <div class="kdelta kneu">Total owed</div>
+      </div>
+    </div>
+
+    <div class="sales-tabs">
+      ${[['contacts','ti-address-book','Contacts'],['pipeline','ti-layout-columns','Pipeline'],['deals','ti-file-dollar','Deals'],['referrers','ti-user-dollar','Referrers & Commissions']].map(([t,icon,label])=>`
+        <button class="tab-btn ${_salesTab===t?'active':''}" onclick="renderSalesPortal('${t}')">
+          <i class="ti ${icon}" style="font-size:12px;margin-right:4px"></i>${label}
+        </button>`).join('')}
+    </div>
+
+    <div id="salesTabContent">${renderSalesTab(_salesTab,colors,textColors)}</div>`;
+}
+
+function renderSalesTab(tab,colors,textColors){
+  if(tab==='contacts') return renderContacts(colors,textColors);
+  if(tab==='pipeline') return renderPipeline();
+  if(tab==='deals') return renderDeals(colors,textColors);
+  if(tab==='referrers') return renderReferrers(colors,textColors);
+  return '';
+}
+
+function renderContacts(colors,textColors){
+  if(!_salesContacts.length) return `
+    <div style="text-align:center;padding:40px;color:var(--muted);font-family:var(--mono);font-size:.8rem;">
+      <i class="ti ti-address-book" style="font-size:2rem;opacity:.3;display:block;margin-bottom:8px"></i>
+      No contacts yet — click Add Contact to get started
+    </div>`;
+  return `
+    <div style="margin-bottom:8px;display:flex;gap:8px;">
+      <input type="text" placeholder="Search contacts..." onkeyup="filterContacts(this.value)"
+        style="flex:1;background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:6px 11px;color:var(--text);font-family:var(--mono);font-size:.78rem;outline:none;">
+      <select onchange="filterContactsBySource(this.value)" style="background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:6px 11px;color:var(--text);font-family:var(--mono);font-size:.78rem;outline:none;">
+        <option value="">All sources</option>
+        <option value="referral">Referral</option>
+        <option value="linkedin">LinkedIn</option>
+        <option value="cold">Cold outreach</option>
+        <option value="event">Event</option>
+        <option value="website">Website</option>
+      </select>
+    </div>
+    <div id="contactsList">
+      ${_salesContacts.map((c,i)=>`
+        <div class="contact-card" onclick="showContactDetail('${c.id}')">
+          <div class="contact-av" style="background:${colors[i%5]};color:${textColors[i%5]}">${(c.name||'?').substring(0,2).toUpperCase()}</div>
+          <div style="flex:1">
+            <div class="contact-name">${c.name||'—'}</div>
+            <div class="contact-meta">${c.title||''} ${c.company?'· '+c.company:''} ${c.country?'· '+c.country:''}</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:.68rem;color:var(--muted);font-family:var(--mono)">${c.source||'—'}</div>
+            <div style="font-size:.68rem;color:var(--muted);font-family:var(--mono)">${c.last_contact?getTimeAgo(new Date(c.last_contact)):'Never contacted'}</div>
+          </div>
+          <span style="font-size:.6rem;padding:2px 7px;border-radius:6px;font-family:var(--mono);background:#0c1f35;color:var(--nes-blue)">${c.industry||'—'}</span>
+        </div>`).join('')}
+    </div>`;
+}
+
+function renderPipeline(){
+  const stages=[
+    {key:'lead',label:'Lead',color:'#409cff'},
+    {key:'qualified',label:'Qualified',color:'#3fb950'},
+    {key:'proposal',label:'Proposal',color:'#d29922'},
+    {key:'negotiation',label:'Negotiation',color:'#f0883e'},
+    {key:'won',label:'Won',color:'#3fb950'}
+  ];
+  return `
+    <div class="pipeline-board">
+      ${stages.map(s=>{
+        const stageDeals=_salesDeals.filter(d=>d.stage===s.key);
+        const stageVal=stageDeals.reduce((sum,d)=>sum+(parseFloat(d.value)||0),0);
+        return`<div class="pipeline-col">
+          <div class="pipeline-col-title" style="color:${s.color}">${s.label} (${stageDeals.length})</div>
+          <div style="font-size:.65rem;color:var(--muted);font-family:var(--mono);text-align:center;margin-bottom:6px">OMR ${Math.round(stageVal).toLocaleString()}</div>
+          ${stageDeals.length?stageDeals.map(d=>`
+            <div class="pipeline-deal">
+              <div class="pipeline-deal-name">${d.name||'—'}</div>
+              <div class="pipeline-deal-val">OMR ${Math.round(parseFloat(d.value)||0).toLocaleString()}</div>
+              <div style="font-size:.62rem;color:var(--muted);font-family:var(--mono);margin-top:2px">${d.company||'—'}</div>
+            </div>`).join('')
+          :`<div style="text-align:center;padding:12px;font-size:.65rem;color:#484f58;font-family:var(--mono)">No deals</div>`}
+          <button onclick="showAddDealModal('${s.key}')" style="width:100%;background:none;border:1px dashed var(--border);border-radius:5px;padding:4px;color:var(--muted);font-size:.65rem;cursor:pointer;margin-top:4px;">+ Add deal</button>
+        </div>`;
+      }).join('')}
+    </div>`;
+}
+
+function renderDeals(colors,textColors){
+  if(!_salesDeals.length) return `
+    <div style="text-align:center;padding:40px;color:var(--muted);font-family:var(--mono);font-size:.8rem;">
+      <i class="ti ti-file-dollar" style="font-size:2rem;opacity:.3;display:block;margin-bottom:8px"></i>
+      No deals yet — add from the Pipeline view
+    </div>`;
+  return`
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;overflow:hidden;">
+      <div style="display:grid;grid-template-columns:2fr 1.5fr 1fr 1fr 90px;gap:8px;padding:7px 13px;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:.62rem;color:var(--muted);text-transform:uppercase;">
+        <div>Deal</div><div>Contact</div><div>Value</div><div>Close date</div><div>Stage</div>
+      </div>
+      ${_salesDeals.map(d=>`
+        <div style="display:grid;grid-template-columns:2fr 1.5fr 1fr 1fr 90px;gap:8px;padding:9px 13px;border-bottom:1px solid rgba(26,35,50,.5);align-items:center;">
+          <div><div style="font-size:.8rem;font-weight:600;color:var(--text)">${d.name||'—'}</div><div style="font-size:.65rem;color:var(--muted);font-family:var(--mono)">${d.company||'—'}</div></div>
+          <div style="font-size:.75rem;color:var(--muted)">${d.contact_name||'—'}</div>
+          <div style="font-size:.82rem;font-weight:700;color:var(--nes-blue)">OMR ${Math.round(parseFloat(d.value)||0).toLocaleString()}</div>
+          <div style="font-size:.68rem;color:var(--muted);font-family:var(--mono)">${d.close_date||'—'}</div>
+          <div><span class="stage-badge stage-${d.stage||'lead'}">${(d.stage||'lead').toUpperCase()}</span></div>
+        </div>`).join('')}
+    </div>`;
+}
+
+function renderReferrers(colors,textColors){
+  const totalComm=_salesReferrers.reduce((s,r)=>s+(parseFloat(r.commission_earned)||0),0);
+  const totalPaid=_salesReferrers.reduce((s,r)=>s+(parseFloat(r.commission_paid)||0),0);
+  return`
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+      <div class="kcard"><div class="klbl" style="display:flex;align-items:center;gap:4px;"><i class="ti ti-coin" style="font-size:11px;color:#7f77dd;filter:drop-shadow(0 0 3px #7f77dd)"></i>Total Commissions</div><div class="kval" style="color:#7f77dd">OMR ${Math.round(totalComm).toLocaleString()}</div></div>
+      <div class="kcard"><div class="klbl" style="display:flex;align-items:center;gap:4px;"><i class="ti ti-check" style="font-size:11px;color:#3fb950;filter:drop-shadow(0 0 3px #3fb950)"></i>Total Paid</div><div class="kval" style="color:#3fb950">OMR ${Math.round(totalPaid).toLocaleString()}</div></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;">Referrers</div>
+      <button onclick="showAddReferrerModal()" style="background:var(--nes-btn-grad);border:none;border-radius:6px;padding:4px 10px;color:#fff;font-size:.7rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:4px;"><i class="ti ti-plus"></i> Add Referrer</button>
+    </div>
+    ${_salesReferrers.length?`
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;overflow:hidden;">
+      <div class="comm-header"><div>Referrer</div><div>Deals referred</div><div>Earned</div><div>Paid</div><div>Status</div></div>
+      ${_salesReferrers.map((r,i)=>`
+        <div class="comm-row" style="border-bottom:1px solid rgba(26,35,50,.5)">
+          <div><div style="font-weight:600;color:var(--text)">${r.name||'—'}</div><div style="font-size:.65rem;color:var(--muted);font-family:var(--mono)">${r.company||'—'} · ${r.commission_rate||0}% rate</div></div>
+          <div style="color:var(--muted);font-family:var(--mono);font-size:.72rem">${r.deals_referred||0}</div>
+          <div style="color:#7f77dd;font-weight:700;font-family:var(--mono)">OMR ${Math.round(parseFloat(r.commission_earned)||0)}</div>
+          <div style="color:#3fb950;font-weight:700;font-family:var(--mono)">OMR ${Math.round(parseFloat(r.commission_paid)||0)}</div>
+          <div><span style="font-size:.6rem;padding:2px 7px;border-radius:5px;font-family:var(--mono);background:${(r.commission_earned||0)>(r.commission_paid||0)?'#2d1f00':'#0d2818'};color:${(r.commission_earned||0)>(r.commission_paid||0)?'#d29922':'#3fb950'}">${(r.commission_earned||0)>(r.commission_paid||0)?'PENDING':'PAID'}</span></div>
+        </div>`).join('')}
+    </div>`:`
+    <div style="text-align:center;padding:40px;color:var(--muted);font-family:var(--mono);font-size:.8rem;">
+      <i class="ti ti-user-dollar" style="font-size:2rem;opacity:.3;display:block;margin-bottom:8px"></i>
+      No referrers yet
+    </div>`}`;
+}
+
+// ── MODALS ──
+function showAddContactModal(){
+  const m=document.createElement('div');m.className='modal-overlay';m.id='contactModal';
+  m.innerHTML=`
+    <div class="modal-box">
+      <div class="modal-title">
+        <span><i class="ti ti-user-plus" style="color:var(--nes-blue);margin-right:6px"></i>Add Contact</span>
+        <button onclick="document.getElementById('contactModal').remove()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.2rem;">✕</button>
+      </div>
+      <div class="form-grid">
+        <div class="form-field"><label class="form-label">Full Name *</label><input id="c_name" class="form-input" placeholder="Ahmed Al Rashdi"></div>
+        <div class="form-field"><label class="form-label">Company</label><input id="c_company" class="form-input" placeholder="Company name"></div>
+        <div class="form-field"><label class="form-label">Title / Role</label><input id="c_title" class="form-input" placeholder="CEO, IT Manager..."></div>
+        <div class="form-field"><label class="form-label">Email</label><input id="c_email" class="form-input" type="email" placeholder="email@company.com"></div>
+        <div class="form-field"><label class="form-label">Phone</label><input id="c_phone" class="form-input" placeholder="+968..."></div>
+        <div class="form-field"><label class="form-label">Country</label><input id="c_country" class="form-input" placeholder="Oman"></div>
+        <div class="form-field"><label class="form-label">Industry</label><input id="c_industry" class="form-input" placeholder="Technology, Ports..."></div>
+        <div class="form-field"><label class="form-label">Source</label>
+          <select id="c_source" class="form-select">
+            <option value="referral">Referral</option>
+            <option value="linkedin">LinkedIn</option>
+            <option value="cold">Cold outreach</option>
+            <option value="event">Event</option>
+            <option value="website">Website</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-field" style="margin-top:8px"><label class="form-label">Notes</label><textarea id="c_notes" class="form-input" rows="2" style="resize:vertical" placeholder="Any notes..."></textarea></div>
+      <button class="form-submit" onclick="saveContact()"><i class="ti ti-plus"></i> Save Contact</button>
+    </div>`;
+  document.body.appendChild(m);
+}
+
+async function saveContact(){
+  const data={
+    name:document.getElementById('c_name')?.value.trim(),
+    company:document.getElementById('c_company')?.value.trim(),
+    title:document.getElementById('c_title')?.value.trim(),
+    email:document.getElementById('c_email')?.value.trim(),
+    phone:document.getElementById('c_phone')?.value.trim(),
+    country:document.getElementById('c_country')?.value.trim(),
+    industry:document.getElementById('c_industry')?.value.trim(),
+    source:document.getElementById('c_source')?.value,
+    notes:document.getElementById('c_notes')?.value.trim(),
+    last_contact:new Date().toISOString()
+  };
+  if(!data.name){alert('Name is required');return;}
+  try{
+    await sb.from('sales_contacts').insert([data]);
+    document.getElementById('contactModal')?.remove();
+    showToast('Contact saved');
+    await loadSalesData();
+  }catch(e){alert('Error: '+e.message);}
+}
+
+function showAddDealModal(stage='lead'){
+  const m=document.createElement('div');m.className='modal-overlay';m.id='dealModal';
+  m.innerHTML=`
+    <div class="modal-box">
+      <div class="modal-title">
+        <span><i class="ti ti-file-dollar" style="color:var(--nes-blue);margin-right:6px"></i>Add Deal</span>
+        <button onclick="document.getElementById('dealModal').remove()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.2rem;">✕</button>
+      </div>
+      <div class="form-grid">
+        <div class="form-field"><label class="form-label">Deal Name *</label><input id="d_name" class="form-input" placeholder="Gulf Ports — AI Platform"></div>
+        <div class="form-field"><label class="form-label">Company</label><input id="d_company" class="form-input" placeholder="Company name"></div>
+        <div class="form-field"><label class="form-label">Contact Name</label><input id="d_contact" class="form-input" placeholder="Decision maker"></div>
+        <div class="form-field"><label class="form-label">Value (OMR)</label><input id="d_value" class="form-input" type="number" placeholder="0"></div>
+        <div class="form-field"><label class="form-label">Expected Close</label><input id="d_close" class="form-input" type="date"></div>
+        <div class="form-field"><label class="form-label">Stage</label>
+          <select id="d_stage" class="form-select">
+            <option value="lead" ${stage==='lead'?'selected':''}>Lead</option>
+            <option value="qualified" ${stage==='qualified'?'selected':''}>Qualified</option>
+            <option value="proposal" ${stage==='proposal'?'selected':''}>Proposal</option>
+            <option value="negotiation" ${stage==='negotiation'?'selected':''}>Negotiation</option>
+            <option value="won" ${stage==='won'?'selected':''}>Won</option>
+            <option value="lost">Lost</option>
+          </select>
+        </div>
+        <div class="form-field"><label class="form-label">Probability %</label><input id="d_prob" class="form-input" type="number" placeholder="50" min="0" max="100"></div>
+        <div class="form-field"><label class="form-label">Referrer</label>
+          <select id="d_ref" class="form-select">
+            <option value="">None</option>
+            ${_salesReferrers.map(r=>`<option value="${r.id}">${r.name}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+      <div class="form-field" style="margin-top:8px"><label class="form-label">Notes</label><textarea id="d_notes" class="form-input" rows="2" style="resize:vertical"></textarea></div>
+      <button class="form-submit" onclick="saveDeal()"><i class="ti ti-plus"></i> Save Deal</button>
+    </div>`;
+  document.body.appendChild(m);
+}
+
+async function saveDeal(){
+  const data={
+    name:document.getElementById('d_name')?.value.trim(),
+    company:document.getElementById('d_company')?.value.trim(),
+    contact_name:document.getElementById('d_contact')?.value.trim(),
+    value:parseFloat(document.getElementById('d_value')?.value)||0,
+    close_date:document.getElementById('d_close')?.value,
+    stage:document.getElementById('d_stage')?.value,
+    probability:parseInt(document.getElementById('d_prob')?.value)||50,
+    referrer_id:document.getElementById('d_ref')?.value||null,
+    notes:document.getElementById('d_notes')?.value.trim()
+  };
+  if(!data.name){alert('Deal name is required');return;}
+  try{
+    await sb.from('sales_deals').insert([data]);
+    // Update referrer deal count if referrer selected
+    if(data.referrer_id){
+      const ref=_salesReferrers.find(r=>r.id===data.referrer_id);
+      if(ref){
+        const newComm=(parseFloat(ref.commission_earned)||0)+(data.value*(parseFloat(ref.commission_rate)||0)/100);
+        await sb.from('sales_referrers').update({
+          deals_referred:(ref.deals_referred||0)+1,
+          commission_earned:newComm
+        }).eq('id',data.referrer_id);
+      }
+    }
+    document.getElementById('dealModal')?.remove();
+    showToast('Deal saved');
+    await loadSalesData();
+  }catch(e){alert('Error: '+e.message);}
+}
+
+function showAddReferrerModal(){
+  const m=document.createElement('div');m.className='modal-overlay';m.id='referrerModal';
+  m.innerHTML=`
+    <div class="modal-box">
+      <div class="modal-title">
+        <span><i class="ti ti-user-dollar" style="color:var(--nes-blue);margin-right:6px"></i>Add Referrer</span>
+        <button onclick="document.getElementById('referrerModal').remove()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.2rem;">✕</button>
+      </div>
+      <div class="form-grid">
+        <div class="form-field"><label class="form-label">Full Name *</label><input id="r_name" class="form-input" placeholder="Referrer name"></div>
+        <div class="form-field"><label class="form-label">Company</label><input id="r_company" class="form-input" placeholder="Company"></div>
+        <div class="form-field"><label class="form-label">Email</label><input id="r_email" class="form-input" type="email" placeholder="email@..."></div>
+        <div class="form-field"><label class="form-label">Phone</label><input id="r_phone" class="form-input" placeholder="+968..."></div>
+        <div class="form-field"><label class="form-label">Commission Rate %</label><input id="r_rate" class="form-input" type="number" placeholder="10" min="0" max="100"></div>
+        <div class="form-field"><label class="form-label">Type</label>
+          <select id="r_type" class="form-select">
+            <option value="individual">Individual</option>
+            <option value="company">Company</option>
+            <option value="partner">Partner</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-field" style="margin-top:8px"><label class="form-label">Notes</label><textarea id="r_notes" class="form-input" rows="2" style="resize:vertical"></textarea></div>
+      <button class="form-submit" onclick="saveReferrer()"><i class="ti ti-plus"></i> Save Referrer</button>
+    </div>`;
+  document.body.appendChild(m);
+}
+
+async function saveReferrer(){
+  const data={
+    name:document.getElementById('r_name')?.value.trim(),
+    company:document.getElementById('r_company')?.value.trim(),
+    email:document.getElementById('r_email')?.value.trim(),
+    phone:document.getElementById('r_phone')?.value.trim(),
+    commission_rate:parseFloat(document.getElementById('r_rate')?.value)||10,
+    type:document.getElementById('r_type')?.value,
+    notes:document.getElementById('r_notes')?.value.trim(),
+    deals_referred:0,commission_earned:0,commission_paid:0
+  };
+  if(!data.name){alert('Name is required');return;}
+  try{
+    await sb.from('sales_referrers').insert([data]);
+    document.getElementById('referrerModal')?.remove();
+    showToast('Referrer saved');
+    await loadSalesData();
+  }catch(e){alert('Error: '+e.message);}
+}
+
+function showContactDetail(id){
+  const c=_salesContacts.find(x=>x.id===id);if(!c)return;
+  const relatedDeals=_salesDeals.filter(d=>d.contact_name===c.name||d.company===c.company);
+  const m=document.createElement('div');m.className='modal-overlay';m.id='contactDetailModal';
+  m.innerHTML=`
+    <div class="modal-box">
+      <div class="modal-title">
+        <span><i class="ti ti-user" style="color:var(--nes-blue);margin-right:6px"></i>${c.name}</span>
+        <button onclick="document.getElementById('contactDetailModal').remove()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.2rem;">✕</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+        ${[['Company',c.company],['Title',c.title],['Email',c.email],['Phone',c.phone],['Country',c.country],['Industry',c.industry],['Source',c.source],['Last contact',c.last_contact?getTimeAgo(new Date(c.last_contact)):'Never']].map(([l,v])=>`
+          <div style="background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:7px 10px;">
+            <div style="font-size:.62rem;color:var(--muted);font-family:var(--mono);margin-bottom:2px">${l}</div>
+            <div style="font-size:.78rem;color:var(--text)">${v||'—'}</div>
+          </div>`).join('')}
+      </div>
+      ${c.notes?`<div style="background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:8px 10px;margin-bottom:12px;font-size:.78rem;color:var(--muted)">${c.notes}</div>`:''}
+      <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Related Deals (${relatedDeals.length})</div>
+      ${relatedDeals.length?relatedDeals.map(d=>`
+        <div style="background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:8px 10px;margin-bottom:5px;display:flex;align-items:center;justify-content:space-between;">
+          <div><div style="font-size:.78rem;font-weight:600;color:var(--text)">${d.name}</div><div style="font-size:.65rem;color:var(--muted);font-family:var(--mono)">Close: ${d.close_date||'—'}</div></div>
+          <div style="text-align:right"><div style="font-size:.82rem;font-weight:700;color:var(--nes-blue)">OMR ${Math.round(parseFloat(d.value)||0).toLocaleString()}</div><span class="stage-badge stage-${d.stage||'lead'}">${(d.stage||'lead').toUpperCase()}</span></div>
+        </div>`).join(''):`<div style="text-align:center;padding:12px;font-size:.75rem;color:#484f58;font-family:var(--mono)">No deals yet</div>`}
+      <button onclick="showAddDealModal();document.getElementById('contactDetailModal').remove();" class="form-submit" style="margin-top:12px"><i class="ti ti-plus"></i> Add Deal for this Contact</button>
+    </div>`;
+  document.body.appendChild(m);
+}
+
+function filterContacts(q){
+  const filtered=q?_salesContacts.filter(c=>(c.name+c.company+c.email+c.industry).toLowerCase().includes(q.toLowerCase())):_salesContacts;
+  const colors=['#1a3a6e','#2d1f00','#0d2818','#2d0e0e','#1a2332'];
+  const textColors=['#409cff','#d29922','#3fb950','#f85149','#8b949e'];
+  const el=document.getElementById('contactsList');
+  if(el)el.innerHTML=filtered.map((c,i)=>`
+    <div class="contact-card" onclick="showContactDetail('${c.id}')">
+      <div class="contact-av" style="background:${colors[i%5]};color:${textColors[i%5]}">${(c.name||'?').substring(0,2).toUpperCase()}</div>
+      <div style="flex:1"><div class="contact-name">${c.name||'—'}</div><div class="contact-meta">${c.title||''} ${c.company?'· '+c.company:''}</div></div>
+      <span style="font-size:.6rem;padding:2px 7px;border-radius:6px;font-family:var(--mono);background:#0c1f35;color:var(--nes-blue)">${c.industry||'—'}</span>
+    </div>`).join('');
+}
+function filterContactsBySource(s){
+  const filtered=s?_salesContacts.filter(c=>c.source===s):_salesContacts;
+  filterContacts('');
+  const colors=['#1a3a6e','#2d1f00','#0d2818','#2d0e0e','#1a2332'];
+  const textColors=['#409cff','#d29922','#3fb950','#f85149','#8b949e'];
+  const el=document.getElementById('contactsList');
+  if(el)el.innerHTML=filtered.map((c,i)=>`
+    <div class="contact-card" onclick="showContactDetail('${c.id}')">
+      <div class="contact-av" style="background:${colors[i%5]};color:${textColors[i%5]}">${(c.name||'?').substring(0,2).toUpperCase()}</div>
+      <div style="flex:1"><div class="contact-name">${c.name||'—'}</div><div class="contact-meta">${c.title||''} ${c.company?'· '+c.company:''}</div></div>
+      <span style="font-size:.6rem;padding:2px 7px;border-radius:6px;font-family:var(--mono);background:#0c1f35;color:var(--nes-blue)">${c.industry||'—'}</span>
+    </div>`).join('');
+}
+
 function showPricing(){
   const plans=[
     {name:'Free',price:'$0',period:'forever',features:['50 msgs/day','3 images/day','5 docs/day','Web search','Voice input'],btn:'Current Plan',disabled:true},
@@ -1394,6 +1869,12 @@ window.deleteClient=deleteClient;window.saveClientModules=saveClientModules;
 window.saveClientCreds=saveClientCreds;window.saveClientBranding=saveClientBranding;
 window.saveClientAgents=saveClientAgents;window.saveClientBilling=saveClientBilling;
 window.showClientManager=showClientManager;window.showToast=showToast;window.hideTeamHub=hideTeamHub;
+window.showSalesPortal=showSalesPortal;window.renderSalesPortal=renderSalesPortal;
+window.showAddContactModal=showAddContactModal;window.saveContact=saveContact;
+window.showAddDealModal=showAddDealModal;window.saveDeal=saveDeal;
+window.showAddReferrerModal=showAddReferrerModal;window.saveReferrer=saveReferrer;
+window.showContactDetail=showContactDetail;window.filterContacts=filterContacts;
+window.filterContactsBySource=filterContactsBySource;
 window.selectClientDB=selectClientDB;window.restoreChat=restoreChat;
 </script>
 </body>
