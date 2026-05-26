@@ -1911,6 +1911,7 @@ function filterContactsBySource(s){
     </div>`).join('');
 }
 
+
 // ── CLIENT PORTAL: MY CREDENTIALS ──
 async function showMyCredentials(){
   if(!userClientId){addAiMsg('No client account linked.');return;}
@@ -1924,15 +1925,13 @@ async function showMyCredentials(){
     <div class="page"><div style="max-width:640px;padding-bottom:40px;" id="myCredsContent">
       <div style="color:var(--muted);font-family:var(--mono);font-size:.8rem;padding:20px 0;">Loading credentials...</div>
     </div></div>`;
-
-  // Load current credentials from backend
   try{
-    const res=await fetch(\`\${API_URL}/api/client/\${userClientId}/credentials\`);
+    const res=await fetch(API_URL+'/api/client/'+userClientId+'/credentials');
     const json=await res.json();
-    const creds=json.credentials||{};
-    renderMyCredsForm(creds);
+    renderMyCredsForm(json.credentials||{});
   }catch(e){
-    document.getElementById('myCredsContent').innerHTML=\`<div style="color:var(--red);font-family:var(--mono);font-size:.8rem;">Error loading credentials: \${e.message}</div>\`;
+    const el=document.getElementById('myCredsContent');
+    if(el)el.innerHTML='<div style="color:var(--red);font-family:var(--mono);font-size:.8rem;">Error loading credentials: '+e.message+'</div>';
   }
 }
 
@@ -1950,36 +1949,29 @@ function renderMyCredsForm(creds){
     {label:'Website URL',key:'website',type:'url',placeholder:'https://yourcompany.com'},
     {label:'Vapi Assistant ID',key:'vapi_assistant_id',type:'text',placeholder:'vapi-...'},
   ];
-
-  el.innerHTML=`
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:20px;">
-      <div style="font-family:var(--mono);font-size:.7rem;color:var(--amber);margin-bottom:16px;padding:10px 14px;background:#2d1f00;border-radius:8px;border:1px solid #d2992240;">
-        <i class="ti ti-lock" style="margin-right:6px;"></i>Credentials are encrypted and stored securely. They are never shared with third parties.
-      </div>
-      \${fields.map(f=>\`
-        <div class="form-field">
-          <label class="form-label">\${f.label}</label>
-          <input id="mycred_\${f.key}" type="\${f.type}" class="form-input"
-            value="\${creds[f.key]||''}"
-            placeholder="\${f.placeholder}"
-            \${f.type==='password'?'autocomplete="new-password"':''}>
-        </div>
-      \`).join('')}
-      <button onclick="saveMyCredentials()" class="form-submit" style="margin-top:12px;">
-        <i class="ti ti-device-floppy"></i> Save Credentials
-      </button>
+  let html=`<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:20px;">
+    <div style="font-family:var(--mono);font-size:.7rem;color:var(--amber);margin-bottom:16px;padding:10px 14px;background:#2d1f00;border-radius:8px;border:1px solid #d2992240;">
+      <i class="ti ti-lock" style="margin-right:6px;"></i>Credentials are encrypted and stored securely.
     </div>`;
+  fields.forEach(function(f){
+    const val=(creds[f.key]||'').replace(/"/g,'&quot;');
+    html+='<div class="form-field"><label class="form-label">'+f.label+'</label>';
+    html+='<input id="mycred_'+f.key+'" type="'+f.type+'" class="form-input" value="'+val+'" placeholder="'+f.placeholder+'"'+(f.type==='password'?' autocomplete="new-password"':'')+'>'; 
+    html+='</div>';
+  });
+  html+='<button onclick="saveMyCredentials()" class="form-submit" style="margin-top:12px;"><i class="ti ti-device-floppy"></i> Save Credentials</button></div>';
+  el.innerHTML=html;
 }
 
 async function saveMyCredentials(){
   const fields=['facebook_token','facebook_page_id','instagram_business_id','whatsapp_phone_id','whatsapp_token','linkedin_token','calcom_link','lead_email','website','vapi_assistant_id'];
   const creds={};
-  fields.forEach(k=>{
+  fields.forEach(function(k){
     const el=document.getElementById('mycred_'+k);
     if(el&&el.value.trim())creds[k]=el.value.trim();
   });
   try{
-    const res=await fetch(\`\${API_URL}/api/client/\${userClientId}/credentials\`,{
+    const res=await fetch(API_URL+'/api/client/'+userClientId+'/credentials',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({credentials:creds})
