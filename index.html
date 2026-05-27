@@ -455,7 +455,7 @@
         <div class="nav-item" data-view="command"><i class="ti ti-terminal-2"></i><span>Team Hub</span><span class="nav-badge nb-orange" id="commandBadge" style="display:none;">5</span></div>
         <div class="nav-item" data-view="leads"><i class="ti ti-user-check"></i><span>Leads</span><span class="nav-badge nb-red" id="leadsBadge">—</span></div>
         <div class="nav-item" id="salesNav" data-view="sales" style="display:none;"><i class="ti ti-chart-arrows"></i><span>Sales Portal</span></div>
-        <div class="nav-item" id="myCredsNav" data-view="mycredentials" style="display:none;"><i class="ti ti-key"></i><span>My Credentials</span></div>
+        <div class="nav-item" id="myCredsNav" data-view="mycredentials" style="display:none;"><i class="ti ti-checklist"></i><span>IT Setup</span></div>
       </div>
     </div>
 
@@ -997,7 +997,7 @@ function renderClientManagerFull(clients,activeId=null){
   setTimeout(()=>{
     if(window._activeTab&&window._activeTab!=='modules'){
       const tabEl=document.querySelector('.cm-tab[onclick*="\'' +window._activeTab+ '\'"]');
-      if(tabEl){['modules','creds','branding','agents','billing'].forEach(t=>{const e=document.getElementById('cm-'+t);if(e)e.style.display=t===window._activeTab?'block':'none';});document.querySelectorAll('.cm-tab').forEach(t=>t.classList.remove('active'));tabEl.classList.add('active');}
+      if(tabEl){['modules','creds','branding','agents','billing','users'].forEach(t=>{const e=document.getElementById('cm-'+t);if(e)e.style.display=t===window._activeTab?'block':'none';});document.querySelectorAll('.cm-tab').forEach(t=>t.classList.remove('active'));tabEl.classList.add('active');if(window._activeTab==='users'&&window._activeClientId)loadClientUsers(window._activeClientId);}
     }
   },50);
   const colors=['#1a3a6e','#2d1f00','#0d2818','#2d0e0e','#1a2332'];
@@ -1099,7 +1099,7 @@ function renderClientDetail(c,colors,textColors,idx){
               ['WhatsApp Phone ID','whatsapp_phone_id'],
               ['WhatsApp Token','whatsapp_token'],
               ['WhatsApp Business ID','whatsapp_business_id'],
-              ['Cal.com Link','calcom_link'],
+              ['Appointment Booking Link','calcom_link'],
               ['Lead Email','email'],
               ['Website URL','website'],
               ['Telegram Bot Token','telegram_bot_token'],
@@ -1142,12 +1142,14 @@ function renderClientDetail(c,colors,textColors,idx){
         </div>
 
         <div id="cm-agents" style="display:none;">
+          <div style="font-family:var(--mono);font-size:.65rem;color:var(--nes-blue);font-weight:800;margin-bottom:8px;padding:6px 10px;background:#0c1f35;border-radius:6px;border:1px solid #1a3a6e;"><i class="ti ti-lock" style="margin-right:5px;"></i>NES MANAGED — Admin only</div>
           <div class="creds-grid">
             ${[
-              ['Sara Assistant ID','sara_assistant_id'],
-              ['Layla Assistant ID','layla_assistant_id'],
-              ['Adam Assistant ID','adam_assistant_id'],
-              ['Riley Assistant ID','riley_assistant_id'],
+              ['AI Voice Number (Twilio)','twilio_number'],
+              ['AI Voice Assistant (Sara)','sara_assistant_id'],
+              ['AI Voice Assistant (Layla)','layla_assistant_id'],
+              ['AI Voice Assistant (Adam)','adam_assistant_id'],
+              ['Appointment Booking Link','calcom_link'],
               ['Agent Language','agent_language'],
               ['Callback Delay (mins)','callback_delay'],
             ].map(([lbl,key])=>`
@@ -1160,12 +1162,32 @@ function renderClientDetail(c,colors,textColors,idx){
         </div>
 
         <div id="cm-billing" style="display:none;">
+          ${(()=>{
+            const trialStart=c.trial_start?new Date(c.trial_start):null;
+            const trialDays=c.trial_duration_days||7;
+            const trialEnd=trialStart?new Date(trialStart.getTime()+trialDays*86400000):null;
+            const now=new Date();
+            const daysLeft=trialEnd?Math.ceil((trialEnd-now)/86400000):null;
+            const trialActive=daysLeft!==null&&daysLeft>0;
+            const trialExpired=daysLeft!==null&&daysLeft<=0;
+            return trialStart?`
+              <div style="padding:10px 14px;border-radius:8px;margin-bottom:12px;background:${trialActive?(daysLeft<=2?'#2d0e0e':'#0d2818'):'#1a1a2e'};border:1px solid ${trialActive?(daysLeft<=2?'#f8514940':'#3fb95040'):'#409cff40'};">
+                <div style="font-family:var(--mono);font-size:.68rem;font-weight:800;color:${trialActive?(daysLeft<=2?'#f85149':'#3fb950'):'#409cff'};margin-bottom:3px;">
+                  ${trialExpired?'TRIAL EXPIRED':'TRIAL ACTIVE'}
+                </div>
+                <div style="font-size:.75rem;color:var(--muted);">
+                  ${trialActive?'<i class="ti ti-clock" style="margin-right:4px;"></i>'+daysLeft+' day'+( daysLeft===1?'':'s')+' remaining — ends '+trialEnd.toLocaleDateString():(trialExpired?'Expired '+trialEnd.toLocaleDateString():'No trial set')}
+                </div>
+              </div>`:''
+          })()}
           <div class="creds-grid">
             ${[
               ['Monthly Fee (OMR)','monthly_fee'],
               ['Billing Date (day of month)','billing_date'],
               ['Contract Start','contract_start'],
               ['Contract End','contract_end'],
+              ['Trial Start Date','trial_start'],
+              ['Trial Duration (days)','trial_duration_days'],
             ].map(([lbl,key])=>`
               <div class="cred-field">
                 <div class="cf-lbl">${lbl}</div>
@@ -2023,48 +2045,137 @@ async function showMyCredentials(){
   mc.style.overflow='auto';
   mc.innerHTML=`
     <div style="padding:11px 18px;border-bottom:1px solid var(--border);flex-shrink:0;">
-      <div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;">MY CREDENTIALS</div>
-      <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">Self-service · Update your integration credentials</div>
+      <div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;">IT SETUP</div>
+      <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">Integration checklist · Connect your services</div>
     </div>
     <div class="page"><div style="max-width:640px;padding-bottom:40px;" id="myCredsContent">
-      <div style="color:var(--muted);font-family:var(--mono);font-size:.8rem;padding:20px 0;">Loading credentials...</div>
+      <div style="color:var(--muted);font-family:var(--mono);font-size:.8rem;padding:20px 0;">Loading...</div>
     </div></div>`;
   try{
-    const res=await fetch(API_URL+'/api/client/'+userClientId+'/credentials');
-    const json=await res.json();
-    renderMyCredsForm(json.credentials||{});
+    const [credsRes, clientRes] = await Promise.all([
+      fetch(API_URL+'/api/client/'+userClientId+'/credentials'),
+      fetch(API_URL+'/api/client/'+userClientId)
+    ]);
+    const credsJson=await credsRes.json();
+    const clientJson=await clientRes.json();
+    renderMyCredsForm(credsJson.credentials||{}, clientJson.client||{});
   }catch(e){
     const el=document.getElementById('myCredsContent');
-    if(el)el.innerHTML='<div style="color:var(--red);font-family:var(--mono);font-size:.8rem;">Error loading credentials: '+e.message+'</div>';
+    if(el)el.innerHTML='<div style="color:var(--red);font-family:var(--mono);font-size:.8rem;">Error: '+e.message+'</div>';
   }
 }
 
-function renderMyCredsForm(creds){
+function renderMyCredsForm(creds, client){
   const el=document.getElementById('myCredsContent');
-  const fields=[
-    {label:'Facebook Page Token',key:'facebook_token',type:'password',placeholder:'EAABwzLixnjYBO...'},
-    {label:'Facebook Page ID',key:'facebook_page_id',type:'text',placeholder:'123456789'},
-    {label:'Instagram Business ID',key:'instagram_business_id',type:'text',placeholder:'987654321'},
-    {label:'WhatsApp Phone ID',key:'whatsapp_phone_id',type:'text',placeholder:'1234567890'},
-    {label:'WhatsApp Token',key:'whatsapp_token',type:'password',placeholder:'EAABwz...'},
-    {label:'LinkedIn Token',key:'linkedin_token',type:'password',placeholder:'AQV3...'},
-    {label:'Cal.com Booking Link',key:'calcom_link',type:'url',placeholder:'https://cal.com/yourname'},
-    {label:'Lead Notification Email',key:'lead_email',type:'email',placeholder:'leads@yourcompany.com'},
-    {label:'Website URL',key:'website',type:'url',placeholder:'https://yourcompany.com'},
-    {label:'Vapi Assistant ID',key:'vapi_assistant_id',type:'text',placeholder:'vapi-...'},
+  // Trial banner
+  let trialHtml='';
+  if(client.trial_start){
+    const trialEnd=new Date(new Date(client.trial_start).getTime()+((client.trial_duration_days||7)*86400000));
+    const daysLeft=Math.ceil((trialEnd-new Date())/86400000);
+    const expired=daysLeft<=0;
+    const urgent=daysLeft<=2&&!expired;
+    const color=expired?'#f85149':urgent?'#d29922':'#3fb950';
+    const bg=expired?'#2d0e0e':urgent?'#2d1f00':'#0d2818';
+    const border=expired?'#f8514940':urgent?'#d2992240':'#3fb95040';
+    trialHtml='<div style="padding:12px 16px;border-radius:10px;margin-bottom:16px;background:'+bg+';border:1px solid '+border+';">'+
+      '<div style="font-family:var(--mono);font-size:.7rem;font-weight:800;color:'+color+';margin-bottom:4px;">'+(expired?'TRIAL EXPIRED':'TRIAL ACTIVE')+'</div>'+
+      '<div style="font-size:.8rem;color:var(--muted);">'+(expired?'Your trial ended on '+trialEnd.toLocaleDateString()+'. Contact support to continue.':daysLeft+' day'+(daysLeft===1?'':'s')+' remaining — trial ends '+trialEnd.toLocaleDateString())+'</div>'+
+      (urgent&&!expired?'<div style="font-size:.75rem;color:'+color+';margin-top:4px;font-weight:600;">Connect your credentials now to avoid interruption.</div>':'')+'</div>';
+  }
+  // Checklist sections
+  const sections=[
+    {title:'Social media',items:[
+      {label:'Facebook',desc:'Page token + Page ID',keys:['facebook_token','facebook_page_id'],icon:'ti-brand-facebook'},
+      {label:'Instagram',desc:'Business Account ID',keys:['instagram_business_id'],icon:'ti-brand-instagram'},
+      {label:'LinkedIn',desc:'Access token',keys:['linkedin_token'],icon:'ti-brand-linkedin'},
+    ]},
+    {title:'Messaging & leads',items:[
+      {label:'WhatsApp',desc:'Phone ID + API token',keys:['whatsapp_phone_id','whatsapp_token'],icon:'ti-brand-whatsapp'},
+      {label:'Lead alerts email',desc:'Where new leads are sent',keys:['lead_email'],icon:'ti-mail'},
+      {label:'Website',desc:'Your website URL',keys:['website'],icon:'ti-world'},
+    ]},
   ];
-  let html=`<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:20px;">
-    <div style="font-family:var(--mono);font-size:.7rem;color:var(--amber);margin-bottom:16px;padding:10px 14px;background:#2d1f00;border-radius:8px;border:1px solid #d2992240;">
-      <i class="ti ti-lock" style="margin-right:6px;"></i>Credentials are encrypted and stored securely.
-    </div>`;
-  fields.forEach(function(f){
-    const val=(creds[f.key]||'').replace(/"/g,'&quot;');
-    html+='<div class="form-field"><label class="form-label">'+f.label+'</label>';
-    html+='<input id="mycred_'+f.key+'" type="'+f.type+'" class="form-input" value="'+val+'" placeholder="'+f.placeholder+'"'+(f.type==='password'?' autocomplete="new-password"':'')+'>'; 
-    html+='</div>';
+  // Progress
+  let connected=0,total=0;
+  sections.forEach(s=>s.items.forEach(item=>{
+    total++;
+    if(item.keys.some(k=>creds[k]&&creds[k].trim()))connected++;
+  }));
+  const pct=total?Math.round((connected/total)*100):0;
+  let html=trialHtml;
+  html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">';
+  html+='<div style="font-size:.8rem;color:var(--muted);">'+connected+' / '+total+' connected</div>';
+  html+='<div style="font-size:.8rem;color:var(--nes-blue);font-family:var(--mono);font-weight:700;">'+pct+'%</div></div>';
+  html+='<div style="background:var(--surface);border-radius:6px;height:6px;margin-bottom:20px;overflow:hidden;">';
+  html+='<div style="height:100%;width:'+pct+'%;background:'+(pct===100?'#3fb950':'#409cff')+';border-radius:6px;transition:width .4s;"></div></div>';
+  sections.forEach(function(sec){
+    html+='<div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;margin-top:16px;">'+sec.title+'</div>';
+    sec.items.forEach(function(item){
+      const isConnected=item.keys.some(k=>creds[k]&&creds[k].trim());
+      html+='<div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:6px;">';
+      html+='<div style="width:34px;height:34px;border-radius:8px;background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti '+item.icon+'" style="font-size:16px;color:var(--nes-blue);"></i></div>';
+      html+='<div style="flex:1;"><div style="font-size:.82rem;color:var(--text);font-weight:500;">'+item.label+'</div>';
+      html+='<div style="font-size:.72rem;color:var(--muted);">'+item.desc+'</div></div>';
+      html+='<div style="display:flex;align-items:center;gap:8px;">';
+      html+='<span style="font-size:.68rem;font-family:var(--mono);padding:3px 10px;border-radius:12px;background:'+(isConnected?'#0d2818':'#2d1f00')+';color:'+(isConnected?'#3fb950':'#d29922')+';">'+(isConnected?'Connected':'Missing')+'</span>';
+      html+='<button onclick="editItCred(''+item.keys.join(',')+'',''+item.label+'')" style="background:none;border:1px solid var(--border);border-radius:6px;padding:4px 10px;color:var(--muted);cursor:pointer;font-size:.72rem;">'+(isConnected?'Edit':'Connect')+'</button>';
+      html+='</div></div>';
+    });
   });
-  html+='<button onclick="saveMyCredentials()" class="form-submit" style="margin-top:12px;"><i class="ti ti-device-floppy"></i> Save Credentials</button></div>';
+  html+='<div id="it-cred-form" style="display:none;margin-top:16px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;">';
+  html+='<div id="it-cred-title" style="font-family:var(--mono);font-size:.75rem;font-weight:700;color:var(--nes-blue);margin-bottom:12px;"></div>';
+  html+='<div id="it-cred-fields"></div>';
+  html+='<div style="display:flex;gap:8px;margin-top:12px;">';
+  html+='<button onclick="saveItCred()" class="form-submit" style="flex:1;"><i class="ti ti-device-floppy"></i> Save</button>';
+  html+='<button onclick="document.getElementById('it-cred-form').style.display='none'" style="background:none;border:1px solid var(--border);border-radius:8px;padding:8px 14px;color:var(--muted);cursor:pointer;font-size:.8rem;">Cancel</button>';
+  html+='</div></div>';
   el.innerHTML=html;
+  window._itCredsCache=creds;
+}
+
+function editItCred(keysStr, label){
+  const keys=keysStr.split(',');
+  const creds=window._itCredsCache||{};
+  document.getElementById('it-cred-title').textContent=label;
+  const fieldLabels={
+    facebook_token:'Page token',facebook_page_id:'Page ID',
+    instagram_business_id:'Business Account ID',
+    whatsapp_phone_id:'Phone ID',whatsapp_token:'API token',
+    linkedin_token:'Access token',
+    lead_email:'Email address',website:'Website URL'
+  };
+  let html='';
+  keys.forEach(function(k){
+    const val=(creds[k]||'').replace(/"/g,'&quot;');
+    const isPwd=k.includes('token');
+    html+='<div style="margin-bottom:8px;"><div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);margin-bottom:4px;">'+(fieldLabels[k]||k)+'</div>';
+    html+='<input id="itf_'+k+'" type="'+(isPwd?'password':'text')+'" class="form-input" value="'+val+'" placeholder="Enter value"'+(isPwd?' autocomplete="new-password"':'')+' style="font-family:var(--mono);font-size:.75rem;"></div>';
+  });
+  document.getElementById('it-cred-fields').innerHTML=html;
+  document.getElementById('it-cred-form').style.display='block';
+  window._itActiveKeys=keys;
+  document.querySelector('#it-cred-fields input')?.focus();
+}
+
+async function saveItCred(){
+  const keys=window._itActiveKeys||[];
+  const creds=window._itCredsCache||{};
+  keys.forEach(function(k){
+    const el=document.getElementById('itf_'+k);
+    if(el&&el.value.trim())creds[k]=el.value.trim();
+  });
+  window._itCredsCache=creds;
+  try{
+    const res=await fetch(API_URL+'/api/client/'+userClientId+'/credentials',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({credentials:creds})
+    });
+    if(!res.ok)throw new Error(await res.text());
+    showToast('Saved ✓');
+    document.getElementById('it-cred-form').style.display='none';
+    renderMyCredsForm(creds, window._itClientCache||{});
+  }catch(e){alert('Error: '+e.message);}
 }
 
 async function saveMyCredentials(){
@@ -2186,7 +2297,7 @@ window.saveClientCreds=saveClientCreds;window.saveClientBranding=saveClientBrand
 window.saveClientAgents=saveClientAgents;window.saveClientBilling=saveClientBilling;
 window.showClientManager=showClientManager;window.showToast=showToast;window.hideTeamHub=hideTeamHub;
 window.showSalesPortal=showSalesPortal;window.renderSalesPortal=renderSalesPortal;
-window.showMyCredentials=showMyCredentials;window.saveMyCredentials=saveMyCredentials;
+window.showMyCredentials=showMyCredentials;window.saveMyCredentials=saveMyCredentials;window.editItCred=editItCred;window.saveItCred=saveItCred;
 window.loadClientUsers=loadClientUsers;window.showInviteUserForm=showInviteUserForm;window.sendClientInvite=sendClientInvite;window.removeClientUser=removeClientUser;
 window.showAddContactModal=showAddContactModal;window.saveContact=saveContact;
 window.showAddDealModal=showAddDealModal;window.saveDeal=saveDeal;
