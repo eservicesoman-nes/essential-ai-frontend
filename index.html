@@ -2118,7 +2118,7 @@ function renderMyCredsForm(creds, client){
       html+='<div style="font-size:.72rem;color:var(--muted);">'+item.desc+'</div></div>';
       html+='<div style="display:flex;align-items:center;gap:8px;">';
       html+='<span style="font-size:.68rem;font-family:var(--mono);padding:3px 10px;border-radius:12px;background:'+(isConnected?'#0d2818':'#2d1f00')+';color:'+(isConnected?'#3fb950':'#d29922')+';">'+(isConnected?'Connected':'Missing')+'</span>';
-      html+='<button onclick="editItCred(''+item.keys.join(',')+'',''+item.label+'')" style="background:none;border:1px solid var(--border);border-radius:6px;padding:4px 10px;color:var(--muted);cursor:pointer;font-size:.72rem;">'+(isConnected?'Edit':'Connect')+'</button>';
+      html+='<button onclick="editItCred(\''+item.keys.join(',')+'\',\''+item.label+'\')" style="background:none;border:1px solid var(--border);border-radius:6px;padding:4px 10px;color:var(--muted);cursor:pointer;font-size:.72rem;">'+(isConnected?'Edit':'Connect')+'</button>';
       html+='</div></div>';
     });
   });
