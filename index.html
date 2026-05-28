@@ -756,23 +756,26 @@ async function showCEODashboard(){
   const geoRows=Object.entries(countries).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([c,n],i)=>`
     <div class="geo-row"><div class="geo-name">${c}</div><div class="geo-track"><div class="geo-fill" style="width:${Math.round(n/totalLeads*100)||0}%;background:${colors[i%5]};box-shadow:0 0 4px ${colors[i%5]}"></div></div><div class="geo-n">${n}</div></div>`).join('');
   // Fetch weather
-  fetch('https://wttr.in/Muscat?format=j1').then(r=>r.json()).then(w=>{
-    const c=w.current_condition[0];
-    const desc=c.weatherDesc[0].value;
-    const temp=c.temp_C;
-    const feels=c.FeelsLikeC;
-    const humidity=c.humidity;
-    const icons={'Sunny':'ti-sun','Clear':'ti-moon-stars','Partly cloudy':'ti-cloud-sun','Cloudy':'ti-cloud','Overcast':'ti-cloud','Mist':'ti-mist','Fog':'ti-mist','Rain':'ti-cloud-rain','Drizzle':'ti-cloud-drizzle','Thunderstorm':'ti-storm','Snow':'ti-snowflake','Blizzard':'ti-snowflake'};
-    const iconKey=Object.keys(icons).find(k=>desc.includes(k))||'Sunny';
-    const wi=document.getElementById('weatherIcon');
-    const wd=document.getElementById('weatherDesc');
-    const wt=document.getElementById('weatherTemp');
-    const wf=document.getElementById('weatherFeels');
-    if(wi)wi.className='ti '+(icons[iconKey]||'ti-sun')+' ';wi.style.cssText='font-size:22px;color:var(--nes-blue);filter:drop-shadow(0 0 4px var(--nes-blue))';
-    if(wd)wd.textContent=desc+' · Humidity '+humidity+'%';
-    if(wt)wt.textContent=temp+'°C';
-    if(wf)wf.textContent='Feels like '+feels+'°C';
-  }).catch(()=>{const wd=document.getElementById('weatherDesc');if(wd)wd.textContent='Weather unavailable';});
+  // Load weather without triggering re-render
+  setTimeout(()=>{
+    fetch('https://wttr.in/Muscat?format=j1').then(r=>r.json()).then(w=>{
+      const c=w.current_condition[0];
+      const desc=c.weatherDesc[0].value;
+      const temp=c.temp_C;
+      const feels=c.FeelsLikeC;
+      const humidity=c.humidity;
+      const icons={'Sunny':'ti-sun','Clear':'ti-moon-stars','Partly cloudy':'ti-cloud-sun','Cloudy':'ti-cloud','Overcast':'ti-cloud','Mist':'ti-mist','Fog':'ti-mist','Rain':'ti-cloud-rain','Drizzle':'ti-cloud-drizzle','Thunderstorm':'ti-storm','Snow':'ti-snowflake','Blizzard':'ti-snowflake'};
+      const iconKey=Object.keys(icons).find(k=>desc.includes(k))||'Sunny';
+      const wi=document.getElementById('weatherIcon');
+      const wd=document.getElementById('weatherDesc');
+      const wt=document.getElementById('weatherTemp');
+      const wf=document.getElementById('weatherFeels');
+      if(wi){wi.className='ti '+(icons[iconKey]||'ti-sun');wi.style.cssText='font-size:22px;color:var(--nes-blue);filter:drop-shadow(0 0 4px var(--nes-blue))';}
+      if(wd)wd.textContent=desc+' · Humidity '+humidity+'%';
+      if(wt)wt.textContent=temp+'°C';
+      if(wf)wf.textContent='Feels like '+feels+'°C';
+    }).catch(()=>{const wd=document.getElementById('weatherDesc');if(wd)wd.textContent='Weather unavailable';});
+  },100);
 
   document.getElementById('ceoDashContent').innerHTML=`
     ${uncontacted>0
@@ -837,8 +840,24 @@ async function loadCeoFeed(){
     const tagMap={briefing:{cls:'itag-watch',icon:'ti-file-text',label:'BRIEF'},intelligence:{cls:'itag-opp',icon:'ti-radar',label:'INTEL'},default:{cls:'itag-risk',icon:'ti-info-circle',label:'INFO'}};
     el.innerHTML=data.map(item=>{
       const t=tagMap[item.type]||tagMap.default;
-      const preview=item.content?item.content.substring(0,120).replace(/\n/g,' ')+'...':'No content';
-      return `<div class="intel-item"><i class="ti ${t.icon}" style="font-size:14px;color:var(--nes-blue);flex-shrink:0;margin-top:1px"></i><div style="flex:1"><div class="ititle">${item.title||'Intelligence Update'}</div><div class="isub">${preview}</div></div><span class="itag ${t.cls}">${item.tag||t.label}</span></div>`;
+      // Clean content: strip markdown symbols, collapse whitespace
+      const clean=item.content
+        ?item.content
+          .replace(/[◆━]/g,'')
+          .replace(/\*([^*]+)\*/g,'$1')
+          .replace(/🔹/g,'·')
+          .replace(/🔗[^
+]*/g,'')
+          .replace(/
+{2,}/g,' ')
+          .replace(/
+/g,' ')
+          .replace(/---/g,'')
+          .replace(/\s{2,}/g,' ')
+          .trim()
+          .substring(0,140)+'...'
+        :'No content';
+      return `<div class="intel-item"><i class="ti ${t.icon}" style="font-size:14px;color:var(--nes-blue);flex-shrink:0;margin-top:1px"></i><div style="flex:1"><div class="ititle">${item.title||'Intelligence Update'}</div><div class="isub">${clean}</div></div><span class="itag ${t.cls}">${item.tag||t.label}</span></div>`;
     }).join('');
   }catch(e){
     const el=document.getElementById('ceoFeedItems');
