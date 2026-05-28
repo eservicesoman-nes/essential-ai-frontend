@@ -2383,26 +2383,33 @@ async function checkPlatformStatus(){
   html+='<i class="ti ti-photo" style="font-size:20px;color:#7f77dd;"></i><div><div style="font-size:1.2rem;font-weight:700;color:#7f77dd;">'+totalImgsToday+'</div><div style="font-size:.65rem;color:var(--muted);font-family:var(--mono);">Images generated today</div></div></div>';
   html+='</div>';
 
-  // API Credits
+  // API Credits — full table in Platform Status
+  html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">';
+  html+='<div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;">API Credit Status</div>';
+  html+='<button onclick="showView(\'apicredits\')" style="background:none;border:1px solid var(--border);border-radius:6px;padding:3px 9px;color:var(--muted);cursor:pointer;font-size:.68rem;font-family:var(--mono);">Manage all →</button></div>';
+  if(lowApis.length>0){
+    html+='<div style="background:#2d0e0e;border:1px solid rgba(248,81,73,.3);border-radius:8px;padding:10px 14px;margin-bottom:8px;font-size:.75rem;color:#f85149;display:flex;align-items:center;gap:8px;"><i class="ti ti-alert-triangle"></i>'+lowApis.length+' API'+(lowApis.length>1?'s':'')+' below threshold — '+lowApis.map(a=>a.service_name).join(', ')+'</div>';
+  }
   if(apis.length>0){
-    html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">';
-    html+='<div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;">API Credits</div>';
-    html+='<button onclick="showView('apicredits')" style="background:none;border:1px solid var(--border);border-radius:6px;padding:3px 9px;color:var(--muted);cursor:pointer;font-size:.68rem;font-family:var(--mono);">Manage →</button></div>';
-    if(lowApis.length>0){
-      html+='<div style="background:#2d0e0e;border:1px solid rgba(248,81,73,.3);border-radius:8px;padding:10px 14px;margin-bottom:8px;font-size:.75rem;color:#f85149;display:flex;align-items:center;gap:8px;"><i class="ti ti-alert-triangle"></i>'+lowApis.length+' API'+( lowApis.length>1?'s':'' )+' below threshold: '+lowApis.map(a=>a.service_name).join(', ')+'</div>';
-    }
-    html+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:6px;margin-bottom:16px;">';
+    html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:16px;">';
+    html+='<div style="display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr 80px;gap:8px;padding:8px 14px;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;">';
+    html+='<div>Service</div><div>Balance</div><div>Alert at</div><div>Used/mo</div><div>Status</div></div>';
     apis.forEach(function(a){
       const color=a.status==='healthy'?'#3fb950':a.status==='low'?'#f85149':'#d29922';
       const bg=a.status==='healthy'?'#0d2818':a.status==='low'?'#2d0e0e':'#2d1f00';
-      html+='<div style="background:var(--surface);border:1px solid '+(a.status==='low'?'rgba(248,81,73,.3)':'var(--border)')+';border-radius:8px;padding:10px 12px;">';
-      html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">';
-      html+='<div style="font-size:.72rem;font-weight:600;color:var(--text);">'+a.service_name+'</div>';
-      html+='<span style="font-size:.58rem;padding:1px 6px;border-radius:8px;background:'+bg+';color:'+color+';">'+( a.status||'unknown').toUpperCase()+'</span></div>';
-      html+='<div style="font-size:1.1rem;font-weight:700;color:'+color+';">'+(a.current_balance>0?'$'+parseFloat(a.current_balance).toFixed(2):'—')+'</div>';
-      html+='<div style="font-size:.62rem;color:var(--muted);font-family:var(--mono);">Alert at $'+( a.alert_threshold||5)+'</div></div>';
+      const bal=a.current_balance>0?'$'+parseFloat(a.current_balance).toFixed(2):'—';
+      const usage=a.monthly_usage>0?'$'+parseFloat(a.monthly_usage).toFixed(2):'—';
+      html+='<div style="display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr 80px;gap:8px;padding:9px 14px;border-bottom:1px solid rgba(26,35,50,.4);align-items:center;">';
+      html+='<div style="font-size:.78rem;font-weight:600;color:var(--text);">'+a.service_name+'</div>';
+      html+='<div style="font-size:.78rem;font-weight:700;color:'+color+';">'+bal+'</div>';
+      html+='<div style="font-size:.72rem;color:var(--muted);font-family:var(--mono);">$'+(a.alert_threshold||5)+'</div>';
+      html+='<div style="font-size:.72rem;color:var(--muted);font-family:var(--mono);">'+usage+'</div>';
+      html+='<div><span style="font-size:.6rem;padding:2px 8px;border-radius:8px;font-family:var(--mono);font-weight:700;background:'+bg+';color:'+color+';">'+(a.status||'unknown').toUpperCase()+'</span></div>';
+      html+='</div>';
     });
     html+='</div>';
+  } else {
+    html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:16px;text-align:center;font-family:var(--mono);font-size:.75rem;color:var(--muted);">No API credits configured yet — <span onclick="showView(\'apicredits\')" style="color:var(--nes-blue);cursor:pointer;">click to set up</span></div>';
   }
 
   el.innerHTML=html;
