@@ -726,6 +726,11 @@ function showView(view){
 async function showCEODashboard(){
   const mc=document.getElementById('mainContent');
   mc.style.overflow='hidden';
+  // If already rendered, just refresh feed only — prevents flicker
+  if(document.getElementById('ceoDashContent')&&document.getElementById('ceoFeedItems')){
+    loadCeoFeed();
+    return;
+  }
   mc.innerHTML=`
     <div style="padding:11px 18px;border-bottom:1px solid var(--border);flex-shrink:0;">
       <div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;">CEO DASHBOARD</div>
@@ -893,13 +898,20 @@ async function loadCeoFeed(){
         '</div></div>'+
         '<div style="font-size:.8rem;font-weight:600;color:var(--text);margin-bottom:4px;">'+
         (function(){
-          // Extract first real headline from content
           if(!item.content)return item.title||'Intelligence Update';
           var lines=item.content.split('\n').map(function(l){return l.trim();});
+          var skipWords=['NES INTELLIGENCE','NES AI','Oman •','GCC •','Global Tech','AST','━','OMAN & GCC','AI & TECH','BUSINESS & ECO','MARKET INSIGHT','MORNING BRIEF','Intelligence Feed','CEO Briefing','---','http','🌐','📰','🔵','•'];
           for(var i=0;i<lines.length;i++){
             var l=lines[i];
-            if(l.length>20&&l.length<120&&!l.startsWith('NES ')&&!l.startsWith('Oman ')&&!l.includes('AST')&&!l.includes('━')&&!l.includes('OMAN')&&!l.includes('AI &')&&!l.includes('BUSINESS')&&!l.includes('MARKET INSIGHT')&&!l.includes('BRIEF')&&!l.startsWith('---')&&!l.startsWith('http')){
-              return l.replace(/^[*🔹◆·\s]+/,'').substring(0,80);
+            // Must be 15-100 chars, not a header/meta line
+            if(l.length>=15&&l.length<=100){
+              var skip=false;
+              for(var j=0;j<skipWords.length;j++){if(l.includes(skipWords[j])){skip=true;break;}}
+              if(!skip){
+                // Clean leading symbols
+                var clean=l.replace(/^[*🔹◆·🔷📅👥☀️⛅🌧️🌫️🌤️⚙️📡☕🕌🌅\s]+/,'').trim();
+                if(clean.length>=15)return clean.substring(0,80);
+              }
             }
           }
           return item.title||'Intelligence Update';
