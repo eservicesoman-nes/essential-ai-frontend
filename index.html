@@ -731,7 +731,7 @@ async function showCEODashboard(){
       <div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;">CEO DASHBOARD</div>
       <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">Live · ${new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</div>
     </div>
-    <div class="page" id="ceoDashContent">
+    <div class="page" id="ceoDashContent" style="opacity:0;transition:opacity .3s;">
       <div style="text-align:center;padding:40px;color:var(--muted);font-family:var(--mono);font-size:.8rem;">Loading dashboard...</div>
     </div>`;
   let leads=[],leadsToday=0,totalLeads=0;
@@ -822,6 +822,9 @@ async function showCEODashboard(){
     <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:7px;display:flex;align-items:center;gap:5px;"><i class="ti ti-radar" style="font-size:12px;color:var(--nes-blue);filter:drop-shadow(0 0 3px var(--nes-blue))"></i>Market Intelligence</div>
     <div id="ceoFeedItems" style="min-height:60px;"><div style="color:var(--muted);font-family:var(--mono);font-size:.7rem;padding:10px 0;">Loading intelligence feed...</div></div>
     `;
+  // Fade in dashboard after render
+  const dashEl=document.getElementById('ceoDashContent');
+  if(dashEl)requestAnimationFrame(()=>{dashEl.style.opacity='1';});
   loadCeoFeed();
 }
 
@@ -834,31 +837,89 @@ async function loadCeoFeed(){
     const el=document.getElementById('ceoFeedItems');
     if(!el)return;
     if(error||!data||data.length===0){
-      el.innerHTML=`<div style="color:var(--muted);font-family:var(--mono);font-size:.7rem;padding:10px 0;">No intelligence feed data yet. Check back after 6AM tomorrow.</div>`;
+      el.innerHTML='<div style="color:var(--muted);font-family:var(--mono);font-size:.7rem;padding:10px 0;">No intelligence feed data yet. Check back after 6AM tomorrow.</div>';
       return;
     }
-    const tagMap={briefing:{cls:'itag-watch',icon:'ti-file-text',label:'BRIEF'},intelligence:{cls:'itag-opp',icon:'ti-radar',label:'INTEL'},default:{cls:'itag-risk',icon:'ti-info-circle',label:'INFO'}};
-    el.innerHTML=data.map(item=>{
-      const t=tagMap[item.type]||tagMap.default;
-      // Clean content: strip markdown symbols, collapse whitespace
-      const clean=item.content
+    const tagColors={briefing:'#409cff',intelligence:'#3fb950',default:'#d29922'};
+    const tagLabels={briefing:'BRIEF',intelligence:'INTEL',default:'INFO'};
+    el.innerHTML=data.map(function(item,idx){
+      const tagColor=tagColors[item.type]||tagColors.default;
+      const tagLabel=tagLabels[item.type]||tagLabels.default;
+      // Extract URLs from content using split approach
+      const urls=[];
+      if(item.content){
+        item.content.split(' ').forEach(function(word){
+          if(word.startsWith('http')){
+            try{const u=new URL(word.trim());urls.push(u.hostname.replace('www.',''));}catch(e){}
+          }
+        });
+      }
+      // Clean content for preview
+      const cleaned=item.content
         ?item.content
-          .replace(/[\u25C6\u2501]/g,'')
-          .replace(/\*([^*]+)\*/g,'$1')
-          .replace(/\u1F539/g,'·')
           .replace(/https?:\/\/\S+/g,'')
-          .replace(/\n+/g,' ')
-          .replace(/---/g,'')
+          .replace(/\*/g,'')
+          .replace(/---+/g,'')
           .replace(/\s+/g,' ')
           .trim()
-          .substring(0,140)+'...'
-        :'No content';
-      return `<div class="intel-item"><i class="ti ${t.icon}" style="font-size:14px;color:var(--nes-blue);flex-shrink:0;margin-top:1px"></i><div style="flex:1"><div class="ititle">${item.title||'Intelligence Update'}</div><div class="isub">${clean}</div></div><span class="itag ${t.cls}">${item.tag||t.label}</span></div>`;
+        :'';
+      // Split into sections for expand view
+      const sections=cleaned.split('  ').filter(function(s){return s.trim().length>10;});
+      const preview=sections.slice(0,2).join(' ').substring(0,160)+'...';
+      const uniqueUrls=[...new Set(urls)].slice(0,4);
+      const sourceHtml=uniqueUrls.length
+        ?'<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:5px;">'+
+          uniqueUrls.map(function(u){
+            return '<span style="font-size:.62rem;font-family:var(--mono);padding:2px 7px;border-radius:5px;background:var(--bg);border:1px solid var(--border);color:var(--nes-blue);">'+u+'</span>';
+          }).join('')+'</div>'
+        :'';
+      const expandedHtml=sections.map(function(s){
+        return '<p style="margin:0 0 8px;line-height:1.6;font-size:.82rem;color:var(--text);">'+s.trim()+'</p>';
+      }).join('');
+      return '<div class="feed-card" id="feed-'+idx+'" style="background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:8px;overflow:hidden;">'+
+        '<div style="display:flex;align-items:flex-start;gap:10px;padding:12px 14px;cursor:pointer;" onclick="toggleFeedItem('+idx+')">'+
+        '<div style="width:32px;height:32px;border-radius:50%;border:2px solid #1a56db;background:#0a0f1e;display:flex;align-items:center;justify-content:center;flex-shrink:0;">'+
+        '<div style="width:16px;height:16px;border-radius:50%;background:#1a3a6e;display:flex;align-items:center;justify-content:center;">'+
+        '<div style="width:6px;height:6px;border-radius:50%;background:#409cff;"></div></div></div>'+
+        '<div style="flex:1;min-width:0;">'+
+        '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">'+
+        '<div style="font-size:.75rem;font-weight:700;color:var(--text);">NES Intelligence</div>'+
+        '<div style="display:flex;align-items:center;gap:6px;">'+
+        '<span style="font-size:.6rem;font-family:var(--mono);padding:2px 7px;border-radius:5px;background:'+
+        (item.type==='intelligence'?'#0d2818':'#0c1f35')+';color:'+tagColor+';">'+tagLabel+'</span>'+
+        '<span style="font-size:.6rem;color:var(--muted);font-family:var(--mono);">'+
+        new Date(item.created_at).toLocaleDateString('en-GB',{day:'numeric',month:'short'})+'</span>'+
+        '<i class="ti ti-chevron-down feed-chevron-'+idx+'" style="font-size:12px;color:var(--muted);transition:transform .2s;"></i>'+
+        '</div></div>'+
+        '<div style="font-size:.8rem;font-weight:600;color:var(--text);margin-bottom:4px;">'+
+        (item.title||'Intelligence Update')+'</div>'+
+        '<div class="feed-preview-'+idx+'" style="font-size:.75rem;color:var(--muted);line-height:1.5;">'+preview+'</div>'+
+        sourceHtml+
+        '</div></div>'+
+        '<div class="feed-expanded-'+idx+'" style="display:none;padding:0 14px 14px 56px;border-top:1px solid var(--border);">'+
+        '<div style="padding-top:12px;">'+expandedHtml+'</div>'+
+        (uniqueUrls.length?'<div style="font-family:var(--mono);font-size:.62rem;color:var(--muted);margin-top:8px;margin-bottom:4px;text-transform:uppercase;letter-spacing:.08em;">Sources</div>'+
+        '<div style="display:flex;flex-wrap:wrap;gap:5px;">'+
+        uniqueUrls.map(function(u){
+          return '<span style="font-size:.62rem;font-family:var(--mono);padding:2px 8px;border-radius:5px;background:var(--bg);border:1px solid var(--border);color:var(--nes-blue);">'+u+'</span>';
+        }).join('')+'</div>':'')+
+        '</div></div>';
     }).join('');
   }catch(e){
     const el=document.getElementById('ceoFeedItems');
-    if(el)el.innerHTML=`<div style="color:var(--muted);font-family:var(--mono);font-size:.7rem;padding:10px 0;">Feed unavailable.</div>`;
+    if(el)el.innerHTML='<div style="color:var(--muted);font-family:var(--mono);font-size:.7rem;padding:10px 0;">Feed unavailable.</div>';
   }
+}
+
+function toggleFeedItem(idx){
+  const preview=document.querySelector('.feed-preview-'+idx);
+  const expanded=document.querySelector('.feed-expanded-'+idx);
+  const chevron=document.querySelector('.feed-chevron-'+idx);
+  if(!expanded)return;
+  const isOpen=expanded.style.display!=='none';
+  expanded.style.display=isOpen?'none':'block';
+  if(preview)preview.style.display=isOpen?'block':'none';
+  if(chevron)chevron.style.transform=isOpen?'':'rotate(180deg)';
 }
 
 function detectCountry(email){
@@ -2312,7 +2373,7 @@ window.saveClientCreds=saveClientCreds;window.saveClientBranding=saveClientBrand
 window.saveClientAgents=saveClientAgents;window.saveClientBilling=saveClientBilling;
 window.showClientManager=showClientManager;window.showToast=showToast;window.hideTeamHub=hideTeamHub;
 window.showSalesPortal=showSalesPortal;window.renderSalesPortal=renderSalesPortal;
-window.showMyCredentials=showMyCredentials;window.saveMyCredentials=saveMyCredentials;window.editItCred=editItCred;window.saveItCred=saveItCred;
+window.showMyCredentials=showMyCredentials;window.saveMyCredentials=saveMyCredentials;window.editItCred=editItCred;window.saveItCred=saveItCred;window.toggleFeedItem=toggleFeedItem;
 window.loadClientUsers=loadClientUsers;window.showInviteUserForm=showInviteUserForm;window.sendClientInvite=sendClientInvite;window.removeClientUser=removeClientUser;
 window.showAddContactModal=showAddContactModal;window.saveContact=saveContact;
 window.showAddDealModal=showAddDealModal;window.saveDeal=saveDeal;
