@@ -2300,7 +2300,7 @@ async function showAdminStatus(){
       <div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;">PLATFORM STATUS</div>
       <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">NES AI — Unified Business Platform · Live health check</div>
     </div>
-    <div class="page"><div style="max-width:700px;padding-bottom:40px;" id="statusContent">
+    <div class="page" style="overflow-y:auto;height:calc(100dvh - 56px);"><div style="max-width:760px;padding-bottom:60px;" id="statusContent">
       <div style="color:var(--muted);font-family:var(--mono);font-size:.8rem;padding:20px 0;">Checking services...</div>
     </div></div>`;
   await checkPlatformStatus();
