@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title>NES AI — Intelligence Platform</title>
+  <title>NES AI — Unified Business Platform</title>
   <meta name="description" content="NES AI — unified intelligence platform">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -63,7 +63,7 @@
     .avatar-logo{width:38px;height:38px;border-radius:50%;object-fit:cover;}
     .avatar-mid{width:20px;height:20px;border-radius:50%;background:#1a3a6e;display:flex;align-items:center;justify-content:center;}
     .avatar-dot{width:7px;height:7px;border-radius:50%;background:#409cff;position:relative;}
-    .avatar-dot::before{content:'';position:absolute;inset:-4px;border-radius:50%;border:1.5px solid #409cff;opacity:0;animation:ping 30s infinite;}
+    .avatar-dot::before{content:'';position:absolute;inset:-4px;border-radius:50%;border:1.5px solid #409cff;opacity:0;animation:ping 3s infinite;}
     @keyframes ping{0%,97%{opacity:0;transform:scale(1);}97.5%{opacity:.8;transform:scale(1);}99%{opacity:0;transform:scale(2.5);}}
     .avatar-online{position:absolute;bottom:0;right:0;width:8px;height:8px;border-radius:50%;background:#3fb950;border:1.5px solid var(--surface);}
     .sb-brand{flex:1;}
@@ -432,7 +432,7 @@
       </div>
       <div class="sb-brand">
         <div class="sb-brand-name"><span class="nes">NES</span><span class="ai">AI</span></div>
-        <div class="sb-brand-sub">Intelligence Platform</div>
+        <div class="sb-brand-sub">Unified Business Platform</div>
       </div>
     </div>
 
@@ -850,12 +850,21 @@ async function loadCeoFeed(){
     el.innerHTML=data.map(function(item,idx){
       const tagColor=tagColors[item.type]||tagColors.default;
       const tagLabel=tagLabels[item.type]||tagLabels.default;
-      // Extract URLs from content using split approach
+      // Extract URLs from content — clean domain extraction
       const urls=[];
       if(item.content){
-        item.content.split(' ').forEach(function(word){
-          if(word.startsWith('http')){
-            try{const u=new URL(word.trim());urls.push(u.hostname.replace('www.',''));}catch(e){}
+        var words=item.content.split(/[\s\n]+/);
+        words.forEach(function(word){
+          var w=word.replace(/[^a-zA-Z0-9/:._-]/g,'');
+          if(w.indexOf('http')===0){
+            try{
+              var u=new URL(w);
+              var host=u.hostname.replace('www.','');
+              // Only add clean recognisable domains
+              if(host.length>3&&host.length<50&&host.indexOf('xn--')<0){
+                urls.push(host);
+              }
+            }catch(e){}
           }
         });
       }
@@ -888,7 +897,7 @@ async function loadCeoFeed(){
         '<div style="width:6px;height:6px;border-radius:50%;background:#409cff;"></div></div></div>'+
         '<div style="flex:1;min-width:0;">'+
         '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">'+
-        '<div style="font-size:.75rem;font-weight:700;color:var(--text);">NES Intelligence</div>'+
+
         '<div style="display:flex;align-items:center;gap:6px;">'+
         '<span style="font-size:.6rem;font-family:var(--mono);padding:2px 7px;border-radius:5px;background:'+
         (item.type==='intelligence'?'#0d2818':'#0c1f35')+';color:'+tagColor+';">'+tagLabel+'</span>'+
@@ -1135,7 +1144,7 @@ function renderClientDetail(c,colors,textColors,idx){
     ['ti-brand-instagram','social_media','Social Media','FB · LinkedIn · Instagram'],
     ['ti-chart-bar','ceo_dashboard','CEO Dashboard','KPIs · pipeline · intel'],
     ['ti-terminal-2','nes_command','Team Hub','Team communications'],
-    ['ti-news','intel_feed','Intelligence Feed','Daily market briefing'],
+    ['ti-news','intel_feed','NES Pulse','Daily market briefing'],
     ['ti-phone','sara_receptionist','Sara AI Receptionist','1-min callback on lead'],
     ['ti-brand-whatsapp','whatsapp_alerts','WhatsApp Alerts','Lead + team alerts'],
     ['ti-mail','email_notifications','Email Notifications','Lead emails to team'],
@@ -1621,7 +1630,7 @@ function showChatInterface(mode='chat'){
           <div id="promptPingAvatar" style="width:34px;height:34px;border-radius:50%;background:#0a0f1e;border:2px solid #1a56db;display:flex;align-items:center;justify-content:center;">
             <div style="width:18px;height:18px;border-radius:50%;background:#1a3a6e;display:flex;align-items:center;justify-content:center;">
               <div id="promptPingDot" style="width:8px;height:8px;border-radius:50%;background:#409cff;position:relative;">
-                <div id="promptPingRing" style="position:absolute;inset:-4px;border-radius:50%;border:1.5px solid #409cff;opacity:0;animation:ping 30s infinite;"></div>
+                <div id="promptPingRing" style="position:absolute;inset:-4px;border-radius:50%;border:1.5px solid #409cff;opacity:0;animation:ping 3s infinite;"></div>
               </div>
             </div>
           </div>
@@ -2232,6 +2241,38 @@ function renderMyCredsForm(creds, client){
       html+='</div></div>';
     });
   });
+  // Feed Sources section
+  const isPro=(client.plan==='pro'||client.plan==='enterprise'||client.plan==='growth');
+  const isEnterprise=client.plan==='enterprise';
+  const maxSources=isEnterprise?10:isPro?10:5;
+  const savedSources=creds.feed_sources?creds.feed_sources.split(',').filter(function(s){return s.trim();}):[];
+  const defaultSources=['https://timesofoman.com/rss','https://omanobserver.om/feed','https://www.arabianbusiness.com/rss','https://www.zawya.com/rss/technology','https://gulfnews.com/rss/technology'];
+  const sources=savedSources.length?savedSources:defaultSources;
+  html+='<div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;margin-top:20px;">NES Pulse — Feed Sources</div>';
+  html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:16px;">';
+  html+='<div style="font-size:.75rem;color:var(--muted);margin-bottom:10px;">Your NES Pulse intelligence feed pulls from these sources daily.</div>';
+  for(var si=0;si<5;si++){
+    var sv=sources[si]||'';
+    html+='<div style="display:flex;gap:8px;margin-bottom:6px;">';
+    html+='<input id="feed_src_'+si+'" type="url" class="form-input" value="'+sv.replace(/"/g,'&quot;')+'" placeholder="https://news-source.com/rss" style="font-size:.72rem;">';
+    html+='</div>';
+  }
+  if(!isPro){
+    html+='<div style="margin-top:10px;padding:10px 12px;background:#0c1f35;border:1px solid #1a3a6e;border-radius:8px;display:flex;align-items:center;justify-content:space-between;">';
+    html+='<div><div style="font-family:var(--mono);font-size:.68rem;color:var(--nes-blue);font-weight:700;">+ 5 more sources</div>';
+    html+='<div style="font-size:.68rem;color:var(--muted);">Add custom industry sources</div></div>';
+    html+='<button onclick="showUpgradePopup()" style="background:var(--nes-btn-grad);border:none;border-radius:6px;padding:5px 12px;color:#fff;font-size:.68rem;font-weight:700;cursor:pointer;">Upgrade to Pro</button>';
+    html+='</div>';
+  } else {
+    for(var si2=5;si2<10;si2++){
+      var sv2=sources[si2]||'';
+      html+='<div style="display:flex;gap:8px;margin-bottom:6px;">';
+      html+='<input id="feed_src_'+si2+'" type="url" class="form-input" value="'+sv2.replace(/"/g,'&quot;')+'" placeholder="https://custom-source.com/rss" style="font-size:.72rem;">';
+      html+='</div>';
+    }
+  }
+  html+='<button onclick="saveFeedSources()" style="background:var(--nes-btn-grad);border:none;border-radius:7px;padding:7px 16px;color:#fff;font-size:.75rem;font-weight:700;cursor:pointer;margin-top:8px;width:100%;"><i class="ti ti-device-floppy"></i> Save Feed Sources</button>';
+  html+='</div>';
   html+='<div id="it-cred-form" style="display:none;margin-top:16px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;">';
   html+='<div id="it-cred-title" style="font-family:var(--mono);font-size:.75rem;font-weight:700;color:var(--nes-blue);margin-bottom:12px;"></div>';
   html+='<div id="it-cred-fields"></div>';
@@ -2308,14 +2349,107 @@ async function saveMyCredentials(){
   }
 }
 
+function saveFeedSources(){
+  var sources=[];
+  for(var i=0;i<10;i++){
+    var el=document.getElementById('feed_src_'+i);
+    if(el&&el.value.trim())sources.push(el.value.trim());
+  }
+  var creds=window._itCredsCache||{};
+  creds.feed_sources=sources.join(',');
+  window._itCredsCache=creds;
+  fetch(API_URL+'/api/client/'+userClientId+'/credentials',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({credentials:creds})
+  }).then(function(r){
+    if(r.ok)showToast('Feed sources saved ✓');
+    else showToast('Error saving');
+  }).catch(function(){showToast('Error saving');});
+}
+
+function showUpgradePopup(){
+  var m=document.createElement('div');
+  m.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;z-index:9999;';
+  m.innerHTML='<div style="background:var(--bg);border:1px solid var(--border);border-radius:16px;padding:28px;width:360px;max-width:95vw;text-align:center;">'+
+    '<div style="font-size:1.8rem;margin-bottom:8px;">⚡</div>'+
+    '<div style="font-family:var(--mono);font-size:.7rem;color:var(--nes-blue);font-weight:800;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;">Upgrade to Pro</div>'+
+    '<div style="font-size:.85rem;color:var(--text);font-weight:600;margin-bottom:16px;">Unlock 10 custom feed sources</div>'+
+    '<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:16px;text-align:left;">'+
+    '<div style="font-size:.78rem;color:var(--muted);margin-bottom:8px;">Pro includes:</div>'+
+    '<div style="font-size:.78rem;color:var(--text);line-height:2;">✅ 10 custom feed sources<br>✅ Priority Intelligence Alerts every 4 hours<br>✅ 10 team users<br>✅ Daily social media posts<br>✅ Own Sara AI phone number<br>✅ 30 days lead history</div>'+
+    '</div>'+
+    '<div style="font-size:1.4rem;font-weight:800;color:var(--nes-blue);margin-bottom:4px;">OMR 35<span style="font-size:.75rem;font-weight:400;color:var(--muted);">/month</span></div>'+
+    '<div style="display:flex;gap:8px;margin-top:16px;">'+
+    '<button onclick="upgradeContact()" style="flex:1;background:var(--nes-btn-grad);border:none;border-radius:8px;padding:10px;color:#fff;font-weight:700;cursor:pointer;font-size:.82rem;">Contact Us \u2192</button>'+
+    '<button onclick="closeUpgradePopup()" style="flex:1;background:none;border:1px solid var(--border);border-radius:8px;padding:10px;color:var(--muted);cursor:pointer;font-size:.82rem;">Maybe later</button>'+
+    '</div></div>';
+  document.body.appendChild(m);
+}
+
 function showPricing(){
-  const plans=[
-    {name:'Free',price:'$0',period:'forever',features:['50 msgs/day','3 images/day','5 docs/day','Web search','Voice input'],btn:'Current Plan',disabled:true},
-    {name:'Starter',price:'$7',period:'per month',features:['150 msgs/day','10 images/day','25 docs/day','Web search','Voice input'],btn:'Upgrade →',onclick:"alert('Coming soon!')"},
-    {name:'Pro',price:'$19',period:'per month',features:['500 msgs/day','25 images/day','100 docs/day','Priority search','Email support'],btn:'Upgrade →',onclick:"alert('Coming soon!')"},
-    {name:'Enterprise',price:'Contact',period:'tailored',features:['Unlimited messages','SLA guarantee','SSO / SAML','On-premise','Custom limits'],btn:'Contact Us →',onclick:"alert('office@essential-services.org')"}
-  ];
-  document.getElementById('mainContent').innerHTML=`<div class="pricing-wrap"><a href="#" onclick="showView('chat');return false;" style="color:var(--nes-blue);text-decoration:none;display:inline-block;margin-bottom:22px;font-family:var(--mono);font-size:.8rem;">← Back</a><div style="text-align:center;margin-bottom:28px;"><h1 style="font-size:1.7rem;font-weight:700;">Choose Your Plan</h1></div><div class="plan-grid">${plans.map(p=>`<div class="plan-card"><div class="plan-name">${p.name}</div><div class="plan-price">${p.price}</div><div class="plan-period">${p.period}</div><ul class="plan-features-list">${p.features.map(f=>`<li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>${f}</li>`).join('')}</ul><button class="plan-action-btn" ${p.disabled?'disabled':''} ${p.onclick?`onclick="${p.onclick}"`:''} >${p.btn}</button></div>`).join('')}</div></div>`;
+  document.getElementById('mainContent').innerHTML=`
+    <div class="pricing-wrap">
+      <a href="#" onclick="showView('chat');return false;" style="color:var(--nes-blue);text-decoration:none;display:inline-block;margin-bottom:22px;font-family:var(--mono);font-size:.8rem;">← Back</a>
+      <div style="text-align:center;margin-bottom:8px;"><h1 style="font-size:1.7rem;font-weight:700;">Choose Your Plan</h1></div>
+      <div style="text-align:center;margin-bottom:28px;font-family:var(--mono);font-size:.75rem;color:var(--muted);">NES AI — Unified Business Platform</div>
+      <div class="plan-grid">
+        <div class="plan-card">
+          <div class="plan-name">Starter</div>
+          <div class="plan-price">OMR 15</div>
+          <div class="plan-period">per month</div>
+          <ul class="plan-features-list">
+            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>150 AI messages/day</li>
+            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>10 image generations/day</li>
+            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>5 feed sources (NES default)</li>
+            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>NES Pulse — daily 6AM</li>
+            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Lead capture + alerts</li>
+            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>3 team users</li>
+            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Social media (3x/week)</li>
+            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Team Hub (Rocket.Chat)</li>
+            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>1 week trial on NES numbers</li>
+          </ul>
+          <button class="plan-action-btn" onclick="alert('Contact us: office@essential-services.org')">Get Started →</button>
+        </div>
+        <div class="plan-card" style="border-color:var(--nes-blue);position:relative;">
+          <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--nes-btn-grad);color:#fff;font-size:.65rem;font-weight:700;padding:3px 12px;border-radius:20px;font-family:var(--mono);">POPULAR</div>
+          <div class="plan-name" style="color:var(--nes-blue);">Pro</div>
+          <div class="plan-price">OMR 35</div>
+          <div class="plan-period">per month</div>
+          <ul class="plan-features-list">
+            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>500 AI messages/day</li>
+            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>25 image generations/day</li>
+            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>10 custom feed sources</li>
+            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>NES Pulse — every 4 hours</li>
+            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Priority Intelligence Alerts</li>
+            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>10 team users</li>
+            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Daily social media posts</li>
+            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Own phone number (Sara AI)</li>
+            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>30 days lead history</li>
+            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Priority email support</li>
+          </ul>
+          <button class="plan-action-btn" onclick="alert('Contact us: office@essential-services.org')">Upgrade to Pro →</button>
+        </div>
+        <div class="plan-card">
+          <div class="plan-name">Enterprise</div>
+          <div class="plan-price">Custom</div>
+          <div class="plan-period">tailored pricing</div>
+          <ul class="plan-features-list">
+            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Unlimited AI messages</li>
+            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Unlimited feed sources</li>
+            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Real-time alerts (15 mins)</li>
+            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Unlimited team users</li>
+            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Multiple social posts/day</li>
+            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Dedicated Sara AI line</li>
+            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>White label branding</li>
+            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>90 days history</li>
+            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>SLA guarantee</li>
+            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Dedicated account manager</li>
+          </ul>
+          <button class="plan-action-btn" onclick="alert('Contact us: office@essential-services.org')">Contact Us →</button>
+        </div>
+      </div>
+    </div>`;
 }
 
 // Helpers
@@ -2418,7 +2552,9 @@ window.saveClientCreds=saveClientCreds;window.saveClientBranding=saveClientBrand
 window.saveClientAgents=saveClientAgents;window.saveClientBilling=saveClientBilling;
 window.showClientManager=showClientManager;window.showToast=showToast;window.hideTeamHub=hideTeamHub;
 window.showSalesPortal=showSalesPortal;window.renderSalesPortal=renderSalesPortal;
-window.showMyCredentials=showMyCredentials;window.saveMyCredentials=saveMyCredentials;window.editItCred=editItCred;window.saveItCred=saveItCred;window.toggleFeedItem=toggleFeedItem;
+window.showMyCredentials=showMyCredentials;window.saveMyCredentials=saveMyCredentials;window.editItCred=editItCred;window.saveItCred=saveItCred;window.toggleFeedItem=toggleFeedItem;window.saveFeedSources=saveFeedSources;window.showUpgradePopup=showUpgradePopup;
+window.upgradeContact=function(){document.querySelectorAll('div[style*="position:fixed"]').forEach(function(el){if(el.querySelector('.ti-check'))el.remove();});window.location.href='mailto:office@essential-services.org?subject=Upgrade to Pro';};
+window.closeUpgradePopup=function(){document.querySelectorAll('div[style*="position:fixed"]').forEach(function(el){if(el.style.zIndex==='9999')el.remove();});};
 window.loadClientUsers=loadClientUsers;window.showInviteUserForm=showInviteUserForm;window.sendClientInvite=sendClientInvite;window.removeClientUser=removeClientUser;
 window.showAddContactModal=showAddContactModal;window.saveContact=saveContact;
 window.showAddDealModal=showAddDealModal;window.saveDeal=saveDeal;
