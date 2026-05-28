@@ -2294,15 +2294,19 @@ function filterContactsBySource(s){
 async function showAdminStatus(){
   if(userRole!=='nesadmin'){return;}
   const mc=document.getElementById('mainContent');
-  mc.style.overflow='auto';
+  mc.style.overflow='hidden';
+  mc.style.display='flex';
+  mc.style.flexDirection='column';
   mc.innerHTML=`
     <div style="padding:11px 18px;border-bottom:1px solid var(--border);flex-shrink:0;">
       <div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;">PLATFORM STATUS</div>
       <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">NES AI — Unified Business Platform · Live health check</div>
     </div>
-    <div class="page" style="overflow-y:auto;height:calc(100dvh - 56px);"><div style="max-width:760px;padding-bottom:60px;" id="statusContent">
-      <div style="color:var(--muted);font-family:var(--mono);font-size:.8rem;padding:20px 0;">Checking services...</div>
-    </div></div>`;
+    <div style="flex:1;overflow-y:auto;padding:14px 18px;">
+      <div style="max-width:760px;padding-bottom:60px;" id="statusContent">
+        <div style="color:var(--muted);font-family:var(--mono);font-size:.8rem;padding:20px 0;">Checking services...</div>
+      </div>
+    </div>`;
   await checkPlatformStatus();
 }
 
