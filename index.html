@@ -474,6 +474,11 @@
         <span style="flex:1;">Client Manager</span>
         <span class="nav-badge nb-blue" id="clientCount">0</span>
       </div>
+      <div class="client-mgr-btn" id="adminStatusNav" onclick="showView('adminstatus')" style="display:none;margin-top:4px;background:rgba(63,185,80,.08);border-color:rgba(63,185,80,.2);color:#3fb950;">
+        <i class="ti ti-activity-heartbeat"></i>
+        <span style="flex:1;">Platform Status</span>
+        <div style="width:6px;height:6px;border-radius:50%;background:#3fb950;"></div>
+      </div>
     </div>
 
     <div class="usage-wrap">
@@ -590,7 +595,12 @@ function setupNavForRole(){
     // NES internal users
     if(['nesadmin','ceo','manager'].includes(userRole))intel.style.display='block';
     if(!['nesadmin','ceo'].includes(userRole)&&ceoNav)ceoNav.style.display='none';
-    if(userRole==='nesadmin'){clientMgr.style.display='block';loadClientCount();}
+    if(userRole==='nesadmin'){
+      clientMgr.style.display='block';
+      loadClientCount();
+      const statusNav=document.getElementById('adminStatusNav');
+      if(statusNav)statusNav.style.display='flex';
+    }
     if(['nesadmin','manager'].includes(userRole)&&salesNav)salesNav.style.display='flex';
   }
   loadLeadCount();
@@ -669,10 +679,18 @@ function saveRecentChat(label){
   let rc=[];try{rc=JSON.parse(localStorage.getItem(STORAGE_KEYS.rc)||'[]');}catch(e){}
   const now=new Date();
   const today=now.toDateString();
-  let timeLabel;
+  // Save current history snapshot with this chat
+  const historySnapshot=JSON.stringify(history.slice(-30));
+  const msgSnapshot=allMsgsHTML;
   const existing=rc.find(r=>r.date===today);
-  if(existing){existing.time=now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});existing.label=label||existing.label;}
-  else{rc.unshift({date:today,time:now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}),label:label||'Chat'});}
+  if(existing){
+    existing.time=now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+    existing.label=label||existing.label;
+    existing.history=historySnapshot;
+    existing.msgs=msgSnapshot;
+  } else {
+    rc.unshift({date:today,time:now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}),label:label||'Chat',history:historySnapshot,msgs:msgSnapshot});
+  }
   rc=rc.slice(0,5);
   localStorage.setItem(STORAGE_KEYS.rc,JSON.stringify(rc));
   loadRecentChats();
@@ -686,11 +704,19 @@ function loadRecentChats(){
   const yesterday=new Date(Date.now()-86400000).toDateString();
   el.innerHTML=rc.map(r=>{
     let lbl=r.date===today?'Today '+r.time:r.date===yesterday?'Yesterday '+r.time:new Date(r.date).toLocaleDateString('en-GB',{day:'numeric',month:'short'})+' '+r.time;
-    return`<div class="recent-item" onclick="restoreChat()"><i class="ti ti-clock"></i><span>${lbl}</span></div>`;
+    return`<div class="recent-item" onclick="restoreChat(${rc.indexOf(r)})" title="${r.label||'Chat'}"><i class="ti ti-clock"></i><span>${lbl}</span></div>`;
   }).join('');
 }
 
-function restoreChat(){showView('chat');}
+function restoreChat(idx){
+  let rc=[];try{rc=JSON.parse(localStorage.getItem(STORAGE_KEYS.rc)||'[]');}catch(e){}
+  const chat=rc[idx||0];
+  if(chat&&chat.history){
+    try{history=JSON.parse(chat.history);}catch(e){history=[];}
+    allMsgsHTML=chat.msgs||'';
+  }
+  showView('chat');
+}
 
 function bindNav(){
   document.querySelectorAll('.nav-item[data-view]').forEach(item=>{
@@ -719,6 +745,7 @@ function showView(view){
   else if(view==='clientmgr'){showClientManager();}
   else if(view==='sales'){showSalesPortal();}
   else if(view==='mycredentials'){showMyCredentials();}
+  else if(view==='adminstatus'){showAdminStatus();}
   else if(view==='pricing'){showPricing();}
 }
 
@@ -874,6 +901,7 @@ async function loadCeoFeed(){
           .replace(/https?:\/\/\S+/g,'')
           .replace(/\*/g,'')
           .replace(/---+/g,'')
+          .replace(/🔗/g,'')
           .replace(/\s+/g,' ')
           .trim()
         :'';
@@ -884,7 +912,7 @@ async function loadCeoFeed(){
       const sourceHtml=uniqueUrls.length
         ?'<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:5px;">'+
           uniqueUrls.map(function(u){
-            return '<span style="font-size:.62rem;font-family:var(--mono);padding:2px 7px;border-radius:5px;background:var(--bg);border:1px solid var(--border);color:var(--nes-blue);">'+u+'</span>';
+            return '<a href="https://'+u+'" target="_blank" rel="noopener" style="font-size:.62rem;font-family:var(--mono);padding:2px 7px;border-radius:5px;background:var(--bg);border:1px solid var(--border);color:var(--nes-blue);text-decoration:none;cursor:pointer;">'+u+'</a>';
           }).join('')+'</div>'
         :'';
       const expandedHtml=sections.map(function(s){
@@ -933,7 +961,7 @@ async function loadCeoFeed(){
         (uniqueUrls.length?'<div style="font-family:var(--mono);font-size:.62rem;color:var(--muted);margin-top:8px;margin-bottom:4px;text-transform:uppercase;letter-spacing:.08em;">Sources</div>'+
         '<div style="display:flex;flex-wrap:wrap;gap:5px;">'+
         uniqueUrls.map(function(u){
-          return '<span style="font-size:.62rem;font-family:var(--mono);padding:2px 8px;border-radius:5px;background:var(--bg);border:1px solid var(--border);color:var(--nes-blue);">'+u+'</span>';
+          return '<a href="https://'+u+'" target="_blank" rel="noopener" style="font-size:.62rem;font-family:var(--mono);padding:2px 8px;border-radius:5px;background:var(--bg);border:1px solid var(--border);color:var(--nes-blue);text-decoration:none;">'+u+'</a>';
         }).join('')+'</div>':'')+
         '</div></div>';
     }).join('');
@@ -1431,6 +1459,11 @@ function showEditClientForm(clientId){
     <div class="page"><div style="max-width:640px;">${clientFormFields(client)}<button class="form-submit" onclick="updateClient('${clientId}')"><i class="ti ti-device-floppy"></i> Save Changes</button></div></div>`;
 }
 
+function buildCountryOptions(selected){
+  const countries=['Oman','UAE','Saudi Arabia','Qatar','Kuwait','Bahrain','Jordan','Egypt','Afghanistan','Albania','Algeria','Angola','Argentina','Armenia','Australia','Austria','Azerbaijan','Bangladesh','Belarus','Belgium','Bolivia','Bosnia','Botswana','Brazil','Bulgaria','Cambodia','Cameroon','Canada','Chile','China','Colombia','Croatia','Cuba','Cyprus','Czech Republic','Denmark','Ecuador','El Salvador','Estonia','Ethiopia','Finland','France','Georgia','Germany','Ghana','Greece','Guatemala','Honduras','Hungary','Iceland','India','Indonesia','Iran','Iraq','Ireland','Israel','Italy','Jamaica','Japan','Kazakhstan','Kenya','Kosovo','Latvia','Lebanon','Libya','Lithuania','Luxembourg','Malaysia','Malta','Mexico','Moldova','Mongolia','Montenegro','Morocco','Mozambique','Myanmar','Namibia','Nepal','Netherlands','New Zealand','Nicaragua','Nigeria','North Korea','Norway','Pakistan','Palestine','Panama','Paraguay','Peru','Philippines','Poland','Portugal','Romania','Russia','Rwanda','Serbia','Singapore','Slovakia','Slovenia','Somalia','South Africa','South Korea','South Sudan','Spain','Sri Lanka','Sudan','Sweden','Switzerland','Syria','Taiwan','Tajikistan','Tanzania','Thailand','Tunisia','Turkey','Turkmenistan','Uganda','UK','Ukraine','Uruguay','USA','Uzbekistan','Venezuela','Vietnam','Yemen','Zambia','Zimbabwe'];
+  return countries.map(function(c){return '<option value="'+c+'"'+(c===selected?' selected':'')+'>'+c+'</option>';}).join('');
+}
+
 function clientFormFields(c={}){
   return`
     <div class="form-section">Basic Information</div>
@@ -1440,7 +1473,9 @@ function clientFormFields(c={}){
       <div class="form-field"><label class="form-label">Website</label><input id="field_website" type="text" value="${esc(c.website||'')} " class="form-input" placeholder="https://..."></div>
       <div class="form-field"><label class="form-label">Industry</label><input id="field_industry" type="text" value="${esc(c.industry||'')} " class="form-input" placeholder="Industry"></div>
       <div class="form-field"><label class="form-label">Region</label><input id="field_region" type="text" value="${esc(c.region||'Oman')} " class="form-input" placeholder="Oman"></div>
-      <div class="form-field"><label class="form-label">Country</label><input id="field_country" type="text" value="${esc(c.country||'Oman')} " class="form-input" placeholder="Oman"></div>
+      <div class="form-field"><label class="form-label">Country</label>
+        <select id="field_country" class="form-select">${buildCountryOptions(c.country||'Oman')}</select>
+      </div>
       <div class="form-field"><label class="form-label">Language</label>
         <select id="field_language" class="form-select">
           <option value="English" ${c.language==='English'?'selected':''}>English</option>
@@ -1474,11 +1509,13 @@ function clientFormFields(c={}){
           <option value="inactive" ${c.status==='inactive'?'selected':''}>Inactive</option>
         </select>
       </div>
+      <div class="form-field"><label class="form-label">Trial Start Date</label><input id="field_trial_start" type="date" value="${esc(c.trial_start||'')}" class="form-input"></div>
+      <div class="form-field"><label class="form-label">Trial Duration (days)</label><input id="field_trial_duration_days" type="number" value="${esc(String(c.trial_duration_days||7))}" class="form-input" placeholder="7"></div>
     </div>`;
 }
 
 function getFormData(){
-  const fields=['name','email','website','industry','region','country','language','lead_email','primary_color','logo_url','plan','status'];
+  const fields=['name','email','website','industry','region','country','language','lead_email','primary_color','logo_url','plan','status','trial_start','trial_duration_days'];
   const data={};
   fields.forEach(f=>{const el=document.getElementById('field_'+f);if(el)data[f]=el.value.trim();});
   return data;
@@ -2157,6 +2194,87 @@ function filterContactsBySource(s){
 }
 
 
+// ── ADMIN STATUS PAGE ──
+async function showAdminStatus(){
+  if(userRole!=='nesadmin'){return;}
+  const mc=document.getElementById('mainContent');
+  mc.style.overflow='auto';
+  mc.innerHTML=`
+    <div style="padding:11px 18px;border-bottom:1px solid var(--border);flex-shrink:0;">
+      <div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;">PLATFORM STATUS</div>
+      <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">NES AI — Unified Business Platform · Live health check</div>
+    </div>
+    <div class="page"><div style="max-width:700px;padding-bottom:40px;" id="statusContent">
+      <div style="color:var(--muted);font-family:var(--mono);font-size:.8rem;padding:20px 0;">Checking services...</div>
+    </div></div>`;
+  await checkPlatformStatus();
+}
+
+async function checkPlatformStatus(){
+  const el=document.getElementById('statusContent');
+  if(!el)return;
+  const services=[
+    {name:'Backend API',url:API_URL+'/health',label:'NES AI Backend'},
+    {name:'Supabase',url:'https://sfpfjjdtczvuxyhjievt.supabase.co/rest/v1/',label:'Database'},
+    {name:'Frontend',url:'https://essential-ai-frontend.vercel.app',label:'Vercel Frontend'},
+    {name:'Rocket.Chat',url:'https://chat.essential-services.org/api/v1/info',label:'Team Hub'},
+  ];
+  const results=await Promise.all(services.map(async function(s){
+    const start=Date.now();
+    try{
+      const r=await fetch(s.url,{method:'GET',signal:AbortSignal.timeout(5000)});
+      const ms=Date.now()-start;
+      return{...s,ok:r.ok||r.status===401,ms,status:r.ok||r.status===401?'online':'error'};
+    }catch(e){
+      return{...s,ok:false,ms:Date.now()-start,status:'offline'};
+    }
+  }));
+  const allOk=results.every(function(r){return r.ok;});
+  const now=new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  let html='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">';
+  html+='<div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">Last checked: '+now+'</div>';
+  html+='<button onclick="checkPlatformStatus()" style="background:none;border:1px solid var(--border);border-radius:6px;padding:4px 10px;color:var(--muted);cursor:pointer;font-size:.72rem;font-family:var(--mono);"><i class="ti ti-refresh"></i> Refresh</button>';
+  html+='</div>';
+  html+='<div style="background:'+(allOk?'#0d2818':'#2d0e0e')+';border:1px solid '+(allOk?'#3fb95040':'#f8514940')+';border-radius:10px;padding:14px 16px;margin-bottom:20px;display:flex;align-items:center;gap:10px;">';
+  html+='<div style="width:10px;height:10px;border-radius:50%;background:'+(allOk?'#3fb950':'#f85149')+';"></div>';
+  html+='<div style="font-family:var(--mono);font-size:.8rem;font-weight:700;color:'+(allOk?'#3fb950':'#f85149')+'">'+(allOk?'All systems operational':'Some services need attention')+'</div>';
+  html+='</div>';
+  results.forEach(function(r){
+    const color=r.status==='online'?'#3fb950':r.status==='error'?'#d29922':'#f85149';
+    const bg=r.status==='online'?'#0d2818':r.status==='error'?'#2d1f00':'#2d0e0e';
+    html+='<div style="display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:8px;">';
+    html+='<div style="width:10px;height:10px;border-radius:50%;background:'+color+';flex-shrink:0;'+(r.status==='online'?'box-shadow:0 0 6px '+color+';':'')+'"></div>';
+    html+='<div style="flex:1;">';
+    html+='<div style="font-size:.82rem;font-weight:600;color:var(--text);">'+r.label+'</div>';
+    html+='<div style="font-size:.7rem;color:var(--muted);font-family:var(--mono);">'+r.name+'</div>';
+    html+='</div>';
+    html+='<div style="text-align:right;">';
+    html+='<span style="font-size:.68rem;font-family:var(--mono);padding:3px 10px;border-radius:12px;background:'+bg+';color:'+color+';">'+r.status.toUpperCase()+'</span>';
+    html+='<div style="font-size:.65rem;color:var(--muted);font-family:var(--mono);margin-top:3px;">'+r.ms+'ms</div>';
+    html+='</div></div>';
+  });
+  // Platform stats
+  html+='<div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin:20px 0 10px;">Platform Stats</div>';
+  try{
+    const{count:clientCount}=await sb.from('clients').select('*',{count:'exact',head:true});
+    const{count:leadCount}=await sb.from('leads').select('*',{count:'exact',head:true});
+    const{count:userCount}=await sb.from('profiles').select('*',{count:'exact',head:true});
+    html+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">';
+    [{label:'Total Clients',val:clientCount||0,icon:'ti-briefcase',color:'var(--nes-blue)'},
+     {label:'Total Leads',val:leadCount||0,icon:'ti-users',color:'#3fb950'},
+     {label:'Platform Users',val:userCount||0,icon:'ti-user',color:'#7f77dd'}
+    ].forEach(function(s){
+      html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;">';
+      html+='<i class="ti '+s.icon+'" style="font-size:20px;color:'+s.color+';display:block;margin-bottom:6px;"></i>';
+      html+='<div style="font-size:1.4rem;font-weight:700;color:'+s.color+';">'+s.val+'</div>';
+      html+='<div style="font-size:.68rem;color:var(--muted);font-family:var(--mono);">'+s.label+'</div>';
+      html+='</div>';
+    });
+    html+='</div>';
+  }catch(e){}
+  el.innerHTML=html;
+}
+
 // ── CLIENT PORTAL: MY CREDENTIALS ──
 async function showMyCredentials(){
   if(!userClientId){addAiMsg('No client account linked.');return;}
@@ -2552,7 +2670,7 @@ window.saveClientCreds=saveClientCreds;window.saveClientBranding=saveClientBrand
 window.saveClientAgents=saveClientAgents;window.saveClientBilling=saveClientBilling;
 window.showClientManager=showClientManager;window.showToast=showToast;window.hideTeamHub=hideTeamHub;
 window.showSalesPortal=showSalesPortal;window.renderSalesPortal=renderSalesPortal;
-window.showMyCredentials=showMyCredentials;window.saveMyCredentials=saveMyCredentials;window.editItCred=editItCred;window.saveItCred=saveItCred;window.toggleFeedItem=toggleFeedItem;window.saveFeedSources=saveFeedSources;window.showUpgradePopup=showUpgradePopup;
+window.showAdminStatus=showAdminStatus;window.checkPlatformStatus=checkPlatformStatus;window.showMyCredentials=showMyCredentials;window.saveMyCredentials=saveMyCredentials;window.editItCred=editItCred;window.saveItCred=saveItCred;window.toggleFeedItem=toggleFeedItem;window.saveFeedSources=saveFeedSources;window.showUpgradePopup=showUpgradePopup;
 window.upgradeContact=function(){document.querySelectorAll('div[style*="position:fixed"]').forEach(function(el){if(el.querySelector('.ti-check'))el.remove();});window.location.href='mailto:office@essential-services.org?subject=Upgrade to Pro';};
 window.closeUpgradePopup=function(){document.querySelectorAll('div[style*="position:fixed"]').forEach(function(el){if(el.style.zIndex==='9999')el.remove();});};
 window.loadClientUsers=loadClientUsers;window.showInviteUserForm=showInviteUserForm;window.sendClientInvite=sendClientInvite;window.removeClientUser=removeClientUser;
@@ -2575,7 +2693,7 @@ function addCustomCredField(clientId){
   showToast('Field added — save to store it');
 }
 
-window.selectClientDB=selectClientDB;window.restoreChat=restoreChat;
+window.buildCountryOptions=buildCountryOptions;window.selectClientDB=selectClientDB;window.restoreChat=restoreChat;
 window.addCustomCredField=addCustomCredField;
 </script>
 </body>
