@@ -152,10 +152,8 @@
 
     /* Chat avatar with ping */
     .chat-av-wrap{position:relative;width:34px;height:34px;flex-shrink:0;}
-    .chat-av-ring{width:34px;height:34px;border-radius:50%;border:2px solid #1a56db;background:#0a0f1e;display:flex;align-items:center;justify-content:center;}
-    .chat-av-mid{width:18px;height:18px;border-radius:50%;background:#1a3a6e;display:flex;align-items:center;justify-content:center;}
-    .chat-av-dot{width:6px;height:6px;border-radius:50%;background:#409cff;position:relative;}
-    .chat-av-dot::before{content:'';position:absolute;inset:-3px;border-radius:50%;border:1.5px solid #409cff;opacity:0;}
+    .chat-av-mid{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#1a56db,#2563eb);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:.68rem;font-weight:800;color:#fff;flex-shrink:0;}
+    .chat-av-dot{display:none;}
     .chat-av-online{position:absolute;bottom:0;right:0;width:7px;height:7px;border-radius:50%;background:#3fb950;border:1.5px solid var(--surface);}
 
     .user-av-msg{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:rgba(128,128,128,.12);border:1px solid var(--border);font-size:.72rem;font-weight:700;flex-shrink:0;}
@@ -1763,7 +1761,7 @@ function showChatInterface(mode='chat'){
           <div id="promptPingAvatar" style="width:34px;height:34px;border-radius:50%;background:#0a0f1e;border:2px solid #1a56db;display:flex;align-items:center;justify-content:center;">
             <div style="width:18px;height:18px;border-radius:50%;background:#1a3a6e;display:flex;align-items:center;justify-content:center;">
               <div id="promptPingDot" style="width:8px;height:8px;border-radius:50%;background:#409cff;position:relative;">
-                <div id="promptPingRing" style="position:absolute;inset:-4px;border-radius:50%;border:1.5px solid #409cff;opacity:0;animation:ping 2s ease-out infinite;"></div>
+                <div id="promptPingRing" style="position:absolute;inset:-4px;border-radius:50%;border:1.5px solid #409cff;opacity:0;animation:ping 3s ease-out infinite;"></div>
               </div>
             </div>
           </div>
@@ -2767,13 +2765,13 @@ function toggleTheme(){
 function userBubble(text){return`<div class="msg user"><div class="user-av-msg">${session?.user?.email?.[0]?.toUpperCase()||'U'}</div><div class="msg-body"><div class="msg-role">You</div><div class="msg-bubble">${esc(text)}</div></div></div>`;}
 function aiBubble(text,sources=[]){
   const src=sources.length?'<div class="sources-block">Sources: '+sources.map(s=>'<a href="'+esc(s.url)+'" target="_blank">'+esc(s.title||s.url)+'</a>').join(' · ')+'</div>':''
-  return`<div class="msg ai"><div class="chat-av-wrap"><div class="chat-av-mid" style="width:34px;height:34px;"><div class="chat-av-dot" style="width:10px;height:10px;"></div></div><div class="chat-av-online"></div></div><div class="msg-body"><div class="msg-role">NES AI</div><div class="msg-bubble">${md(text)}${src}</div><button class="copy-btn" onclick="copyMsg(this)">Copy</button></div></div>`;
+  return`<div class="msg ai"><div class="chat-av-wrap"><div class="chat-av-mid">N</div><div class="chat-av-online"></div></div><div class="msg-body"><div class="msg-role">NES AI</div><div class="msg-bubble">${md(text)}${src}</div><button class="copy-btn" onclick="copyMsg(this)">Copy</button></div></div>`;
 }
-function imgBubble(url){return`<div class="msg ai"><div class="chat-av-wrap"><div class="chat-av-mid" style="width:34px;height:34px;"><div class="chat-av-dot" style="width:10px;height:10px;"></div></div><div class="chat-av-online"></div></div><div class="msg-body"><div class="msg-role">NES AI · Image Gen</div><div class="msg-bubble"><img src="${esc(url)}" style="max-width:100%;border-radius:10px;margin-top:4px;"></div></div></div>`;}
+function imgBubble(url){return`<div class="msg ai"><div class="chat-av-wrap"><div class="chat-av-mid">N</div><div class="chat-av-online"></div></div><div class="msg-body"><div class="msg-role">NES AI · Image Gen</div><div class="msg-bubble"><img src="${esc(url)}" style="max-width:100%;border-radius:10px;margin-top:4px;"></div></div></div>`;}
 function addAiMsg(text,sources=[]){appendMsg(aiBubble(text,sources));saveHistory();}
 function addTyping(){
   const el=document.createElement('div');el.className='msg ai';el.id='typing';
-  el.innerHTML=`<div class="chat-av-wrap"><div class="chat-av-mid" style="width:34px;height:34px;"><div class="chat-av-dot" style="width:10px;height:10px;"></div></div><div class="chat-av-online"></div></div><div class="msg-body"><div class="msg-role">NES AI</div><div class="msg-bubble"><div style="display:flex;gap:5px;">${[0,.2,.4].map(d=>`<div style="width:7px;height:7px;background:var(--nes-blue);border-radius:50%;animation:bounce 1.4s ${d}s infinite;"></div>`).join('')}</div></div></div>`;
+  el.innerHTML=`<div class="chat-av-wrap"><div class="chat-av-mid">N</div><div class="chat-av-online"></div></div><div class="msg-body"><div class="msg-role">NES AI</div><div class="msg-bubble"><div style="display:flex;gap:5px;">${[0,.2,.4].map(d=>`<div style="width:7px;height:7px;background:var(--nes-blue);border-radius:50%;animation:bounce 1.4s ${d}s infinite;"></div>`).join('')}</div></div></div>`;
   document.getElementById('messages')?.appendChild(el);scroll();
 }
 function removeTyping(){document.getElementById('typing')?.remove();}
