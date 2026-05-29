@@ -156,7 +156,6 @@
     .chat-av-mid{width:18px;height:18px;border-radius:50%;background:#1a3a6e;display:flex;align-items:center;justify-content:center;}
     .chat-av-dot{width:6px;height:6px;border-radius:50%;background:#409cff;}
     .chat-av-online{position:absolute;bottom:0;right:0;width:7px;height:7px;border-radius:50%;background:#3fb950;border:1.5px solid var(--surface);}
-    .chat-av-online{position:absolute;bottom:0;right:0;width:7px;height:7px;border-radius:50%;background:#3fb950;border:1.5px solid var(--surface);}
 
     .user-av-msg{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:rgba(128,128,128,.12);border:1px solid var(--border);font-size:.72rem;font-weight:700;flex-shrink:0;}
     .msg-body{max-width:80%;position:relative;}
@@ -2416,21 +2415,49 @@ async function checkPlatformStatus(){
   const totalImgsToday=todayUsage.reduce((s,u)=>s+(u.images_used||0),0);
   const lowApis=apis.filter(a=>a.status==='low'||a.status==='critical');
 
-  // Top bar
-  let html='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">';
+  // Platform Stats — sticky at top
+  let html='<div style="position:sticky;top:0;z-index:10;background:var(--bg);padding-bottom:10px;">';
+
+  // Last checked + Refresh
+  html+='<div style="display:flex;align-items:center;justify-content:space-between;padding-top:2px;margin-bottom:10px;">';
   html+='<div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">Last checked: '+now+'</div>';
   html+='<button onclick="checkPlatformStatus()" style="background:none;border:1px solid var(--border);border-radius:6px;padding:4px 10px;color:var(--muted);cursor:pointer;font-size:.72rem;font-family:var(--mono);"><i class="ti ti-refresh"></i> Refresh</button>';
   html+='</div>';
 
   // Overall status banner
-  html+='<div style="background:'+(allOk?'#0d2818':'#2d0e0e')+';border:1px solid '+(allOk?'#3fb95040':'#f8514940')+';border-radius:10px;padding:12px 16px;margin-bottom:14px;display:flex;align-items:center;gap:10px;">';
+  html+='<div style="background:'+(allOk?'#0d2818':'#2d0e0e')+';border:1px solid '+(allOk?'#3fb95040':'#f8514940')+';border-radius:10px;padding:10px 16px;margin-bottom:10px;display:flex;align-items:center;gap:10px;">';
   html+='<div style="width:10px;height:10px;border-radius:50%;background:'+(allOk?'#3fb950':'#f85149')+';'+(allOk?'box-shadow:0 0 6px #3fb950;':'')+'"></div>';
   html+='<div style="font-family:var(--mono);font-size:.8rem;font-weight:700;color:'+(allOk?'#3fb950':'#f85149')+'">'+(allOk?'All systems operational':'Some services need attention')+'</div>';
   if(lowApis.length>0){html+='<div style="margin-left:auto;font-size:.65rem;font-family:var(--mono);color:#f85149;"><i class="ti ti-alert-triangle"></i> '+lowApis.length+' API'+(lowApis.length>1?'s':'')+' low</div>';}
   html+='</div>';
 
-  // ── SIDE BY SIDE: SERVICES (left) | API CREDITS (right) ──
-  html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;">';
+  // Platform Stats
+  html+='<div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;">Platform Stats</div>';
+  html+='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px;">';
+  [{label:'Total Clients',val:clientRes.count||0,icon:'ti-briefcase',color:'var(--nes-blue)'},
+   {label:'Total Leads',val:leadRes.count||0,icon:'ti-users',color:'#3fb950'},
+   {label:'Platform Users',val:userRes.count||0,icon:'ti-user',color:'#7f77dd'}
+  ].forEach(function(s){
+    html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;">';
+    html+='<i class="ti '+s.icon+'" style="font-size:18px;color:'+s.color+';display:block;margin-bottom:5px;"></i>';
+    html+='<div style="font-size:1.3rem;font-weight:700;color:'+s.color+';">'+s.val+'</div>';
+    html+='<div style="font-size:.65rem;color:var(--muted);font-family:var(--mono);">'+s.label+'</div></div>';
+  });
+  html+='</div>';
+
+  // Today's Usage
+  html+='<div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;">Today&#39;s Usage</div>';
+  html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">';
+  html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;display:flex;align-items:center;gap:10px;">';
+  html+='<i class="ti ti-message" style="font-size:20px;color:var(--nes-blue);"></i><div><div style="font-size:1.2rem;font-weight:700;color:var(--nes-blue);">'+totalChatsToday+'</div><div style="font-size:.65rem;color:var(--muted);font-family:var(--mono);">Chat messages today</div></div></div>';
+  html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;display:flex;align-items:center;gap:10px;">';
+  html+='<i class="ti ti-photo" style="font-size:20px;color:#7f77dd;"></i><div><div style="font-size:1.2rem;font-weight:700;color:#7f77dd;">'+totalImgsToday+'</div><div style="font-size:.65rem;color:var(--muted);font-family:var(--mono);">Images generated today</div></div></div>';
+  html+='</div>';
+
+  html+='</div>'; // end sticky header
+
+  // ── SIDE BY SIDE: SERVICES (left) | API CREDITS (right) — scrollable ──
+  html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px;margin-bottom:16px;">';
 
   // LEFT — Services
   html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;">';
@@ -2479,29 +2506,6 @@ async function checkPlatformStatus(){
   }
   html+='</div>';
   html+='</div>'; // end side-by-side grid
-
-  // Platform Stats
-  html+='<div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;">Platform Stats</div>';
-  html+='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;">';
-  [{label:'Total Clients',val:clientRes.count||0,icon:'ti-briefcase',color:'var(--nes-blue)'},
-   {label:'Total Leads',val:leadRes.count||0,icon:'ti-users',color:'#3fb950'},
-   {label:'Platform Users',val:userRes.count||0,icon:'ti-user',color:'#7f77dd'}
-  ].forEach(function(s){
-    html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;">';
-    html+='<i class="ti '+s.icon+'" style="font-size:18px;color:'+s.color+';display:block;margin-bottom:5px;"></i>';
-    html+='<div style="font-size:1.3rem;font-weight:700;color:'+s.color+';">'+s.val+'</div>';
-    html+='<div style="font-size:.65rem;color:var(--muted);font-family:var(--mono);">'+s.label+'</div></div>';
-  });
-  html+='</div>';
-
-  // Today's Usage
-  html+='<div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;">Today&#39;s Usage</div>';
-  html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">';
-  html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;display:flex;align-items:center;gap:10px;">';
-  html+='<i class="ti ti-message" style="font-size:20px;color:var(--nes-blue);"></i><div><div style="font-size:1.2rem;font-weight:700;color:var(--nes-blue);">'+totalChatsToday+'</div><div style="font-size:.65rem;color:var(--muted);font-family:var(--mono);">Chat messages today</div></div></div>';
-  html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;display:flex;align-items:center;gap:10px;">';
-  html+='<i class="ti ti-photo" style="font-size:20px;color:#7f77dd;"></i><div><div style="font-size:1.2rem;font-weight:700;color:#7f77dd;">'+totalImgsToday+'</div><div style="font-size:.65rem;color:var(--muted);font-family:var(--mono);">Images generated today</div></div></div>';
-  html+='</div>';
 
   el.innerHTML=html;
 }
