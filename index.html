@@ -2403,7 +2403,7 @@ async function checkPlatformStatus(){
       sb.from('clients').select('*',{count:'exact',head:true}),
       sb.from('leads').select('*',{count:'exact',head:true}),
       sb.from('profiles').select('*',{count:'exact',head:true}),
-      sb.from('usage').select('chats_used,images_used').eq('date',new Date().toISOString().split('T')[0]),
+      sb.from('usage').select('chats_used,images_used,docs_used').eq('date',new Date().toISOString().split('T')[0]),
     ])
   ]);
   const allOk=results.every(function(r){return r.ok;});
@@ -2413,6 +2413,7 @@ async function checkPlatformStatus(){
   const todayUsage=usageRes.data||[];
   const totalChatsToday=todayUsage.reduce((s,u)=>s+(u.chats_used||0),0);
   const totalImgsToday=todayUsage.reduce((s,u)=>s+(u.images_used||0),0);
+  const totalDocsToday=todayUsage.reduce((s,u)=>s+(u.docs_used||0),0);
   const lowApis=apis.filter(a=>a.status==='low'||a.status==='critical');
 
   // Platform Stats — sticky at top
@@ -2431,27 +2432,15 @@ async function checkPlatformStatus(){
   if(lowApis.length>0){html+='<div style="margin-left:auto;font-size:.65rem;font-family:var(--mono);color:#f85149;"><i class="ti ti-alert-triangle"></i> '+lowApis.length+' API'+(lowApis.length>1?'s':'')+' low</div>';}
   html+='</div>';
 
-  // Platform Stats
-  html+='<div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;">Platform Stats</div>';
-  html+='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px;">';
-  [{label:'Total Clients',val:clientRes.count||0,icon:'ti-briefcase',color:'var(--nes-blue)'},
-   {label:'Total Leads',val:leadRes.count||0,icon:'ti-users',color:'#3fb950'},
-   {label:'Platform Users',val:userRes.count||0,icon:'ti-user',color:'#7f77dd'}
-  ].forEach(function(s){
-    html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;">';
-    html+='<i class="ti '+s.icon+'" style="font-size:18px;color:'+s.color+';display:block;margin-bottom:5px;"></i>';
-    html+='<div style="font-size:1.3rem;font-weight:700;color:'+s.color+';">'+s.val+'</div>';
-    html+='<div style="font-size:.65rem;color:var(--muted);font-family:var(--mono);">'+s.label+'</div></div>';
-  });
-  html+='</div>';
-
-  // Today's Usage
-  html+='<div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;">Today&#39;s Usage</div>';
-  html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">';
-  html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;display:flex;align-items:center;gap:10px;">';
-  html+='<i class="ti ti-message" style="font-size:20px;color:var(--nes-blue);"></i><div><div style="font-size:1.2rem;font-weight:700;color:var(--nes-blue);">'+totalChatsToday+'</div><div style="font-size:.65rem;color:var(--muted);font-family:var(--mono);">Chat messages today</div></div></div>';
-  html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;display:flex;align-items:center;gap:10px;">';
-  html+='<i class="ti ti-photo" style="font-size:20px;color:#7f77dd;"></i><div><div style="font-size:1.2rem;font-weight:700;color:#7f77dd;">'+totalImgsToday+'</div><div style="font-size:.65rem;color:var(--muted);font-family:var(--mono);">Images generated today</div></div></div>';
+  // All stats in ONE row — 6 cards
+  html+='<div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;">Platform Stats & Today&#39;s Usage</div>';
+  html+='<div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:10px;">';
+  html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center;"><i class="ti ti-briefcase" style="font-size:16px;color:var(--nes-blue);display:block;margin-bottom:4px;"></i><div style="font-size:1.1rem;font-weight:700;color:var(--nes-blue);">'+(clientRes.count||0)+'</div><div style="font-size:.58rem;color:var(--muted);font-family:var(--mono);">Clients</div></div>';
+  html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center;"><i class="ti ti-users" style="font-size:16px;color:#3fb950;display:block;margin-bottom:4px;"></i><div style="font-size:1.1rem;font-weight:700;color:#3fb950;">'+(leadRes.count||0)+'</div><div style="font-size:.58rem;color:var(--muted);font-family:var(--mono);">Leads</div></div>';
+  html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center;"><i class="ti ti-user" style="font-size:16px;color:#7f77dd;display:block;margin-bottom:4px;"></i><div style="font-size:1.1rem;font-weight:700;color:#7f77dd;">'+(userRes.count||0)+'</div><div style="font-size:.58rem;color:var(--muted);font-family:var(--mono);">Users</div></div>';
+  html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center;"><i class="ti ti-message" style="font-size:16px;color:var(--nes-blue);display:block;margin-bottom:4px;"></i><div style="font-size:1.1rem;font-weight:700;color:var(--nes-blue);">'+totalChatsToday+'</div><div style="font-size:.58rem;color:var(--muted);font-family:var(--mono);">Chats today</div></div>';
+  html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center;"><i class="ti ti-photo" style="font-size:16px;color:#7f77dd;display:block;margin-bottom:4px;"></i><div style="font-size:1.1rem;font-weight:700;color:#7f77dd;">'+totalImgsToday+'</div><div style="font-size:.58rem;color:var(--muted);font-family:var(--mono);">Images today</div></div>';
+  html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center;"><i class="ti ti-file-text" style="font-size:16px;color:#3fb950;display:block;margin-bottom:4px;"></i><div style="font-size:1.1rem;font-weight:700;color:#3fb950;">'+totalDocsToday+'</div><div style="font-size:.58rem;color:var(--muted);font-family:var(--mono);">Docs today</div></div>';
   html+='</div>';
 
   html+='</div>'; // end sticky header
