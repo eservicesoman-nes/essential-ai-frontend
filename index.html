@@ -2777,7 +2777,7 @@ function renderMyCredsForm(creds, client){
   const isPro=(client.plan==='pro'||client.plan==='enterprise'||client.plan==='growth');
   const isEnterprise=client.plan==='enterprise';
   const maxSources=isEnterprise?10:isPro?10:5;
-  const savedSources=creds.feed_sources?creds.feed_sources.split(',').filter(function(s){return s.trim();}):[];
+  const savedSources=client.feed_urls&&client.feed_urls.length?client.feed_urls:[];
   const defaultSources=['https://timesofoman.com/rss','https://omanobserver.om/feed','https://www.arabianbusiness.com/rss','https://www.zawya.com/rss/technology','https://gulfnews.com/rss/technology'];
   const sources=savedSources.length?savedSources:defaultSources;
   html+='<div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;margin-top:20px;">NES Pulse — Feed Sources</div>';
@@ -2881,23 +2881,17 @@ async function saveMyCredentials(){
   }
 }
 
-function saveFeedSources(){
+async function saveFeedSources(){
   var sources=[];
   for(var i=0;i<10;i++){
     var el=document.getElementById('feed_src_'+i);
     if(el&&el.value.trim())sources.push(el.value.trim());
   }
-  var creds=window._itCredsCache||{};
-  creds.feed_sources=sources.join(',');
-  window._itCredsCache=creds;
-  fetch(API_URL+'/api/client/'+userClientId+'/credentials',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({credentials:creds})
-  }).then(function(r){
-    if(r.ok)showToast('Feed sources saved ✓');
-    else showToast('Error saving');
-  }).catch(function(){showToast('Error saving');});
+  try{
+    const{error}=await sb.from('clients').update({feed_urls:sources}).eq('id',userClientId);
+    if(error)throw error;
+    showToast('Feed sources saved ✓');
+  }catch(e){showToast('Error: '+e.message);}
 }
 
 function showUpgradePopup(){
