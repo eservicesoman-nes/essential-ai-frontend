@@ -1162,11 +1162,11 @@ function renderClientDetail(c,colors,textColors,idx){
     ['ti-chart-bar','ceo_dashboard','CEO Dashboard','KPIs · pipeline · intel'],
     ['ti-terminal-2','nes_command','Team Hub','Team communications'],
     ['ti-news','intel_feed','NES Pulse','Daily market briefing'],
-    ['ti-phone','sara_receptionist','Sara AI Receptionist','1-min callback on lead'],
+    ['ti-phone','sara_receptionist','Apex Connect','60-sec callback on new lead'],
     ['ti-brand-whatsapp','whatsapp_alerts','WhatsApp Alerts','Lead + team alerts'],
     ['ti-mail','email_notifications','Email Notifications','Lead emails to team'],
-    ['ti-phone-call','adam_consultant','Adam AI Consultant','Enterprise voice agent'],
-    ['ti-headset','layla_advisor','Layla Follow-up Advisor','Re-engagement calls'],
+    ['ti-phone-call','adam_consultant','Apex Advisory','Enterprise voice consultant'],
+    ['ti-headset','layla_advisor','Apex Outreach','3-day follow-up calls'],
     ['ti-moon','islam360','Islam360','GCC / Europe version'],
   ];
   return`
@@ -1561,7 +1561,9 @@ async function loadApiCredits(){
     {id:'deepseek',name:'DeepSeek',icon:'ti-robot',color:'#7f77dd',note:'Chat fallback 2'},
     {id:'fal',name:'Flux (FAL)',icon:'ti-wand',color:'#f0883e',note:'Primary image generation'},
     {id:'tavily',name:'Tavily Search',icon:'ti-search',color:'#409cff',note:'Web search for chat'},
-    {id:'vapi',name:'Vapi (Sara AI)',icon:'ti-phone',color:'#3fb950',note:'AI receptionist calls'},
+    {id:'apex_connect',name:'Apex Connect (Sara)',icon:'ti-phone',color:'#3fb950',note:'60-sec callback — Apex Connect'},
+    {id:'apex_outreach',name:'Apex Outreach (Layla)',icon:'ti-headset',color:'#7f77dd',note:'3-day follow-up — Apex Outreach'},
+    {id:'apex_advisory',name:'Apex Advisory (Adam)',icon:'ti-phone-call',color:'#f0883e',note:'Enterprise consultant — Apex Advisory'},
     {id:'twilio',name:'Twilio',icon:'ti-message-dots',color:'#f85149',note:'WhatsApp & SMS'},
   ];
   let thresholds={};
@@ -2734,64 +2736,138 @@ function showPricing(){
     <div class="pricing-wrap">
       <a href="#" onclick="showView('chat');return false;" style="color:var(--nes-blue);text-decoration:none;display:inline-block;margin-bottom:22px;font-family:var(--mono);font-size:.8rem;">← Back</a>
       <div style="text-align:center;margin-bottom:8px;"><h1 style="font-size:1.7rem;font-weight:700;">Choose Your Plan</h1></div>
-      <div style="text-align:center;margin-bottom:28px;font-family:var(--mono);font-size:.75rem;color:var(--muted);">NES AI — Unified Business Platform</div>
+      <div style="text-align:center;margin-bottom:6px;font-family:var(--mono);font-size:.75rem;color:var(--muted);">NES AI — Unified Business Platform · Oman Pricing</div>
+      <div style="text-align:center;margin-bottom:28px;font-family:var(--mono);font-size:.68rem;color:var(--muted);">All plans include a 7-day trial · Cancel anytime</div>
+
       <div class="plan-grid">
+
+        <!-- AI PRESENCE -->
         <div class="plan-card">
-          <div class="plan-name">Starter</div>
-          <div class="plan-price">OMR 15</div>
-          <div class="plan-period">per month</div>
+          <div style="font-family:var(--mono);font-size:.65rem;color:var(--nes-blue);text-transform:uppercase;letter-spacing:.1em;text-align:center;margin-bottom:4px;">AI Presence</div>
+          <div class="plan-price">OMR 19</div>
+          <div class="plan-period">per month · ~$49</div>
           <ul class="plan-features-list">
             <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>150 AI messages/day</li>
             <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>10 image generations/day</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>5 feed sources (NES default)</li>
+            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>25 document analyses/mo</li>
+            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>AI Chatbot (24/7)</li>
+            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Lead Capture + Email alerts</li>
+            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Team Hub</li>
             <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>NES Pulse — daily 6AM</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Lead capture + alerts</li>
             <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>3 team users</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Social media (3x/week)</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Team Hub (Rocket.Chat)</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>1 week trial on NES numbers</li>
+            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Islam360 (GCC)</li>
+            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Email support</li>
+            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>7-day trial</li>
           </ul>
+          <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);margin-bottom:8px;padding:6px 8px;background:var(--accent-lo);border-radius:6px;">
+            + Apex Connect OMR 15/mo<br>+ WhatsApp Alerts OMR 8/mo
+          </div>
           <button class="plan-action-btn" onclick="alert('Contact us: office@essential-services.org')">Get Started →</button>
         </div>
+
+        <!-- AI OPERATIONS -->
         <div class="plan-card" style="border-color:var(--nes-blue);position:relative;">
           <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--nes-btn-grad);color:#fff;font-size:.65rem;font-weight:700;padding:3px 12px;border-radius:20px;font-family:var(--mono);">POPULAR</div>
-          <div class="plan-name" style="color:var(--nes-blue);">Pro</div>
-          <div class="plan-price">OMR 35</div>
-          <div class="plan-period">per month</div>
+          <div style="font-family:var(--mono);font-size:.65rem;color:var(--nes-blue);text-transform:uppercase;letter-spacing:.1em;text-align:center;margin-bottom:4px;">AI Operations</div>
+          <div class="plan-price">OMR 49</div>
+          <div class="plan-period">per month · ~$127</div>
           <ul class="plan-features-list">
             <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>500 AI messages/day</li>
             <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>25 image generations/day</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>10 custom feed sources</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>NES Pulse — every 4 hours</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Priority Intelligence Alerts</li>
+            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>100 document analyses/mo</li>
+            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Everything in AI Presence</li>
+            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>CEO Dashboard</li>
+            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Social Media — 3x/week</li>
+            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>NES Pulse — alerts 4x/day</li>
+            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Sales Portal (CRM)</li>
             <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>10 team users</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Daily social media posts</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Own phone number (Sara AI)</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>30 days lead history</li>
             <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Priority email support</li>
           </ul>
-          <button class="plan-action-btn" onclick="alert('Contact us: office@essential-services.org')">Upgrade to Pro →</button>
+          <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);margin-bottom:8px;padding:6px 8px;background:var(--accent-lo);border-radius:6px;">
+            + Apex Connect OMR 15/mo<br>+ Apex Outreach OMR 15/mo<br>+ WhatsApp Alerts OMR 8/mo
+          </div>
+          <button class="plan-action-btn" onclick="alert('Contact us: office@essential-services.org')">Upgrade to Operations →</button>
         </div>
-        <div class="plan-card">
-          <div class="plan-name">Enterprise</div>
-          <div class="plan-price">Custom</div>
-          <div class="plan-period">tailored pricing</div>
+
+        <!-- AI WORKFORCE -->
+        <div class="plan-card" style="border-color:#3fb950;position:relative;">
+          <div style="font-family:var(--mono);font-size:.65rem;color:#3fb950;text-transform:uppercase;letter-spacing:.1em;text-align:center;margin-bottom:4px;">AI Workforce</div>
+          <div class="plan-price" style="color:#3fb950;">OMR 99</div>
+          <div class="plan-period">per month · ~$257</div>
           <ul class="plan-features-list">
             <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Unlimited AI messages</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Unlimited feed sources</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Real-time alerts (15 mins)</li>
+            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>50 image generations/day</li>
+            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Unlimited document analyses</li>
+            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Everything in AI Operations</li>
+            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Apex Connect (own number)</li>
+            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Apex Outreach included</li>
+            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>WhatsApp Alerts included</li>
+            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Social Media — daily</li>
             <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Unlimited team users</li>
+            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>WhatsApp support</li>
+          </ul>
+          <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);margin-bottom:8px;padding:6px 8px;background:rgba(63,185,80,.08);border-radius:6px;">
+            + Apex Advisory OMR 20/mo<br>+ Extra social posts OMR 8/mo
+          </div>
+          <button class="plan-action-btn" style="background:linear-gradient(135deg,#1a7f37,#3fb950);" onclick="alert('Contact us: office@essential-services.org')">Upgrade to Workforce →</button>
+        </div>
+
+        <!-- AI INFRASTRUCTURE -->
+        <div class="plan-card" style="border-color:#d29922;position:relative;">
+          <div style="font-family:var(--mono);font-size:.65rem;color:#d29922;text-transform:uppercase;letter-spacing:.1em;text-align:center;margin-bottom:4px;">AI Infrastructure</div>
+          <div class="plan-price" style="color:#d29922;">Custom</div>
+          <div class="plan-period">OMR 250–1000+ / month</div>
+          <ul class="plan-features-list">
+            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Unlimited everything</li>
+            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Full Apex Suite included</li>
+            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Real-time alerts (2hrs)</li>
             <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Multiple social posts/day</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Dedicated Sara AI line</li>
             <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>White label branding</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>90 days history</li>
+            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Custom AI agents</li>
+            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>90 days lead history</li>
             <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>SLA guarantee</li>
             <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Dedicated account manager</li>
+            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Custom integrations</li>
           </ul>
-          <button class="plan-action-btn" onclick="alert('Contact us: office@essential-services.org')">Contact Us →</button>
+          <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);margin-bottom:8px;padding:6px 8px;background:rgba(210,153,34,.08);border-radius:6px;">
+            Tailored to your requirements
+          </div>
+          <button class="plan-action-btn" style="background:linear-gradient(135deg,#92610a,#d29922);" onclick="alert('Contact us: office@essential-services.org')">Contact Us →</button>
+        </div>
+
+      </div>
+
+      <!-- APEX SUITE SECTION -->
+      <div style="margin-top:36px;text-align:center;">
+        <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:16px;">Apex Suite — AI Voice Agents</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;max-width:700px;margin:0 auto;">
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center;">
+            <i class="ti ti-phone" style="font-size:24px;color:#3fb950;display:block;margin-bottom:8px;"></i>
+            <div style="font-weight:700;margin-bottom:4px;">Apex Connect</div>
+            <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);margin-bottom:8px;">60-sec callback on every lead</div>
+            <div style="font-size:1.1rem;font-weight:700;color:#3fb950;">+OMR 15/mo</div>
+          </div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center;">
+            <i class="ti ti-headset" style="font-size:24px;color:#7f77dd;display:block;margin-bottom:8px;"></i>
+            <div style="font-weight:700;margin-bottom:4px;">Apex Outreach</div>
+            <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);margin-bottom:8px;">3-day follow-up re-engagement</div>
+            <div style="font-size:1.1rem;font-weight:700;color:#7f77dd;">+OMR 15/mo</div>
+          </div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center;">
+            <i class="ti ti-phone-call" style="font-size:24px;color:#f0883e;display:block;margin-bottom:8px;"></i>
+            <div style="font-weight:700;margin-bottom:4px;">Apex Advisory</div>
+            <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);margin-bottom:8px;">Enterprise voice consultant</div>
+            <div style="font-size:1.1rem;font-weight:700;color:#f0883e;">+OMR 20/mo</div>
+          </div>
         </div>
       </div>
+
+      <div style="text-align:center;margin-top:28px;font-family:var(--mono);font-size:.72rem;color:var(--muted);">
+        All prices in Omani Rial (OMR) · UAE/KSA/EU pricing available on request<br>
+        <a href="mailto:office@essential-services.org" style="color:var(--nes-blue);text-decoration:none;">office@essential-services.org</a>
+      </div>
     </div>`;
+}
 }
 
 // Helpers
