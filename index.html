@@ -2992,7 +2992,8 @@ function cleanDisplay(text){
     const l=line.toLowerCase();
     return !bad.some(function(b){return l.includes(b);});
   }).join('\n').trim();
-}return`<div class="msg user"><div class="user-av-msg">${session?.user?.email?.[0]?.toUpperCase()||'U'}</div><div class="msg-body"><div class="msg-role">You</div><div class="msg-bubble">${esc(text)}</div></div></div>`;}
+}
+function userBubble(text){return`<div class="msg user"><div class="user-av-msg">${session?.user?.email?.[0]?.toUpperCase()||'U'}</div><div class="msg-body"><div class="msg-role">You</div><div class="msg-bubble">${esc(text)}</div></div></div>`;}
 function aiBubble(text,sources=[]){
   const src=sources.length?'<div class="sources-block">Sources: '+sources.map(s=>'<a href="'+esc(s.url)+'" target="_blank">'+esc(s.title||s.url)+'</a>').join(' · ')+'</div>':''
   return`<div class="msg ai"><div class="chat-av-wrap"><div class="chat-av-ring"><div class="chat-av-mid"><div class="chat-av-dot"></div></div></div><div class="chat-av-online"></div></div><div class="msg-body"><div class="msg-role">NES AI</div><div class="msg-bubble">${md(text)}${src}</div><button class="copy-btn" onclick="copyMsg(this)">Copy</button></div></div>`;
