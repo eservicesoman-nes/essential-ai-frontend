@@ -1126,7 +1126,8 @@ async function loadCeoFeed(){
       const sourceHtml=uniqueUrls.length
         ?'<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:5px;">'+
           uniqueUrls.map(function(u){
-            return '<a href="https://'+u+'" target="_blank" rel="noopener" style="font-size:.62rem;font-family:var(--mono);padding:2px 7px;border-radius:5px;background:var(--bg);border:1px solid var(--border);color:var(--nes-blue);text-decoration:none;cursor:pointer;">'+u+'</a>';
+            var label=u;try{label=new URL(u).hostname.replace('www.','');}catch(e){}
+            return '<a href="'+u+'" target="_blank" rel="noopener" style="font-size:.62rem;font-family:var(--mono);padding:2px 7px;border-radius:5px;background:var(--bg);border:1px solid var(--border);color:var(--nes-blue);text-decoration:none;cursor:pointer;">'+label+'</a>';
           }).join('')+'</div>'
         :'';
       const expandedHtml=sections.map(function(s){
@@ -1181,7 +1182,8 @@ async function loadCeoFeed(){
         (uniqueUrls.length?'<div style="font-family:var(--mono);font-size:.62rem;color:var(--muted);margin-top:8px;margin-bottom:4px;text-transform:uppercase;letter-spacing:.08em;">Sources</div>'+
         '<div style="display:flex;flex-wrap:wrap;gap:5px;">'+
         uniqueUrls.map(function(u){
-          return '<a href="https://'+u+'" target="_blank" rel="noopener" style="font-size:.62rem;font-family:var(--mono);padding:2px 8px;border-radius:5px;background:var(--bg);border:1px solid var(--border);color:var(--nes-blue);text-decoration:none;">'+u+'</a>';
+          var label=u;try{label=new URL(u).hostname.replace('www.','');}catch(e){}
+          return '<a href="'+u+'" target="_blank" rel="noopener" style="font-size:.62rem;font-family:var(--mono);padding:2px 8px;border-radius:5px;background:var(--bg);border:1px solid var(--border);color:var(--nes-blue);text-decoration:none;">'+label+'</a>';
         }).join('')+'</div>':'')+
         '</div></div>';
     }).join('');
