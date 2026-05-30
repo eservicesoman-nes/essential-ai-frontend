@@ -1091,23 +1091,20 @@ async function loadCeoFeed(){
     el.innerHTML=data.map(function(item,idx){
       const tagColor=tagColors[item.type]||tagColors.default;
       const tagLabel=tagLabels[item.type]||tagLabels.default;
-      // Extract URLs from content — clean domain extraction
+      // Extract URLs from content — handles href="..." and plain text
       const urls=[];
       if(item.content){
-        var words=item.content.split(/[\s\n]+/);
-        words.forEach(function(word){
-          var w=word.replace(/[^a-zA-Z0-9/:._-]/g,'');
-          if(w.indexOf('http')===0){
-            try{
-              var u=new URL(w);
-              var host=u.hostname.replace('www.','');
-              // Only add clean recognisable domains
-              if(host.length>3&&host.length<50&&host.indexOf('xn--')<0){
-                urls.push(host);
-              }
-            }catch(e){}
-          }
-        });
+        var hrefRe=/href=["']([^"']+)["']/g;
+        var hm;
+        while((hm=hrefRe.exec(item.content))!==null){
+          if(hm[1].indexOf('http')===0){try{new URL(hm[1]);urls.push(hm[1]);}catch(e){}}
+        }
+        if(urls.length===0){
+          item.content.split(/\s+/).forEach(function(word){
+            var w=word.replace(/[^a-zA-Z0-9/:._?=&%-]/g,'');
+            if(w.indexOf('http')===0){try{new URL(w);urls.push(w);}catch(e){}}
+          });
+        }
       }
       // Clean content for preview
       const cleaned=item.content
