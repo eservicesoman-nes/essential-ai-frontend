@@ -921,7 +921,7 @@ async function showCEODashboard(){
   if(window._weatherCache){setTimeout(()=>{const w=window._weatherCache;const wi=document.getElementById('weatherIcon');const wd=document.getElementById('weatherDesc');const wt=document.getElementById('weatherTemp');const wf=document.getElementById('weatherFeels');if(wi){wi.className='ti '+w.icon;wi.style.cssText='font-size:22px;color:var(--nes-blue);filter:drop-shadow(0 0 4px var(--nes-blue))';}if(wd)wd.textContent=w.desc;if(wt)wt.textContent=w.temp;if(wf)wf.textContent=w.feels;},50);}else{setTimeout(()=>{fetch('https://wttr.in/Muscat?format=j1').then(r=>r.json()).then(w=>{const c=w.current_condition[0];const desc=c.weatherDesc[0].value;const temp=c.temp_C;const feels=c.FeelsLikeC;const humidity=c.humidity;const icons={'Sunny':'ti-sun','Clear':'ti-moon-stars','Partly cloudy':'ti-cloud-sun','Cloudy':'ti-cloud','Overcast':'ti-cloud','Mist':'ti-mist','Fog':'ti-mist','Rain':'ti-cloud-rain','Drizzle':'ti-cloud-drizzle','Thunderstorm':'ti-storm','Snow':'ti-snowflake','Blizzard':'ti-snowflake'};const iconKey=Object.keys(icons).find(k=>desc.includes(k))||'Sunny';const icon=icons[iconKey]||'ti-sun';const descTxt=desc+' · Humidity '+humidity+'%';const tempTxt=temp+'°C';const feelsTxt='Feels like '+feels+'°C';window._weatherCache={icon,desc:descTxt,temp:tempTxt,feels:feelsTxt};const wi=document.getElementById('weatherIcon');const wd=document.getElementById('weatherDesc');const wt=document.getElementById('weatherTemp');const wf=document.getElementById('weatherFeels');if(wi){wi.className='ti '+icon;wi.style.cssText='font-size:22px;color:var(--nes-blue);filter:drop-shadow(0 0 4px var(--nes-blue))';}if(wd)wd.textContent=descTxt;if(wt)wt.textContent=tempTxt;if(wf)wf.textContent=feelsTxt;}).catch(()=>{const wd=document.getElementById('weatherDesc');if(wd)wd.textContent='Weather unavailable';});},100);}
 
   document.getElementById('ceoDashContent').innerHTML=`
-    <div style="display:grid;grid-template-columns:1fr 300px;gap:0;height:100%;min-height:0;">
+    <div style="display:grid;grid-template-columns:1fr 420px;gap:0;height:100%;min-height:0;">
       <!-- LEFT COLUMN -->
       <div style="overflow-y:auto;padding:14px 16px;border-right:1px solid var(--border);">
         ${uncontacted>0
@@ -939,13 +939,60 @@ async function showCEODashboard(){
           </div>
         </div>
         <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:7px;display:flex;align-items:center;gap:5px;"><i class="ti ti-chart-bar" style="font-size:12px;color:var(--nes-blue);filter:drop-shadow(0 0 3px var(--nes-blue))"></i>Performance</div>
-        <div class="${userRole==='nesadmin'?'kgrid5':'kgrid3'}">
-          <div class="kcard hot"><div class="klbl" style="display:flex;align-items:center;gap:4px;"><i class="ti ti-trending-up" style="font-size:11px;color:var(--nes-blue);filter:drop-shadow(0 0 3px var(--nes-blue))"></i>Pipeline value</div><div class="kval" style="color:var(--nes-blue);">OMR ${Math.round(pipelineValue/3.85).toLocaleString()}</div><div class="kdelta kup">Est. from ${totalLeads} leads</div><div class="kbar"><div class="kfill" style="width:72%;background:var(--nes-blue)"></div></div></div>
-          <div class="kcard"><div class="klbl" style="display:flex;align-items:center;gap:4px;"><i class="ti ti-users" style="font-size:11px;color:#3fb950;filter:drop-shadow(0 0 3px #3fb950)"></i>New leads today</div><div class="kval">${leadsToday}</div><div class="kdelta kneu">Total: ${totalLeads}</div><div class="kbar"><div class="kfill" style="width:${Math.min(100,leadsToday*10)}%;background:#3fb950"></div></div></div>
-          <div class="kcard ${uncontacted>0?'warn':''}" ><div class="klbl" style="display:flex;align-items:center;gap:4px;"><i class="ti ti-bell" style="font-size:11px;color:${uncontacted>0?'#f85149':'#3fb950'};filter:drop-shadow(0 0 3px ${uncontacted>0?'#f85149':'#3fb950'})"></i>Needs follow-up</div><div class="kval">${uncontacted}</div><div class="kdelta ${uncontacted>0?'kdn':'kneu'}">${uncontacted>0?'Action required':'All followed up'}</div><div class="kbar"><div class="kfill" style="width:${Math.min(100,uncontacted*20)}%;background:${uncontacted>0?'#f85149':'#3fb950'}"></div></div></div>
+        <div style="display:grid;grid-template-columns:1fr${userRole==='nesadmin'?' 1fr':''};gap:8px;margin-bottom:12px;">
+          <div class="dash-card">
+            <div class="dc-title" style="display:flex;align-items:center;gap:5px;"><i class="ti ti-chart-bar" style="font-size:10px;color:var(--nes-blue)"></i>Lead performance</div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <div style="width:28px;height:28px;border-radius:7px;background:#0c1f35;display:flex;align-items:center;justify-content:center;"><i class="ti ti-trending-up" style="font-size:13px;color:var(--nes-blue);"></i></div>
+                <div><div style="font-size:.62rem;color:var(--muted);">Pipeline value</div><div style="font-size:1.05rem;font-weight:700;color:var(--nes-blue);">OMR ${Math.round(pipelineValue/3.85).toLocaleString()}</div><div style="height:3px;background:var(--border);border-radius:2px;margin-top:3px;width:110px;"><div style="height:100%;width:72%;background:var(--nes-blue);border-radius:2px;"></div></div></div>
+              </div>
+              <div style="font-size:.6rem;color:var(--muted);text-align:right;">${totalLeads} leads<br>Est. value</div>
+            </div>
+            <div style="height:1px;background:var(--border);margin:6px 0;"></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <div style="width:28px;height:28px;border-radius:7px;background:#0d2818;display:flex;align-items:center;justify-content:center;"><i class="ti ti-users" style="font-size:13px;color:#3fb950;"></i></div>
+                <div><div style="font-size:.62rem;color:var(--muted);">New today</div><div style="font-size:1.05rem;font-weight:700;color:#3fb950;">${leadsToday}</div><div style="height:3px;background:var(--border);border-radius:2px;margin-top:3px;width:110px;"><div style="height:100%;width:${Math.min(100,leadsToday*10)}%;background:#3fb950;border-radius:2px;"></div></div></div>
+              </div>
+              <div style="font-size:.6rem;color:var(--muted);text-align:right;">Total: ${totalLeads}<br>+${leadsToday} today</div>
+            </div>
+            <div style="height:1px;background:var(--border);margin:6px 0;"></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <div style="width:28px;height:28px;border-radius:7px;background:${uncontacted>0?'#2d1800':'#0d2818'};display:flex;align-items:center;justify-content:center;"><i class="ti ti-bell" style="font-size:13px;color:${uncontacted>0?'#f85149':'#3fb950'};"></i></div>
+                <div><div style="font-size:.62rem;color:var(--muted);">Needs follow-up</div><div style="font-size:1.05rem;font-weight:700;color:${uncontacted>0?'#f85149':'#3fb950'};">${uncontacted}</div><div style="height:3px;background:var(--border);border-radius:2px;margin-top:3px;width:110px;"><div style="height:100%;width:${Math.min(100,uncontacted*2)}%;background:${uncontacted>0?'#f85149':'#3fb950'};border-radius:2px;"></div></div></div>
+              </div>
+              <div style="font-size:.6rem;color:${uncontacted>0?'#f85149':'var(--muted)'};text-align:right;">${uncontacted>0?'Action<br>required':'All<br>followed up'}</div>
+            </div>
+          </div>
           ${userRole==='nesadmin'?`
-          <div class="kcard" id="apiHealthCard"><div class="klbl" style="display:flex;align-items:center;gap:4px;"><i class="ti ti-activity" style="font-size:11px;color:#3fb950;"></i>API Health</div><div class="kval" id="apiHealthVal" style="color:#3fb950;">—</div><div class="kdelta" id="apiHealthDelta">Loading...</div><div class="kbar"><div class="kfill" id="apiHealthBar" style="width:0%;background:#3fb950"></div></div></div>
-          <div class="kcard" id="creditCard"><div class="klbl" style="display:flex;align-items:center;gap:4px;"><i class="ti ti-credit-card" style="font-size:11px;color:#7f77dd;"></i>API Credits</div><div class="kval" id="creditVal" style="color:#7f77dd;">—</div><div class="kdelta" id="creditDelta">Loading...</div><div class="kbar"><div class="kfill" id="creditBar" style="width:0%;background:#7f77dd"></div></div></div>`:''}
+          <div class="dash-card">
+            <div class="dc-title" style="display:flex;align-items:center;gap:5px;"><i class="ti ti-activity" style="font-size:10px;color:#3fb950"></i>Platform health</div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <div style="width:28px;height:28px;border-radius:7px;background:#0d2818;display:flex;align-items:center;justify-content:center;"><i class="ti ti-shield-check" style="font-size:13px;color:#3fb950;"></i></div>
+                <div><div style="font-size:.62rem;color:var(--muted);">API health</div><div style="font-size:1.05rem;font-weight:700;color:#3fb950;" id="apiHealthVal">—</div><div style="height:3px;background:var(--border);border-radius:2px;margin-top:3px;width:110px;"><div id="apiHealthBar" style="height:100%;width:0%;background:#3fb950;border-radius:2px;"></div></div></div>
+              </div>
+              <div style="font-size:.6rem;color:var(--muted);text-align:right;" id="apiHealthDelta">Loading...</div>
+            </div>
+            <div style="height:1px;background:var(--border);margin:6px 0;"></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <div style="width:28px;height:28px;border-radius:7px;background:#1a1040;display:flex;align-items:center;justify-content:center;"><i class="ti ti-credit-card" style="font-size:13px;color:#7f77dd;"></i></div>
+                <div><div style="font-size:.62rem;color:var(--muted);">API credits</div><div style="font-size:1.05rem;font-weight:700;color:#7f77dd;" id="creditVal">—</div><div style="height:3px;background:var(--border);border-radius:2px;margin-top:3px;width:110px;"><div id="creditBar" style="height:100%;width:0%;background:#7f77dd;border-radius:2px;"></div></div></div>
+              </div>
+              <div style="font-size:.6rem;color:var(--muted);text-align:right;" id="creditDelta">Loading...</div>
+            </div>
+            <div style="height:1px;background:var(--border);margin:6px 0;"></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <div style="width:28px;height:28px;border-radius:7px;background:#0c1827;display:flex;align-items:center;justify-content:center;"><i class="ti ti-clock" style="font-size:13px;color:#409cff;"></i></div>
+                <div><div style="font-size:.62rem;color:var(--muted);">Platform uptime</div><div style="font-size:1.05rem;font-weight:700;color:#409cff;">99.9%</div><div style="height:3px;background:var(--border);border-radius:2px;margin-top:3px;width:110px;"><div style="height:100%;width:99%;background:#409cff;border-radius:2px;"></div></div></div>
+              </div>
+              <div style="font-size:.6rem;color:var(--muted);text-align:right;">30 days<br>running</div>
+            </div>
+          </div>`:''}
         </div>
         <div class="row2">
           <div class="dash-card">
