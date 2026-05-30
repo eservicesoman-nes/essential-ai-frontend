@@ -546,6 +546,11 @@ async function showApp(user){
   await loadUserRole(user);
   await loadUserPlan();
   setupNavForRole();
+  // Check agreement — skip for nesadmin
+  if(userRole !== 'nesadmin'){
+    const agreed = await checkAgreement(user.id);
+    if(!agreed){ showAgreementModal(user.id); return; }
+  }
   // Phase 4: Client portal — route client users to CEO dashboard by default
   let defaultView = localStorage.getItem('nesai_view')||'chat';
   if(userClientId){
@@ -554,6 +559,123 @@ async function showApp(user){
   showView(defaultView);
   loadUsageFromServer();
   bindNav();
+}
+
+async function checkAgreement(userId){
+  try{
+    const{data}=await sb.from('agreements').select('id').eq('user_id',userId).single();
+    return !!data;
+  }catch(e){ return false; }
+}
+
+function showAgreementModal(userId){
+  const modal=document.createElement('div');
+  modal.id='agreementModal';
+  modal.style.cssText='position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:20px;';
+  modal.innerHTML=`
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px;max-width:560px;width:100%;max-height:90vh;overflow-y:auto;">
+      <div style="text-align:center;margin-bottom:24px;">
+        <div style="font-size:1.6rem;font-weight:800;margin-bottom:4px;"><span style="color:var(--nes-blue);">NES</span> <span style="color:#fff;">AI</span></div>
+        <div style="font-family:var(--mono);font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;">Terms & Conditions</div>
+      </div>
+      <p style="font-size:.85rem;color:var(--muted);margin-bottom:24px;line-height:1.6;">Before accessing the platform, please read and accept the following terms.</p>
+
+      <!-- Accept All -->
+      <label style="display:flex;align-items:center;gap:12px;padding:14px;background:var(--card);border:1px solid var(--border);border-radius:10px;cursor:pointer;margin-bottom:20px;">
+        <input type="checkbox" id="agreeAll" onchange="toggleAllTerms(this.checked)" style="width:18px;height:18px;accent-color:var(--nes-blue);cursor:pointer;">
+        <span style="font-weight:700;font-size:.9rem;">Accept all terms and conditions</span>
+      </label>
+
+      <!-- Term 1 -->
+      <div style="border:1px solid var(--border);border-radius:10px;margin-bottom:12px;overflow:hidden;">
+        <label style="display:flex;align-items:flex-start;gap:12px;padding:14px;cursor:pointer;">
+          <input type="checkbox" id="agree1" onchange="updateAgreeAll()" style="width:16px;height:16px;margin-top:2px;accent-color:var(--nes-blue);cursor:pointer;flex-shrink:0;">
+          <div>
+            <div style="font-weight:600;font-size:.85rem;margin-bottom:4px;">Acceptable Use</div>
+            <div style="font-size:.78rem;color:var(--muted);line-height:1.5;">I agree to use NES AI only for lawful, ethical business purposes. I will not use the platform for illegal, harmful, discriminatory, or misleading activities. I understand that violation may result in immediate account termination.</div>
+          </div>
+        </label>
+      </div>
+
+      <!-- Term 2 -->
+      <div style="border:1px solid var(--border);border-radius:10px;margin-bottom:12px;overflow:hidden;">
+        <label style="display:flex;align-items:flex-start;gap:12px;padding:14px;cursor:pointer;">
+          <input type="checkbox" id="agree2" onchange="updateAgreeAll()" style="width:16px;height:16px;margin-top:2px;accent-color:var(--nes-blue);cursor:pointer;flex-shrink:0;">
+          <div>
+            <div style="font-weight:600;font-size:.85rem;margin-bottom:4px;">AI Limitations</div>
+            <div style="font-size:.78rem;color:var(--muted);line-height:1.5;">I understand that AI-generated content may not always be accurate, complete, or current. I agree to verify important information independently before acting on it. NES AI is a decision-support tool, not a replacement for professional advice.</div>
+          </div>
+        </label>
+      </div>
+
+      <!-- Term 3 -->
+      <div style="border:1px solid var(--border);border-radius:10px;margin-bottom:24px;overflow:hidden;">
+        <label style="display:flex;align-items:flex-start;gap:12px;padding:14px;cursor:pointer;">
+          <input type="checkbox" id="agree3" onchange="updateAgreeAll()" style="width:16px;height:16px;margin-top:2px;accent-color:var(--nes-blue);cursor:pointer;flex-shrink:0;">
+          <div>
+            <div style="font-weight:600;font-size:.85rem;margin-bottom:4px;">Liability</div>
+            <div style="font-size:.78rem;color:var(--muted);line-height:1.5;">I acknowledge that New Essential Services is not liable for any losses, damages, or decisions arising from the use of AI-generated content, platform downtime, or data inaccuracies. Use of this platform constitutes acceptance of this limitation.</div>
+          </div>
+        </label>
+      </div>
+
+      <button id="agreeBtn" onclick="submitAgreement('${userId}')" disabled style="width:100%;padding:14px;border:none;border-radius:10px;background:#1a2332;color:#4a5568;font-weight:700;font-size:.9rem;cursor:not-allowed;transition:all .2s;">
+        Confirm & Continue →
+      </button>
+      <div style="text-align:center;margin-top:12px;font-family:var(--mono);font-size:.65rem;color:var(--muted);">Full terms & privacy policy available on request · NES AI v1.0</div>
+    </div>`;
+  document.body.appendChild(modal);
+}
+
+function toggleAllTerms(checked){
+  ['agree1','agree2','agree3'].forEach(id=>document.getElementById(id).checked=checked);
+  updateConfirmBtn();
+}
+
+function updateAgreeAll(){
+  const all=['agree1','agree2','agree3'].every(id=>document.getElementById(id).checked);
+  document.getElementById('agreeAll').checked=all;
+  updateConfirmBtn();
+}
+
+function updateConfirmBtn(){
+  const all=['agree1','agree2','agree3'].every(id=>document.getElementById(id).checked);
+  const btn=document.getElementById('agreeBtn');
+  if(all){
+    btn.disabled=false;
+    btn.style.background='var(--nes-btn-grad)';
+    btn.style.color='#fff';
+    btn.style.cursor='pointer';
+  } else {
+    btn.disabled=true;
+    btn.style.background='#1a2332';
+    btn.style.color='#4a5568';
+    btn.style.cursor='not-allowed';
+  }
+}
+
+async function submitAgreement(userId){
+  const btn=document.getElementById('agreeBtn');
+  btn.textContent='Saving...';
+  btn.disabled=true;
+  try{
+    await sb.from('agreements').insert({
+      user_id: userId,
+      version: 'v1.0'
+    });
+    document.getElementById('agreementModal').remove();
+    // Continue loading app
+    let defaultView = localStorage.getItem('nesai_view')||'chat';
+    if(userClientId){ defaultView = userRole==='ceo' ? 'ceo' : 'leads'; }
+    showView(defaultView);
+    loadUsageFromServer();
+    bindNav();
+  }catch(e){
+    btn.textContent='Error — please try again';
+    btn.disabled=false;
+    btn.style.background='#f85149';
+    btn.style.color='#fff';
+  }
 }
 
 async function loadUserRole(user){
