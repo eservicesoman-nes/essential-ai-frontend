@@ -1101,43 +1101,34 @@ async function loadPartnerMrr(){
 
 function initCeoResizer(){
   const grid=document.getElementById('ceoDashGrid');
-  const resizer=document.getElementById('ceoResizer');
-  if(!grid||!resizer)return;
-  // Remove old listeners by cloning
-  const newResizer=resizer.cloneNode(true);
-  resizer.parentNode.replaceChild(newResizer,resizer);
   const r=document.getElementById('ceoResizer');
-  // Restore saved width
+  if(!grid||!r)return;
   const saved=localStorage.getItem('nesai_feed_width');
-  if(saved) grid.style.gridTemplateColumns='1fr 6px '+parseInt(saved)+'px';
+  if(saved)grid.style.gridTemplateColumns='1fr 6px '+parseInt(saved)+'px';
   let dragging=false;
   r.addEventListener('mousedown',function(e){
     dragging=true;
+    r.setPointerCapture(e.pointerId);
     r.classList.add('dragging');
     document.body.style.cursor='col-resize';
     document.body.style.userSelect='none';
-    // Disable pointer events on all other grid children so drag stays on resizer
-    grid.querySelectorAll(':scope > div:not(#ceoResizer)').forEach(function(el){el.style.pointerEvents='none';});
     e.preventDefault();
-    e.stopPropagation();
   });
-  document.addEventListener('mousemove',function(e){
+  r.addEventListener('pointermove',function(e){
     if(!dragging)return;
     const cols=grid.style.gridTemplateColumns.split(' ');
     const currentW=parseInt(cols[cols.length-1])||420;
-    // movementX negative = moving left = feed gets wider
     const newW=Math.max(280,Math.min(window.innerWidth-300,currentW-e.movementX));
     grid.style.gridTemplateColumns='1fr 6px '+newW+'px';
     e.preventDefault();
   });
-  document.addEventListener('mouseup',function(){
+  r.addEventListener('pointerup',function(e){
     if(!dragging)return;
     dragging=false;
+    r.releasePointerCapture(e.pointerId);
     r.classList.remove('dragging');
     document.body.style.cursor='';
     document.body.style.userSelect='';
-    // Restore pointer events
-    grid.querySelectorAll(':scope > div').forEach(function(el){el.style.pointerEvents='';});
     const cols=grid.style.gridTemplateColumns.split(' ');
     localStorage.setItem('nesai_feed_width',parseInt(cols[cols.length-1])||420);
   });
