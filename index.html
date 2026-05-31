@@ -485,6 +485,10 @@
         <span style="flex:1;">Client Manager</span>
         <span class="nav-badge nb-blue" id="clientCount">0</span>
       </div>
+      <div class="client-mgr-btn" id="analyticsNav" onclick="showView('analytics')" style="display:none;margin-top:4px;background:rgba(210,153,34,.08);border-color:rgba(210,153,34,.2);color:#d29922;">
+        <i class="ti ti-chart-dots" style="font-size:14px;"></i>
+        <span style="flex:1;">Usage Analytics</span>
+      </div>
       <div class="client-mgr-btn" id="adminStatusNav" onclick="showView('adminstatus')" style="display:none;margin-top:4px;background:rgba(63,185,80,.08);border-color:rgba(63,185,80,.2);color:#3fb950;">
         <i class="ti ti-activity-heartbeat"></i>
         <span style="flex:1;">Platform Status</span>
@@ -742,7 +746,7 @@ function setupNavForRole(){
     // NES internal users
     if(['nesadmin','ceo','manager'].includes(userRole))intel.style.display='block';
     if(!['nesadmin','ceo'].includes(userRole)&&ceoNav)ceoNav.style.display='none';
-    if(userRole==='nesadmin'){const phn=document.getElementById('partnerHubNav');if(phn)phn.style.display='block';
+    if(userRole==='nesadmin'){const phn=document.getElementById('partnerHubNav');if(phn)phn.style.display='block';const an=document.getElementById('analyticsNav');if(an)an.style.display='flex';
       clientMgr.style.display='block';
       loadClientCount();
       const statusNav=document.getElementById('adminStatusNav');
@@ -896,6 +900,7 @@ function showView(view){
   else if(view==='clientmgr'){showClientManager();}
   else if(view==='sales'){showSalesPortal();}
   else if(view==='mycredentials'){showMyCredentials();}
+  else if(view==='analytics'){showAnalytics();}
   else if(view==='adminstatus'){showAdminStatus();}
   else if(view==='apicredits'){showApiCredits();}
   else if(view==='pricing'){showPricing();}
@@ -2367,6 +2372,244 @@ function toggleVoice(){const SR=window.SpeechRecognition||window.webkitSpeechRec
 // ── PARTNER HUB ──
 let _partnerTab = 'overview';
 
+// ── USAGE ANALYTICS ──
+async function showAnalytics(){
+  const mc = document.getElementById('mainContent');
+  mc.style.overflow = 'auto';
+  mc.innerHTML = `
+    <div style="padding:11px 18px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <div style="font-family:var(--mono);font-size:.8rem;color:#d29922;font-weight:800;display:flex;align-items:center;gap:6px;"><i class="ti ti-chart-dots"></i>USAGE ANALYTICS</div>
+        <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">Platform usage · All clients · Real-time</div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button onclick="loadAnalytics('7')" id="anBtn7" style="font-family:var(--mono);font-size:.65rem;padding:4px 10px;border-radius:6px;border:1px solid var(--nes-blue);background:var(--nes-blue);color:#fff;cursor:pointer;">7 days</button>
+        <button onclick="loadAnalytics('30')" id="anBtn30" style="font-family:var(--mono);font-size:.65rem;padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer;">30 days</button>
+        <button onclick="loadAnalytics('90')" id="anBtn90" style="font-family:var(--mono);font-size:.65rem;padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer;">90 days</button>
+      </div>
+    </div>
+    <div class="page scrollable" id="analyticsContent" style="padding:14px 18px;">
+      <div style="text-align:center;padding:40px;color:var(--muted);font-family:var(--mono);font-size:.8rem;">Loading analytics...</div>
+    </div>`;
+  await loadAnalytics('7');
+}
+
+async function loadAnalytics(days){
+  // Update button styles
+  ['7','30','90'].forEach(d => {
+    const btn = document.getElementById('anBtn'+d);
+    if(btn){
+      btn.style.background = d===days ? 'var(--nes-blue)' : 'none';
+      btn.style.color = d===days ? '#fff' : 'var(--muted)';
+      btn.style.borderColor = d===days ? 'var(--nes-blue)' : 'var(--border)';
+    }
+  });
+
+  const el = document.getElementById('analyticsContent');
+  if(!el) return;
+
+  try{
+    const since = new Date(Date.now() - parseInt(days)*24*60*60*1000).toISOString();
+
+    // Fetch data in parallel
+    const [leadsRes, clientsRes, feedRes] = await Promise.all([
+      sb.from('leads').select('id,created_at,status,client_id,country').gte('created_at',since),
+      sb.from('clients').select('id,name,plan,status,created_at'),
+      sb.from('ceo_feed').select('id,created_at,type,tag').gte('created_at',since)
+    ]);
+
+    const leads = leadsRes.data || [];
+    const clients = clientsRes.data || [];
+    const feed = feedRes.data || [];
+
+    // Calculate metrics
+    const activeClients = clients.filter(c=>c.status==='active').length;
+    const totalLeads = leads.length;
+    const newLeads = leads.filter(l=>l.status==='new').length;
+    const closedLeads = leads.filter(l=>l.status==='closed').length;
+    const convRate = totalLeads > 0 ? Math.round((closedLeads/totalLeads)*100) : 0;
+
+    // Daily lead trend
+    const dailyLeads = {};
+    for(let i=parseInt(days)-1; i>=0; i--){
+      const d = new Date(Date.now() - i*24*60*60*1000);
+      const key = d.toISOString().split('T')[0];
+      dailyLeads[key] = 0;
+    }
+    leads.forEach(l => {
+      const key = l.created_at.split('T')[0];
+      if(dailyLeads[key] !== undefined) dailyLeads[key]++;
+    });
+
+    const dailyKeys = Object.keys(dailyLeads);
+    const dailyVals = Object.values(dailyLeads);
+    const maxVal = Math.max(...dailyVals, 1);
+
+    // Client plan breakdown
+    const planCounts = {presence:0,operations:0,workforce:0,infrastructure:0};
+    clients.forEach(c => {
+      const p = (c.plan||'').toLowerCase();
+      if(p.includes('operations')) planCounts.operations++;
+      else if(p.includes('workforce')) planCounts.workforce++;
+      else if(p.includes('infrastructure')||p.includes('enterprise')) planCounts.infrastructure++;
+      else planCounts.presence++;
+    });
+
+    // Country breakdown
+    const countries = {};
+    leads.forEach(l => { const cn = l.country||'Unknown'; countries[cn]=(countries[cn]||0)+1; });
+    const topCountries = Object.entries(countries).sort((a,b)=>b[1]-a[1]).slice(0,5);
+
+    // Feed stats
+    const feedByType = {};
+    feed.forEach(f => { const t=f.type||'intel'; feedByType[t]=(feedByType[t]||0)+1; });
+
+    // MRR calculation
+    const planValues = {presence:29,operations:79,workforce:149,infrastructure:299};
+    const mrr = clients.filter(c=>c.status==='active').reduce((s,c) => {
+      const p=(c.plan||'').toLowerCase();
+      if(p.includes('operations')) return s+79;
+      if(p.includes('workforce')) return s+149;
+      if(p.includes('infrastructure')||p.includes('enterprise')) return s+299;
+      return s+29;
+    }, 0);
+
+    el.innerHTML = `
+      <style>
+        .an-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px;}
+        .an-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px 14px;}
+        .an-lbl{font-size:.6rem;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;}
+        .an-val{font-size:1.4rem;font-weight:700;}
+        .an-sub{font-size:.62rem;color:var(--muted);margin-top:2px;}
+        .an-bar{height:3px;background:var(--border2);border-radius:2px;margin-top:7px;}
+        .an-fill{height:100%;border-radius:2px;}
+        .an-row2{display:grid;grid-template-columns:2fr 1fr;gap:10px;margin-bottom:10px;}
+        .an-sec{font-family:var(--mono);font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;margin-top:12px;display:flex;align-items:center;gap:5px;}
+        .geo-row{display:flex;align-items:center;gap:8px;margin-bottom:5px;}
+        .geo-name{font-size:.72rem;min-width:70px;}
+        .geo-track{flex:1;background:var(--border2);border-radius:2px;height:5px;overflow:hidden;}
+        .geo-fill{height:100%;border-radius:2px;background:var(--nes-blue);}
+        .geo-n{font-size:.65rem;color:var(--muted);min-width:24px;text-align:right;}
+        .client-row-an{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);}
+        .client-row-an:last-child{border-bottom:none;}
+      </style>
+
+      <!-- KPI CARDS -->
+      <div class="an-grid">
+        <div class="an-card" style="border-color:#409cff33;">
+          <div class="an-lbl">Total MRR</div>
+          <div class="an-val" style="color:#409cff;">OMR ${mrr}</div>
+          <div class="an-sub">${activeClients} active clients</div>
+          <div class="an-bar"><div class="an-fill" style="width:100%;background:#409cff;"></div></div>
+        </div>
+        <div class="an-card" style="border-color:#3fb95033;">
+          <div class="an-lbl">Total leads</div>
+          <div class="an-val" style="color:#3fb950;">${totalLeads}</div>
+          <div class="an-sub">Last ${days} days</div>
+          <div class="an-bar"><div class="an-fill" style="width:${Math.min(100,totalLeads*2)}%;background:#3fb950;"></div></div>
+        </div>
+        <div class="an-card" style="border-color:#7f77dd33;">
+          <div class="an-lbl">Conversion rate</div>
+          <div class="an-val" style="color:#7f77dd;">${convRate}%</div>
+          <div class="an-sub">${closedLeads} closed of ${totalLeads}</div>
+          <div class="an-bar"><div class="an-fill" style="width:${convRate}%;background:#7f77dd;"></div></div>
+        </div>
+        <div class="an-card" style="border-color:#d2992233;">
+          <div class="an-lbl">Intel articles</div>
+          <div class="an-val" style="color:#d29922;">${feed.length}</div>
+          <div class="an-sub">Last ${days} days</div>
+          <div class="an-bar"><div class="an-fill" style="width:${Math.min(100,feed.length)}%;background:#d29922;"></div></div>
+        </div>
+      </div>
+
+      <!-- LEAD TREND CHART -->
+      <div class="an-sec"><i class="ti ti-chart-bar" style="font-size:11px;color:#409cff;"></i>Lead trend — last ${days} days</div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px;">
+        <div style="display:flex;align-items:flex-end;gap:${parseInt(days)>30?'1':'3'}px;height:80px;">
+          ${dailyKeys.map((key,i) => {
+            const val = dailyVals[i];
+            const h = Math.max(2, Math.round((val/maxVal)*76));
+            const isToday = key === new Date().toISOString().split('T')[0];
+            const label = parseInt(days) <= 7 ? new Date(key).toLocaleDateString('en',{weekday:'short'}) : 
+                          parseInt(days) <= 30 ? new Date(key).getDate() : '';
+            return `<div style="display:flex;flex-direction:column;align-items:center;gap:2px;flex:1;">
+              ${val>0?`<div style="font-size:.45rem;color:#409cff;font-weight:600;">${val}</div>`:'<div style="font-size:.45rem;color:transparent;">0</div>'}
+              <div style="width:100%;background:${isToday?'#409cff':'#409cff33'};border-top:2px solid ${isToday?'#409cff':'#409cff88'};border-radius:2px 2px 0 0;height:${h}px;"></div>
+              ${label?`<div style="font-size:.45rem;color:${isToday?'#409cff':'var(--muted)'};">${label}</div>`:''}
+            </div>`;
+          }).join('')}
+        </div>
+      </div>
+
+      <div class="an-row2">
+        <!-- LEAD GEOGRAPHY -->
+        <div>
+          <div class="an-sec"><i class="ti ti-map-pin" style="font-size:11px;color:#7f77dd;"></i>Lead geography</div>
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px;">
+            ${topCountries.length > 0 ? topCountries.map(([cn,n]) => `
+              <div class="geo-row">
+                <div class="geo-name">${cn}</div>
+                <div class="geo-track"><div class="geo-fill" style="width:${Math.round((n/totalLeads)*100)}%;"></div></div>
+                <div class="geo-n">${n}</div>
+              </div>`).join('') : '<div style="color:var(--muted);font-size:.72rem;">No lead data yet</div>'}
+          </div>
+        </div>
+
+        <!-- CLIENT PLAN BREAKDOWN -->
+        <div>
+          <div class="an-sec"><i class="ti ti-users" style="font-size:11px;color:#3fb950;"></i>Plan breakdown</div>
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px;">
+            ${[
+              ['AI Presence','#409cff',planCounts.presence],
+              ['AI Operations','#3fb950',planCounts.operations],
+              ['AI Workforce','#7f77dd',planCounts.workforce],
+              ['Infrastructure','#d29922',planCounts.infrastructure]
+            ].map(([name,color,count]) => `
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;">
+                <div style="display:flex;align-items:center;gap:5px;">
+                  <div style="width:7px;height:7px;border-radius:50%;background:${color};"></div>
+                  <div style="font-size:.7rem;">${name}</div>
+                </div>
+                <div style="font-size:.8rem;font-weight:600;color:${color};">${count}</div>
+              </div>`).join('')}
+          </div>
+        </div>
+      </div>
+
+      <!-- CLIENT LIST -->
+      <div class="an-sec"><i class="ti ti-building" style="font-size:11px;color:#d29922;"></i>Client overview</div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px;">
+        ${clients.length === 0 ? '<div style="color:var(--muted);font-size:.72rem;">No clients yet</div>' :
+          clients.map(cl => {
+            const p=(cl.plan||'').toLowerCase();
+            const val=p.includes('operations')?79:p.includes('workforce')?149:p.includes('infrastructure')||p.includes('enterprise')?299:29;
+            const color=cl.status==='active'?'#3fb950':'#d29922';
+            const clientLeads = leads.filter(l=>l.client_id===cl.id).length;
+            const initials=(cl.name||'?').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+            return `<div class="client-row-an">
+              <div style="width:30px;height:30px;border-radius:7px;background:var(--blue-dim);display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;color:var(--nes-blue);flex-shrink:0;">${initials}</div>
+              <div style="flex:1;">
+                <div style="font-size:.78rem;font-weight:600;">${cl.name}</div>
+                <div style="font-size:.62rem;color:var(--muted);">${cl.plan||'starter'} · ${cl.status}</div>
+              </div>
+              <div style="text-align:right;">
+                <div style="font-size:.75rem;font-weight:600;color:var(--nes-blue);">OMR ${val}/mo</div>
+                <div style="font-size:.6rem;color:var(--muted);">${clientLeads} leads</div>
+              </div>
+              <div style="width:7px;height:7px;border-radius:50%;background:${color};margin-left:8px;flex-shrink:0;"></div>
+            </div>`;
+          }).join('')}
+        <div style="border-top:1px solid var(--border);margin-top:8px;padding-top:8px;display:flex;justify-content:space-between;font-family:var(--mono);font-size:.65rem;">
+          <span style="color:var(--muted);">Total MRR</span>
+          <span style="color:var(--nes-blue);font-weight:700;">OMR ${mrr}/mo</span>
+        </div>
+      </div>
+    `;
+  }catch(e){
+    if(el) el.innerHTML = `<div style="color:var(--red);font-family:var(--mono);font-size:.75rem;padding:20px;">Error loading analytics: ${e.message}</div>`;
+  }
+}
+
 async function showSalesPortal(){
   const mc = document.getElementById('mainContent');
   mc.style.overflow = 'hidden';
@@ -3605,7 +3848,7 @@ window.deleteClient=deleteClient;window.saveClientModules=saveClientModules;
 window.saveClientCreds=saveClientCreds;window.saveClientBranding=saveClientBranding;
 window.saveClientAgents=saveClientAgents;window.saveClientBilling=saveClientBilling;
 window.showClientManager=showClientManager;window.showToast=showToast;window.hideTeamHub=hideTeamHub;
-window.showSalesPortal=showSalesPortal;window.renderSalesPortal=renderSalesPortal;window.switchPhTab=switchPhTab;window.calcPartner=calcPartner;window.loadPartnerMrr=loadPartnerMrr;window.loadLeadTrends=loadLeadTrends;window.initCeoResizer=initCeoResizer;window.onboardClient=onboardClient;
+window.showSalesPortal=showSalesPortal;window.renderSalesPortal=renderSalesPortal;window.switchPhTab=switchPhTab;window.calcPartner=calcPartner;window.loadPartnerMrr=loadPartnerMrr;window.loadLeadTrends=loadLeadTrends;window.initCeoResizer=initCeoResizer;window.onboardClient=onboardClient;window.showAnalytics=showAnalytics;window.loadAnalytics=loadAnalytics;
 window.showAdminStatus=showAdminStatus;window.checkPlatformStatus=checkPlatformStatus;window.showAddServiceModal=showAddServiceModal;window.saveNewService=saveNewService;window.showAddApiModalQuick=showAddApiModalQuick;window.saveApiQuick=saveApiQuick;window.showApiCredits=showApiCredits;window.loadApiCredits=loadApiCredits;window.saveAllThresholds=saveAllThresholds;window.addApiService=addApiService;window.saveNewApiService=saveNewApiService;window.updateApiBalance=updateApiBalance;window.showMyCredentials=showMyCredentials;window.saveMyCredentials=saveMyCredentials;window.editItCred=editItCred;window.saveItCred=saveItCred;window.toggleFeedItem=toggleFeedItem;window.saveFeedSources=saveFeedSources;window.showUpgradePopup=showUpgradePopup;
 window.upgradeContact=function(){document.querySelectorAll('div[style*="position:fixed"]').forEach(function(el){if(el.querySelector('.ti-check'))el.remove();});window.location.href='mailto:office@essential-services.org?subject=Upgrade to Pro';};
 window.closeUpgradePopup=function(){document.querySelectorAll('div[style*="position:fixed"]').forEach(function(el){if(el.style.zIndex==='9999')el.remove();});};
