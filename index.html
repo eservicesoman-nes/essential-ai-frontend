@@ -1488,6 +1488,52 @@ function exportLeads(){
 }
 
 // ── CLIENT MANAGER ──
+async function onboardClient(clientId, clientName){
+  const btn = document.getElementById('onboard-btn-'+clientId);
+  if(btn){btn.disabled=true;btn.innerHTML='<i class="ti ti-loader-2 ti-spin" style="font-size:12px"></i> Onboarding...';}
+
+  try{
+    // Step 1: Get client full data
+    const{data:client,error:ce}=await sb.from('clients').select('*').eq('id',clientId).single();
+    if(ce||!client)throw new Error('Client not found');
+
+    // Step 2: Update status to active
+    const{error:se}=await sb.from('clients').update({
+      status:'active',
+      trial_start:new Date().toISOString()
+    }).eq('id',clientId);
+    if(se)throw new Error('Status update failed: '+se.message);
+
+    // Step 3: Trigger n8n onboarding webhook
+    const webhookUrl='https://n8n.essential-services.org/webhook/nes-client-onboard';
+    const payload={
+      client_id:clientId,
+      client_name:clientName,
+      plan:client.plan||'starter',
+      industry:client.industry||'General Business',
+      region:client.region||'Oman',
+      email:client.email||'',
+      language:client.language||'English',
+      modules:client.modules||{},
+      onboarded_at:new Date().toISOString()
+    };
+
+    try{
+      await fetch(webhookUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    }catch(we){
+      console.warn('n8n webhook failed (non-blocking):',we);
+    }
+
+    showToast(clientName+' onboarded successfully ✓');
+    // Refresh client manager
+    setTimeout(()=>showClientManager(),800);
+
+  }catch(e){
+    showToast('Onboarding failed: '+e.message);
+    if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-rocket" style="font-size:12px"></i> Onboard';}
+  }
+}
+
 async function showClientManager(){
   if(userRole!=='nesadmin'){addAiMsg('Access denied.');return;}
   const mc=document.getElementById('mainContent');
@@ -1583,6 +1629,8 @@ function renderClientDetail(c,colors,textColors,idx){
           <button class="cm-btn" onclick="alert('Billing — Stripe integration coming soon')"><i class="ti ti-credit-card" style="font-size:12px"></i> Billing</button>
           <button class="cm-btn danger" onclick="deleteClient('${c.id}')"><i class="ti ti-trash" style="font-size:12px"></i> Delete</button>
           <button class="cm-btn primary" onclick="saveClientModules('${c.id}')"><i class="ti ti-device-floppy" style="font-size:12px"></i> Save</button>
+          ${c.status==='onboarding'?`<button class="cm-btn" style="background:linear-gradient(135deg,#1a7f37,#3fb950);color:#fff;border:none;" onclick="onboardClient('${c.id}','${(c.name||'').replace(/'/g,'')}')" id="onboard-btn-${c.id}"><i class="ti ti-rocket" style="font-size:12px"></i> Onboard</button>`:''}
+          ${c.status==='active'?`<span style="font-size:.65rem;font-family:var(--mono);color:#3fb950;display:flex;align-items:center;gap:4px;"><i class="ti ti-circle-check"></i> Active</span>`:''}
         </div>
       </div>
       <div class="cm-stats">
@@ -3557,7 +3605,7 @@ window.deleteClient=deleteClient;window.saveClientModules=saveClientModules;
 window.saveClientCreds=saveClientCreds;window.saveClientBranding=saveClientBranding;
 window.saveClientAgents=saveClientAgents;window.saveClientBilling=saveClientBilling;
 window.showClientManager=showClientManager;window.showToast=showToast;window.hideTeamHub=hideTeamHub;
-window.showSalesPortal=showSalesPortal;window.renderSalesPortal=renderSalesPortal;window.switchPhTab=switchPhTab;window.calcPartner=calcPartner;window.loadPartnerMrr=loadPartnerMrr;window.loadLeadTrends=loadLeadTrends;window.initCeoResizer=initCeoResizer;
+window.showSalesPortal=showSalesPortal;window.renderSalesPortal=renderSalesPortal;window.switchPhTab=switchPhTab;window.calcPartner=calcPartner;window.loadPartnerMrr=loadPartnerMrr;window.loadLeadTrends=loadLeadTrends;window.initCeoResizer=initCeoResizer;window.onboardClient=onboardClient;
 window.showAdminStatus=showAdminStatus;window.checkPlatformStatus=checkPlatformStatus;window.showAddServiceModal=showAddServiceModal;window.saveNewService=saveNewService;window.showAddApiModalQuick=showAddApiModalQuick;window.saveApiQuick=saveApiQuick;window.showApiCredits=showApiCredits;window.loadApiCredits=loadApiCredits;window.saveAllThresholds=saveAllThresholds;window.addApiService=addApiService;window.saveNewApiService=saveNewApiService;window.updateApiBalance=updateApiBalance;window.showMyCredentials=showMyCredentials;window.saveMyCredentials=saveMyCredentials;window.editItCred=editItCred;window.saveItCred=saveItCred;window.toggleFeedItem=toggleFeedItem;window.saveFeedSources=saveFeedSources;window.showUpgradePopup=showUpgradePopup;
 window.upgradeContact=function(){document.querySelectorAll('div[style*="position:fixed"]').forEach(function(el){if(el.querySelector('.ti-check'))el.remove();});window.location.href='mailto:office@essential-services.org?subject=Upgrade to Pro';};
 window.closeUpgradePopup=function(){document.querySelectorAll('div[style*="position:fixed"]').forEach(function(el){if(el.style.zIndex==='9999')el.remove();});};
