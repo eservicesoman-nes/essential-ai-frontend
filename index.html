@@ -727,7 +727,7 @@ function setupNavForRole(){
     if(myCredsNav)myCredsNav.style.display='flex';
     // Show AI Advisory for Operations+ plans
     const dcNav=document.getElementById('deepCoreNav');
-    if(dcNav&&clientPlan&&['operations','workforce','infrastructure','enterprise'].some(p=>clientPlan.toLowerCase().includes(p))){
+    if(dcNav&&window.clientPlan&&['operations','workforce','infrastructure','enterprise'].some(p=>window.clientPlan.toLowerCase().includes(p))){
       dcNav.style.display='flex';
       const dcBadge=document.getElementById('deepCoreBadge');
       if(dcBadge)dcBadge.style.display='flex';
@@ -754,11 +754,12 @@ function setupNavForRole(){
 async function showClientBrandingChip(){
   // Load client branding for client portal users
   try{
-    const{data}=await sb.from('clients').select('name,primary_color,logo_url').eq('id',userClientId).single();
+    const{data}=await sb.from('clients').select('name,primary_color,logo_url,plan').eq('id',userClientId).single();
     if(!data)return;
     // Update role chip to show company name
     const chip=document.getElementById('roleChip');
     if(chip&&data.name)chip.textContent=data.name;
+    if(data.plan)window.clientPlan=data.plan;
     // Apply primary color if set
     if(data.primary_color){
       document.documentElement.style.setProperty('--nes-blue',data.primary_color);
@@ -1087,6 +1088,58 @@ async function loadPartnerMrr(){
   }catch(e){}
 }
 
+async function loadLeadTrends(){
+  try{
+    const now=new Date();
+    const monthStart=new Date(now.getFullYear(),now.getMonth(),1).toISOString();
+    const weekStart=new Date(now.getTime()-7*24*60*60*1000).toISOString();
+    let q=sb.from('leads').select('created_at').gte('created_at',monthStart);
+    if(userClientId)q=q.eq('client_id',userClientId);
+    const{data:monthLeads}=await q;
+    if(!monthLeads)return;
+    // Week bars
+    const days=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+    const weekCounts=new Array(7).fill(0);
+    monthLeads.forEach(function(l){
+      const d=new Date(l.created_at);
+      if(d>=new Date(weekStart)){
+        const dow=(d.getDay()+6)%7; // Mon=0
+        weekCounts[dow]++;
+      }
+    });
+    const weekMax=Math.max(...weekCounts,1);
+    const weekTotal=weekCounts.reduce(function(a,b){return a+b;},0);
+    const weekEl=document.getElementById('weekTrendBars');
+    const weekTot=document.getElementById('weekTrendTotal');
+    if(weekEl)weekEl.innerHTML=weekCounts.map(function(n,i){
+      const h=Math.max(4,Math.round((n/weekMax)*50));
+      const isToday=(new Date().getDay()+6)%7===i;
+      return '<div style="display:flex;flex-direction:column;align-items:center;gap:2px;flex:1;">'+
+        '<div style="font-size:.5rem;color:#409cff;font-weight:600;">'+n+'</div>'+
+        '<div style="width:100%;background:'+(isToday?'#409cff':'#409cff33')+';border-top:2px solid #409cff;border-radius:2px 2px 0 0;height:'+h+'px;"></div>'+
+        '<div style="font-size:.5rem;color:'+(isToday?'#409cff':'var(--muted)')+';">'+days[i].substring(0,1)+'</div></div>';
+    }).join('');
+    if(weekTot)weekTot.textContent=weekTotal+' leads';
+    // Month bars
+    const daysInMonth=new Date(now.getFullYear(),now.getMonth()+1,0).getDate();
+    const monthCounts=new Array(daysInMonth).fill(0);
+    monthLeads.forEach(function(l){
+      const d=new Date(l.created_at).getDate()-1;
+      if(d>=0&&d<daysInMonth)monthCounts[d]++;
+    });
+    const monthMax=Math.max(...monthCounts,1);
+    const monthTotal=monthLeads.length;
+    const monthEl=document.getElementById('monthTrendBars');
+    const monthTot=document.getElementById('monthTrendTotal');
+    if(monthEl)monthEl.innerHTML=monthCounts.map(function(n,i){
+      const h=Math.max(2,Math.round((n/monthMax)*46));
+      const isToday=i===now.getDate()-1;
+      return '<div style="flex:1;background:'+(isToday?'#7f77dd':'#7f77dd33')+';border-top:2px solid #7f77dd;border-radius:1px 1px 0 0;height:'+h+'px;" title="Day '+(i+1)+': '+n+' leads"></div>';
+    }).join('');
+    if(monthTot)monthTot.textContent=monthTotal+' total';
+  }catch(e){}
+}
+
 async function loadApiSummary(){
   try{
     const{data}=await sb.from('api_credits').select('service_name,current_balance,monthly_usage,status').neq('status','inactive');
@@ -1119,7 +1172,7 @@ async function loadApiSummary(){
 
 async function loadCeoFeed(){
   try{
-    let feedQ=sb.from('ceo_feed').select('*').order('created_at',{ascending:false}).limit(20);
+    let feedQ=sb.from('ceo_feed').select('id,title,content,tag,type,source_url,created_at,client_id').order('created_at',{ascending:false}).limit(20);
     if(userClientId)feedQ=feedQ.eq('client_id',userClientId);
     const{data,error}=await feedQ;
     const el=document.getElementById('ceoFeedItems');
@@ -1144,7 +1197,10 @@ async function loadCeoFeed(){
       const tagLabel=tagLabels[item.type]||tagLabels.default;
       // Extract URLs from content — handles href="..." and plain text
       const urls=[];
-      if(item.content){
+      // First try source_url column (most reliable)
+      if(item.source_url&&item.source_url.indexOf('http')===0){
+        urls.push(item.source_url);
+      } else if(item.content){
         var hrefRe=/href=["']([^"']+)["']/g;
         var hm;
         while((hm=hrefRe.exec(item.content))!==null){
@@ -1154,6 +1210,16 @@ async function loadCeoFeed(){
           item.content.split(/\s+/).forEach(function(word){
             var w=word.replace(/[^a-zA-Z0-9/:._?=&%-]/g,'');
             if(w.indexOf('http')===0){try{new URL(w);urls.push(w);}catch(e){}}
+          });
+        }
+        // Also try 🔗 lines
+        if(item.content){
+          item.content.split('\n').forEach(function(line){
+            var l=line.trim();
+            if(l.startsWith('🔗')){
+              var url=l.replace('🔗','').trim();
+              if(url.indexOf('http')===0&&urls.indexOf(url)<0)urls.push(url);
+            }
           });
         }
       }
@@ -3450,7 +3516,7 @@ window.deleteClient=deleteClient;window.saveClientModules=saveClientModules;
 window.saveClientCreds=saveClientCreds;window.saveClientBranding=saveClientBranding;
 window.saveClientAgents=saveClientAgents;window.saveClientBilling=saveClientBilling;
 window.showClientManager=showClientManager;window.showToast=showToast;window.hideTeamHub=hideTeamHub;
-window.showSalesPortal=showSalesPortal;window.renderSalesPortal=renderSalesPortal;window.switchPhTab=switchPhTab;window.calcPartner=calcPartner;window.loadPartnerMrr=loadPartnerMrr;
+window.showSalesPortal=showSalesPortal;window.renderSalesPortal=renderSalesPortal;window.switchPhTab=switchPhTab;window.calcPartner=calcPartner;window.loadPartnerMrr=loadPartnerMrr;window.loadLeadTrends=loadLeadTrends;
 window.showAdminStatus=showAdminStatus;window.checkPlatformStatus=checkPlatformStatus;window.showAddServiceModal=showAddServiceModal;window.saveNewService=saveNewService;window.showAddApiModalQuick=showAddApiModalQuick;window.saveApiQuick=saveApiQuick;window.showApiCredits=showApiCredits;window.loadApiCredits=loadApiCredits;window.saveAllThresholds=saveAllThresholds;window.addApiService=addApiService;window.saveNewApiService=saveNewApiService;window.updateApiBalance=updateApiBalance;window.showMyCredentials=showMyCredentials;window.saveMyCredentials=saveMyCredentials;window.editItCred=editItCred;window.saveItCred=saveItCred;window.toggleFeedItem=toggleFeedItem;window.saveFeedSources=saveFeedSources;window.showUpgradePopup=showUpgradePopup;
 window.upgradeContact=function(){document.querySelectorAll('div[style*="position:fixed"]').forEach(function(el){if(el.querySelector('.ti-check'))el.remove();});window.location.href='mailto:office@essential-services.org?subject=Upgrade to Pro';};
 window.closeUpgradePopup=function(){document.querySelectorAll('div[style*="position:fixed"]').forEach(function(el){if(el.style.zIndex==='9999')el.remove();});};
