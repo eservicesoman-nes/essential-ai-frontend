@@ -441,7 +441,7 @@
       <div class="nav-label">Workspace</div>
       <div class="nav nav-workspace">
         <div class="nav-item active" data-view="chat"><i class="ti ti-message-2"></i><span>Chat</span></div>
-        <div class="nav-item" data-view="deepcore"><i class="ti ti-atom"></i><span>Deep Core</span></div>
+        <div class="nav-item" data-view="deepcore" style="display:none;"><i class="ti ti-atom"></i><span>Deep Core</span></div>
         <div class="nav-item" data-view="docs"><i class="ti ti-notes"></i><span>Documents</span></div>
         <div class="nav-item" data-view="image"><i class="ti ti-photo"></i><span>Image Gen</span></div>
       </div>
@@ -453,7 +453,7 @@
         <div class="nav-item" data-view="ceo"><i class="ti ti-chart-pie"></i><span>CEO Dashboard</span><span class="nav-badge nb-blue">Live</span></div>
         <div class="nav-item" data-view="command"><i class="ti ti-terminal-2"></i><span>Team Hub</span><span class="nav-badge nb-orange" id="commandBadge" style="display:none;">5</span></div>
         <div class="nav-item" data-view="leads"><i class="ti ti-user-check"></i><span>Leads</span><span class="nav-badge nb-red" id="leadsBadge">—</span></div>
-        <div class="nav-item" id="salesNav" data-view="sales" style="display:none;"><i class="ti ti-chart-arrows"></i><span>Sales Portal</span></div>
+        <div class="nav-item" id="salesNav" data-view="sales" style="display:none;"><i class="ti ti-users-group"></i><span>Partner Hub</span></div>
         <div class="nav-item" id="myCredsNav" data-view="mycredentials" style="display:none;"><i class="ti ti-checklist"></i><span>IT Setup</span></div>
       </div>
     </div>
@@ -466,6 +466,14 @@
     </div>
 
     <div class="sb-divider"></div>
+
+    <div id="partnerHubNav" style="display:none;padding:0 8px 4px;">
+      <div class="client-mgr-btn" onclick="showView('sales')" style="background:rgba(64,156,255,.08);border-color:rgba(64,156,255,.2);color:#409cff;">
+        <i class="ti ti-users-group"></i>
+        <span style="flex:1;">Partner Hub</span>
+        <div id="partnerEarningsDot" style="font-family:monospace;font-size:.6rem;color:#409cff;"></div>
+      </div>
+    </div>
 
     <div id="clientMgrSection" style="display:none;padding:0 8px 8px;">
       <div class="client-mgr-btn" onclick="showView('clientmgr')">
@@ -721,7 +729,7 @@ function setupNavForRole(){
     // NES internal users
     if(['nesadmin','ceo','manager'].includes(userRole))intel.style.display='block';
     if(!['nesadmin','ceo'].includes(userRole)&&ceoNav)ceoNav.style.display='none';
-    if(userRole==='nesadmin'){
+    if(userRole==='nesadmin'){const phn=document.getElementById('partnerHubNav');if(phn)phn.style.display='block';
       clientMgr.style.display='block';
       loadClientCount();
       const statusNav=document.getElementById('adminStatusNav');
@@ -2157,217 +2165,337 @@ function loadScript(src){return new Promise((resolve,reject)=>{if(document.query
 function toggleVoice(){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){addAiMsg('Voice not supported in this browser.');return;}const btn=document.getElementById('voiceBtn');const recognition=new SR();recognition.lang='en-US';btn.style.color='#f85149';setStatus('busy','Listening…');recognition.onresult=e=>{document.getElementById('msgInput').value=e.results[0][0].transcript;btn.style.color='';setStatus('ok','Ready');sendMsg();};recognition.onerror=recognition.onend=()=>{btn.style.color='';setStatus('ok','Ready');};recognition.start();}
 
 
-// ── SALES PORTAL ──
-let _salesTab='contacts';
-let _salesContacts=[];
-let _salesDeals=[];
-let _salesReferrers=[];
+// ── PARTNER HUB ──
+let _partnerTab = 'overview';
 
 async function showSalesPortal(){
-  const mc=document.getElementById('mainContent');
-  mc.style.overflow='hidden';
-  mc.innerHTML=`
+  const mc = document.getElementById('mainContent');
+  mc.style.overflow = 'hidden';
+  mc.innerHTML = `
     <div style="padding:11px 18px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;">
       <div>
         <div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;display:flex;align-items:center;gap:6px;">
-          <i class="ti ti-chart-arrows" style="filter:drop-shadow(0 0 3px var(--nes-blue))"></i>SALES PORTAL
+          <i class="ti ti-users-group" style="filter:drop-shadow(0 0 3px var(--nes-blue))"></i>PARTNER HUB
         </div>
-        <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">Contacts · Pipeline · Commissions</div>
+        <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">NES · Incentive structure · Direct & partner clients</div>
       </div>
-      <button onclick="showAddContactModal()" style="background:var(--nes-btn-grad);border:none;border-radius:8px;padding:6px 14px;color:#fff;font-size:.75rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;margin-right:44px;">
-        <i class="ti ti-plus"></i> Add Contact
-      </button>
     </div>
-    <div class="page" id="salesContent">
-      <div style="text-align:center;padding:40px;color:var(--muted);font-family:var(--mono);font-size:.8rem;">Loading sales data...</div>
+    <div class="page scrollable" id="partnerContent" style="padding:14px 18px;">
+      <div style="text-align:center;padding:40px;color:var(--muted);font-family:var(--mono);font-size:.8rem;">Loading partner data...</div>
     </div>`;
-  await loadSalesData();
+  await renderPartnerHub();
 }
 
-async function loadSalesData(){
+async function renderPartnerHub(){
+  const el = document.getElementById('partnerContent');
+  if(!el) return;
+
+  // Fetch clients with partner info
+  let directClients = [], partnerClients = [], partners = [];
   try{
-    const[{data:contacts},{data:deals},{data:referrers}]=await Promise.all([
-      sb.from('sales_contacts').select('*').order('created_at',{ascending:false}),
-      sb.from('sales_deals').select('*').order('created_at',{ascending:false}),
-      sb.from('sales_referrers').select('*').order('created_at',{ascending:false})
-    ]);
-    _salesContacts=contacts||[];
-    _salesDeals=deals||[];
-    _salesReferrers=referrers||[];
-  }catch(e){
-    _salesContacts=[];_salesDeals=[];_salesReferrers=[];
+    const {data: allClients} = await sb.from('clients').select('id,name,plan,status,partner_id,monthly_fee');
+    directClients = (allClients||[]).filter(c => !c.partner_id);
+    partnerClients = (allClients||[]).filter(c => c.partner_id);
+  }catch(e){}
+
+  // Plan values
+  const planVal = {starter:29, operations:79, workforce:149, infrastructure:299, presence:29};
+  const getPlanVal = (plan, fee) => {
+    if(fee && fee > 0) return parseFloat(fee);
+    const p = (plan||'').toLowerCase();
+    if(p.includes('workforce')) return 149;
+    if(p.includes('operations')) return 79;
+    if(p.includes('presence') || p.includes('starter')) return 29;
+    return 79;
+  };
+
+  // NES platform fee %
+  const NES_PLATFORM_PCT = 20;
+
+  // Calculate direct MRR
+  const directMRR = directClients.filter(c=>c.status==='active').reduce((s,c) => s + getPlanVal(c.plan, c.monthly_fee), 0);
+  const partnerMRR = partnerClients.filter(c=>c.status==='active').reduce((s,c) => s + getPlanVal(c.plan, c.monthly_fee), 0);
+  const totalMRR = directMRR + partnerMRR;
+
+  // Pool from partner clients (80%)
+  const partnerPool = partnerMRR * 0.80;
+  const nesFromPool = partnerPool * 0.40; // assume avg 60% partner share
+  const nesPlatformFee = totalMRR * (NES_PLATFORM_PCT/100);
+  const totalNesRevenue = directMRR + nesPlatformFee + nesFromPool;
+
+  el.innerHTML = `
+    <style>
+      .ph-tabs{display:flex;gap:6px;margin-bottom:16px;}
+      .ph-tab{font-family:var(--mono);font-size:.72rem;padding:6px 14px;border-radius:7px;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer;}
+      .ph-tab.active{background:var(--nes-blue);color:#fff;border-color:var(--nes-blue);}
+      .ph-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px;}
+      .ph-kcard{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:11px 13px;}
+      .ph-klbl{font-size:.62rem;color:var(--muted);margin-bottom:3px;display:flex;align-items:center;gap:4px;}
+      .ph-kval{font-size:1.2rem;font-weight:700;}
+      .ph-kdelta{font-size:.62rem;color:var(--muted);margin-top:2px;}
+      .ph-kbar{height:3px;background:var(--border2);border-radius:2px;margin-top:7px;}
+      .ph-kfill{height:100%;border-radius:2px;}
+      .tier-row-ph{display:flex;justify-content:space-between;align-items:center;font-size:.72rem;padding:5px 0;border-bottom:1px solid var(--border);}
+      .tier-row-ph:last-child{border-bottom:none;}
+      .tier-lbl-ph{color:var(--muted);}
+      .tier-val-ph{font-weight:600;font-family:var(--mono);}
+      .prog-track{height:5px;background:var(--border2);border-radius:3px;overflow:hidden;margin:8px 0 4px;}
+      .prog-fill{height:100%;border-radius:3px;}
+      .client-row-ph{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);}
+      .client-row-ph:last-child{border-bottom:none;}
+      .ph-av{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;flex-shrink:0;}
+      .split-bar{display:flex;height:8px;border-radius:4px;overflow:hidden;margin:8px 0;}
+    </style>
+
+    <!-- TABS -->
+    <div class="ph-tabs">
+      <button class="ph-tab active" onclick="switchPhTab('overview',this)">Overview</button>
+      <button class="ph-tab" onclick="switchPhTab('tiers',this)">Incentive structure</button>
+      <button class="ph-tab" onclick="switchPhTab('direct',this)">Direct clients</button>
+      <button class="ph-tab" onclick="switchPhTab('partners',this)">Partner clients</button>
+      <button class="ph-tab" onclick="switchPhTab('calculator',this)">Calculator</button>
+    </div>
+
+    <!-- OVERVIEW TAB -->
+    <div id="ph-overview">
+      <div class="ph-grid">
+        <div class="ph-kcard" style="border-color:#409cff33;">
+          <div class="ph-klbl"><i class="ti ti-trending-up" style="font-size:11px;color:var(--nes-blue);"></i>Total MRR</div>
+          <div class="ph-kval" style="color:var(--nes-blue);">OMR ${totalMRR.toFixed(0)}</div>
+          <div class="ph-kdelta">${directClients.filter(c=>c.status==='active').length + partnerClients.filter(c=>c.status==='active').length} active clients</div>
+          <div class="ph-kbar"><div class="ph-kfill" style="width:100%;background:var(--nes-blue);"></div></div>
+        </div>
+        <div class="ph-kcard" style="border-color:#3fb95033;">
+          <div class="ph-klbl"><i class="ti ti-building" style="font-size:11px;color:#3fb950;"></i>Direct MRR</div>
+          <div class="ph-kval" style="color:#3fb950;">OMR ${directMRR.toFixed(0)}</div>
+          <div class="ph-kdelta">${directClients.filter(c=>c.status==='active').length} direct clients · 100% NES</div>
+          <div class="ph-kbar"><div class="ph-kfill" style="width:${totalMRR>0?Math.round((directMRR/totalMRR)*100):0}%;background:#3fb950;"></div></div>
+        </div>
+        <div class="ph-kcard" style="border-color:#7f77dd33;">
+          <div class="ph-klbl"><i class="ti ti-users-group" style="font-size:11px;color:#7f77dd;"></i>Partner MRR</div>
+          <div class="ph-kval" style="color:#7f77dd;">OMR ${partnerMRR.toFixed(0)}</div>
+          <div class="ph-kdelta">${partnerClients.filter(c=>c.status==='active').length} partner clients</div>
+          <div class="ph-kbar"><div class="ph-kfill" style="width:${totalMRR>0?Math.round((partnerMRR/totalMRR)*100):0}%;background:#7f77dd;"></div></div>
+        </div>
+        <div class="ph-kcard" style="border-color:#d2992233;">
+          <div class="ph-klbl"><i class="ti ti-coin" style="font-size:11px;color:#d29922;"></i>NES net revenue</div>
+          <div class="ph-kval" style="color:#d29922;">OMR ${totalNesRevenue.toFixed(0)}</div>
+          <div class="ph-kdelta">After partner incentives</div>
+          <div class="ph-kbar"><div class="ph-kfill" style="width:${totalMRR>0?Math.round((totalNesRevenue/totalMRR)*100):0}%;background:#d29922;"></div></div>
+        </div>
+      </div>
+
+      <!-- Revenue split visual -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:14px;">
+        <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;">Revenue split — partner clients</div>
+        <div style="font-size:.75rem;color:var(--muted);margin-bottom:6px;">For every OMR 79 (Operations) via a partner:</div>
+        <div class="split-bar">
+          <div style="width:20%;background:#1a56db;"></div>
+          <div style="width:32%;background:#d29922;"></div>
+          <div style="width:48%;background:#7f77dd;"></div>
+        </div>
+        <div style="display:flex;gap:16px;font-size:.68rem;">
+          <div style="display:flex;align-items:center;gap:5px;"><div style="width:10px;height:10px;border-radius:2px;background:#1a56db;"></div><span style="color:var(--muted);">NES platform fee 20% = OMR 15.80</span></div>
+          <div style="display:flex;align-items:center;gap:5px;"><div style="width:10px;height:10px;border-radius:2px;background:#d29922;"></div><span style="color:var(--muted);">NES pool share ~40% = OMR 25.28</span></div>
+          <div style="display:flex;align-items:center;gap:5px;"><div style="width:10px;height:10px;border-radius:2px;background:#7f77dd;"></div><span style="color:var(--muted);">Partner share ~60% = OMR 37.92</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TIERS TAB -->
+    <div id="ph-tiers" style="display:none;">
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px;">
+        ${[
+          {name:'Apex Affiliate',who:'Individuals · freelancers · agents',color:'#409cff',dim:'#0c1f3a',levels:[
+            {name:'Starter',clients:'1–5',pct:50},{name:'Silver',clients:'6–15',pct:60},
+            {name:'Gold',clients:'16–30',pct:70},{name:'Platinum',clients:'31+',pct:75}
+          ]},
+          {name:'Alliance Partner',who:'Companies · agencies · IT firms',color:'#3fb950',dim:'#0d2818',levels:[
+            {name:'Base',clients:'5–15',pct:60},{name:'Growth',clients:'16–30',pct:65},{name:'Premium',clients:'31+',pct:70}
+          ]},
+          {name:'Elite Partner',who:'Exclusive territory · sector deals',color:'#d29922',dim:'#2d1800',levels:[
+            {name:'Fixed',clients:'10–29',pct:70},{name:'Scaled',clients:'30+',pct:75}
+          ]}
+        ].map(tier => `
+          <div style="background:var(--card);border:1px solid ${tier.color}33;border-radius:10px;padding:14px;">
+            <div style="font-size:.65rem;font-family:var(--mono);color:${tier.color};text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;">Partner tier</div>
+            <div style="font-size:.88rem;font-weight:700;margin-bottom:3px;">${tier.name}</div>
+            <div style="font-size:.7rem;color:var(--muted);margin-bottom:12px;">${tier.who}</div>
+            <div class="tier-row-ph"><span class="tier-lbl-ph">NES platform fee</span><span class="tier-val-ph">20% (fixed)</span></div>
+            <div class="tier-row-ph"><span class="tier-lbl-ph">Pool available</span><span class="tier-val-ph">80% of revenue</span></div>
+            <div style="font-size:.65rem;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin:10px 0 6px;">Incentive levels</div>
+            ${tier.levels.map(l => `
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:5px 8px;border-radius:6px;margin-bottom:4px;background:${tier.dim};">
+                <div>
+                  <div style="font-size:.75rem;font-weight:600;color:var(--white);">${l.name}</div>
+                  <div style="font-size:.62rem;color:var(--muted);">${l.clients} clients</div>
+                </div>
+                <div style="text-align:right;">
+                  <div style="font-size:.88rem;font-weight:700;color:${tier.color};">${l.pct}%</div>
+                  <div style="font-size:.6rem;color:var(--muted);">of pool</div>
+                </div>
+              </div>`).join('')}
+          </div>`).join('')}
+      </div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;font-size:.75rem;color:var(--muted);line-height:1.7;">
+        <div style="font-family:var(--mono);font-size:.65rem;color:var(--nes-blue);margin-bottom:6px;">HOW IT WORKS</div>
+        NES takes a fixed 20% platform fee from every client payment — this covers infrastructure, AI costs and operations. The remaining 80% is the partnership pool. The pool is then split between NES and the partner based on tier and volume. All incentives are recurring monthly — partners earn every month their clients stay active. If a client upgrades their plan, incentives increase automatically.
+      </div>
+    </div>
+
+    <!-- DIRECT CLIENTS TAB -->
+    <div id="ph-direct" style="display:none;">
+      <div style="background:var(--card);border:1px solid #3fb95033;border-radius:10px;padding:12px 14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;">
+        <div>
+          <div style="font-size:.75rem;font-weight:600;color:#3fb950;">Direct clients — 100% revenue to NES</div>
+          <div style="font-size:.68rem;color:var(--muted);">No partner involved · Full margin retained</div>
+        </div>
+        <div style="font-family:var(--mono);font-size:1rem;font-weight:700;color:#3fb950;">OMR ${directMRR.toFixed(0)}/mo</div>
+      </div>
+      ${directClients.length === 0 ? `<div style="text-align:center;padding:30px;color:var(--muted);font-family:var(--mono);font-size:.75rem;">No direct clients yet</div>` :
+        directClients.map(cl => {
+          const val = getPlanVal(cl.plan, cl.monthly_fee);
+          const initials = cl.name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+          return `<div class="client-row-ph">
+            <div class="ph-av" style="background:#0d2818;color:#3fb950;">${initials}</div>
+            <div style="flex:1;">
+              <div style="font-size:.8rem;font-weight:600;">${cl.name}</div>
+              <div style="font-size:.65rem;color:var(--muted);">${cl.plan||'—'} · ${cl.status}</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:.8rem;font-weight:600;color:#3fb950;">OMR ${val.toFixed(0)}/mo</div>
+              <div style="font-size:.62rem;color:var(--muted);">100% NES</div>
+            </div>
+          </div>`;
+        }).join('')}
+    </div>
+
+    <!-- PARTNER CLIENTS TAB -->
+    <div id="ph-partners" style="display:none;">
+      <div style="background:var(--card);border:1px solid #7f77dd33;border-radius:10px;padding:12px 14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;">
+        <div>
+          <div style="font-size:.75rem;font-weight:600;color:#7f77dd;">Partner clients — shared revenue</div>
+          <div style="font-size:.68rem;color:var(--muted);">NES platform fee 20% + pool share · Partner earns recurring incentive</div>
+        </div>
+        <div style="font-family:var(--mono);font-size:1rem;font-weight:700;color:#7f77dd;">OMR ${partnerMRR.toFixed(0)}/mo</div>
+      </div>
+      ${partnerClients.length === 0 ? `<div style="text-align:center;padding:30px;color:var(--muted);font-family:var(--mono);font-size:.75rem;">No partner clients yet</div>` :
+        partnerClients.map(cl => {
+          const val = getPlanVal(cl.plan, cl.monthly_fee);
+          const nesShare = val * 0.20 + val * 0.80 * 0.40;
+          const partnerShare = val * 0.80 * 0.60;
+          const initials = cl.name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+          return `<div class="client-row-ph">
+            <div class="ph-av" style="background:#1a1040;color:#7f77dd;">${initials}</div>
+            <div style="flex:1;">
+              <div style="font-size:.8rem;font-weight:600;">${cl.name}</div>
+              <div style="font-size:.65rem;color:var(--muted);">${cl.plan||'—'} · ${cl.status}</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:.75rem;color:var(--muted);">NES: <span style="color:var(--nes-blue);">OMR ${nesShare.toFixed(2)}</span></div>
+              <div style="font-size:.75rem;color:var(--muted);">Partner: <span style="color:#7f77dd;">OMR ${partnerShare.toFixed(2)}</span></div>
+            </div>
+          </div>`;
+        }).join('')}
+    </div>
+
+    <!-- CALCULATOR TAB -->
+    <div id="ph-calculator" style="display:none;">
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;max-width:580px;">
+        <div style="font-family:var(--mono);font-size:.65rem;color:var(--nes-blue);text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px;">Incentive calculator</div>
+        <div style="margin-bottom:12px;">
+          <div style="font-size:.72rem;color:var(--muted);margin-bottom:5px;">Plan</div>
+          <select id="calc_plan" onchange="calcPartner()" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:7px 10px;color:var(--white);font-size:.78rem;">
+            <option value="29">AI Presence — OMR 29/mo</option>
+            <option value="79" selected>AI Operations — OMR 79/mo</option>
+            <option value="149">AI Workforce — OMR 149/mo</option>
+          </select>
+        </div>
+        <div style="margin-bottom:12px;">
+          <div style="font-size:.72rem;color:var(--muted);margin-bottom:5px;">Partner tier</div>
+          <select id="calc_tier" onchange="calcPartner()" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:7px 10px;color:var(--white);font-size:.78rem;">
+            <option value="apex">Apex Affiliate</option>
+            <option value="alliance">Alliance Partner</option>
+            <option value="elite">Elite Partner</option>
+          </select>
+        </div>
+        <div style="margin-bottom:14px;">
+          <div style="display:flex;justify-content:space-between;font-size:.72rem;color:var(--muted);margin-bottom:5px;"><span>Number of clients</span><span id="calc_clients_lbl">10</span></div>
+          <input type="range" id="calc_clients" min="1" max="50" value="10" oninput="calcPartner()" style="width:100%;">
+        </div>
+        <div id="calc_results" style="background:var(--bg);border-radius:8px;padding:12px;"></div>
+      </div>
+    </div>
+  `;
+
+  // Init calculator
+  calcPartner();
+}
+
+function switchPhTab(tab, btn){
+  ['overview','tiers','direct','partners','calculator'].forEach(t => {
+    const el = document.getElementById('ph-'+t);
+    if(el) el.style.display = t===tab ? 'block' : 'none';
+  });
+  document.querySelectorAll('.ph-tab').forEach(b => b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+}
+
+function calcPartner(){
+  const plan = parseInt(document.getElementById('calc_plan')?.value||79);
+  const tier = document.getElementById('calc_tier')?.value||'apex';
+  const clients = parseInt(document.getElementById('calc_clients')?.value||10);
+  if(document.getElementById('calc_clients_lbl')) document.getElementById('calc_clients_lbl').textContent = clients;
+
+  const pool = plan * 0.80;
+  const nesPlatform = plan * 0.20;
+
+  let partnerPct, levelName;
+  if(tier==='apex'){
+    if(clients<=5){partnerPct=50;levelName='Starter';}
+    else if(clients<=15){partnerPct=60;levelName='Silver';}
+    else if(clients<=30){partnerPct=70;levelName='Gold';}
+    else{partnerPct=75;levelName='Platinum';}
+  } else if(tier==='alliance'){
+    if(clients<=15){partnerPct=60;levelName='Base';}
+    else if(clients<=30){partnerPct=65;levelName='Growth';}
+    else{partnerPct=70;levelName='Premium';}
+  } else {
+    if(clients<=30){partnerPct=70;levelName='Fixed';}
+    else{partnerPct=75;levelName='Scaled';}
   }
-  renderSalesPortal(_salesTab);
-}
 
-function renderSalesPortal(tab){
-  _salesTab=tab;
-  const totalPipeline=_salesDeals.reduce((s,d)=>s+(parseFloat(d.value)||0),0);
-  const wonDeals=_salesDeals.filter(d=>d.stage==='won');
-  const wonValue=wonDeals.reduce((s,d)=>s+(parseFloat(d.value)||0),0);
-  const openDeals=_salesDeals.filter(d=>!['won','lost'].includes(d.stage));
-  const totalComm=_salesReferrers.reduce((s,r)=>s+(parseFloat(r.commission_earned)||0),0);
-  const colors=['#1a3a6e','#2d1f00','#0d2818','#2d0e0e','#1a2332'];
-  const textColors=['#409cff','#d29922','#3fb950','#f85149','#8b949e'];
+  const nesPct = 100 - partnerPct;
+  const partnerPerClient = pool * (partnerPct/100);
+  const nesPerClient = nesPlatform + pool * (nesPct/100);
+  const totalPartner = (partnerPerClient * clients).toFixed(2);
+  const totalNes = (nesPerClient * clients).toFixed(2);
 
-  document.getElementById('salesContent').innerHTML=`
-    <div class="sales-grid">
-      <div class="kcard hot">
-        <div class="klbl" style="display:flex;align-items:center;gap:4px;"><i class="ti ti-users" style="font-size:11px;color:var(--nes-blue);filter:drop-shadow(0 0 3px var(--nes-blue))"></i>Contacts</div>
-        <div class="kval" style="color:var(--nes-blue)">${_salesContacts.length}</div>
-        <div class="kdelta kneu">Total in CRM</div>
+  const el = document.getElementById('calc_results');
+  if(!el) return;
+  el.innerHTML = `
+    <div style="font-size:.65rem;font-family:var(--mono);color:var(--muted);margin-bottom:10px;">Level: <span style="color:var(--nes-blue);">${levelName} (${partnerPct}% of pool)</span></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+      <div style="text-align:center;padding:10px;background:var(--card);border-radius:7px;border:1px solid var(--border);">
+        <div style="font-size:.6rem;color:var(--muted);margin-bottom:4px;">Pool per client</div>
+        <div style="font-size:1rem;font-weight:700;color:var(--nes-blue);">OMR ${pool.toFixed(2)}</div>
+        <div style="font-size:.6rem;color:var(--muted);">80% of OMR ${plan}</div>
       </div>
-      <div class="kcard">
-        <div class="klbl" style="display:flex;align-items:center;gap:4px;"><i class="ti ti-trending-up" style="font-size:11px;color:#3fb950;filter:drop-shadow(0 0 3px #3fb950)"></i>Pipeline</div>
-        <div class="kval">OMR ${Math.round(totalPipeline).toLocaleString()}</div>
-        <div class="kdelta kneu">${openDeals.length} open deals</div>
+      <div style="text-align:center;padding:10px;background:var(--card);border-radius:7px;border:1px solid #7f77dd33;">
+        <div style="font-size:.6rem;color:var(--muted);margin-bottom:4px;">Partner earns/mo</div>
+        <div style="font-size:1rem;font-weight:700;color:#7f77dd;">OMR ${totalPartner}</div>
+        <div style="font-size:.6rem;color:var(--muted);">${partnerPct}% of pool × ${clients} clients</div>
       </div>
-      <div class="kcard">
-        <div class="klbl" style="display:flex;align-items:center;gap:4px;"><i class="ti ti-trophy" style="font-size:11px;color:#d29922;filter:drop-shadow(0 0 3px #d29922)"></i>Won</div>
-        <div class="kval" style="color:#3fb950">OMR ${Math.round(wonValue).toLocaleString()}</div>
-        <div class="kdelta kneu">${wonDeals.length} deals closed</div>
+      <div style="text-align:center;padding:10px;background:var(--card);border-radius:7px;border:1px solid #3fb95033;">
+        <div style="font-size:.6rem;color:var(--muted);margin-bottom:4px;">NES earns/mo</div>
+        <div style="font-size:1rem;font-weight:700;color:#3fb950;">OMR ${totalNes}</div>
+        <div style="font-size:.6rem;color:var(--muted);">Platform fee + ${nesPct}% of pool</div>
       </div>
-      <div class="kcard">
-        <div class="klbl" style="display:flex;align-items:center;gap:4px;"><i class="ti ti-coin" style="font-size:11px;color:#7f77dd;filter:drop-shadow(0 0 3px #7f77dd)"></i>Commissions</div>
-        <div class="kval" style="color:#7f77dd">OMR ${Math.round(totalComm).toLocaleString()}</div>
-        <div class="kdelta kneu">Total owed</div>
-      </div>
-    </div>
-
-    <div class="sales-tabs">
-      ${[['contacts','ti-address-book','Contacts'],['pipeline','ti-layout-columns','Pipeline'],['deals','ti-file-dollar','Deals'],['referrers','ti-user-dollar','Referrers & Commissions']].map(([t,icon,label])=>`
-        <button class="tab-btn ${_salesTab===t?'active':''}" onclick="renderSalesPortal('${t}')">
-          <i class="ti ${icon}" style="font-size:12px;margin-right:4px"></i>${label}
-        </button>`).join('')}
-    </div>
-
-    <div id="salesTabContent">${renderSalesTab(_salesTab,colors,textColors)}</div>`;
-}
-
-function renderSalesTab(tab,colors,textColors){
-  if(tab==='contacts') return renderContacts(colors,textColors);
-  if(tab==='pipeline') return renderPipeline();
-  if(tab==='deals') return renderDeals(colors,textColors);
-  if(tab==='referrers') return renderReferrers(colors,textColors);
-  return '';
-}
-
-function renderContacts(colors,textColors){
-  if(!_salesContacts.length) return `
-    <div style="text-align:center;padding:40px;color:var(--muted);font-family:var(--mono);font-size:.8rem;">
-      <i class="ti ti-address-book" style="font-size:2rem;opacity:.3;display:block;margin-bottom:8px"></i>
-      No contacts yet — click Add Contact to get started
-    </div>`;
-  return `
-    <div style="margin-bottom:8px;display:flex;gap:8px;">
-      <input type="text" placeholder="Search contacts..." onkeyup="filterContacts(this.value)"
-        style="flex:1;background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:6px 11px;color:var(--text);font-family:var(--mono);font-size:.78rem;outline:none;">
-      <select onchange="filterContactsBySource(this.value)" style="background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:6px 11px;color:var(--text);font-family:var(--mono);font-size:.78rem;outline:none;">
-        <option value="">All sources</option>
-        <option value="referral">Referral</option>
-        <option value="linkedin">LinkedIn</option>
-        <option value="cold">Cold outreach</option>
-        <option value="event">Event</option>
-        <option value="website">Website</option>
-      </select>
-    </div>
-    <div id="contactsList">
-      ${_salesContacts.map((c,i)=>`
-        <div class="contact-card" onclick="showContactDetail('${c.id}')">
-          <div class="contact-av" style="background:${colors[i%5]};color:${textColors[i%5]}">${(c.name||'?').substring(0,2).toUpperCase()}</div>
-          <div style="flex:1">
-            <div class="contact-name">${c.name||'—'}</div>
-            <div class="contact-meta">${c.title||''} ${c.company?'· '+c.company:''} ${c.country?'· '+c.country:''}</div>
-          </div>
-          <div style="text-align:right">
-            <div style="font-size:.68rem;color:var(--muted);font-family:var(--mono)">${c.source||'—'}</div>
-            <div style="font-size:.68rem;color:var(--muted);font-family:var(--mono)">${c.last_contact?getTimeAgo(new Date(c.last_contact)):'Never contacted'}</div>
-          </div>
-          <span style="font-size:.6rem;padding:2px 7px;border-radius:6px;font-family:var(--mono);background:#0c1f35;color:var(--nes-blue)">${c.industry||'—'}</span>
-        </div>`).join('')}
     </div>`;
 }
 
-function renderPipeline(){
-  const stages=[
-    {key:'lead',label:'Lead',color:'#409cff'},
-    {key:'qualified',label:'Qualified',color:'#3fb950'},
-    {key:'proposal',label:'Proposal',color:'#d29922'},
-    {key:'negotiation',label:'Negotiation',color:'#f0883e'},
-    {key:'won',label:'Won',color:'#3fb950'}
-  ];
-  return `
-    <div class="pipeline-board">
-      ${stages.map(s=>{
-        const stageDeals=_salesDeals.filter(d=>d.stage===s.key);
-        const stageVal=stageDeals.reduce((sum,d)=>sum+(parseFloat(d.value)||0),0);
-        return`<div class="pipeline-col">
-          <div class="pipeline-col-title" style="color:${s.color}">${s.label} (${stageDeals.length})</div>
-          <div style="font-size:.65rem;color:var(--muted);font-family:var(--mono);text-align:center;margin-bottom:6px">OMR ${Math.round(stageVal).toLocaleString()}</div>
-          ${stageDeals.length?stageDeals.map(d=>`
-            <div class="pipeline-deal">
-              <div class="pipeline-deal-name">${d.name||'—'}</div>
-              <div class="pipeline-deal-val">OMR ${Math.round(parseFloat(d.value)||0).toLocaleString()}</div>
-              <div style="font-size:.62rem;color:var(--muted);font-family:var(--mono);margin-top:2px">${d.company||'—'}</div>
-            </div>`).join('')
-          :`<div style="text-align:center;padding:12px;font-size:.65rem;color:#484f58;font-family:var(--mono)">No deals</div>`}
-          <button onclick="showAddDealModal('${s.key}')" style="width:100%;background:none;border:1px dashed var(--border);border-radius:5px;padding:4px;color:var(--muted);font-size:.65rem;cursor:pointer;margin-top:4px;">+ Add deal</button>
-        </div>`;
-      }).join('')}
-    </div>`;
-}
+function renderSalesPortal(tab){ showSalesPortal(); }
 
-function renderDeals(colors,textColors){
-  if(!_salesDeals.length) return `
-    <div style="text-align:center;padding:40px;color:var(--muted);font-family:var(--mono);font-size:.8rem;">
-      <i class="ti ti-file-dollar" style="font-size:2rem;opacity:.3;display:block;margin-bottom:8px"></i>
-      No deals yet — add from the Pipeline view
-    </div>`;
-  return`
-    <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;overflow:hidden;">
-      <div style="display:grid;grid-template-columns:2fr 1.5fr 1fr 1fr 90px;gap:8px;padding:7px 13px;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:.62rem;color:var(--muted);text-transform:uppercase;">
-        <div>Deal</div><div>Contact</div><div>Value</div><div>Close date</div><div>Stage</div>
-      </div>
-      ${_salesDeals.map(d=>`
-        <div style="display:grid;grid-template-columns:2fr 1.5fr 1fr 1fr 90px;gap:8px;padding:9px 13px;border-bottom:1px solid rgba(26,35,50,.5);align-items:center;">
-          <div><div style="font-size:.8rem;font-weight:600;color:var(--text)">${d.name||'—'}</div><div style="font-size:.65rem;color:var(--muted);font-family:var(--mono)">${d.company||'—'}</div></div>
-          <div style="font-size:.75rem;color:var(--muted)">${d.contact_name||'—'}</div>
-          <div style="font-size:.82rem;font-weight:700;color:var(--nes-blue)">OMR ${Math.round(parseFloat(d.value)||0).toLocaleString()}</div>
-          <div style="font-size:.68rem;color:var(--muted);font-family:var(--mono)">${d.close_date||'—'}</div>
-          <div><span class="stage-badge stage-${d.stage||'lead'}">${(d.stage||'lead').toUpperCase()}</span></div>
-        </div>`).join('')}
-    </div>`;
-}
-
-function renderReferrers(colors,textColors){
-  const totalComm=_salesReferrers.reduce((s,r)=>s+(parseFloat(r.commission_earned)||0),0);
-  const totalPaid=_salesReferrers.reduce((s,r)=>s+(parseFloat(r.commission_paid)||0),0);
-  return`
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
-      <div class="kcard"><div class="klbl" style="display:flex;align-items:center;gap:4px;"><i class="ti ti-coin" style="font-size:11px;color:#7f77dd;filter:drop-shadow(0 0 3px #7f77dd)"></i>Total Commissions</div><div class="kval" style="color:#7f77dd">OMR ${Math.round(totalComm).toLocaleString()}</div></div>
-      <div class="kcard"><div class="klbl" style="display:flex;align-items:center;gap:4px;"><i class="ti ti-check" style="font-size:11px;color:#3fb950;filter:drop-shadow(0 0 3px #3fb950)"></i>Total Paid</div><div class="kval" style="color:#3fb950">OMR ${Math.round(totalPaid).toLocaleString()}</div></div>
-    </div>
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-      <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;">Referrers</div>
-      <button onclick="showAddReferrerModal()" style="background:var(--nes-btn-grad);border:none;border-radius:6px;padding:4px 10px;color:#fff;font-size:.7rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:4px;"><i class="ti ti-plus"></i> Add Referrer</button>
-    </div>
-    ${_salesReferrers.length?`
-    <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;overflow:hidden;">
-      <div class="comm-header"><div>Referrer</div><div>Deals referred</div><div>Earned</div><div>Paid</div><div>Status</div></div>
-      ${_salesReferrers.map((r,i)=>`
-        <div class="comm-row" style="border-bottom:1px solid rgba(26,35,50,.5)">
-          <div><div style="font-weight:600;color:var(--text)">${r.name||'—'}</div><div style="font-size:.65rem;color:var(--muted);font-family:var(--mono)">${r.company||'—'} · ${r.commission_rate||0}% rate</div></div>
-          <div style="color:var(--muted);font-family:var(--mono);font-size:.72rem">${r.deals_referred||0}</div>
-          <div style="color:#7f77dd;font-weight:700;font-family:var(--mono)">OMR ${Math.round(parseFloat(r.commission_earned)||0)}</div>
-          <div style="color:#3fb950;font-weight:700;font-family:var(--mono)">OMR ${Math.round(parseFloat(r.commission_paid)||0)}</div>
-          <div><span style="font-size:.6rem;padding:2px 7px;border-radius:5px;font-family:var(--mono);background:${(r.commission_earned||0)>(r.commission_paid||0)?'#2d1f00':'#0d2818'};color:${(r.commission_earned||0)>(r.commission_paid||0)?'#d29922':'#3fb950'}">${(r.commission_earned||0)>(r.commission_paid||0)?'PENDING':'PAID'}</span></div>
-        </div>`).join('')}
-    </div>`:`
-    <div style="text-align:center;padding:40px;color:var(--muted);font-family:var(--mono);font-size:.8rem;">
-      <i class="ti ti-user-dollar" style="font-size:2rem;opacity:.3;display:block;margin-bottom:8px"></i>
-      No referrers yet
-    </div>`}`;
-}
 
 // ── MODALS ──
 function showAddContactModal(){
@@ -3278,7 +3406,7 @@ window.deleteClient=deleteClient;window.saveClientModules=saveClientModules;
 window.saveClientCreds=saveClientCreds;window.saveClientBranding=saveClientBranding;
 window.saveClientAgents=saveClientAgents;window.saveClientBilling=saveClientBilling;
 window.showClientManager=showClientManager;window.showToast=showToast;window.hideTeamHub=hideTeamHub;
-window.showSalesPortal=showSalesPortal;window.renderSalesPortal=renderSalesPortal;
+window.showSalesPortal=showSalesPortal;window.renderSalesPortal=renderSalesPortal;window.switchPhTab=switchPhTab;window.calcPartner=calcPartner;
 window.showAdminStatus=showAdminStatus;window.checkPlatformStatus=checkPlatformStatus;window.showAddServiceModal=showAddServiceModal;window.saveNewService=saveNewService;window.showAddApiModalQuick=showAddApiModalQuick;window.saveApiQuick=saveApiQuick;window.showApiCredits=showApiCredits;window.loadApiCredits=loadApiCredits;window.saveAllThresholds=saveAllThresholds;window.addApiService=addApiService;window.saveNewApiService=saveNewApiService;window.updateApiBalance=updateApiBalance;window.showMyCredentials=showMyCredentials;window.saveMyCredentials=saveMyCredentials;window.editItCred=editItCred;window.saveItCred=saveItCred;window.toggleFeedItem=toggleFeedItem;window.saveFeedSources=saveFeedSources;window.showUpgradePopup=showUpgradePopup;
 window.upgradeContact=function(){document.querySelectorAll('div[style*="position:fixed"]').forEach(function(el){if(el.querySelector('.ti-check'))el.remove();});window.location.href='mailto:office@essential-services.org?subject=Upgrade to Pro';};
 window.closeUpgradePopup=function(){document.querySelectorAll('div[style*="position:fixed"]').forEach(function(el){if(el.style.zIndex==='9999')el.remove();});};
