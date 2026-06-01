@@ -640,7 +640,7 @@ function showAgreementModal(userId){
       <button id="agreeBtn" onclick="submitAgreement('${userId}')" disabled style="width:100%;padding:14px;border:none;border-radius:10px;background:#1a2332;color:#4a5568;font-weight:700;font-size:.9rem;cursor:not-allowed;transition:all .2s;">
         Confirm & Continue →
       </button>
-      <div style="text-align:center;margin-top:12px;font-family:var(--mono);font-size:.65rem;color:var(--muted);">By continuing you agree to our <a href="https://nes-ai.com/tos.html" target="_blank" style="color:var(--nes-blue);">Terms of Service</a> and <a href="https://nes-ai.com/privacy.html" target="_blank" style="color:var(--nes-blue);">Privacy Policy</a></div>
+      <div style="text-align:center;margin-top:12px;font-family:var(--mono);font-size:.65rem;color:var(--muted);">By continuing you agree to our <a href="https://nes-ai.com/tos.html" target="_blank" rel="noopener noreferrer" style="color:var(--nes-blue);pointer-events:all;z-index:99999;position:relative;">Terms of Service</a> and <a href="https://nes-ai.com/privacy.html" target="_blank" rel="noopener noreferrer" style="color:var(--nes-blue);pointer-events:all;z-index:99999;position:relative;">Privacy Policy</a></div>
     </div>`;
   document.body.appendChild(modal);
 }
