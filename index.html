@@ -746,7 +746,10 @@ function setupNavForRole(){
     // NES internal users
     if(['nesadmin','ceo','manager'].includes(userRole))intel.style.display='block';
     if(!['nesadmin','ceo'].includes(userRole)&&ceoNav)ceoNav.style.display='none';
-    if(userRole==='nesadmin'){const phn=document.getElementById('partnerHubNav');if(phn)phn.style.display='block';const an=document.getElementById('analyticsNav');if(an)an.style.display='flex';
+    if(userRole==='nesadmin'){const phn=document.getElementById('partnerHubNav');if(phn)phn.style.display='block';
+      // Show Deep Core for nesadmin always
+      const dcNavAdmin=document.getElementById('deepCoreNav');
+      if(dcNavAdmin){dcNavAdmin.style.display='flex';const dcb=document.getElementById('deepCoreBadge');if(dcb)dcb.style.display='flex';}const an=document.getElementById('analyticsNav');if(an)an.style.display='flex';
       clientMgr.style.display='block';
       loadClientCount();
       const statusNav=document.getElementById('adminStatusNav');
@@ -1998,7 +2001,7 @@ async function showApiCredits(){
       </div>
       <button onclick="saveAllThresholds()" style="background:var(--nes-btn-grad);border:none;border-radius:8px;padding:6px 14px;color:#fff;font-size:.75rem;font-weight:700;cursor:pointer;margin-right:44px;"><i class="ti ti-device-floppy"></i> Save Thresholds</button>
     </div>
-    <div class="page" id="apiCreditsContent">
+    <div class="page" id="apiCreditsContent" style="overflow-y:auto;flex:1;">
       <div style="color:var(--muted);font-family:var(--mono);font-size:.8rem;padding:20px 0;">Loading API credits...</div>
     </div>`;
   await loadApiCredits();
