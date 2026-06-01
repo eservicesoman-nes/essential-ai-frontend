@@ -640,16 +640,9 @@ function showAgreementModal(userId){
       <button id="agreeBtn" onclick="submitAgreement('${userId}')" disabled style="width:100%;padding:14px;border:none;border-radius:10px;background:#1a2332;color:#4a5568;font-weight:700;font-size:.9rem;cursor:not-allowed;transition:all .2s;">
         Confirm & Continue →
       </button>
-      <div style="text-align:center;margin-top:12px;font-family:var(--mono);font-size:.65rem;color:var(--muted);">By continuing you agree to our <button type="button" onclick="event.stopPropagation();event.preventDefault();window.open('https://nes-ai.com/tos.html','_blank');return false;" style="background:none;border:none;color:var(--nes-blue);cursor:pointer;text-decoration:underline;font-family:var(--mono);font-size:.65rem;padding:0;">Terms of Service</button> and <button type="button" onclick="event.stopPropagation();event.preventDefault();window.open('https://nes-ai.com/privacy.html','_blank');return false;" style="background:none;border:none;color:var(--nes-blue);cursor:pointer;text-decoration:underline;font-family:var(--mono);font-size:.65rem;padding:0;">Privacy Policy</button></div>
+      <div style="text-align:center;margin-top:12px;font-family:var(--mono);font-size:.65rem;color:var(--muted);">By continuing you agree to our <a href="https://nes-ai.com/tos.html" target="_blank" rel="noopener" onclick="event.stopPropagation();" style="color:var(--nes-blue);font-family:var(--mono);font-size:.65rem;">Terms of Service</a> and <a href="https://nes-ai.com/privacy.html" target="_blank" rel="noopener" onclick="event.stopPropagation();" style="color:var(--nes-blue);font-family:var(--mono);font-size:.65rem;">Privacy Policy</a></div>
     </div>`;
   document.body.appendChild(modal);
-  // Attach link handlers after DOM insert to avoid template literal issues
-  setTimeout(function(){
-    const tosLink = document.getElementById('tosLink');
-    const privLink = document.getElementById('privLink');
-    if(tosLink) tosLink.onclick = function(e){e.stopPropagation();window.open('https://nes-ai.com/tos.html','_blank');};
-    if(privLink) privLink.onclick = function(e){e.stopPropagation();window.open('https://nes-ai.com/privacy.html','_blank');};
-  }, 100);
 }
 
 function toggleAllTerms(checked){
@@ -3243,13 +3236,6 @@ function showAddServiceModal(){
     </div>
   </div>`;
   document.body.appendChild(modal);
-  // Attach link handlers after DOM insert to avoid template literal issues
-  setTimeout(function(){
-    const tosLink = document.getElementById('tosLink');
-    const privLink = document.getElementById('privLink');
-    if(tosLink) tosLink.onclick = function(e){e.stopPropagation();window.open('https://nes-ai.com/tos.html','_blank');};
-    if(privLink) privLink.onclick = function(e){e.stopPropagation();window.open('https://nes-ai.com/privacy.html','_blank');};
-  }, 100);
 }
 
 async function saveNewService(){
@@ -3287,13 +3273,6 @@ function showAddApiModalQuick(){
     </div>
   </div>`;
   document.body.appendChild(modal);
-  // Attach link handlers after DOM insert to avoid template literal issues
-  setTimeout(function(){
-    const tosLink = document.getElementById('tosLink');
-    const privLink = document.getElementById('privLink');
-    if(tosLink) tosLink.onclick = function(e){e.stopPropagation();window.open('https://nes-ai.com/tos.html','_blank');};
-    if(privLink) privLink.onclick = function(e){e.stopPropagation();window.open('https://nes-ai.com/privacy.html','_blank');};
-  }, 100);
 }
 
 async function saveApiQuick(){
