@@ -640,15 +640,15 @@ function showAgreementModal(userId){
       <button id="agreeBtn" onclick="submitAgreement('${userId}')" disabled style="width:100%;padding:14px;border:none;border-radius:10px;background:#1a2332;color:#4a5568;font-weight:700;font-size:.9rem;cursor:not-allowed;transition:all .2s;">
         Confirm & Continue →
       </button>
-      <div style="text-align:center;margin-top:12px;font-family:var(--mono);font-size:.65rem;color:var(--muted);">By continuing you agree to our <a href="https://nes-ai.com/tos.html" target="_blank" rel="noopener noreferrer" style="color:var(--nes-blue);">Terms of Service</a> and <a href="https://nes-ai.com/privacy.html" target="_blank" rel="noopener noreferrer" style="color:var(--nes-blue);">Privacy Policy</a></div>
+      <div style="text-align:center;margin-top:12px;font-family:var(--mono);font-size:.65rem;color:var(--muted);">By continuing you agree to our <span id="tosLink" style="color:var(--nes-blue);cursor:pointer;text-decoration:underline;">Terms of Service</span> and <span id="privLink" style="color:var(--nes-blue);cursor:pointer;text-decoration:underline;">Privacy Policy</span></div>
     </div>`;
   document.body.appendChild(modal);
   // Attach link handlers after DOM insert to avoid template literal issues
   setTimeout(function(){
-    const tosLink = modal.querySelector('a[href*="tos.html"]');
-    const privLink = modal.querySelector('a[href*="privacy.html"]');
-    if(tosLink) tosLink.addEventListener('click', function(e){e.stopPropagation();e.preventDefault();window.open('https://nes-ai.com/tos.html','_blank');});
-    if(privLink) privLink.addEventListener('click', function(e){e.stopPropagation();e.preventDefault();window.open('https://nes-ai.com/privacy.html','_blank');});
+    const tosLink = document.getElementById('tosLink');
+    const privLink = document.getElementById('privLink');
+    if(tosLink) tosLink.onclick = function(e){e.stopPropagation();window.open('https://nes-ai.com/tos.html','_blank');};
+    if(privLink) privLink.onclick = function(e){e.stopPropagation();window.open('https://nes-ai.com/privacy.html','_blank');};
   }, 100);
 }
 
@@ -3245,10 +3245,10 @@ function showAddServiceModal(){
   document.body.appendChild(modal);
   // Attach link handlers after DOM insert to avoid template literal issues
   setTimeout(function(){
-    const tosLink = modal.querySelector('a[href*="tos.html"]');
-    const privLink = modal.querySelector('a[href*="privacy.html"]');
-    if(tosLink) tosLink.addEventListener('click', function(e){e.stopPropagation();e.preventDefault();window.open('https://nes-ai.com/tos.html','_blank');});
-    if(privLink) privLink.addEventListener('click', function(e){e.stopPropagation();e.preventDefault();window.open('https://nes-ai.com/privacy.html','_blank');});
+    const tosLink = document.getElementById('tosLink');
+    const privLink = document.getElementById('privLink');
+    if(tosLink) tosLink.onclick = function(e){e.stopPropagation();window.open('https://nes-ai.com/tos.html','_blank');};
+    if(privLink) privLink.onclick = function(e){e.stopPropagation();window.open('https://nes-ai.com/privacy.html','_blank');};
   }, 100);
 }
 
@@ -3289,10 +3289,10 @@ function showAddApiModalQuick(){
   document.body.appendChild(modal);
   // Attach link handlers after DOM insert to avoid template literal issues
   setTimeout(function(){
-    const tosLink = modal.querySelector('a[href*="tos.html"]');
-    const privLink = modal.querySelector('a[href*="privacy.html"]');
-    if(tosLink) tosLink.addEventListener('click', function(e){e.stopPropagation();e.preventDefault();window.open('https://nes-ai.com/tos.html','_blank');});
-    if(privLink) privLink.addEventListener('click', function(e){e.stopPropagation();e.preventDefault();window.open('https://nes-ai.com/privacy.html','_blank');});
+    const tosLink = document.getElementById('tosLink');
+    const privLink = document.getElementById('privLink');
+    if(tosLink) tosLink.onclick = function(e){e.stopPropagation();window.open('https://nes-ai.com/tos.html','_blank');};
+    if(privLink) privLink.onclick = function(e){e.stopPropagation();window.open('https://nes-ai.com/privacy.html','_blank');};
   }, 100);
 }
 
