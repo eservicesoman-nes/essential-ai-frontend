@@ -640,7 +640,7 @@ function showAgreementModal(userId){
       <button id="agreeBtn" onclick="submitAgreement('${userId}')" disabled style="width:100%;padding:14px;border:none;border-radius:10px;background:#1a2332;color:#4a5568;font-weight:700;font-size:.9rem;cursor:not-allowed;transition:all .2s;">
         Confirm & Continue →
       </button>
-      <div style="text-align:center;margin-top:12px;font-family:var(--mono);font-size:.65rem;color:var(--muted);">Full terms & privacy policy available on request · NES AI v1.0</div>
+      <div style="text-align:center;margin-top:12px;font-family:var(--mono);font-size:.65rem;color:var(--muted);">By continuing you agree to our <a href="https://nes-ai.com/tos.html" target="_blank" style="color:var(--nes-blue);">Terms of Service</a> and <a href="https://nes-ai.com/privacy.html" target="_blank" style="color:var(--nes-blue);">Privacy Policy</a></div>
     </div>`;
   document.body.appendChild(modal);
 }
@@ -735,7 +735,7 @@ function setupNavForRole(){
     if(myCredsNav)myCredsNav.style.display='flex';
     // Show AI Advisory for Operations+ plans
     const dcNav=document.getElementById('deepCoreNav');
-    if(dcNav&&window.clientPlan&&['operations','workforce','infrastructure','enterprise'].some(p=>window.clientPlan.toLowerCase().includes(p))){
+    if(dcNav&&['operations','workforce','infrastructure','enterprise'].some(p=>(window.clientPlan||userPlan||'').toLowerCase().includes(p))){
       dcNav.style.display='flex';
       const dcBadge=document.getElementById('deepCoreBadge');
       if(dcBadge)dcBadge.style.display='flex';
@@ -1964,6 +1964,7 @@ function getFormData(){
 
 async function saveNewClient(){
   const data=getFormData();if(!data.name){alert('Company name is required');return;}
+  if(!data.modules)data.modules={islam360:true};
   const btn=document.querySelector('.form-submit');if(btn){btn.disabled=true;btn.textContent='Creating...';}
   try{const{error}=await sb.from('clients').insert([data]);if(error)throw error;window._activeClientId=null;await showClientManager();showToast('Client created');}
   catch(e){alert('Error: '+e.message);if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-plus"></i> Create Client';}}
@@ -2264,6 +2265,31 @@ async function sendMsg(){
       if(res.ok){const data=await res.json();appendMsg(imgBubble(data.url,data.revisedPrompt||text));imagesUsed++;}
       else{const err=await res.json().catch(()=>({}));addAiMsg('Error '+(err.error||res.status)+'. Please try again.');}
       saveHistory();saveUsage();updateStats();
+    }catch(e){removeTyping();addAiMsg('Network error. Please check your connection.');}
+    setBusy(false);return;
+  }
+
+  // Deep Core mode — dedicated endpoint
+  if(currentView==='deepcore'){
+    try{
+      const res2=await fetch(API_URL+'/api/deepcore',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
+        body:JSON.stringify({message:text,history:history.slice(-6)})
+      });
+      removeTyping();
+      if(res2.ok){
+        const data=await res2.json();
+        addAiMsg(data.reply);
+        history.push({role:'assistant',content:data.reply});
+        chatUsed++;
+        const dcb=document.getElementById('deepCoreBadge');
+        if(dcb&&data.usage)dcb.textContent=data.usage.remaining;
+        saveHistory();saveUsage();updateStats();
+      } else {
+        const err=await res2.json().catch(()=>({}));
+        addAiMsg(err.error||'Deep Core unavailable. Please try again.');
+      }
     }catch(e){removeTyping();addAiMsg('Network error. Please check your connection.');}
     setBusy(false);return;
   }
@@ -3172,7 +3198,7 @@ function filterContactsBySource(s){
 async function showAdminStatus(){
   if(userRole!=='nesadmin'){return;}
   const mc=document.getElementById('mainContent');
-  mc.style.overflow='hidden';
+  mc.style.overflow='auto';
   mc.style.display='flex';
   mc.style.flexDirection='column';
   mc.innerHTML=`
@@ -3635,7 +3661,7 @@ function showPricing(){
           <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);margin-bottom:8px;padding:6px 8px;background:var(--accent-lo);border-radius:6px;">
             + Apex Connect upgrade OMR 15/mo<br>+ WhatsApp Alerts OMR 8/mo
           </div>
-          <button class="plan-action-btn" onclick="alert('Contact us: office@essential-services.org')">Get Started →</button>
+          <button class="plan-action-btn" onclick="window.open('https://nes-ai.com/register.html?plan=presence','_blank')">Get Started →</button>
         </div>
 
         <!-- AI OPERATIONS -->
@@ -3659,7 +3685,7 @@ function showPricing(){
           <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);margin-bottom:8px;padding:6px 8px;background:var(--accent-lo);border-radius:6px;">
             + Apex Outreach OMR 15/mo<br>+ WhatsApp Alerts OMR 8/mo
           </div>
-          <button class="plan-action-btn" onclick="alert('Contact us: office@essential-services.org')">Upgrade to Operations →</button>
+          <button class="plan-action-btn" onclick="window.open('https://nes-ai.com/register.html?plan=operations','_blank')">Upgrade to Operations →</button>
         </div>
 
         <!-- AI WORKFORCE -->
@@ -3681,7 +3707,7 @@ function showPricing(){
           <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);margin-bottom:8px;padding:6px 8px;background:rgba(63,185,80,.08);border-radius:6px;">
             + Apex Advisory OMR 20/mo<br>+ Extra social posts OMR 8/mo
           </div>
-          <button class="plan-action-btn" style="background:linear-gradient(135deg,#1a7f37,#3fb950);" onclick="alert('Contact us: office@essential-services.org')">Upgrade to Workforce →</button>
+          <button class="plan-action-btn" style="background:linear-gradient(135deg,#1a7f37,#3fb950);" onclick="window.open('https://nes-ai.com/register.html?plan=workforce','_blank')">Upgrade to Workforce →</button>
         </div>
 
         <!-- AI INFRASTRUCTURE -->
@@ -3704,7 +3730,7 @@ function showPricing(){
           <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);margin-bottom:8px;padding:6px 8px;background:rgba(210,153,34,.08);border-radius:6px;">
             Tailored to your requirements
           </div>
-          <button class="plan-action-btn" style="background:linear-gradient(135deg,#92610a,#d29922);" onclick="alert('Contact us: office@essential-services.org')">Contact Us →</button>
+          <button class="plan-action-btn" style="background:linear-gradient(135deg,#92610a,#d29922);" onclick="window.open('https://nes-ai.com/register.html?plan=infrastructure','_blank')">Contact Us →</button>
         </div>
 
       </div>
