@@ -381,8 +381,29 @@
     /* Toast */
     .toast{position:fixed;bottom:24px;right:24px;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:.75rem;padding:9px 16px;border-radius:8px;z-index:9999;animation:fadeIn .2s ease;box-shadow:0 4px 16px rgba(0,0,0,.3);}
 
+    /* CEO Dashboard mobile */
+    @media(max-width:700px){
+      .ceo-panel-toggle{display:flex!important;}
+      #ceoDashGrid{grid-template-columns:1fr!important;}
+    }
+    /* Inbox mobile */
+    @media(max-width:700px){
+      #inboxGrid{grid-template-columns:1fr!important;}
+      #inboxGrid .inbox-read-panel{display:none;}
+      #inboxGrid .inbox-list-panel{display:flex!important;}
+    }
     @media(max-width:700px){
       .welcome-card,.messages,.input-area{padding-left:12px;padding-right:12px;}
+      .status-panel-toggle{display:flex!important;}
+      #statusPanelGrid{grid-template-columns:1fr!important;}
+      .cm-layout{grid-template-columns:1fr!important;}
+      .cm-stats{grid-template-columns:1fr 1fr!important;}
+      .an-grid{grid-template-columns:1fr 1fr!important;}
+      .ph-grid{grid-template-columns:1fr 1fr!important;}
+      .sales-grid{grid-template-columns:1fr 1fr!important;}
+      .kgrid5{grid-template-columns:repeat(3,1fr)!important;}
+      .top-bar{gap:4px!important;}
+      .top-bar button span{display:none!important;}
       .disclaimer{display:none;}
       .kgrid3{grid-template-columns:1fr 1fr;}
       .row2,.cm-layout{grid-template-columns:1fr;}
@@ -972,6 +993,10 @@ async function showCEODashboard(){
   if(window._weatherCache){setTimeout(()=>{const w=window._weatherCache;const wi=document.getElementById('weatherIcon');const wd=document.getElementById('weatherDesc');const wt=document.getElementById('weatherTemp');const wf=document.getElementById('weatherFeels');if(wi){wi.className='ti '+w.icon;wi.style.cssText='font-size:22px;color:var(--nes-blue);filter:drop-shadow(0 0 4px var(--nes-blue))';}if(wd)wd.textContent=w.desc;if(wt)wt.textContent=w.temp;if(wf)wf.textContent=w.feels;},50);}else{setTimeout(()=>{fetch('https://wttr.in/Muscat?format=j1').then(r=>r.json()).then(w=>{const c=w.current_condition[0];const desc=c.weatherDesc[0].value;const temp=c.temp_C;const feels=c.FeelsLikeC;const humidity=c.humidity;const icons={'Sunny':'ti-sun','Clear':'ti-moon-stars','Partly cloudy':'ti-cloud-sun','Cloudy':'ti-cloud','Overcast':'ti-cloud','Mist':'ti-mist','Fog':'ti-mist','Rain':'ti-cloud-rain','Drizzle':'ti-cloud-drizzle','Thunderstorm':'ti-storm','Snow':'ti-snowflake','Blizzard':'ti-snowflake'};const iconKey=Object.keys(icons).find(k=>desc.includes(k))||'Sunny';const icon=icons[iconKey]||'ti-sun';const descTxt=desc+' · Humidity '+humidity+'%';const tempTxt=temp+'°C';const feelsTxt='Feels like '+feels+'°C';window._weatherCache={icon,desc:descTxt,temp:tempTxt,feels:feelsTxt};const wi=document.getElementById('weatherIcon');const wd=document.getElementById('weatherDesc');const wt=document.getElementById('weatherTemp');const wf=document.getElementById('weatherFeels');if(wi){wi.className='ti '+icon;wi.style.cssText='font-size:22px;color:var(--nes-blue);filter:drop-shadow(0 0 4px var(--nes-blue))';}if(wd)wd.textContent=descTxt;if(wt)wt.textContent=tempTxt;if(wf)wf.textContent=feelsTxt;}).catch(()=>{const wd=document.getElementById('weatherDesc');if(wd)wd.textContent='Weather unavailable';});},100);}
 
   document.getElementById('ceoDashContent').innerHTML=`
+    <div class="ceo-panel-toggle" style="display:none;padding:6px 12px;border-bottom:1px solid var(--border);gap:6px;flex-shrink:0;">
+      <button onclick="toggleCeoPanel('stats')" id="ceoToggleStats" style="flex:1;padding:7px;border:none;border-radius:7px;background:var(--nes-blue);color:#fff;font-size:.75rem;font-weight:600;cursor:pointer;"><i class="ti ti-chart-bar"></i> Stats</button>
+      <button onclick="toggleCeoPanel('feed')" id="ceoToggleFeed" style="flex:1;padding:7px;border:none;border-radius:7px;background:var(--surface);color:var(--muted);font-size:.75rem;font-weight:600;cursor:pointer;border:1px solid var(--border);"><i class="ti ti-radar"></i> Feed</button>
+    </div>
     <div id="ceoDashGrid" style="display:grid;grid-template-columns:1fr 6px 420px;gap:0;height:100%;min-height:0;position:relative;">
 
       <!-- LEFT COLUMN -->
@@ -1103,6 +1128,15 @@ async function showCEODashboard(){
   const dashEl=document.getElementById('ceoDashContent');
   if(dashEl)requestAnimationFrame(()=>{dashEl.style.opacity='1';});
   loadCeoFeed();
+  // Show mobile toggle for CEO dashboard
+  setTimeout(function(){
+    if(window.innerWidth <= 700){
+      const tog = document.querySelector('.ceo-panel-toggle');
+      if(tog) tog.style.display='flex';
+      // Default show stats on mobile
+      toggleCeoPanel('stats');
+    }
+  }, 100);
 }
 
 
@@ -1968,22 +2002,24 @@ function searchClients(query){
 }
 
 function showAddClientForm(){
+  document.getElementById('mainContent').style.overflow='auto';
   document.getElementById('mainContent').innerHTML=`
     <div style="padding:11px 18px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;gap:10px;">
       <button onclick="showClientManager()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.1rem;"><i class="ti ti-arrow-left"></i></button>
       <div><div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;">ADD NEW CLIENT</div><div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">Fill in the details below</div></div>
     </div>
-    <div class="page"><div style="max-width:640px;">${clientFormFields()}<button class="form-submit" onclick="saveNewClient()"><i class="ti ti-plus"></i> Create Client</button></div></div>`;
+    <div class="page scrollable"><div style="max-width:640px;padding-bottom:40px;">${clientFormFields()}<button class="form-submit" onclick="saveNewClient()"><i class="ti ti-plus"></i> Create Client</button></div></div>`;
 }
 
 function showEditClientForm(clientId){
   const client=(window._clients||[]).find(c=>c.id===clientId);if(!client)return;
+  document.getElementById('mainContent').style.overflow='auto';
   document.getElementById('mainContent').innerHTML=`
     <div style="padding:11px 18px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;gap:10px;">
       <button onclick="showClientManager()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.1rem;"><i class="ti ti-arrow-left"></i></button>
       <div><div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;">EDIT — ${client.name}</div><div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">Update client details</div></div>
     </div>
-    <div class="page"><div style="max-width:640px;">${clientFormFields(client)}<button class="form-submit" onclick="updateClient('${clientId}')"><i class="ti ti-device-floppy"></i> Save Changes</button></div></div>`;
+    <div class="page scrollable"><div style="max-width:640px;padding-bottom:40px;">${clientFormFields(client)}<button class="form-submit" onclick="updateClient('${clientId}')"><i class="ti ti-device-floppy"></i> Save Changes</button></div></div>`;
 }
 
 function buildCountryOptions(selected){
@@ -3438,7 +3474,12 @@ async function checkPlatformStatus(){
   html+='</div>'; // end sticky header
 
   // ── SIDE BY SIDE: SERVICES (left) | API CREDITS (right) — scrollable ──
-  html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px;margin-bottom:16px;">';
+  // Mobile toggle for platform status
+  html+='<div class="status-panel-toggle" style="display:none;padding:6px 0;gap:6px;margin-bottom:10px;">';
+  html+='<button onclick="toggleStatusPanel(&quot;services&quot;)" id="statusToggleServices" style="flex:1;padding:7px;border:none;border-radius:7px;background:var(--nes-blue);color:#fff;font-size:.75rem;font-weight:600;cursor:pointer;"><i class="ti ti-server"></i> Services</button>';
+  html+='<button onclick="toggleStatusPanel(&quot;credits&quot;)" id="statusToggleCredits" style="flex:1;padding:7px;border:none;border-radius:7px;background:var(--surface);color:var(--muted);font-size:.75rem;font-weight:600;cursor:pointer;border:1px solid var(--border);"><i class="ti ti-credit-card"></i> API Credits</button>';
+  html+='</div>';
+  html+='<div id="statusPanelGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px;margin-bottom:16px;">';
 
   // LEFT — Services
   html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;">';
@@ -3486,9 +3527,16 @@ async function checkPlatformStatus(){
     html+='<div style="padding:20px;text-align:center;font-family:var(--mono);font-size:.72rem;color:var(--muted);">No APIs yet — <span onclick="showAddApiModalQuick()" style="color:var(--nes-blue);cursor:pointer;">add one</span></div>';
   }
   html+='</div>';
-  html+='</div>'; // end side-by-side grid
-
+  html+='</div></div>'; // end side-by-side grid
+  // Show mobile toggle
   el.innerHTML=html;
+  // Show mobile toggle after render
+  if(window.innerWidth<=700){
+    const tog=document.querySelector('.status-panel-toggle');
+    if(tog)tog.style.display='flex';
+    const grid=document.getElementById('statusPanelGrid');
+    if(grid)grid.style.gridTemplateColumns='1fr';
+  }
 }
 
 // ── CLIENT PORTAL: MY CREDENTIALS ──
@@ -4075,7 +4123,11 @@ async function showInbox(){
       </div>
       <button onclick="showInbox()" style="background:none;border:1px solid var(--border);border-radius:6px;padding:4px 10px;color:var(--muted);cursor:pointer;font-size:.72rem;font-family:var(--mono);"><i class="ti ti-refresh"></i> Refresh</button>
     </div>
-    <div style="display:grid;grid-template-columns:280px 1fr;flex:1;overflow:hidden;height:calc(100% - 56px);">
+    <div class="inbox-panel-toggle" style="display:none;padding:6px 12px;border-bottom:1px solid var(--border);gap:6px;">
+      <button id="inboxToggleList" onclick="toggleInboxPanel('list')" style="flex:1;padding:7px;border:none;border-radius:7px;background:var(--nes-blue);color:#fff;font-size:.75rem;font-weight:600;cursor:pointer;"><i class="ti ti-inbox"></i> Inbox</button>
+      <button id="inboxToggleRead" onclick="toggleInboxPanel('read')" style="flex:1;padding:7px;border:none;border-radius:7px;background:var(--surface);color:var(--muted);font-size:.75rem;font-weight:600;cursor:pointer;border:1px solid var(--border);"><i class="ti ti-mail-opened"></i> Read</button>
+    </div>
+    <div style="display:grid;grid-template-columns:280px 1fr;flex:1;overflow:hidden;height:calc(100% - 56px);" id="inboxGrid">
       <!-- Email list -->
       <div style="border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;background:var(--surface);">
         <div style="padding:8px 12px;border-bottom:1px solid var(--border);display:flex;gap:6px;overflow-x:auto;" id="acctFilters">
@@ -4151,6 +4203,14 @@ function filterInbox(acct,btn){
   renderEmailList(filtered);
 }
 
+async function fetchEmailBody(accountId, uid){
+  try{
+    const res = await fetch(API_URL+'/api/email/body/'+accountId+'/'+uid, {headers:{'Authorization':'Bearer '+session.access_token}});
+    const data = await res.json();
+    return data.body || '';
+  }catch(e){ return ''; }
+}
+
 function showEmail(idx){
   const emails=window._inboxEmails||[];
   const e=emails[idx];if(!e)return;
@@ -4160,6 +4220,10 @@ function showEmail(idx){
   const color=colors[acctIdx%5]||'#409cff';
   const panel=document.getElementById('emailPanel');
   if(!panel)return;
+  // Store account info for body fetch
+  window._currentEmail = e;
+  // Switch to read panel on mobile
+  if(window.innerWidth <= 700) toggleInboxPanel('read');
   panel.innerHTML=`
     <div style="padding:14px 18px;border-bottom:1px solid var(--border);">
       <div style="font-size:.9rem;font-weight:600;color:var(--text);margin-bottom:6px;">${e.subject||'(no subject)'}</div>
@@ -4169,8 +4233,8 @@ function showEmail(idx){
         <span style="font-size:.65rem;color:var(--muted);margin-left:auto;">${e.received_at?new Date(e.received_at).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):''}</span>
       </div>
     </div>
-    <div style="flex:1;padding:18px;overflow-y:auto;font-size:.82rem;color:var(--text);line-height:1.7;">
-      <div style="color:var(--muted);font-family:var(--mono);font-size:.72rem;text-align:center;padding:20px;">Email body loads on demand · IMAP fetch</div>
+    <div style="flex:1;padding:18px;overflow-y:auto;font-size:.82rem;color:var(--text);line-height:1.7;" id="emailBodyPanel">
+      <div style="color:var(--muted);font-family:var(--mono);font-size:.72rem;text-align:center;padding:20px;"><i class="ti ti-loader-2 ti-spin"></i> Loading...</div>
     </div>
     <div style="border-top:1px solid var(--border);padding:12px 18px;">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
@@ -4311,6 +4375,67 @@ async function connectEmailAccountExtra(idx){
   }catch(e){if(status){status.style.color='#f85149';status.textContent='Error: '+e.message;}}
 }
 
+function toggleInboxPanel(panel){
+  const grid = document.getElementById('inboxGrid');
+  if(!grid) return;
+  const listBtn = document.getElementById('inboxToggleList');
+  const readBtn = document.getElementById('inboxToggleRead');
+  const cols = grid.querySelectorAll(':scope > div');
+  if(panel === 'list'){
+    if(cols[0]) cols[0].style.display='flex';
+    if(cols[1]) cols[1].style.display='none';
+    if(listBtn){listBtn.style.background='var(--nes-blue)';listBtn.style.color='#fff';listBtn.style.border='none';}
+    if(readBtn){readBtn.style.background='var(--surface)';readBtn.style.color='var(--muted)';readBtn.style.border='1px solid var(--border)';}
+  } else {
+    if(cols[0]) cols[0].style.display='none';
+    if(cols[1]) cols[1].style.display='flex';
+    if(readBtn){readBtn.style.background='var(--nes-blue)';readBtn.style.color='#fff';readBtn.style.border='none';}
+    if(listBtn){listBtn.style.background='var(--surface)';listBtn.style.color='var(--muted)';listBtn.style.border='1px solid var(--border)';}
+  }
+}
+window.toggleInboxPanel=toggleInboxPanel;
+
+function toggleCeoPanel(panel){
+  const grid = document.getElementById('ceoDashGrid');
+  if(!grid) return;
+  const cols = grid.querySelectorAll(':scope > div');
+  const statsBtn = document.getElementById('ceoToggleStats');
+  const feedBtn = document.getElementById('ceoToggleFeed');
+  if(panel==='stats'){
+    if(cols[0]) cols[0].style.display='block';
+    if(cols[1]) cols[1].style.display='none';
+    if(cols[2]) cols[2].style.display='none';
+    if(statsBtn){statsBtn.style.background='var(--nes-blue)';statsBtn.style.color='#fff';statsBtn.style.border='none';}
+    if(feedBtn){feedBtn.style.background='var(--surface)';feedBtn.style.color='var(--muted)';feedBtn.style.border='1px solid var(--border)';}
+  } else {
+    if(cols[0]) cols[0].style.display='none';
+    if(cols[1]) cols[1].style.display='none';
+    if(cols[2]) cols[2].style.display='flex';
+    if(feedBtn){feedBtn.style.background='var(--nes-blue)';feedBtn.style.color='#fff';feedBtn.style.border='none';}
+    if(statsBtn){statsBtn.style.background='var(--surface)';statsBtn.style.color='var(--muted)';statsBtn.style.border='1px solid var(--border)';}
+  }
+}
+window.toggleCeoPanel=toggleCeoPanel;
+
+function toggleStatusPanel(panel){
+  const grid = document.getElementById('statusPanelGrid');
+  if(!grid) return;
+  const cols = grid.querySelectorAll(':scope > div');
+  const sBtn = document.getElementById('statusToggleServices');
+  const cBtn = document.getElementById('statusToggleCredits');
+  if(panel==='services'){
+    if(cols[0]) cols[0].style.display='block';
+    if(cols[1]) cols[1].style.display='none';
+    if(sBtn){sBtn.style.background='var(--nes-blue)';sBtn.style.color='#fff';sBtn.style.border='none';}
+    if(cBtn){cBtn.style.background='var(--surface)';cBtn.style.color='var(--muted)';cBtn.style.border='1px solid var(--border)';}
+  } else {
+    if(cols[0]) cols[0].style.display='none';
+    if(cols[1]) cols[1].style.display='block';
+    if(cBtn){cBtn.style.background='var(--nes-blue)';cBtn.style.color='#fff';cBtn.style.border='none';}
+    if(sBtn){sBtn.style.background='var(--surface)';sBtn.style.color='var(--muted)';sBtn.style.border='1px solid var(--border)';}
+  }
+}
+window.toggleStatusPanel=toggleStatusPanel;
 window.addEmailForm=addEmailForm;
 window.updateAddBtn=updateAddBtn;
 window.autoFillImapSettings2=autoFillImapSettings2;
@@ -4325,6 +4450,26 @@ window.showInbox=showInbox;
 window.loadInboxEmails=loadInboxEmails;
 window.filterInbox=filterInbox;
 window.showEmail=showEmail;
+
+// Auto fetch body after showEmail
+const _origShowEmail = showEmail;
+window.showEmail = async function(idx){
+  _origShowEmail(idx);
+  const e = window._inboxEmails && window._inboxEmails[idx];
+  if(!e) return;
+  const accounts = window._inboxAccounts || [];
+  const {data: accs} = await sb.from('email_accounts').select('id,email_address').eq('email_address', e.account_email);
+  if(!accs || !accs.length) return;
+  const bodyEl = document.getElementById('emailBodyPanel');
+  if(!bodyEl) return;
+  const body = await fetchEmailBody(accs[0].id, e.uid);
+  if(bodyEl){
+    const cleaned = body.replace(/<[^>]*>/g,'').replace(/\s+/g,' ').trim();
+    bodyEl.innerHTML = cleaned
+      ? '<div style="white-space:pre-wrap;line-height:1.8;font-size:.82rem;">'+cleaned+'</div>'
+      : '<div style="color:var(--muted);font-family:var(--mono);font-size:.72rem;text-align:center;padding:20px;">No body content</div>';
+  }
+};
 window.sendReply=sendReply;
 window.upgradeContact=function(){document.querySelectorAll('div[style*="position:fixed"]').forEach(function(el){if(el.querySelector('.ti-check'))el.remove();});window.location.href='mailto:office@essential-services.org?subject=Upgrade to Pro';};
 window.closeUpgradePopup=function(){document.querySelectorAll('div[style*="position:fixed"]').forEach(function(el){if(el.style.zIndex==='9999')el.remove();});};
