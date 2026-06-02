@@ -762,9 +762,11 @@ function setupNavForRole(){
       // Show Deep Core for nesadmin always
       const dcNavAdmin=document.getElementById('deepCoreNav');
       if(dcNavAdmin){dcNavAdmin.style.display='flex';const dcb=document.getElementById('deepCoreBadge');if(dcb)dcb.style.display='flex';}
-      // Show Inbox for nesadmin
+      // Show Inbox and Din for nesadmin
       const inboxNavAdmin=document.getElementById('inboxNav');
-      if(inboxNavAdmin)inboxNavAdmin.style.display='flex';const an=document.getElementById('analyticsNav');if(an)an.style.display='flex';
+      if(inboxNavAdmin)inboxNavAdmin.style.display='flex';
+      const dinNavAdmin=document.getElementById('dinNav');
+      if(dinNavAdmin)dinNavAdmin.style.display='flex';const an=document.getElementById('analyticsNav');if(an)an.style.display='flex';
       clientMgr.style.display='block';
       loadClientCount();
       const statusNav=document.getElementById('adminStatusNav');
