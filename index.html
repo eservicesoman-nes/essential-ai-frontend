@@ -446,7 +446,6 @@
       <div class="nav nav-workspace">
         <div class="nav-item active" data-view="chat"><i class="ti ti-message-2"></i><span>Chat</span></div>
         <div class="nav-item" data-view="deepcore" id="deepCoreNav" style="display:none;"><i class="ti ti-atom"></i><span>Deep Core</span><span class="nav-badge nb-purple" id="deepCoreBadge" style="display:none;">20</span></div>
-        <div class="nav-item" data-view="din" id="dinNav" style="display:none;"><i class="ti ti-moon-stars"></i><span>Din &#1583;&#1610;&#1606;</span></div>
         <div class="nav-item" data-view="inbox" id="inboxNav" style="display:none;"><i class="ti ti-mail"></i><span>Inbox</span><span class="nav-badge nb-blue" id="inboxBadge" style="display:none;">0</span></div>
         <div class="nav-item" data-view="docs"><i class="ti ti-notes"></i><span>Documents</span></div>
         <div class="nav-item" data-view="image"><i class="ti ti-photo"></i><span>Image Gen</span></div>
@@ -519,6 +518,8 @@
     <div class="top-bar" id="topBar">
       <button class="top-btn danger" id="clearBtn" onclick="clearChat()" title="Clear Chat"><i class="ti ti-trash"></i></button>
       <button class="top-btn" onclick="toggleTheme()" title="Toggle Theme"><i class="ti ti-sun"></i></button>
+      <div style="width:1px;height:20px;background:var(--border);margin:0 2px;"></div>
+      <button class="top-btn" onclick="showView('deen')" title="Deen دين" style="width:auto;border-radius:20px;padding:0 10px;gap:5px;display:flex;align-items:center;font-size:.72rem;font-weight:600;"><i class="ti ti-moon-stars" style="font-size:14px;"></i><span>Deen</span></button>
     </div>
     <div id="mainContent" style="display:flex;flex-direction:column;height:100%;overflow:hidden;"></div>
   </main>
@@ -748,8 +749,8 @@ function setupNavForRole(){
       if(dcBadge)dcBadge.style.display='flex';
     }
     // Show Din and Inbox nav for all client users
-    const dinNavEl = document.getElementById('dinNav');
-    if(dinNavEl) dinNavEl.style.display='flex';
+    const deenNavEl = document.getElementById('deenNav');
+    if(deenNavEl) deenNavEl.style.display='flex';
     const inboxNavEl = document.getElementById('inboxNav');
     if(inboxNavEl) inboxNavEl.style.display='flex';
     // Add client branding chip
@@ -765,8 +766,8 @@ function setupNavForRole(){
       // Show Inbox and Din for nesadmin
       const inboxNavAdmin=document.getElementById('inboxNav');
       if(inboxNavAdmin)inboxNavAdmin.style.display='flex';
-      const dinNavAdmin=document.getElementById('dinNav');
-      if(dinNavAdmin)dinNavAdmin.style.display='flex';const an=document.getElementById('analyticsNav');if(an)an.style.display='flex';
+      const deenNavAdmin=document.getElementById('deenNav');
+      if(deenNavAdmin)deenNavAdmin.style.display='flex';const an=document.getElementById('analyticsNav');if(an)an.style.display='flex';
       clientMgr.style.display='block';
       loadClientCount();
       const statusNav=document.getElementById('adminStatusNav');
@@ -924,7 +925,7 @@ function showView(view){
   else if(view==='adminstatus'){showAdminStatus();}
   else if(view==='apicredits'){showApiCredits();}
   else if(view==='pricing'){showPricing();}
-  else if(view==='din'){showDin();}
+  else if(view==='deen'){showDeen();}
   else if(view==='inbox'){showInbox();}
 }
 
@@ -1639,7 +1640,7 @@ function renderClientDetail(c,colors,textColors,idx){
     ['ti-mail','email_notifications','Email Notifications','Lead emails to team'],
     ['ti-phone-call','adam_consultant','Apex Advisory','Enterprise voice consultant'],
     ['ti-headset','layla_advisor','Apex Outreach','3-day follow-up calls'],
-    ['ti-moon-stars','islam360','Din دين','Islamic companion · Quran · Hadith'],
+    ['ti-moon-stars','islam360','Deen دين','Islamic companion · Quran · Hadith'],
   ];
   return`
     <div class="cm-detail">
@@ -1855,6 +1856,10 @@ function renderClientDetail(c,colors,textColors,idx){
                 <button class="form-submit" style="flex:1;" onclick="connectEmailAccount()"><i class="ti ti-plug"></i> Test & Connect</button>
               </div>
               <div id="em_status" style="font-family:var(--mono);font-size:.7rem;margin-top:8px;min-height:16px;"></div>
+            </div>
+            <div id="em_extra_forms"></div>
+            <button id="em_add_btn" onclick="addEmailForm()" style="width:100%;background:none;border:1px dashed var(--border);border-radius:8px;padding:8px;color:var(--muted);cursor:pointer;font-size:.75rem;margin-top:8px;display:flex;align-items:center;justify-content:center;gap:5px;"><i class="ti ti-plus"></i> Add Another Email Account</button>
+            <div id="em_plan_limit" style="font-family:var(--mono);font-size:.65rem;color:var(--muted);text-align:center;margin-top:6px;"></div>
             </div>
           </div>
         </div>
@@ -4042,17 +4047,17 @@ async function deleteEmailAccount(id){
 }
 
 // ── DIN VIEW ──
-function showDin(){
+function showDeen(){
   const mc=document.getElementById('mainContent');
   mc.style.overflow='auto';
   mc.innerHTML=`
     <div style="padding:11px 18px;border-bottom:1px solid var(--border);flex-shrink:0;">
-      <div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;display:flex;align-items:center;gap:6px;"><i class="ti ti-moon-stars"></i>DIN &#1583;&#1610;&#1606;</div>
+      <div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;display:flex;align-items:center;gap:6px;"><i class="ti ti-moon-stars"></i>DEEN &#1583;&#1610;&#1606;</div>
       <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">Islamic companion · Quran · Hadith · Supplications</div>
     </div>
     <div class="page scrollable" style="display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;padding:60px 20px;">
       <i class="ti ti-moon-stars" style="font-size:3rem;color:var(--nes-blue);opacity:.4;"></i>
-      <div style="font-family:var(--mono);font-size:.85rem;color:var(--muted);text-align:center;">Din is coming soon</div>
+      <div style="font-family:var(--mono);font-size:.85rem;color:var(--muted);text-align:center;">Deen is coming soon</div>
       <div style="font-family:var(--mono);font-size:.72rem;color:var(--muted);text-align:center;max-width:300px;line-height:1.7;">Quran · Hadith · Supplications · Prayer times · Islamic calendar — fully authenticated sources</div>
     </div>`;
 }
@@ -4206,11 +4211,116 @@ async function sendReply(to, originalSubject){
   }catch(e){showToast('Error: '+e.message);}
 }
 
+// Add another email form
+function addEmailForm(){
+  const clientId = window._activeClientId;
+  const planLimits = {presence:2, operations:5, workforce:10, infrastructure:99, starter:2, growth:5, enterprise:99};
+  const client = (window._clients||[]).find(c=>c.id===clientId);
+  const plan = (client?.plan||'presence').toLowerCase();
+  const limit = planLimits[plan]||2;
+  const existing = document.querySelectorAll('.em-extra-form').length + 1;
+  if(existing >= limit){
+    const btn = document.getElementById('em_add_btn');
+    if(btn) btn.style.display='none';
+    const lim = document.getElementById('em_plan_limit');
+    if(lim) lim.textContent='Plan limit reached — '+limit+'/'+limit+' accounts ('+plan+' plan)';
+    return;
+  }
+  const container = document.getElementById('em_extra_forms');
+  if(!container) return;
+  const idx = Date.now();
+  const div = document.createElement('div');
+  div.className='em-extra-form';
+  div.style.cssText='background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-top:8px;';
+  div.innerHTML=`
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+      <div style="font-family:var(--mono);font-size:.68rem;color:var(--nes-blue);font-weight:700;">Account ${existing+1}</div>
+      <button onclick="this.closest('.em-extra-form').remove();updateAddBtn();" style="background:none;border:none;color:#f85149;cursor:pointer;font-size:.72rem;"><i class="ti ti-x"></i> Remove</button>
+    </div>
+    <div class="creds-grid">
+      <div class="cred-field"><div class="cf-lbl">Email Address</div><input class="cf-input" type="email" id="em_address_${idx}" placeholder="email@company.com"></div>
+      <div class="cred-field"><div class="cf-lbl">App Password</div><input class="cf-input" type="password" id="em_password_${idx}" placeholder="App password"></div>
+      <div class="cred-field"><div class="cf-lbl">Provider</div>
+        <select class="cf-input" id="em_provider_${idx}" onchange="autoFillImapSettings2(this.value,'${idx}')">
+          <option value="gmail">Gmail</option>
+          <option value="outlook">Outlook</option>
+          <option value="yahoo">Yahoo</option>
+          <option value="cpanel">cPanel</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+      <div class="cred-field"><div class="cf-lbl">Label</div><input class="cf-input" type="text" id="em_label_${idx}" placeholder="e.g. Sales inbox"></div>
+      <div class="cred-field"><div class="cf-lbl">IMAP Server</div><input class="cf-input" type="text" id="em_imap_${idx}" value="imap.gmail.com"></div>
+      <div class="cred-field"><div class="cf-lbl">IMAP Port</div><input class="cf-input" type="number" id="em_imap_port_${idx}" value="993"></div>
+      <div class="cred-field"><div class="cf-lbl">SMTP Server</div><input class="cf-input" type="text" id="em_smtp_${idx}" value="smtp.gmail.com"></div>
+      <div class="cred-field"><div class="cf-lbl">SMTP Port</div><input class="cf-input" type="number" id="em_smtp_port_${idx}" value="587"></div>
+    </div>
+    <button onclick="connectEmailAccountExtra('${idx}')" style="background:var(--nes-btn-grad);border:none;border-radius:7px;padding:7px 16px;color:#fff;font-size:.72rem;font-weight:700;cursor:pointer;margin-top:8px;width:100%;"><i class="ti ti-plug"></i> Test & Connect</button>
+    <div id="em_status_${idx}" style="font-family:var(--mono);font-size:.7rem;margin-top:6px;min-height:16px;"></div>
+  `;
+  container.appendChild(div);
+  updateAddBtn();
+}
+
+function updateAddBtn(){
+  const clientId = window._activeClientId;
+  const planLimits = {presence:2, operations:5, workforce:10, infrastructure:99, starter:2, growth:5, enterprise:99};
+  const client = (window._clients||[]).find(c=>c.id===clientId);
+  const plan = (client?.plan||'presence').toLowerCase();
+  const limit = planLimits[plan]||2;
+  const existing = document.querySelectorAll('.em-extra-form').length + 1;
+  const btn = document.getElementById('em_add_btn');
+  const lim = document.getElementById('em_plan_limit');
+  if(existing >= limit){
+    if(btn) btn.style.display='none';
+    if(lim) lim.textContent='Plan limit reached — '+limit+'/'+limit+' accounts ('+plan+' plan)';
+  } else {
+    if(btn) btn.style.display='flex';
+    if(lim) lim.textContent='';
+  }
+}
+
+function autoFillImapSettings2(provider, idx){
+  const s={gmail:{imap:'imap.gmail.com',smtp:'smtp.gmail.com'},outlook:{imap:'outlook.office365.com',smtp:'smtp.office365.com'},yahoo:{imap:'imap.mail.yahoo.com',smtp:'smtp.mail.yahoo.com'},cpanel:{imap:'',smtp:''},other:{imap:'',smtp:''}};
+  const p=s[provider]||s.other;
+  const i=document.getElementById('em_imap_'+idx);const sm=document.getElementById('em_smtp_'+idx);
+  if(i)i.value=p.imap;if(sm)sm.value=p.smtp;
+}
+
+async function connectEmailAccountExtra(idx){
+  const clientId=window._activeClientId;
+  if(!clientId){showToast('Select a client first');return;}
+  const address=document.getElementById('em_address_'+idx)?.value.trim();
+  const password=document.getElementById('em_password_'+idx)?.value.trim();
+  const provider=document.getElementById('em_provider_'+idx)?.value;
+  const label=document.getElementById('em_label_'+idx)?.value.trim();
+  const imap_server=document.getElementById('em_imap_'+idx)?.value.trim();
+  const imap_port=parseInt(document.getElementById('em_imap_port_'+idx)?.value)||993;
+  const smtp_server=document.getElementById('em_smtp_'+idx)?.value.trim();
+  const smtp_port=parseInt(document.getElementById('em_smtp_port_'+idx)?.value)||587;
+  if(!address||!password){showToast('Email and app password required');return;}
+  const status=document.getElementById('em_status_'+idx);
+  if(status){status.style.color='#d29922';status.textContent='Testing connection...';}
+  try{
+    const res=await fetch(API_URL+'/api/email/connect',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify({client_id:clientId,email_address:address,app_password:password,provider,label:label||address,imap_server,imap_port,smtp_server,smtp_port})});
+    const data=await res.json();
+    if(!res.ok)throw new Error(data.error||'Connection failed');
+    if(status){status.style.color='#3fb950';status.textContent='Connected successfully ✓';}
+    showToast('Email account connected ✓');
+    loadEmailAccounts(clientId);
+  }catch(e){if(status){status.style.color='#f85149';status.textContent='Error: '+e.message;}}
+}
+
+window.addEmailForm=addEmailForm;
+window.updateAddBtn=updateAddBtn;
+window.autoFillImapSettings2=autoFillImapSettings2;
+window.connectEmailAccountExtra=connectEmailAccountExtra;
+
 window.autoFillImapSettings=autoFillImapSettings;
 window.connectEmailAccount=connectEmailAccount;
 window.loadEmailAccounts=loadEmailAccounts;
 window.deleteEmailAccount=deleteEmailAccount;
-window.showDin=showDin;
+window.showDeen=showDeen;
 window.showInbox=showInbox;
 window.loadInboxEmails=loadInboxEmails;
 window.filterInbox=filterInbox;
