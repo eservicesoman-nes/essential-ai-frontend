@@ -4488,10 +4488,27 @@ window.showEmail = async function(idx){
   if(!bodyEl) return;
   const body = await fetchEmailBody(accs[0].id, e.uid);
   if(bodyEl){
-    const cleaned = body.replace(/<[^>]*>/g,'').replace(/\s+/g,' ').trim();
-    bodyEl.innerHTML = cleaned
-      ? '<div style="white-space:pre-wrap;line-height:1.8;font-size:.82rem;">'+cleaned+'</div>'
-      : '<div style="color:var(--muted);font-family:var(--mono);font-size:.72rem;text-align:center;padding:20px;">No body content</div>';
+    // Clean MIME encoded content
+    let cleaned = body;
+    // Remove base64 blocks
+    cleaned = cleaned.replace(/[A-Za-z0-9+/]{40,}={0,2}/g, '');
+    // Remove MIME boundaries and headers
+    cleaned = cleaned.replace(/--[a-zA-Z0-9_\-]+=*[\r\n]*/g, '');
+    cleaned = cleaned.replace(/Content-Type:[^\n]*/gi, '');
+    cleaned = cleaned.replace(/Content-Transfer-Encoding:[^\n]*/gi, '');
+    cleaned = cleaned.replace(/Content-Disposition:[^\n]*/gi, '');
+    cleaned = cleaned.replace(/MIME-Version:[^\n]*/gi, '');
+    // Remove HTML tags
+    cleaned = cleaned.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '');
+    cleaned = cleaned.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '');
+    cleaned = cleaned.replace(/<[^>]+>/g, ' ');
+    // Decode HTML entities
+    cleaned = cleaned.replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&nbsp;/g,' ').replace(/&#39;/g,"'").replace(/&quot;/g,'"');
+    // Clean whitespace
+    cleaned = cleaned.replace(/\r\n|\r/g,'\n').replace(/\n{3,}/g,'\n\n').replace(/[ \t]{2,}/g,' ').trim();
+    bodyEl.innerHTML = cleaned && cleaned.length > 10
+      ? '<div style="white-space:pre-wrap;line-height:1.8;font-size:.82rem;color:var(--text);">'+cleaned+'</div>'
+      : '<div style="color:var(--muted);font-family:var(--mono);font-size:.72rem;text-align:center;padding:20px;">No readable content</div>';
   }
 };
 window.sendReply=sendReply;
