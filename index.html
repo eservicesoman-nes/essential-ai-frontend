@@ -4114,7 +4114,13 @@ function showDeen(){
 async function showInbox(){
   const mc=document.getElementById('mainContent');
   mc.style.overflow='hidden';
-  const clientId=userClientId||(window._clients&&window._clients[0]?.id);
+  // For nesadmin — find client with email accounts, fallback to first client
+  let clientId = userClientId;
+  if(!clientId && window._clients && window._clients.length){
+    // Try to find client with email accounts
+    const nesClient = window._clients.find(c => c.name && c.name.toLowerCase().includes('essential'));
+    clientId = nesClient?.id || window._clients[0]?.id;
+  }
   mc.innerHTML=`
     <div style="padding:11px 18px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;">
       <div>
@@ -4145,6 +4151,18 @@ async function showInbox(){
         </div>
       </div>
     </div>`;
+  // Load clients first if not loaded
+  if(!window._clients || !window._clients.length){
+    try{
+      const {data} = await sb.from('clients').select('id,name').order('created_at',{ascending:false});
+      window._clients = data || [];
+    }catch(e){}
+  }
+  // Reload with correct client
+  if(!userClientId && window._clients && window._clients.length){
+    const nesClient = window._clients.find(c => c.name && c.name.toLowerCase().includes('essential'));
+    clientId = nesClient?.id || window._clients[0]?.id;
+  }
   if(clientId) await loadInboxEmails(clientId);
 }
 
@@ -4259,7 +4277,13 @@ async function sendReply(to, originalSubject){
   const fromAccount=document.getElementById('replyFrom')?.value;
   const body=document.getElementById('replyBody')?.value.trim();
   if(!body){showToast('Write a reply first');return;}
-  const clientId=userClientId||(window._clients&&window._clients[0]?.id);
+  // For nesadmin — find client with email accounts, fallback to first client
+  let clientId = userClientId;
+  if(!clientId && window._clients && window._clients.length){
+    // Try to find client with email accounts
+    const nesClient = window._clients.find(c => c.name && c.name.toLowerCase().includes('essential'));
+    clientId = nesClient?.id || window._clients[0]?.id;
+  }
   if(!clientId||!fromAccount)return;
   try{
     const {data:accounts}=await sb.from('email_accounts').select('id').eq('client_id',clientId).eq('email_address',fromAccount).single();
