@@ -445,7 +445,9 @@
       <div class="nav-label">Workspace</div>
       <div class="nav nav-workspace">
         <div class="nav-item active" data-view="chat"><i class="ti ti-message-2"></i><span>Chat</span></div>
-        <div class="nav-item" data-view="deepcore" id="deepCoreNav" style="display:none;"><i class="ti ti-atom"></i><span>AI Advisory</span><span class="nav-badge nb-purple" id="deepCoreBadge" style="display:none;">20</span></div>
+        <div class="nav-item" data-view="deepcore" id="deepCoreNav" style="display:none;"><i class="ti ti-atom"></i><span>Deep Core</span><span class="nav-badge nb-purple" id="deepCoreBadge" style="display:none;">20</span></div>
+        <div class="nav-item" data-view="din" id="dinNav" style="display:none;"><i class="ti ti-moon-stars"></i><span>Din &#1583;&#1610;&#1606;</span></div>
+        <div class="nav-item" data-view="inbox" id="inboxNav" style="display:none;"><i class="ti ti-mail"></i><span>Inbox</span><span class="nav-badge nb-blue" id="inboxBadge" style="display:none;">0</span></div>
         <div class="nav-item" data-view="docs"><i class="ti ti-notes"></i><span>Documents</span></div>
         <div class="nav-item" data-view="image"><i class="ti ti-photo"></i><span>Image Gen</span></div>
       </div>
@@ -549,7 +551,7 @@ let chatUsed=0,imagesUsed=0,docsUsed=0;
 let userPlan='free',userRole='staff',allMsgsHTML='';
 let userClientId=null; // Phase 4: client portal
 const STORAGE_KEYS={h:'nesai_h',m:'nesai_m',u:'nesai_u',rc:'nesai_rc'};
-const MODE_LABELS={chat:'CHAT MODE',deepcore:'AI ADVISORY MODE',docs:'DOCUMENTS MODE',image:'IMAGE GEN MODE'};
+const MODE_LABELS={chat:'CHAT MODE',deepcore:'DEEP CORE MODE',docs:'DOCUMENTS MODE',image:'IMAGE GEN MODE'};
 
 sb.auth.onAuthStateChange((_e,s)=>{session=s;if(s){const uid=s.user?.id;if(!window._appLoaded||window._loadedUid!==uid){window._loadedUid=uid;showApp(s.user);}}else{window._appLoaded=false;window._loadedUid=null;showAuthScreen();}});
 
@@ -641,9 +643,13 @@ function showAgreementModal(userId){
       <button id="agreeBtn" onclick="submitAgreement('${userId}')" disabled style="width:100%;padding:14px;border:none;border-radius:10px;background:#1a2332;color:#4a5568;font-weight:700;font-size:.9rem;cursor:not-allowed;transition:all .2s;">
         Confirm & Continue →
       </button>
-      <div style="text-align:center;margin-top:12px;font-family:var(--mono);font-size:.65rem;color:var(--muted);">By continuing you agree to our <a href="#" onclick="openInNewTab('https://nes-ai.com/tos.html');return false;" style="color:var(--nes-blue);font-family:var(--mono);font-size:.65rem;">Terms of Service</a> and <a href="#" onclick="openInNewTab('https://nes-ai.com/privacy.html');return false;" style="color:var(--nes-blue);font-family:var(--mono);font-size:.65rem;">Privacy Policy</a></div>
+      <div style="text-align:center;margin-top:12px;font-family:var(--mono);font-size:.65rem;color:var(--muted);">By continuing you agree to our <span id="tosLink" style="color:var(--nes-blue);cursor:pointer;text-decoration:underline;font-family:var(--mono);font-size:.65rem;">Terms of Service</span> and <span id="privLink" style="color:var(--nes-blue);cursor:pointer;text-decoration:underline;font-family:var(--mono);font-size:.65rem;">Privacy Policy</span></div>
     </div>`;
   document.body.appendChild(modal);
+  const tosEl=document.getElementById('tosLink');
+  const privEl=document.getElementById('privLink');
+  if(tosEl)tosEl.onclick=function(e){e.stopPropagation();window.open('https://nes-ai.com/tos.html','_blank','noopener,noreferrer');};
+  if(privEl)privEl.onclick=function(e){e.stopPropagation();window.open('https://nes-ai.com/privacy.html','_blank','noopener,noreferrer');};
 }
 
 function toggleAllTerms(checked){
@@ -741,6 +747,11 @@ function setupNavForRole(){
       const dcBadge=document.getElementById('deepCoreBadge');
       if(dcBadge)dcBadge.style.display='flex';
     }
+    // Show Din and Inbox nav for all client users
+    const dinNavEl = document.getElementById('dinNav');
+    if(dinNavEl) dinNavEl.style.display='flex';
+    const inboxNavEl = document.getElementById('inboxNav');
+    if(inboxNavEl) inboxNavEl.style.display='flex';
     // Add client branding chip
     showClientBrandingChip();
   } else {
@@ -750,7 +761,10 @@ function setupNavForRole(){
     if(userRole==='nesadmin'){const phn=document.getElementById('partnerHubNav');if(phn)phn.style.display='block';
       // Show Deep Core for nesadmin always
       const dcNavAdmin=document.getElementById('deepCoreNav');
-      if(dcNavAdmin){dcNavAdmin.style.display='flex';const dcb=document.getElementById('deepCoreBadge');if(dcb)dcb.style.display='flex';}const an=document.getElementById('analyticsNav');if(an)an.style.display='flex';
+      if(dcNavAdmin){dcNavAdmin.style.display='flex';const dcb=document.getElementById('deepCoreBadge');if(dcb)dcb.style.display='flex';}
+      // Show Inbox for nesadmin
+      const inboxNavAdmin=document.getElementById('inboxNav');
+      if(inboxNavAdmin)inboxNavAdmin.style.display='flex';const an=document.getElementById('analyticsNav');if(an)an.style.display='flex';
       clientMgr.style.display='block';
       loadClientCount();
       const statusNav=document.getElementById('adminStatusNav');
@@ -908,6 +922,8 @@ function showView(view){
   else if(view==='adminstatus'){showAdminStatus();}
   else if(view==='apicredits'){showApiCredits();}
   else if(view==='pricing'){showPricing();}
+  else if(view==='din'){showDin();}
+  else if(view==='inbox'){showInbox();}
 }
 
 // ── CEO DASHBOARD ──
@@ -1621,7 +1637,7 @@ function renderClientDetail(c,colors,textColors,idx){
     ['ti-mail','email_notifications','Email Notifications','Lead emails to team'],
     ['ti-phone-call','adam_consultant','Apex Advisory','Enterprise voice consultant'],
     ['ti-headset','layla_advisor','Apex Outreach','3-day follow-up calls'],
-    ['ti-moon','islam360','Islam360','GCC / Europe version'],
+    ['ti-moon-stars','islam360','Din دين','Islamic companion · Quran · Hadith'],
   ];
   return`
     <div class="cm-detail">
@@ -1655,6 +1671,7 @@ function renderClientDetail(c,colors,textColors,idx){
         <div class="cm-tab ${window._activeTab==='agents'?'active':''}" onclick="cmTab('agents',this)">AI Agents</div>
         <div class="cm-tab ${window._activeTab==='billing'?'active':''}" onclick="cmTab('billing',this)">Billing</div>
         <div class="cm-tab ${window._activeTab==='users'?'active':''}" onclick="cmTab('users',this)"><i class="ti ti-users" style="margin-right:4px;font-size:11px;"></i>Users</div>
+        <div class="cm-tab ${window._activeTab==='email'?'active':''}" onclick="cmTab('email',this)"><i class="ti ti-mail" style="margin-right:4px;font-size:11px;"></i>Email</div>
       </div>
       <div class="cm-content">
 
@@ -1780,6 +1797,64 @@ function renderClientDetail(c,colors,textColors,idx){
             </div>
           </div>
           <button class="form-submit" style="margin-top:10px;" onclick="saveClientBilling('${c.id}')"><i class="ti ti-device-floppy"></i> Save Billing</button>
+        </div>
+
+        <div id="cm-email" style="display:none;">
+          <div style="margin-bottom:12px;">
+            <div style="font-family:var(--mono);font-size:.65rem;color:var(--nes-blue);font-weight:800;margin-bottom:8px;padding:6px 10px;background:#0c1f35;border-radius:6px;border:1px solid #1a3a6e;">
+              <i class="ti ti-mail" style="margin-right:5px;"></i>IMAP EMAIL ACCOUNTS
+            </div>
+            <div id="cm-email-accounts" style="margin-bottom:12px;">
+              <div style="color:var(--muted);font-family:var(--mono);font-size:.75rem;">No email accounts connected yet.</div>
+            </div>
+            <div style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:12px;">
+              <div style="font-family:var(--mono);font-size:.68rem;color:var(--nes-blue);margin-bottom:10px;font-weight:700;">+ Connect Email Account</div>
+              <div class="creds-grid">
+                <div class="cred-field">
+                  <div class="cf-lbl">Email Address</div>
+                  <input class="cf-input" type="email" id="em_address" placeholder="info@company.com">
+                </div>
+                <div class="cred-field">
+                  <div class="cf-lbl">App Password</div>
+                  <input class="cf-input" type="password" id="em_password" placeholder="App password (not main password)">
+                </div>
+                <div class="cred-field">
+                  <div class="cf-lbl">Provider</div>
+                  <select class="cf-input" id="em_provider" onchange="autoFillImapSettings(this.value)">
+                    <option value="gmail">Gmail</option>
+                    <option value="outlook">Outlook / Microsoft 365</option>
+                    <option value="yahoo">Yahoo</option>
+                    <option value="cpanel">cPanel / Company email</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+                <div class="cred-field">
+                  <div class="cf-lbl">Label (friendly name)</div>
+                  <input class="cf-input" type="text" id="em_label" placeholder="Sales inbox">
+                </div>
+                <div class="cred-field">
+                  <div class="cf-lbl">IMAP Server</div>
+                  <input class="cf-input" type="text" id="em_imap" placeholder="imap.gmail.com">
+                </div>
+                <div class="cred-field">
+                  <div class="cf-lbl">IMAP Port</div>
+                  <input class="cf-input" type="number" id="em_imap_port" value="993">
+                </div>
+                <div class="cred-field">
+                  <div class="cf-lbl">SMTP Server</div>
+                  <input class="cf-input" type="text" id="em_smtp" placeholder="smtp.gmail.com">
+                </div>
+                <div class="cred-field">
+                  <div class="cf-lbl">SMTP Port</div>
+                  <input class="cf-input" type="number" id="em_smtp_port" value="587">
+                </div>
+              </div>
+              <div style="display:flex;gap:8px;margin-top:10px;">
+                <button class="form-submit" style="flex:1;" onclick="connectEmailAccount()"><i class="ti ti-plug"></i> Test & Connect</button>
+              </div>
+              <div id="em_status" style="font-family:var(--mono);font-size:.7rem;margin-top:8px;min-height:16px;"></div>
+            </div>
+          </div>
         </div>
 
         <div id="cm-users" style="display:none;">
@@ -2199,9 +2274,10 @@ function cmTab(name,el){
     window._cmUnsaved=false;
   }
   window._activeTab=name;
-  ['modules','creds','branding','agents','billing','users'].forEach(t=>{const e=document.getElementById('cm-'+t);if(e)e.style.display=t===name?'block':'none';});
+  ['modules','creds','branding','agents','billing','users','email'].forEach(t=>{const e=document.getElementById('cm-'+t);if(e)e.style.display=t===name?'block':'none';});
   document.querySelectorAll('.cm-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');
   if(name==='users'&&window._activeClientId)loadClientUsers(window._activeClientId);
+  if(name==='email'&&window._activeClientId)loadEmailAccounts(window._activeClientId);
 }
 
 // ── CHAT INTERFACE ──
@@ -2212,7 +2288,7 @@ function showChatInterface(mode='chat'){
   document.getElementById('mainContent').innerHTML=`
     <div class="welcome-card">
       <div class="mode-label">${MODE_LABELS[mode]}</div>
-      <div class="version-label">NES AI v3.0 · ${mode==='deepcore'?'AI Advisory · Claude Sonnet':mode==='chat'?'Web Search ON':''}</div>
+      <div class="version-label">NES AI v3.0 · ${mode==='deepcore'?'Deep Core · Claude Sonnet':mode==='chat'?'Web Search ON':''}</div>
     </div>
     <div class="messages" id="messages"></div>
     <div class="input-area">
@@ -3881,6 +3957,263 @@ window.showClientManager=showClientManager;window.showToast=showToast;window.hid
 window.showSalesPortal=showSalesPortal;window.renderSalesPortal=renderSalesPortal;window.switchPhTab=switchPhTab;window.calcPartner=calcPartner;window.loadPartnerMrr=loadPartnerMrr;window.loadLeadTrends=loadLeadTrends;window.initCeoResizer=initCeoResizer;window.onboardClient=onboardClient;window.showAnalytics=showAnalytics;window.loadAnalytics=loadAnalytics;
 window.showAdminStatus=showAdminStatus;window.checkPlatformStatus=checkPlatformStatus;window.showAddServiceModal=showAddServiceModal;window.saveNewService=saveNewService;window.showAddApiModalQuick=showAddApiModalQuick;window.saveApiQuick=saveApiQuick;window.showApiCredits=showApiCredits;window.loadApiCredits=loadApiCredits;window.saveAllThresholds=saveAllThresholds;window.addApiService=addApiService;window.saveNewApiService=saveNewApiService;window.updateApiBalance=updateApiBalance;window.showMyCredentials=showMyCredentials;window.saveMyCredentials=saveMyCredentials;window.editItCred=editItCred;window.saveItCred=saveItCred;window.toggleFeedItem=toggleFeedItem;window.saveFeedSources=saveFeedSources;window.showUpgradePopup=showUpgradePopup;
 window.openInNewTab=openInNewTab;
+
+// ── EMAIL FUNCTIONS ──
+function autoFillImapSettings(provider){
+  const settings={
+    gmail:{imap:'imap.gmail.com',imap_port:'993',smtp:'smtp.gmail.com',smtp_port:'587'},
+    outlook:{imap:'outlook.office365.com',imap_port:'993',smtp:'smtp.office365.com',smtp_port:'587'},
+    yahoo:{imap:'imap.mail.yahoo.com',imap_port:'993',smtp:'smtp.mail.yahoo.com',smtp_port:'587'},
+    cpanel:{imap:'',imap_port:'993',smtp:'',smtp_port:'587'},
+    other:{imap:'',imap_port:'993',smtp:'',smtp_port:'587'}
+  };
+  const s=settings[provider]||settings.other;
+  const i=document.getElementById('em_imap');const ip=document.getElementById('em_imap_port');
+  const sm=document.getElementById('em_smtp');const sp=document.getElementById('em_smtp_port');
+  if(i)i.value=s.imap;if(ip)ip.value=s.imap_port;if(sm)sm.value=s.smtp;if(sp)sp.value=s.smtp_port;
+}
+
+async function connectEmailAccount(){
+  const clientId=window._activeClientId;
+  if(!clientId){showToast('Select a client first');return;}
+  const address=document.getElementById('em_address')?.value.trim();
+  const password=document.getElementById('em_password')?.value.trim();
+  const provider=document.getElementById('em_provider')?.value;
+  const label=document.getElementById('em_label')?.value.trim();
+  const imap_server=document.getElementById('em_imap')?.value.trim();
+  const imap_port=parseInt(document.getElementById('em_imap_port')?.value)||993;
+  const smtp_server=document.getElementById('em_smtp')?.value.trim();
+  const smtp_port=parseInt(document.getElementById('em_smtp_port')?.value)||587;
+  if(!address||!password){showToast('Email and app password required');return;}
+  const status=document.getElementById('em_status');
+  if(status){status.style.color='#d29922';status.textContent='Testing connection...';}
+  try{
+    const res=await fetch(API_URL+'/api/email/connect',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
+      body:JSON.stringify({client_id:clientId,email_address:address,app_password:password,provider,label:label||address,imap_server,imap_port,smtp_server,smtp_port})
+    });
+    const data=await res.json();
+    if(!res.ok)throw new Error(data.error||'Connection failed');
+    if(status){status.style.color='#3fb950';status.textContent='Connected successfully ✓';}
+    showToast('Email account connected ✓');
+    loadEmailAccounts(clientId);
+    document.getElementById('em_address').value='';
+    document.getElementById('em_password').value='';
+    document.getElementById('em_label').value='';
+  }catch(e){
+    if(status){status.style.color='#f85149';status.textContent='Error: '+e.message;}
+  }
+}
+
+async function loadEmailAccounts(clientId){
+  const el=document.getElementById('cm-email-accounts');
+  if(!el)return;
+  try{
+    const res=await fetch(API_URL+'/api/email/accounts/'+clientId,{headers:{'Authorization':'Bearer '+session.access_token}});
+    const data=await res.json();
+    const accounts=data.accounts||[];
+    const colors=['#409cff','#3fb950','#7f77dd','#d29922','#f85149'];
+    if(accounts.length===0){
+      el.innerHTML='<div style="color:var(--muted);font-family:var(--mono);font-size:.75rem;">No email accounts connected yet.</div>';
+      return;
+    }
+    el.innerHTML=accounts.map((a,i)=>`
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--surface);border:1px solid var(--border);border-radius:8px;margin-bottom:6px;">
+        <div style="width:8px;height:8px;border-radius:50%;background:${colors[i%5]};flex-shrink:0;"></div>
+        <div style="flex:1;">
+          <div style="font-size:.78rem;font-weight:600;color:var(--text);">${a.label||a.email_address}</div>
+          <div style="font-size:.65rem;color:var(--muted);font-family:var(--mono);">${a.email_address} · ${a.provider} · ${a.is_active?'Active':'Inactive'}</div>
+        </div>
+        <button onclick="deleteEmailAccount('${a.id}')" style="background:none;border:1px solid #2d0e0e;border-radius:6px;padding:3px 8px;color:#f85149;cursor:pointer;font-size:.65rem;"><i class="ti ti-trash"></i></button>
+      </div>`).join('');
+  }catch(e){if(el)el.innerHTML='<div style="color:#f85149;font-size:.72rem;">Error loading accounts</div>';}
+}
+
+async function deleteEmailAccount(id){
+  if(!confirm('Remove this email account?'))return;
+  try{
+    await fetch(API_URL+'/api/email/account/'+id,{method:'DELETE',headers:{'Authorization':'Bearer '+session.access_token}});
+    showToast('Account removed');
+    loadEmailAccounts(window._activeClientId);
+  }catch(e){showToast('Error: '+e.message);}
+}
+
+// ── DIN VIEW ──
+function showDin(){
+  const mc=document.getElementById('mainContent');
+  mc.style.overflow='auto';
+  mc.innerHTML=`
+    <div style="padding:11px 18px;border-bottom:1px solid var(--border);flex-shrink:0;">
+      <div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;display:flex;align-items:center;gap:6px;"><i class="ti ti-moon-stars"></i>DIN &#1583;&#1610;&#1606;</div>
+      <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">Islamic companion · Quran · Hadith · Supplications</div>
+    </div>
+    <div class="page scrollable" style="display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;padding:60px 20px;">
+      <i class="ti ti-moon-stars" style="font-size:3rem;color:var(--nes-blue);opacity:.4;"></i>
+      <div style="font-family:var(--mono);font-size:.85rem;color:var(--muted);text-align:center;">Din is coming soon</div>
+      <div style="font-family:var(--mono);font-size:.72rem;color:var(--muted);text-align:center;max-width:300px;line-height:1.7;">Quran · Hadith · Supplications · Prayer times · Islamic calendar — fully authenticated sources</div>
+    </div>`;
+}
+
+// ── INBOX VIEW ──
+async function showInbox(){
+  const mc=document.getElementById('mainContent');
+  mc.style.overflow='hidden';
+  const clientId=userClientId||(window._clients&&window._clients[0]?.id);
+  mc.innerHTML=`
+    <div style="padding:11px 18px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;display:flex;align-items:center;gap:6px;"><i class="ti ti-mail"></i>INBOX</div>
+        <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">Unified email · All accounts</div>
+      </div>
+      <button onclick="showInbox()" style="background:none;border:1px solid var(--border);border-radius:6px;padding:4px 10px;color:var(--muted);cursor:pointer;font-size:.72rem;font-family:var(--mono);"><i class="ti ti-refresh"></i> Refresh</button>
+    </div>
+    <div style="display:grid;grid-template-columns:280px 1fr;flex:1;overflow:hidden;height:calc(100% - 56px);">
+      <!-- Email list -->
+      <div style="border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;background:var(--surface);">
+        <div style="padding:8px 12px;border-bottom:1px solid var(--border);display:flex;gap:6px;overflow-x:auto;" id="acctFilters">
+          <button onclick="filterInbox('all',this)" style="font-size:.65rem;padding:3px 10px;border-radius:20px;border:none;background:var(--nes-blue);color:#fff;cursor:pointer;white-space:nowrap;">All</button>
+        </div>
+        <div style="overflow-y:auto;flex:1;" id="emailList">
+          <div style="padding:20px;text-align:center;color:var(--muted);font-family:var(--mono);font-size:.75rem;">Loading emails...</div>
+        </div>
+      </div>
+      <!-- Email reading panel -->
+      <div style="display:flex;flex-direction:column;overflow:hidden;" id="emailPanel">
+        <div style="display:flex;align-items:center;justify-content:center;flex:1;flex-direction:column;gap:8px;color:var(--muted);">
+          <i class="ti ti-mail" style="font-size:2rem;opacity:.3;"></i>
+          <div style="font-family:var(--mono);font-size:.75rem;">Select an email to read</div>
+        </div>
+      </div>
+    </div>`;
+  if(clientId) await loadInboxEmails(clientId);
+}
+
+async function loadInboxEmails(clientId){
+  try{
+    const res=await fetch(API_URL+'/api/email/inbox/'+clientId,{headers:{'Authorization':'Bearer '+session.access_token}});
+    const data=await res.json();
+    const emails=data.emails||[];
+    const el=document.getElementById('emailList');
+    if(!el)return;
+    const colors=['#409cff','#3fb950','#7f77dd','#d29922','#f85149'];
+    const accounts=[...new Set(emails.map(e=>e.account_email))];
+    // Update filter pills
+    const filters=document.getElementById('acctFilters');
+    if(filters){
+      filters.innerHTML='<button onclick="filterInbox(\'all\',this)" style="font-size:.65rem;padding:3px 10px;border-radius:20px;border:none;background:var(--nes-blue);color:#fff;cursor:pointer;white-space:nowrap;">All</button>'+
+        accounts.map((a,i)=>`<button onclick="filterInbox('${a}',this)" style="font-size:.65rem;padding:3px 10px;border-radius:20px;border:0.5px solid var(--border);background:none;color:var(--muted);cursor:pointer;white-space:nowrap;border-left:2px solid ${colors[i%5]};">${a.split('@')[1]||a}</button>`).join('');
+    }
+    window._inboxEmails=emails;
+    window._inboxAccounts=accounts;
+    window._inboxColors=colors;
+    renderEmailList(emails);
+  }catch(e){
+    const el=document.getElementById('emailList');
+    if(el)el.innerHTML='<div style="padding:20px;text-align:center;color:#f85149;font-family:var(--mono);font-size:.75rem;">Error loading emails</div>';
+  }
+}
+
+function renderEmailList(emails){
+  const el=document.getElementById('emailList');
+  if(!el)return;
+  const colors=window._inboxColors||['#409cff','#3fb950','#7f77dd','#d29922','#f85149'];
+  const accounts=window._inboxAccounts||[];
+  if(emails.length===0){el.innerHTML='<div style="padding:20px;text-align:center;color:var(--muted);font-family:var(--mono);font-size:.75rem;">No emails found</div>';return;}
+  el.innerHTML=emails.map((e,i)=>{
+    const acctIdx=accounts.indexOf(e.account_email);
+    const color=colors[acctIdx%5]||'#409cff';
+    const date=e.received_at?new Date(e.received_at).toLocaleDateString('en-GB',{day:'numeric',month:'short'}):'';
+    return`<div onclick="showEmail(${i})" style="padding:10px 12px;border-bottom:1px solid rgba(26,35,50,.5);cursor:pointer;border-left:3px solid ${color};" class="email-row-${i}">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;">
+        <div style="font-size:.75rem;font-weight:${e.is_read?'400':'600'};color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;">${e.from_name||e.from_address||'Unknown'}</div>
+        <div style="font-size:.6rem;color:var(--muted);margin-left:8px;flex-shrink:0;">${date}</div>
+        ${!e.is_read?'<div style="width:6px;height:6px;border-radius:50%;background:var(--nes-blue);margin-left:6px;flex-shrink:0;"></div>':''}
+      </div>
+      <div style="font-size:.72rem;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:2px;">${e.subject||'(no subject)'}</div>
+      <div style="font-size:.65rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${e.account_label||e.account_email}</div>
+    </div>`;
+  }).join('');
+}
+
+function filterInbox(acct,btn){
+  document.querySelectorAll('#acctFilters button').forEach(b=>{b.style.background='none';b.style.color='var(--muted)';b.style.border='0.5px solid var(--border)';});
+  btn.style.background='var(--nes-blue)';btn.style.color='#fff';btn.style.border='none';
+  const emails=window._inboxEmails||[];
+  const filtered=acct==='all'?emails:emails.filter(e=>e.account_email===acct);
+  renderEmailList(filtered);
+}
+
+function showEmail(idx){
+  const emails=window._inboxEmails||[];
+  const e=emails[idx];if(!e)return;
+  const accounts=window._inboxAccounts||[];
+  const colors=window._inboxColors||['#409cff'];
+  const acctIdx=accounts.indexOf(e.account_email);
+  const color=colors[acctIdx%5]||'#409cff';
+  const panel=document.getElementById('emailPanel');
+  if(!panel)return;
+  panel.innerHTML=`
+    <div style="padding:14px 18px;border-bottom:1px solid var(--border);">
+      <div style="font-size:.9rem;font-weight:600;color:var(--text);margin-bottom:6px;">${e.subject||'(no subject)'}</div>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+        <span style="font-size:.65rem;padding:2px 8px;border-radius:12px;color:#fff;background:${color};">${e.account_email}</span>
+        <span style="font-size:.72rem;color:var(--muted);">From: ${e.from_name?e.from_name+' &lt;'+e.from_address+'&gt;':e.from_address}</span>
+        <span style="font-size:.65rem;color:var(--muted);margin-left:auto;">${e.received_at?new Date(e.received_at).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):''}</span>
+      </div>
+    </div>
+    <div style="flex:1;padding:18px;overflow-y:auto;font-size:.82rem;color:var(--text);line-height:1.7;">
+      <div style="color:var(--muted);font-family:var(--mono);font-size:.72rem;text-align:center;padding:20px;">Email body loads on demand · IMAP fetch</div>
+    </div>
+    <div style="border-top:1px solid var(--border);padding:12px 18px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+        <span style="font-size:.65rem;color:var(--muted);">Reply from:</span>
+        <select id="replyFrom" style="font-size:.65rem;padding:3px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;">
+          ${accounts.map(a=>`<option value="${a}" ${a===e.account_email?'selected':''}>${a}${a===e.account_email?' (default)':''}</option>`).join('')}
+        </select>
+        <span style="font-size:.6rem;padding:2px 6px;border-radius:6px;background:#0d2818;color:#3fb950;">Default</span>
+      </div>
+      <textarea id="replyBody" placeholder="Write your reply..." style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:8px 12px;font-size:.75rem;color:var(--text);resize:none;height:64px;outline:none;font-family:var(--ui);"></textarea>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px;">
+        <div style="display:flex;gap:6px;">
+          <button onclick="sendReply('${e.from_address}','${(e.subject||'').replace(/'/g,'')}')" style="background:var(--nes-btn-grad);border:none;color:#fff;font-size:.72rem;padding:6px 16px;border-radius:6px;cursor:pointer;display:flex;align-items:center;gap:5px;"><i class="ti ti-send"></i> Send</button>
+          <button style="background:none;border:1px solid var(--border);color:var(--muted);font-size:.72rem;padding:6px 12px;border-radius:6px;cursor:pointer;display:flex;align-items:center;gap:5px;"><i class="ti ti-paperclip"></i> Attach</button>
+        </div>
+        <span style="font-size:.65rem;color:var(--muted);">Encrypted · SMTP</span>
+      </div>
+    </div>`;
+}
+
+async function sendReply(to, originalSubject){
+  const fromAccount=document.getElementById('replyFrom')?.value;
+  const body=document.getElementById('replyBody')?.value.trim();
+  if(!body){showToast('Write a reply first');return;}
+  const clientId=userClientId||(window._clients&&window._clients[0]?.id);
+  if(!clientId||!fromAccount)return;
+  try{
+    const {data:accounts}=await sb.from('email_accounts').select('id').eq('client_id',clientId).eq('email_address',fromAccount).single();
+    if(!accounts)throw new Error('Account not found');
+    const res=await fetch(API_URL+'/api/email/send',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
+      body:JSON.stringify({account_id:accounts.id,to,subject:'Re: '+originalSubject,body})
+    });
+    if(!res.ok){const e=await res.json();throw new Error(e.error||'Send failed');}
+    showToast('Reply sent ✓');
+    document.getElementById('replyBody').value='';
+  }catch(e){showToast('Error: '+e.message);}
+}
+
+window.autoFillImapSettings=autoFillImapSettings;
+window.connectEmailAccount=connectEmailAccount;
+window.loadEmailAccounts=loadEmailAccounts;
+window.deleteEmailAccount=deleteEmailAccount;
+window.showDin=showDin;
+window.showInbox=showInbox;
+window.loadInboxEmails=loadInboxEmails;
+window.filterInbox=filterInbox;
+window.showEmail=showEmail;
+window.sendReply=sendReply;
 window.upgradeContact=function(){document.querySelectorAll('div[style*="position:fixed"]').forEach(function(el){if(el.querySelector('.ti-check'))el.remove();});window.location.href='mailto:office@essential-services.org?subject=Upgrade to Pro';};
 window.closeUpgradePopup=function(){document.querySelectorAll('div[style*="position:fixed"]').forEach(function(el){if(el.style.zIndex==='9999')el.remove();});};
 window.loadClientUsers=loadClientUsers;window.showInviteUserForm=showInviteUserForm;window.sendClientInvite=sendClientInvite;window.removeClientUser=removeClientUser;
