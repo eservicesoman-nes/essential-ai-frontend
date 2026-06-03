@@ -53,7 +53,7 @@
     /* ── SIDEBAR ── */
     .sb-toggle{position:fixed;left:16px;top:16px;z-index:1010;background:var(--accent);border:none;border-radius:50%;width:42px;height:42px;display:grid;place-items:center;cursor:pointer;color:#fff;font-size:1.2rem;box-shadow:0 2px 12px rgba(0,0,0,.3);}
     .sidebar{width:228px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:0;height:100dvh;overflow-y:auto;z-index:1000;transition:transform .3s ease;}
-    @media(max-width:900px){.sidebar{position:fixed;top:0;left:0;transform:translateX(-100%);}.sidebar.open{transform:translateX(0);}.welcome-card{padding-top:70px!important;}}
+    @media(max-width:900px){.sidebar{position:fixed;top:0;left:0;transform:translateX(-100%);}.sidebar.open{transform:translateX(0);box-shadow:4px 0 20px rgba(0,0,0,.5);}.welcome-card{padding-top:70px!important;}main{margin-left:0!important;width:100%!important;}}
     @media(min-width:901px){.sidebar{position:relative;}.sidebar.collapsed{position:fixed;transform:translateX(-100%);}.sb-toggle{display:none!important;}}
 
     /* Avatar with ping */
@@ -134,7 +134,7 @@
     .main{flex:1;display:flex;flex-direction:column;height:100dvh;overflow:hidden;min-width:0;position:relative;}
 
     /* Top bar - only show relevant buttons per view */
-    .top-bar{position:absolute;top:14px;right:18px;display:flex;gap:8px;z-index:100;}
+    .top-bar{position:absolute;top:14px;right:18px;display:flex;gap:8px;z-index:100;align-items:center;}
     .top-btn{background:var(--surface);border:1px solid var(--border);border-radius:50%;width:36px;height:36px;display:grid;place-items:center;cursor:pointer;color:var(--nes-blue);font-size:1rem;}
     .top-btn:hover{background:var(--accent-lo);}
     .top-btn.danger:hover{background:rgba(248,81,73,.1);color:#f85149;border-color:#f85149;}
@@ -435,6 +435,7 @@
 <body>
 
 <button class="sb-toggle" onclick="toggleSidebar()"><i class="ti ti-menu-2"></i></button>
+  <div id="sidebarOverlay" onclick="toggleSidebar()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:999;"></div>
 
 <!-- AUTH -->
 <div id="authScreen">
@@ -1496,7 +1497,7 @@ function showCommandCentre(){
     hub=document.createElement('div');
     hub.id='teamHubWrapper';
     hub.style.cssText='position:absolute;top:0;left:228px;right:0;bottom:0;background:var(--bg);z-index:50;display:flex;flex-direction:column;';
-    hub.innerHTML=`<div style="padding:11px 18px;border-bottom:1px solid var(--border);flex-shrink:0;"><div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;">TEAM HUB</div><div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">Internal team communications</div></div><div class="command-wrap"><iframe id="teamHubIframe" class="command-iframe" src="${ROCKET_URL}" title="NES Team Hub" allow="microphone; camera"></iframe></div>`;
+    hub.innerHTML=`<div style="padding:11px 18px 11px 60px;border-bottom:1px solid var(--border);flex-shrink:0;"><div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;">TEAM HUB</div><div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">Internal team communications</div></div><div class="command-wrap"><iframe id="teamHubIframe" class="command-iframe" src="${ROCKET_URL}" title="NES Team Hub" allow="microphone; camera"></iframe></div>`;
     document.getElementById('app').appendChild(hub);
   }
   hub.style.display='flex';
@@ -1515,7 +1516,7 @@ async function showLeadsPage(){
   const mc=document.getElementById('mainContent');
   mc.style.overflow='hidden';
   mc.innerHTML=`
-    <div style="padding:11px 18px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;">
+    <div style="padding:11px 18px 11px 60px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;">
       <div><div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;">LEADS</div><div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);" id="leadsSubtitle">Loading...</div></div>
       <button onclick="exportLeads()" style="font-size:.7rem;padding:4px 9px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:var(--mono);display:flex;align-items:center;gap:5px;"><i class="ti ti-download" style="font-size:13px"></i> Export CSV</button>
     </div>
@@ -2052,7 +2053,7 @@ function searchClients(query){
 function showAddClientForm(){
   document.getElementById('mainContent').style.overflow='auto';
   document.getElementById('mainContent').innerHTML=`
-    <div style="padding:11px 18px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;gap:10px;">
+    <div style="padding:11px 18px 11px 60px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;gap:10px;">
       <button onclick="showClientManager()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.1rem;"><i class="ti ti-arrow-left"></i></button>
       <div><div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;">ADD NEW CLIENT</div><div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">Fill in the details below</div></div>
     </div>
@@ -2063,7 +2064,7 @@ function showEditClientForm(clientId){
   const client=(window._clients||[]).find(c=>c.id===clientId);if(!client)return;
   document.getElementById('mainContent').style.overflow='auto';
   document.getElementById('mainContent').innerHTML=`
-    <div style="padding:11px 18px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;gap:10px;">
+    <div style="padding:11px 18px 11px 60px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;gap:10px;">
       <button onclick="showClientManager()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.1rem;"><i class="ti ti-arrow-left"></i></button>
       <div><div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;">EDIT — ${client.name}</div><div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">Update client details</div></div>
     </div>
@@ -2161,7 +2162,7 @@ async function showApiCredits(){
   const mc=document.getElementById('mainContent');
   mc.style.overflow='auto';
   mc.innerHTML=`
-    <div style="padding:11px 18px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;">
+    <div style="padding:11px 18px 11px 60px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;">
       <div>
         <div style="font-family:var(--mono);font-size:.8rem;color:#7f77dd;font-weight:800;">API CREDITS</div>
         <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">Balance · Usage · Auto-recharge thresholds</div>
@@ -2574,7 +2575,7 @@ async function showAnalytics(){
   const mc = document.getElementById('mainContent');
   mc.style.overflow = 'auto';
   mc.innerHTML = `
-    <div style="padding:11px 18px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;">
+    <div style="padding:11px 18px 11px 60px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;">
       <div>
         <div style="font-family:var(--mono);font-size:.8rem;color:#d29922;font-weight:800;display:flex;align-items:center;gap:6px;"><i class="ti ti-chart-dots"></i>USAGE ANALYTICS</div>
         <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">Platform usage · All clients · Real-time</div>
@@ -2811,7 +2812,7 @@ async function showSalesPortal(){
   const mc = document.getElementById('mainContent');
   mc.style.overflow = 'hidden';
   mc.innerHTML = `
-    <div style="padding:11px 18px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;">
+    <div style="padding:11px 18px 11px 60px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;">
       <div>
         <div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;display:flex;align-items:center;gap:6px;">
           <i class="ti ti-users-group" style="filter:drop-shadow(0 0 3px var(--nes-blue))"></i>PARTNER HUB
@@ -3373,7 +3374,7 @@ async function showAdminStatus(){
   mc.style.display='flex';
   mc.style.flexDirection='column';
   mc.innerHTML=`
-    <div style="padding:11px 18px;border-bottom:1px solid var(--border);flex-shrink:0;">
+    <div style="padding:11px 18px 11px 60px;border-bottom:1px solid var(--border);flex-shrink:0;">
       <div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;">PLATFORM STATUS</div>
       <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">NES AI — Unified Business Platform · Live health check</div>
     </div>
@@ -3593,7 +3594,7 @@ async function showMyCredentials(){
   const mc=document.getElementById('mainContent');
   mc.style.overflow='auto';
   mc.innerHTML=`
-    <div style="padding:11px 18px;border-bottom:1px solid var(--border);flex-shrink:0;">
+    <div style="padding:11px 18px 11px 60px;border-bottom:1px solid var(--border);flex-shrink:0;">
       <div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;">IT SETUP</div>
       <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">Integration checklist · Connect your services</div>
     </div>
@@ -3983,8 +3984,13 @@ function updateStats(){
 }
 function toggleSidebar(){
   const sb=document.getElementById('sidebar');
-  if(window.innerWidth<=900)sb.classList.toggle('open');
-  else sb.classList.toggle('collapsed');
+  const overlay=document.getElementById('sidebarOverlay');
+  if(window.innerWidth<=900){
+    sb.classList.toggle('open');
+    if(overlay) overlay.style.display=sb.classList.contains('open')?'block':'none';
+  } else {
+    sb.classList.toggle('collapsed');
+  }
 }
 function clearChat(){
   if(!confirm('Clear all messages?'))return;
