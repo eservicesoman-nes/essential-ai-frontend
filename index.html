@@ -927,7 +927,18 @@ function restoreChat(idx){
     try{history=JSON.parse(chat.history);}catch(e){history=[];}
     allMsgsHTML=chat.msgs||'';
   }
-  showView('chat');
+  // Restore last active view on refresh
+  const _lastView = (() => { try{ return localStorage.getItem('nes_last_view'); }catch(e){ return null; } })();
+  if(_lastView && _lastView !== 'chat'){
+    setTimeout(() => {
+      showView(_lastView);
+      document.querySelectorAll('.nav-item').forEach(el=>{
+        el.classList.toggle('active', el.getAttribute('data-view') === _lastView);
+      });
+    }, 300);
+  } else {
+    showView('chat');
+  }
 }
 
 function bindNav(){
@@ -4530,8 +4541,10 @@ window.showEmail = async function(idx){
   const body = await fetchEmailBody(accountId, e.uid);
   if(bodyEl){
     let cleaned = body || '';
-    // Remove only very long garbled URLs (unsubscribe links etc) keep normal links
-    cleaned = cleaned.replace(/https?:\/\/[^\s]{120,}/g, '[link]');
+    // Shorten very long URLs but keep them as clickable text
+    cleaned = cleaned.replace(/(https?:\/\/[^\s]{80,})/g, (url) => {
+      try { const u = new URL(url); return u.hostname + '...'; } catch(e){ return '[link]'; }
+    });
     // Remove base64 blocks
     cleaned = cleaned.replace(/[A-Za-z0-9+\/]{60,}={0,2}/g, '');
     // Remove MIME headers
