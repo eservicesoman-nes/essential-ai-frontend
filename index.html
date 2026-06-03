@@ -930,12 +930,15 @@ function restoreChat(idx){
   // Restore last active view on refresh
   const _lastView = (() => { try{ return localStorage.getItem('nes_last_view'); }catch(e){ return null; } })();
   if(_lastView && _lastView !== 'chat'){
+    showView(_lastView);
+    // Update sidebar highlight after bindNav has run
     setTimeout(() => {
-      showView(_lastView);
       document.querySelectorAll('.nav-item').forEach(el=>{
-        el.classList.toggle('active', el.getAttribute('data-view') === _lastView);
+        const v = el.getAttribute('data-view');
+        if(v === _lastView) el.classList.add('active');
+        else el.classList.remove('active');
       });
-    }, 300);
+    }, 500);
   } else {
     showView('chat');
   }
