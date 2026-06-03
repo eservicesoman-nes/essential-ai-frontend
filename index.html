@@ -134,7 +134,7 @@
     .main{flex:1;display:flex;flex-direction:column;height:100dvh;overflow:hidden;min-width:0;position:relative;}
 
     /* Top bar - only show relevant buttons per view */
-    .top-bar{position:absolute;top:14px;right:18px;display:flex;gap:8px;z-index:100;align-items:center;}
+    .top-bar{position:absolute;top:10px;right:12px;display:flex;gap:4px;z-index:100;align-items:center;max-width:60%;justify-content:flex-end;}
     .top-btn{background:var(--surface);border:1px solid var(--border);border-radius:50%;width:36px;height:36px;display:grid;place-items:center;cursor:pointer;color:var(--nes-blue);font-size:1rem;}
     .top-btn:hover{background:var(--accent-lo);}
     .top-btn.danger:hover{background:rgba(248,81,73,.1);color:#f85149;border-color:#f85149;}
@@ -414,6 +414,7 @@
       .ceo-perf-grid{grid-template-columns:1fr!important;}
       /* Partner hub single column */
       .ph-tiers{grid-template-columns:1fr!important;}
+      .ph-tiers > div{max-width:100%!important;}
       /* API credits stats wrap */
       .ac-stats{grid-template-columns:1fr 1fr!important;}
       /* Team Hub iframe full width */
@@ -1497,7 +1498,8 @@ function showCommandCentre(){
     hub=document.createElement('div');
     hub.id='teamHubWrapper';
     hub.style.cssText='position:absolute;top:0;left:228px;right:0;bottom:0;background:var(--bg);z-index:50;display:flex;flex-direction:column;';
-    hub.innerHTML=`<div style="padding:11px 18px 11px 60px;border-bottom:1px solid var(--border);flex-shrink:0;"><div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;">TEAM HUB</div><div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">Internal team communications</div></div><div class="command-wrap"><iframe id="teamHubIframe" class="command-iframe" src="${ROCKET_URL}" title="NES Team Hub" allow="microphone; camera"></iframe></div>`;
+    hub.style.overflow='hidden';
+hub.innerHTML=`<div style="padding:11px 18px 11px 60px;border-bottom:1px solid var(--border);flex-shrink:0;"><div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;">TEAM HUB</div><div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">Internal team communications</div></div><div class="command-wrap" style="width:100%;flex:1;"><iframe id="teamHubIframe" class="command-iframe" src="${ROCKET_URL}" title="NES Team Hub" allow="microphone; camera" style="width:100%;height:100%;border:none;"></iframe></div>`;
     document.getElementById('app').appendChild(hub);
   }
   hub.style.display='flex';
@@ -3922,7 +3924,7 @@ function showPricing(){
       <!-- APEX SUITE SECTION -->
       <div style="margin-top:36px;text-align:center;">
         <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:16px;">Apex Suite — AI Voice Agents</div>
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;max-width:700px;margin:0 auto;">
+        <div class="ph-tiers" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;max-width:700px;margin:0 auto;">
           <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center;">
             <i class="ti ti-phone" style="font-size:24px;color:#3fb950;display:block;margin-bottom:8px;"></i>
             <div style="font-weight:700;margin-bottom:4px;">Apex Connect</div>
@@ -3986,8 +3988,14 @@ function toggleSidebar(){
   const sb=document.getElementById('sidebar');
   const overlay=document.getElementById('sidebarOverlay');
   if(window.innerWidth<=900){
-    sb.classList.toggle('open');
-    if(overlay) overlay.style.display=sb.classList.contains('open')?'block':'none';
+    const isOpen = sb.classList.contains('open');
+    if(isOpen){
+      sb.classList.remove('open');
+      if(overlay){overlay.style.display='none';overlay.style.pointerEvents='none';}
+    } else {
+      sb.classList.add('open');
+      if(overlay){overlay.style.display='block';overlay.style.pointerEvents='all';}
+    }
   } else {
     sb.classList.toggle('collapsed');
   }
@@ -4250,7 +4258,7 @@ async function loadInboxEmails(clientId){
       filters.innerHTML='<button onclick="filterInbox(&quot;all&quot;,this)" style="display:flex;align-items:center;gap:5px;font-size:.65rem;padding:4px 10px;border-radius:6px;border:none;background:var(--nes-blue);color:#fff;cursor:pointer;white-space:nowrap;flex-shrink:0;"><i class=\"ti ti-inbox\" style=\"font-size:11px;\"></i> All</button>'+
         visibleAccounts.map((a,i)=>{
           const label = accountLabels[a] || a.split('@')[0];
-          return `<button onclick="filterInbox('${a}',this)" style="display:flex;align-items:center;gap:5px;font-size:.65rem;padding:4px 10px;border-radius:6px;border:0.5px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer;white-space:nowrap;flex-shrink:0;"><div style="width:7px;height:7px;border-radius:50%;background:${colors[i%5]};flex-shrink:0;"></div>${label}</button>`;
+          return `<button onclick="filterInbox('${a}',this)" style="display:flex;align-items:center;gap:5px;font-size:.65rem;padding:4px 10px;border-radius:6px;border:0.5px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer;white-space:nowrap;flex-shrink:0;"><i class=\"ti ti-moon-stars\" style=\"font-size:10px;color:${colors[i%5]};\"></i>${label}</button>`;
         }).join('');
     }
     window._inboxEmails=emails;
