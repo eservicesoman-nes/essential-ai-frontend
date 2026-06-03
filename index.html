@@ -4548,12 +4548,13 @@ window.showEmail = async function(idx){
   const body = await fetchEmailBody(accountId, e.uid);
   if(bodyEl){
     let cleaned = body || '';
-    // Convert URLs to clickable links
-    cleaned = cleaned.replace(/(https?:\/\/[^\s]+)/g, (url) => {
+    // Convert URLs to clickable links — run AFTER HTML stripping
+    cleaned = cleaned.replace(/(https?:\/\/[^\s<>"{}|\\^`[\]]+)/g, (url) => {
+      // Strip trailing punctuation
+      const clean = url.replace(/[.,;:!?)]+$/, '');
       try {
-        const u = new URL(url);
-        const display = url.length > 60 ? u.hostname + '/...' : url;
-        return '<a href="'+url+'" target="_blank" rel="noopener" style="color:var(--nes-blue);word-break:break-all;">'+display+'</a>';
+        const display = clean.length > 55 ? clean.substring(0,55)+'...' : clean;
+        return '<a href="'+clean+'" target="_blank" rel="noopener noreferrer" style="color:#409cff;text-decoration:underline;cursor:pointer;">'+display+'</a>';
       } catch(e){ return url; }
     });
     // Remove base64 blocks
