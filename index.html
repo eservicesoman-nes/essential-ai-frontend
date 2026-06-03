@@ -4114,20 +4114,29 @@ function showDeen(){
 async function showInbox(){
   const mc=document.getElementById('mainContent');
   mc.style.overflow='hidden';
-  // For nesadmin — find client with email accounts, fallback to first client
+  // For nesadmin — find client with email accounts
   let clientId = userClientId;
-  if(!clientId && window._clients && window._clients.length){
-    // Try to find client with email accounts
-    const nesClient = window._clients.find(c => c.name && c.name.toLowerCase().includes('essential'));
-    clientId = nesClient?.id || window._clients[0]?.id;
+  if(!clientId){
+    // Load clients if not loaded
+    if(!window._clients || !window._clients.length){
+      try{
+        const {data} = await sb.from('clients').select('id,name').order('name');
+        window._clients = data || [];
+      }catch(e){}
+    }
+    if(window._clients && window._clients.length){
+      const nesClient = window._clients.find(c => c.name && (c.name.toLowerCase().includes('essential') || c.name.toLowerCase().includes('nes')));
+      clientId = nesClient?.id || window._clients[0]?.id;
+    }
   }
+  window._inboxClientId = clientId; // store globally for refresh
   mc.innerHTML=`
-    <div style="padding:11px 18px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;">
+    <div style="padding:11px 18px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding-left:60px;">
       <div>
         <div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;display:flex;align-items:center;gap:6px;"><i class="ti ti-mail"></i>INBOX</div>
         <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">Unified email · All accounts</div>
       </div>
-      <button onclick="showInbox()" style="background:none;border:1px solid var(--border);border-radius:6px;padding:4px 10px;color:var(--muted);cursor:pointer;font-size:.72rem;font-family:var(--mono);"><i class="ti ti-refresh"></i> Refresh</button>
+      <button onclick="loadInboxEmails(window._inboxClientId)" style="background:none;border:1px solid var(--border);border-radius:6px;padding:4px 10px;color:var(--muted);cursor:pointer;font-size:.72rem;font-family:var(--mono);"><i class="ti ti-refresh"></i> Refresh</button>
     </div>
     <div class="inbox-panel-toggle" style="display:none;padding:6px 12px;border-bottom:1px solid var(--border);gap:6px;">
       <button id="inboxToggleList" onclick="toggleInboxPanel('list')" style="flex:1;padding:7px;border:none;border-radius:7px;background:var(--nes-blue);color:#fff;font-size:.75rem;font-weight:600;cursor:pointer;"><i class="ti ti-inbox"></i> Inbox</button>
@@ -4151,18 +4160,6 @@ async function showInbox(){
         </div>
       </div>
     </div>`;
-  // Load clients first if not loaded
-  if(!window._clients || !window._clients.length){
-    try{
-      const {data} = await sb.from('clients').select('id,name').order('created_at',{ascending:false});
-      window._clients = data || [];
-    }catch(e){}
-  }
-  // Reload with correct client
-  if(!userClientId && window._clients && window._clients.length){
-    const nesClient = window._clients.find(c => c.name && c.name.toLowerCase().includes('essential'));
-    clientId = nesClient?.id || window._clients[0]?.id;
-  }
   if(clientId) await loadInboxEmails(clientId);
 }
 
