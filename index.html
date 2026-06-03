@@ -4235,10 +4235,23 @@ async function loadInboxEmails(clientId){
     const colors=['#409cff','#3fb950','#7f77dd','#d29922','#f85149'];
     const accounts=[...new Set(emails.map(e=>e.account_email))];
     // Update filter pills
+    // Load account labels from Supabase for friendly names
+    let accountLabels = {};
+    try{
+      const {data:accsData} = await sb.from('email_accounts').select('email_address,label').eq('client_id', window._inboxClientId||clientId);
+      (accsData||[]).forEach(a => accountLabels[a.email_address] = a.label||a.email_address);
+    }catch(e){}
+    window._accountLabels = accountLabels;
+
     const filters=document.getElementById('acctFilters');
     if(filters){
-      filters.innerHTML='<button onclick="filterInbox(\'all\',this)" style="font-size:.65rem;padding:3px 10px;border-radius:20px;border:none;background:var(--nes-blue);color:#fff;cursor:pointer;white-space:nowrap;">All</button>'+
-        accounts.map((a,i)=>`<button onclick="filterInbox('${a}',this)" style="font-size:.65rem;padding:3px 10px;border-radius:20px;border:0.5px solid var(--border);background:none;color:var(--muted);cursor:pointer;white-space:nowrap;border-left:2px solid ${colors[i%5]};">${a.split('@')[1]||a}</button>`).join('');
+      // Show up to 10 accounts — all visible, scrollable if more
+      const visibleAccounts = accounts.slice(0,10);
+      filters.innerHTML='<button onclick="filterInbox(&quot;all&quot;,this)" style="display:flex;align-items:center;gap:5px;font-size:.65rem;padding:4px 10px;border-radius:6px;border:none;background:var(--nes-blue);color:#fff;cursor:pointer;white-space:nowrap;flex-shrink:0;"><i class=\"ti ti-inbox\" style=\"font-size:11px;\"></i> All</button>'+
+        visibleAccounts.map((a,i)=>{
+          const label = accountLabels[a] || a.split('@')[0];
+          return `<button onclick="filterInbox('${a}',this)" style="display:flex;align-items:center;gap:5px;font-size:.65rem;padding:4px 10px;border-radius:6px;border:0.5px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer;white-space:nowrap;flex-shrink:0;"><div style="width:7px;height:7px;border-radius:50%;background:${colors[i%5]};flex-shrink:0;"></div>${label}</button>`;
+        }).join('');
     }
     window._inboxEmails=emails;
     window._inboxAccounts=accounts;
@@ -4267,13 +4280,15 @@ function renderEmailList(emails){
         ${!e.is_read?'<div style="width:6px;height:6px;border-radius:50%;background:var(--nes-blue);margin-left:6px;flex-shrink:0;"></div>':''}
       </div>
       <div style="font-size:.72rem;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:2px;">${e.subject||'(no subject)'}</div>
-      <div style="font-size:.65rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${e.account_label||e.account_email}</div>
+      <div style="font-size:.65rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${(window._accountLabels&&window._accountLabels[e.account_email])||e.account_label||e.account_email.split("@")[0]}</div>
     </div>`;
   }).join('');
 }
 
 function filterInbox(acct,btn){
-  document.querySelectorAll('#acctFilters button').forEach(b=>{b.style.background='none';b.style.color='var(--muted)';b.style.border='0.5px solid var(--border)';});
+  document.querySelectorAll('#acctFilters button').forEach(b=>{
+    b.style.background='var(--surface)';b.style.color='var(--muted)';b.style.border='0.5px solid var(--border)';
+  });
   btn.style.background='var(--nes-blue)';btn.style.color='#fff';btn.style.border='none';
   const emails=window._inboxEmails||[];
   const filtered=acct==='all'?emails:emails.filter(e=>e.account_email===acct);
@@ -4317,7 +4332,7 @@ function showEmail(idx){
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
         <span style="font-size:.65rem;color:var(--muted);">Reply from:</span>
         <select id="replyFrom" style="font-size:.65rem;padding:3px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;">
-          ${accounts.map(a=>`<option value="${a}" ${a===e.account_email?'selected':''}>${a}${a===e.account_email?' (default)':''}</option>`).join('')}
+          ${accounts.map(a=>`<option value="${a}" ${a===e.account_email?'selected':''}>${(window._accountLabels&&window._accountLabels[a])||a.split('@')[0]}${a===e.account_email?' · default':''}</option>`).join('')}
         </select>
         <span style="font-size:.6rem;padding:2px 6px;border-radius:6px;background:#0d2818;color:#3fb950;">Default</span>
       </div>
