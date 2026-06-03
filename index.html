@@ -2169,7 +2169,7 @@ async function showApiCredits(){
         <div style="font-family:var(--mono);font-size:.8rem;color:#7f77dd;font-weight:800;">API CREDITS</div>
         <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">Balance · Usage · Auto-recharge thresholds</div>
       </div>
-      <button onclick="saveAllThresholds()" style="background:var(--nes-btn-grad);border:none;border-radius:8px;padding:6px 14px;color:#fff;font-size:.75rem;font-weight:700;cursor:pointer;margin-right:44px;"><i class="ti ti-device-floppy"></i> Save Thresholds</button>
+      <button onclick="saveAllThresholds()" style="background:var(--nes-btn-grad);border:none;border-radius:8px;padding:6px 14px;color:#fff;font-size:.75rem;font-weight:700;cursor:pointer;margin-top:8px;display:block;"><i class="ti ti-device-floppy"></i> Save Thresholds</button>
     </div>
     <div class="page" id="apiCreditsContent" style="overflow-y:auto;flex:1;">
       <div style="color:var(--muted);font-family:var(--mono);font-size:.8rem;padding:20px 0;">Loading API credits...</div>
@@ -3984,6 +3984,52 @@ function updateStats(){
   const fill=document.getElementById('usageFill');
   if(fill)fill.style.width=Math.min(100,(chatUsed/limits.messages)*100)+'%';
 }
+// ── PULL TO REFRESH ──
+(function(){
+  let startY=0, startTime=0, pulling=false;
+  const indicator = document.createElement('div');
+  indicator.id='pullIndicator';
+  indicator.style.cssText='position:fixed;top:0;left:0;right:0;height:3px;background:var(--nes-blue);transform:scaleX(0);transform-origin:left;transition:transform .2s;z-index:9999;opacity:0;';
+  document.body.appendChild(indicator);
+
+  document.addEventListener('touchstart', (e)=>{
+    const mc = document.getElementById('mainContent');
+    if(!mc) return;
+    if(mc.scrollTop === 0){
+      startY = e.touches[0].clientY;
+      startTime = Date.now();
+      pulling = true;
+    }
+  }, {passive:true});
+
+  document.addEventListener('touchmove', (e)=>{
+    if(!pulling) return;
+    const dy = e.touches[0].clientY - startY;
+    if(dy > 0 && dy < 120){
+      const pct = dy/120;
+      indicator.style.opacity='1';
+      indicator.style.transform='scaleX('+pct+')';
+    }
+  }, {passive:true});
+
+  document.addEventListener('touchend', (e)=>{
+    if(!pulling) return;
+    const dy = e.changedTouches[0].clientY - startY;
+    indicator.style.transform='scaleX(0)';
+    indicator.style.opacity='0';
+    pulling = false;
+    if(dy > 80){
+      // Trigger refresh based on current view
+      const lastView = (() => { try{ return localStorage.getItem('nes_last_view'); }catch(e2){ return 'chat'; } })();
+      if(lastView==='inbox' && window._inboxClientId) loadInboxEmails(window._inboxClientId);
+      else if(lastView==='ceo') loadCeoFeed();
+      else if(lastView==='platformstatus') checkPlatformStatus();
+      else if(lastView==='apicredits') loadApiCredits();
+      else showView(lastView||'chat');
+    }
+  }, {passive:true});
+})();
+
 function toggleSidebar(){
   const sb=document.getElementById('sidebar');
   const overlay=document.getElementById('sidebarOverlay');
@@ -4258,7 +4304,7 @@ async function loadInboxEmails(clientId){
       filters.innerHTML='<button onclick="filterInbox(&quot;all&quot;,this)" style="display:flex;align-items:center;gap:5px;font-size:.65rem;padding:4px 10px;border-radius:6px;border:none;background:var(--nes-blue);color:#fff;cursor:pointer;white-space:nowrap;flex-shrink:0;"><i class=\"ti ti-inbox\" style=\"font-size:11px;\"></i> All</button>'+
         visibleAccounts.map((a,i)=>{
           const label = accountLabels[a] || a.split('@')[0];
-          return `<button onclick="filterInbox('${a}',this)" style="display:flex;align-items:center;gap:5px;font-size:.65rem;padding:4px 10px;border-radius:6px;border:0.5px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer;white-space:nowrap;flex-shrink:0;"><i class=\"ti ti-moon-stars\" style=\"font-size:10px;color:${colors[i%5]};\"></i>${label}</button>`;
+          return `<button onclick="filterInbox('${a}',this)" style="display:flex;align-items:center;gap:5px;font-size:.65rem;padding:4px 10px;border-radius:6px;border:0.5px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer;white-space:nowrap;flex-shrink:0;"><span style=\"display:inline-block;width:8px;height:14px;border-radius:8px 0 0 8px;border:2px solid ${colors[i%5]};border-right:none;margin-right:4px;flex-shrink:0;\"></span>${label}</button>`;
         }).join('');
     }
     window._inboxEmails=emails;
