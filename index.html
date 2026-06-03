@@ -4578,6 +4578,12 @@ window.showEmail = async function(idx){
       return alphaRatio > 0.3 || t.length < 10;
     }).join('\n');
     cleaned = cleaned.trim();
+    // Convert URLs to clickable links — AFTER all cleaning
+    cleaned = cleaned.replace(/(https?:\/\/[^\s]+)/g, (url) => {
+      const clean = url.replace(/[.,;:!?)>]+$/, '');
+      const display = clean.length > 55 ? clean.substring(0,52)+'...' : clean;
+      return '<a href="'+clean+'" target="_blank" rel="noopener noreferrer" style="color:#409cff;text-decoration:underline;cursor:pointer;word-break:break-all;">'+display+'</a>';
+    });
     bodyEl.innerHTML = cleaned && cleaned.length > 10
       ? '<div style="white-space:pre-wrap;line-height:1.9;font-size:.82rem;color:var(--text);padding-bottom:20px;word-break:break-word;">'+cleaned+'</div>'
       : '<div style="color:var(--muted);font-family:var(--mono);font-size:.72rem;text-align:center;padding:20px;">No readable content</div>';
