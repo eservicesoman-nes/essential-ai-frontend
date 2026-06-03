@@ -299,7 +299,7 @@
     .cs-val{font-size:1rem;font-weight:700;color:var(--text);}
     .cm-tabs{display:flex;border-bottom:1px solid var(--border);overflow-x:auto;}
     .cm-tab{font-size:.72rem;padding:7px 12px;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;font-family:var(--mono);white-space:nowrap;}
-    .cm-tab.active{color:var(--nes-blue);border-bottom-color:var(--nes-blue);}
+    .cm-tab.active{color:#fff;background:var(--nes-blue);border-color:var(--nes-blue);}
     .cm-content{padding:11px 13px;overflow-y:auto;max-height:calc(100dvh - 320px);}
 
     /* Modules */
@@ -404,7 +404,22 @@
       .sales-grid{grid-template-columns:1fr 1fr!important;}
       .kgrid5{grid-template-columns:repeat(3,1fr)!important;}
       .top-bar{gap:4px!important;}
-      .top-bar button span{display:none!important;}
+      .top-bar button span{font-size:.65rem;}
+      /* Fix all page header overlap with hamburger */
+      .page-header-inner{padding-left:60px!important;}
+      /* Platform status stats wrap */
+      .ps-stats-row{flex-wrap:wrap!important;gap:6px!important;}
+      .ps-stat-card{min-width:calc(33% - 6px)!important;}
+      /* CEO dashboard single column */
+      .ceo-perf-grid{grid-template-columns:1fr!important;}
+      /* Partner hub single column */
+      .ph-tiers{grid-template-columns:1fr!important;}
+      /* API credits stats wrap */
+      .ac-stats{grid-template-columns:1fr 1fr!important;}
+      /* Team Hub iframe full width */
+      #teamHubFrame{width:100%!important;height:calc(100vh - 120px)!important;}
+      /* CM tabs wrap on mobile */
+      .cm-tabs{flex-wrap:wrap!important;}
       .disclaimer{display:none;}
       .kgrid3{grid-template-columns:1fr 1fr;}
       .row2,.cm-layout{grid-template-columns:1fr;}
@@ -540,8 +555,8 @@
     <div class="top-bar" id="topBar">
       <button class="top-btn danger" id="clearBtn" onclick="clearChat()" title="Clear Chat"><i class="ti ti-trash"></i></button>
       <button class="top-btn" onclick="toggleTheme()" title="Toggle Theme"><i class="ti ti-sun"></i></button>
-      <div style="width:1px;height:20px;background:var(--border);margin:0 2px;"></div>
-      <button class="top-btn" onclick="showView('deen')" title="Deen دين" style="width:auto;border-radius:20px;padding:0 10px;gap:5px;display:flex;align-items:center;font-size:.72rem;font-weight:600;"><i class="ti ti-moon-stars" style="font-size:14px;"></i><span>Deen</span></button>
+      <div style="width:1px;height:20px;background:var(--border);margin:0 4px;flex-shrink:0;"></div>
+      <button class="top-btn" onclick="showView('deen')" title="Deen دين" style="width:auto;border-radius:20px;padding:0 10px;gap:5px;display:flex;align-items:center;font-size:.72rem;font-weight:600;flex-shrink:0;white-space:nowrap;"><i class="ti ti-moon-stars" style="font-size:14px;"></i><span>Deen</span></button>
     </div>
     <div id="mainContent" style="display:flex;flex-direction:column;height:100%;overflow:hidden;"></div>
   </main>
@@ -928,6 +943,8 @@ function bindNav(){
 }
 
 function showView(view){
+  // Persist active view for page refresh
+  try{ localStorage.setItem('nes_last_view', view); }catch(e){}
   currentView=view;
   localStorage.setItem('nesai_view',view);
   if(view!=='ceo')window._ceoRendered=false;
@@ -961,7 +978,7 @@ async function showCEODashboard(){
   }
   window._ceoRendered=false;
   mc.innerHTML=`
-    <div style="padding:11px 18px;border-bottom:1px solid var(--border);flex-shrink:0;">
+    <div style="padding:11px 18px 11px 60px;border-bottom:1px solid var(--border);flex-shrink:0;">
       <div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;">CEO DASHBOARD</div>
       <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">Live · ${new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</div>
     </div>
@@ -1597,12 +1614,24 @@ async function onboardClient(clientId, clientName){
   }
 }
 
+function hideAdminCMTabs(){
+  // Hide admin-only tabs from client portal users
+  if(userRole !== 'nesadmin'){
+    document.querySelectorAll('.cm-tab').forEach(tab => {
+      const oc = tab.getAttribute('onclick') || '';
+      if(oc.includes("'creds'") || oc.includes("'branding'") || oc.includes("'email'") || oc.includes("'users'")){
+        tab.style.display='none';
+      }
+    });
+  }
+}
+
 async function showClientManager(){
   if(userRole!=='nesadmin'){addAiMsg('Access denied.');return;}
   const mc=document.getElementById('mainContent');
   mc.style.overflow='hidden';
   mc.innerHTML=`
-    <div style="padding:11px 18px;border-bottom:1px solid var(--border);flex-shrink:0;">
+    <div style="padding:11px 18px 11px 60px;border-bottom:1px solid var(--border);flex-shrink:0;">
       <div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;">CLIENT MANAGER</div>
       <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">NES Admin only · Manage all clients</div>
     </div>
@@ -4100,7 +4129,7 @@ function showDeen(){
   const mc=document.getElementById('mainContent');
   mc.style.overflow='auto';
   mc.innerHTML=`
-    <div style="padding:11px 18px;border-bottom:1px solid var(--border);flex-shrink:0;">
+    <div style="padding:11px 18px 11px 60px;border-bottom:1px solid var(--border);flex-shrink:0;">
       <div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;display:flex;align-items:center;gap:6px;"><i class="ti ti-moon-stars"></i>DEEN &#1583;&#1610;&#1606;</div>
       <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">Islamic companion · Quran · Hadith · Supplications</div>
     </div>
@@ -4140,7 +4169,7 @@ async function showInbox(){
   }
   window._inboxClientId = clientId;
   mc.innerHTML=`
-    <div style="padding:11px 18px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding-left:60px;">
+    <div style="padding:11px 18px 11px 60px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;">
       <div>
         <div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;display:flex;align-items:center;gap:6px;"><i class="ti ti-mail"></i>INBOX</div>
         <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">Unified email · All accounts</div>
@@ -4487,17 +4516,22 @@ window.showEmail = async function(idx){
   _origShowEmail(idx);
   const e = window._inboxEmails && window._inboxEmails[idx];
   if(!e) return;
-  const accounts = window._inboxAccounts || [];
-  const {data: accs} = await sb.from('email_accounts').select('id,email_address').eq('email_address', e.account_email);
-  if(!accs || !accs.length) return;
+  // Use cached account IDs to avoid extra Supabase query on every click
+  if(!window._emailAccountIds){
+    const clientId = window._inboxClientId;
+    const {data:accs2} = await sb.from('email_accounts').select('id,email_address').eq('client_id',clientId);
+    window._emailAccountIds = {};
+    (accs2||[]).forEach(a => window._emailAccountIds[a.email_address] = a.id);
+  }
+  const accountId = window._emailAccountIds[e.account_email];
+  if(!accountId) return;
   const bodyEl = document.getElementById('emailBodyPanel');
   if(!bodyEl) return;
-  const body = await fetchEmailBody(accs[0].id, e.uid);
+  const body = await fetchEmailBody(accountId, e.uid);
   if(bodyEl){
     let cleaned = body || '';
-    // Remove URLs (long unsubscribe links etc)
-    cleaned = cleaned.replace(/https?:\/\/[^\s]{60,}/g, '[link]');
-    cleaned = cleaned.replace(/https?:\/\/[^\s]+/g, (m) => m.length > 80 ? '[link]' : m);
+    // Remove only very long garbled URLs (unsubscribe links etc) keep normal links
+    cleaned = cleaned.replace(/https?:\/\/[^\s]{120,}/g, '[link]');
     // Remove base64 blocks
     cleaned = cleaned.replace(/[A-Za-z0-9+\/]{60,}={0,2}/g, '');
     // Remove MIME headers
