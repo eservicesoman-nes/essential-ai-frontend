@@ -388,9 +388,10 @@
     }
     /* Inbox mobile */
     @media(max-width:700px){
-      #inboxGrid{grid-template-columns:1fr!important;}
-      #inboxGrid .inbox-read-panel{display:none;}
-      #inboxGrid .inbox-list-panel{display:flex!important;}
+      .inbox-grid-wrap{grid-template-columns:1fr!important;height:calc(100% - 100px)!important;}
+      .inbox-grid-wrap > div:nth-child(2){display:none;}
+      .inbox-panel-toggle{display:flex!important;}
+      .top-bar button span{font-size:.65rem;}
     }
     @media(max-width:700px){
       .welcome-card,.messages,.input-area{padding-left:12px;padding-right:12px;}
@@ -4114,35 +4115,43 @@ function showDeen(){
 async function showInbox(){
   const mc=document.getElementById('mainContent');
   mc.style.overflow='hidden';
-  // For nesadmin — find client with email accounts
+  // Always load clients fresh for nesadmin
   let clientId = userClientId;
   if(!clientId){
-    // Load clients if not loaded
-    if(!window._clients || !window._clients.length){
-      try{
-        const {data} = await sb.from('clients').select('id,name').order('name');
-        window._clients = data || [];
-      }catch(e){}
-    }
+    try{
+      const {data} = await sb.from('clients').select('id,name').order('name');
+      window._clients = data || [];
+    }catch(e){}
     if(window._clients && window._clients.length){
-      const nesClient = window._clients.find(c => c.name && (c.name.toLowerCase().includes('essential') || c.name.toLowerCase().includes('nes')));
-      clientId = nesClient?.id || window._clients[0]?.id;
+      // Find client with email accounts first
+      try{
+        const {data:accs} = await sb.from('email_accounts').select('client_id').eq('is_active',true).limit(1);
+        if(accs && accs.length){
+          clientId = accs[0].client_id;
+        } else {
+          const nesClient = window._clients.find(c => c.name && (c.name.toLowerCase().includes('essential')||c.name.toLowerCase().includes('nes')));
+          clientId = nesClient?.id || window._clients[0]?.id;
+        }
+      }catch(e){
+        const nesClient = window._clients.find(c => c.name && (c.name.toLowerCase().includes('essential')||c.name.toLowerCase().includes('nes')));
+        clientId = nesClient?.id || window._clients[0]?.id;
+      }
     }
   }
-  window._inboxClientId = clientId; // store globally for refresh
+  window._inboxClientId = clientId;
   mc.innerHTML=`
     <div style="padding:11px 18px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding-left:60px;">
       <div>
         <div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;display:flex;align-items:center;gap:6px;"><i class="ti ti-mail"></i>INBOX</div>
         <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">Unified email · All accounts</div>
       </div>
-      <button onclick="loadInboxEmails(window._inboxClientId)" style="background:none;border:1px solid var(--border);border-radius:6px;padding:4px 10px;color:var(--muted);cursor:pointer;font-size:.72rem;font-family:var(--mono);"><i class="ti ti-refresh"></i> Refresh</button>
+      <button onclick="if(window._inboxClientId)loadInboxEmails(window._inboxClientId);else showInbox();" style="background:none;border:1px solid var(--border);border-radius:6px;padding:4px 10px;color:var(--muted);cursor:pointer;font-size:.72rem;font-family:var(--mono);"><i class="ti ti-refresh"></i> Refresh</button>
     </div>
     <div class="inbox-panel-toggle" style="display:none;padding:6px 12px;border-bottom:1px solid var(--border);gap:6px;">
       <button id="inboxToggleList" onclick="toggleInboxPanel('list')" style="flex:1;padding:7px;border:none;border-radius:7px;background:var(--nes-blue);color:#fff;font-size:.75rem;font-weight:600;cursor:pointer;"><i class="ti ti-inbox"></i> Inbox</button>
       <button id="inboxToggleRead" onclick="toggleInboxPanel('read')" style="flex:1;padding:7px;border:none;border-radius:7px;background:var(--surface);color:var(--muted);font-size:.75rem;font-weight:600;cursor:pointer;border:1px solid var(--border);"><i class="ti ti-mail-opened"></i> Read</button>
     </div>
-    <div style="display:grid;grid-template-columns:280px 1fr;flex:1;overflow:hidden;height:calc(100% - 56px);" id="inboxGrid">
+    <div style="display:grid;grid-template-columns:280px 1fr;flex:1;overflow:hidden;height:calc(100% - 56px);" id="inboxGrid" class="inbox-grid-wrap">
       <!-- Email list -->
       <div style="border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;background:var(--surface);">
         <div style="padding:8px 12px;border-bottom:1px solid var(--border);display:flex;gap:6px;overflow-x:auto;" id="acctFilters">
@@ -4198,7 +4207,7 @@ function renderEmailList(emails){
     const acctIdx=accounts.indexOf(e.account_email);
     const color=colors[acctIdx%5]||'#409cff';
     const date=e.received_at?new Date(e.received_at).toLocaleDateString('en-GB',{day:'numeric',month:'short'}):'';
-    return`<div onclick="showEmail(${i})" style="padding:10px 12px;border-bottom:1px solid rgba(26,35,50,.5);cursor:pointer;border-left:3px solid ${color};" class="email-row-${i}">
+    return`<div onclick="showEmail(${i})" style="padding:12px;border-bottom:1px solid rgba(26,35,50,.5);cursor:pointer;border-left:3px solid ${color};-webkit-tap-highlight-color:transparent;" class="email-row-${i}">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;">
         <div style="font-size:.75rem;font-weight:${e.is_read?'400':'600'};color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;">${e.from_name||e.from_address||'Unknown'}</div>
         <div style="font-size:.6rem;color:var(--muted);margin-left:8px;flex-shrink:0;">${date}</div>
@@ -4485,26 +4494,33 @@ window.showEmail = async function(idx){
   if(!bodyEl) return;
   const body = await fetchEmailBody(accs[0].id, e.uid);
   if(bodyEl){
-    // Clean MIME encoded content
-    let cleaned = body;
+    let cleaned = body || '';
+    // Remove URLs (long unsubscribe links etc)
+    cleaned = cleaned.replace(/https?:\/\/[^\s]{60,}/g, '[link]');
+    cleaned = cleaned.replace(/https?:\/\/[^\s]+/g, (m) => m.length > 80 ? '[link]' : m);
     // Remove base64 blocks
-    cleaned = cleaned.replace(/[A-Za-z0-9+/]{40,}={0,2}/g, '');
-    // Remove MIME boundaries and headers
-    cleaned = cleaned.replace(/--[a-zA-Z0-9_\-]+=*[\r\n]*/g, '');
-    cleaned = cleaned.replace(/Content-Type:[^\n]*/gi, '');
-    cleaned = cleaned.replace(/Content-Transfer-Encoding:[^\n]*/gi, '');
-    cleaned = cleaned.replace(/Content-Disposition:[^\n]*/gi, '');
-    cleaned = cleaned.replace(/MIME-Version:[^\n]*/gi, '');
-    // Remove HTML tags
-    cleaned = cleaned.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '');
-    cleaned = cleaned.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '');
+    cleaned = cleaned.replace(/[A-Za-z0-9+\/]{60,}={0,2}/g, '');
+    // Remove MIME headers
+    cleaned = cleaned.replace(/--[\w\-]+=*\r?\n/g, '');
+    cleaned = cleaned.replace(/^(Content-Type|Content-Transfer-Encoding|Content-Disposition|MIME-Version|X-[\w-]+):[^\n]*\n/gm, '');
+    // Remove HTML
+    cleaned = cleaned.replace(/<style[\s\S]*?<\/style>/gi, '');
+    cleaned = cleaned.replace(/<script[\s\S]*?<\/script>/gi, '');
     cleaned = cleaned.replace(/<[^>]+>/g, ' ');
-    // Decode HTML entities
-    cleaned = cleaned.replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&nbsp;/g,' ').replace(/&#39;/g,"'").replace(/&quot;/g,'"');
+    // Decode entities
+    cleaned = cleaned.replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&nbsp;/g,' ').replace(/&#39;/g,"'").replace(/&quot;/g,'"').replace(/&#[0-9]+;/g,' ');
     // Clean whitespace
-    cleaned = cleaned.replace(/\r\n|\r/g,'\n').replace(/\n{3,}/g,'\n\n').replace(/[ \t]{2,}/g,' ').trim();
+    cleaned = cleaned.replace(/[ \t]{2,}/g,' ').replace(/\n{3,}/g,'\n\n').trim();
+    // Remove lines that are just symbols/garbage
+    cleaned = cleaned.split('\n').filter(l => {
+      const t = l.trim();
+      if(t.length === 0) return true;
+      const alphaRatio = (t.match(/[a-zA-Z0-9\u0600-\u06FF]/g)||[]).length / t.length;
+      return alphaRatio > 0.3 || t.length < 10;
+    }).join('\n');
+    cleaned = cleaned.trim();
     bodyEl.innerHTML = cleaned && cleaned.length > 10
-      ? '<div style="white-space:pre-wrap;line-height:1.8;font-size:.82rem;color:var(--text);">'+cleaned+'</div>'
+      ? '<div style="white-space:pre-wrap;line-height:1.9;font-size:.82rem;color:var(--text);padding-bottom:20px;">'+cleaned+'</div>'
       : '<div style="color:var(--muted);font-family:var(--mono);font-size:.72rem;text-align:center;padding:20px;">No readable content</div>';
   }
 };
