@@ -959,6 +959,10 @@ function bindNav(){
 function showView(view){
   // Persist active view for page refresh
   try{ localStorage.setItem('nes_last_view', view); }catch(e){}
+  // Update sidebar highlight immediately
+  document.querySelectorAll('.nav-item[data-view]').forEach(el=>{
+    el.classList.toggle('active', el.getAttribute('data-view') === view);
+  });
   currentView=view;
   localStorage.setItem('nesai_view',view);
   if(view!=='ceo')window._ceoRendered=false;
@@ -4544,9 +4548,13 @@ window.showEmail = async function(idx){
   const body = await fetchEmailBody(accountId, e.uid);
   if(bodyEl){
     let cleaned = body || '';
-    // Shorten very long URLs but keep them as clickable text
-    cleaned = cleaned.replace(/(https?:\/\/[^\s]{80,})/g, (url) => {
-      try { const u = new URL(url); return u.hostname + '...'; } catch(e){ return '[link]'; }
+    // Convert URLs to clickable links
+    cleaned = cleaned.replace(/(https?:\/\/[^\s]+)/g, (url) => {
+      try {
+        const u = new URL(url);
+        const display = url.length > 60 ? u.hostname + '/...' : url;
+        return '<a href="'+url+'" target="_blank" rel="noopener" style="color:var(--nes-blue);word-break:break-all;">'+display+'</a>';
+      } catch(e){ return url; }
     });
     // Remove base64 blocks
     cleaned = cleaned.replace(/[A-Za-z0-9+\/]{60,}={0,2}/g, '');
@@ -4570,7 +4578,7 @@ window.showEmail = async function(idx){
     }).join('\n');
     cleaned = cleaned.trim();
     bodyEl.innerHTML = cleaned && cleaned.length > 10
-      ? '<div style="white-space:pre-wrap;line-height:1.9;font-size:.82rem;color:var(--text);padding-bottom:20px;">'+cleaned+'</div>'
+      ? '<div style="white-space:pre-wrap;line-height:1.9;font-size:.82rem;color:var(--text);padding-bottom:20px;word-break:break-word;">'+cleaned+'</div>'
       : '<div style="color:var(--muted);font-family:var(--mono);font-size:.72rem;text-align:center;padding:20px;">No readable content</div>';
   }
 };
