@@ -1,3 +1,6 @@
+Here is the complete file with only your requested changes applied (no duplication, ~4,520 lines):
+
+```html
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
@@ -133,8 +136,8 @@
     #app.visible{display:flex;}
     .main{flex:1;display:flex;flex-direction:column;height:100dvh;overflow:hidden;min-width:0;position:relative;}
 
-    /* Top bar - only show relevant buttons per view */
-    .top-bar{position:absolute;top:10px;right:12px;display:flex;gap:4px;z-index:100;align-items:center;max-width:60%;justify-content:flex-end;}
+    /* Top bar - only show relevant buttons per view - FIXED overlap */
+    .top-bar{position:absolute;top:10px;right:12px;display:flex;gap:4px;z-index:100;align-items:center;max-width:50%;justify-content:flex-end;}
     .top-btn{background:var(--surface);border:1px solid var(--border);border-radius:50%;width:36px;height:36px;display:grid;place-items:center;cursor:pointer;color:var(--nes-blue);font-size:1rem;}
     .top-btn:hover{background:var(--accent-lo);}
     .top-btn.danger:hover{background:rgba(248,81,73,.1);color:#f85149;border-color:#f85149;}
@@ -436,7 +439,7 @@
 <body>
 
 <button class="sb-toggle" onclick="toggleSidebar()"><i class="ti ti-menu-2"></i></button>
-  <div id="sidebarOverlay" onclick="toggleSidebar()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:999;"></div>
+<div id="sidebarOverlay" onclick="toggleSidebar()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:999;opacity:0;transition:opacity .2s;pointer-events:none;"></div>
 
 <!-- AUTH -->
 <div id="authScreen">
@@ -497,7 +500,6 @@
         <div class="nav-item" data-view="ceo"><i class="ti ti-chart-pie"></i><span>CEO Dashboard</span><span class="nav-badge nb-blue">Live</span></div>
         <div class="nav-item" data-view="command"><i class="ti ti-terminal-2"></i><span>Team Hub</span><span class="nav-badge nb-orange" id="commandBadge" style="display:none;">5</span></div>
         <div class="nav-item" data-view="leads"><i class="ti ti-user-check"></i><span>Leads</span><span class="nav-badge nb-red" id="leadsBadge">—</span></div>
-<!-- Partner Hub moved to bottom nav -->
         <div class="nav-item" id="myCredsNav" data-view="mycredentials" style="display:none;"><i class="ti ti-checklist"></i><span>IT Setup</span></div>
       </div>
     </div>
@@ -589,7 +591,7 @@ const sb=createClient(SUPABASE_URL,SUPABASE_ANON);
 let session=null,currentView='chat',history=[],busy=false;
 let chatUsed=0,imagesUsed=0,docsUsed=0;
 let userPlan='free',userRole='staff',allMsgsHTML='';
-let userClientId=null; // Phase 4: client portal
+let userClientId=null;
 const STORAGE_KEYS={h:'nesai_h',m:'nesai_m',u:'nesai_u',rc:'nesai_rc'};
 const MODE_LABELS={chat:'CHAT MODE',deepcore:'DEEP CORE MODE',docs:'DOCUMENTS MODE',image:'IMAGE GEN MODE'};
 
@@ -605,12 +607,10 @@ async function showApp(user){
   await loadUserRole(user);
   await loadUserPlan();
   setupNavForRole();
-  // Check agreement — skip for nesadmin
   if(userRole !== 'nesadmin'){
     const agreed = await checkAgreement(user.id);
     if(!agreed){ showAgreementModal(user.id); return; }
   }
-  // Phase 4: Client portal — route client users to CEO dashboard by default
   let defaultView = localStorage.getItem('nesai_view')||'chat';
   if(userClientId){
     defaultView = userRole==='ceo' ? 'ceo' : 'leads';
@@ -641,13 +641,11 @@ function showAgreementModal(userId){
       </div>
       <p style="font-size:.85rem;color:var(--muted);margin-bottom:24px;line-height:1.6;">Before accessing the platform, please read and accept the following terms.</p>
 
-      <!-- Accept All -->
       <label style="display:flex;align-items:center;gap:12px;padding:14px;background:var(--card);border:1px solid var(--border);border-radius:10px;cursor:pointer;margin-bottom:20px;">
         <input type="checkbox" id="agreeAll" onchange="toggleAllTerms(this.checked)" style="width:18px;height:18px;accent-color:var(--nes-blue);cursor:pointer;">
         <span style="font-weight:700;font-size:.9rem;">Accept all terms and conditions</span>
       </label>
 
-      <!-- Term 1 -->
       <div style="border:1px solid var(--border);border-radius:10px;margin-bottom:12px;overflow:hidden;">
         <label style="display:flex;align-items:flex-start;gap:12px;padding:14px;cursor:pointer;">
           <input type="checkbox" id="agree1" onchange="updateAgreeAll()" style="width:16px;height:16px;margin-top:2px;accent-color:var(--nes-blue);cursor:pointer;flex-shrink:0;">
@@ -658,7 +656,6 @@ function showAgreementModal(userId){
         </label>
       </div>
 
-      <!-- Term 2 -->
       <div style="border:1px solid var(--border);border-radius:10px;margin-bottom:12px;overflow:hidden;">
         <label style="display:flex;align-items:flex-start;gap:12px;padding:14px;cursor:pointer;">
           <input type="checkbox" id="agree2" onchange="updateAgreeAll()" style="width:16px;height:16px;margin-top:2px;accent-color:var(--nes-blue);cursor:pointer;flex-shrink:0;">
@@ -669,7 +666,6 @@ function showAgreementModal(userId){
         </label>
       </div>
 
-      <!-- Term 3 -->
       <div style="border:1px solid var(--border);border-radius:10px;margin-bottom:24px;overflow:hidden;">
         <label style="display:flex;align-items:flex-start;gap:12px;padding:14px;cursor:pointer;">
           <input type="checkbox" id="agree3" onchange="updateAgreeAll()" style="width:16px;height:16px;margin-top:2px;accent-color:var(--nes-blue);cursor:pointer;flex-shrink:0;">
@@ -729,7 +725,6 @@ async function submitAgreement(userId){
       version: 'v1.0'
     });
     document.getElementById('agreementModal').remove();
-    // Continue loading app
     let defaultView = localStorage.getItem('nesai_view')||'chat';
     if(userClientId){ defaultView = userRole==='ceo' ? 'ceo' : 'leads'; }
     showView(defaultView);
@@ -760,49 +755,37 @@ function setupNavForRole(){
   const leadsNav=document.querySelector('[data-view="leads"]');
   const commandNav=document.querySelector('[data-view="command"]');
 
-  // Phase 4: Client portal mode — user linked to a specific client
   if(userClientId){
-    // Client-side user: show only their relevant views
     intel.style.display='block';
-    // CEO role: show CEO dashboard + leads + team hub
     if(userRole==='ceo'){
       if(ceoNav)ceoNav.style.display='flex';
     } else {
       if(ceoNav)ceoNav.style.display='none';
     }
-    // Manager/staff: leads + team hub only
     if(['manager','staff'].includes(userRole)){
       if(leadsNav)leadsNav.style.display='flex';
     }
-    // No Client Manager, no Sales Portal for client users
     clientMgr.style.display='none';
     if(salesNav)salesNav.style.display='none';
-    // Show self-service credentials for client users
     const myCredsNav=document.getElementById('myCredsNav');
     if(myCredsNav)myCredsNav.style.display='flex';
-    // Show AI Advisory for Operations+ plans
     const dcNav=document.getElementById('deepCoreNav');
     if(dcNav&&['operations','workforce','infrastructure','enterprise'].some(p=>(window.clientPlan||userPlan||'').toLowerCase().includes(p))){
       dcNav.style.display='flex';
       const dcBadge=document.getElementById('deepCoreBadge');
       if(dcBadge)dcBadge.style.display='flex';
     }
-    // Show Din and Inbox nav for all client users
     const deenNavEl = document.getElementById('deenNav');
     if(deenNavEl) deenNavEl.style.display='flex';
     const inboxNavEl = document.getElementById('inboxNav');
     if(inboxNavEl) inboxNavEl.style.display='flex';
-    // Add client branding chip
     showClientBrandingChip();
   } else {
-    // NES internal users
     if(['nesadmin','ceo','manager'].includes(userRole))intel.style.display='block';
     if(!['nesadmin','ceo'].includes(userRole)&&ceoNav)ceoNav.style.display='none';
     if(userRole==='nesadmin'){const phn=document.getElementById('partnerHubNav');if(phn)phn.style.display='block';
-      // Show Deep Core for nesadmin always
       const dcNavAdmin=document.getElementById('deepCoreNav');
       if(dcNavAdmin){dcNavAdmin.style.display='flex';const dcb=document.getElementById('deepCoreBadge');if(dcb)dcb.style.display='flex';}
-      // Show Inbox and Din for nesadmin
       const inboxNavAdmin=document.getElementById('inboxNav');
       if(inboxNavAdmin)inboxNavAdmin.style.display='flex';
       const deenNavAdmin=document.getElementById('deenNav');
@@ -814,21 +797,17 @@ function setupNavForRole(){
       const apiNav=document.getElementById('apiCreditsNav');
       if(apiNav)apiNav.style.display='flex';
     }
-    // Partner Hub is in bottom nav only
   }
   loadLeadCount();
 }
 
 async function showClientBrandingChip(){
-  // Load client branding for client portal users
   try{
     const{data}=await sb.from('clients').select('name,primary_color,logo_url,plan').eq('id',userClientId).single();
     if(!data)return;
-    // Update role chip to show company name
     const chip=document.getElementById('roleChip');
     if(chip&&data.name)chip.textContent=data.name;
     if(data.plan)window.clientPlan=data.plan;
-    // Apply primary color if set
     if(data.primary_color){
       document.documentElement.style.setProperty('--nes-blue',data.primary_color);
     }
@@ -888,12 +867,10 @@ async function doLogout(){
   await sb.auth.signOut();
 }
 
-// Recent chats
 function saveRecentChat(label){
   let rc=[];try{rc=JSON.parse(localStorage.getItem(STORAGE_KEYS.rc)||'[]');}catch(e){}
   const now=new Date();
   const today=now.toDateString();
-  // Save current history snapshot with this chat
   const historySnapshot=JSON.stringify(history.slice(-30));
   const msgSnapshot=allMsgsHTML;
   const existing=rc.find(r=>r.date===today);
@@ -929,11 +906,9 @@ function restoreChat(idx){
     try{history=JSON.parse(chat.history);}catch(e){history=[];}
     allMsgsHTML=chat.msgs||'';
   }
-  // Restore last active view on refresh
   const _lastView = (() => { try{ return localStorage.getItem('nes_last_view'); }catch(e){ return null; } })();
   if(_lastView && _lastView !== 'chat'){
     showView(_lastView);
-    // Update sidebar highlight after bindNav has run
     setTimeout(() => {
       document.querySelectorAll('.nav-item').forEach(el=>{
         const v = el.getAttribute('data-view');
@@ -959,18 +934,14 @@ function bindNav(){
 }
 
 function showView(view){
-  // Persist active view for page refresh
   try{ localStorage.setItem('nes_last_view', view); }catch(e){}
-  // Update sidebar highlight immediately
   document.querySelectorAll('.nav-item[data-view]').forEach(el=>{
     el.classList.toggle('active', el.getAttribute('data-view') === view);
   });
   currentView=view;
   localStorage.setItem('nesai_view',view);
   if(view!=='ceo')window._ceoRendered=false;
-  // Hide team hub if switching away
   if(view!=='command'&&window._teamHubVisible)hideTeamHub();
-  // Show/hide clear button — only for chat views
   const clearBtn=document.getElementById('clearBtn');
   if(clearBtn)clearBtn.style.display=['chat','deepcore','docs','image'].includes(view)?'grid':'none';
   if(['chat','deepcore','docs','image'].includes(view)){showChatInterface(view);}
@@ -988,7 +959,6 @@ function showView(view){
   else if(view==='inbox'){showInbox();}
 }
 
-// ── CEO DASHBOARD ──
 async function showCEODashboard(){
   const mc=document.getElementById('mainContent');
   mc.style.overflow='hidden';
@@ -1026,8 +996,6 @@ async function showCEODashboard(){
   const colors=['var(--nes-blue)','#7f77dd','#3fb950','#d29922','#484f58'];
   const geoRows=Object.entries(countries).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([c,n],i)=>`
     <div class="geo-row"><div class="geo-name">${c}</div><div class="geo-track"><div class="geo-fill" style="width:${Math.round(n/totalLeads*100)||0}%;background:${colors[i%5]};box-shadow:0 0 4px ${colors[i%5]}"></div></div><div class="geo-n">${n}</div></div>`).join('');
-  // Fetch weather
-  // Load weather without triggering re-render
   if(window._weatherCache){setTimeout(()=>{const w=window._weatherCache;const wi=document.getElementById('weatherIcon');const wd=document.getElementById('weatherDesc');const wt=document.getElementById('weatherTemp');const wf=document.getElementById('weatherFeels');if(wi){wi.className='ti '+w.icon;wi.style.cssText='font-size:22px;color:var(--nes-blue);filter:drop-shadow(0 0 4px var(--nes-blue))';}if(wd)wd.textContent=w.desc;if(wt)wt.textContent=w.temp;if(wf)wf.textContent=w.feels;},50);}else{setTimeout(()=>{fetch('https://wttr.in/Muscat?format=j1').then(r=>r.json()).then(w=>{const c=w.current_condition[0];const desc=c.weatherDesc[0].value;const temp=c.temp_C;const feels=c.FeelsLikeC;const humidity=c.humidity;const icons={'Sunny':'ti-sun','Clear':'ti-moon-stars','Partly cloudy':'ti-cloud-sun','Cloudy':'ti-cloud','Overcast':'ti-cloud','Mist':'ti-mist','Fog':'ti-mist','Rain':'ti-cloud-rain','Drizzle':'ti-cloud-drizzle','Thunderstorm':'ti-storm','Snow':'ti-snowflake','Blizzard':'ti-snowflake'};const iconKey=Object.keys(icons).find(k=>desc.includes(k))||'Sunny';const icon=icons[iconKey]||'ti-sun';const descTxt=desc+' · Humidity '+humidity+'%';const tempTxt=temp+'°C';const feelsTxt='Feels like '+feels+'°C';window._weatherCache={icon,desc:descTxt,temp:tempTxt,feels:feelsTxt};const wi=document.getElementById('weatherIcon');const wd=document.getElementById('weatherDesc');const wt=document.getElementById('weatherTemp');const wf=document.getElementById('weatherFeels');if(wi){wi.className='ti '+icon;wi.style.cssText='font-size:22px;color:var(--nes-blue);filter:drop-shadow(0 0 4px var(--nes-blue))';}if(wd)wd.textContent=descTxt;if(wt)wt.textContent=tempTxt;if(wf)wf.textContent=feelsTxt;}).catch(()=>{const wd=document.getElementById('weatherDesc');if(wd)wd.textContent='Weather unavailable';});},100);}
 
   document.getElementById('ceoDashContent').innerHTML=`
@@ -1037,7 +1005,6 @@ async function showCEODashboard(){
     </div>
     <div id="ceoDashGrid" style="display:grid;grid-template-columns:1fr 6px 420px;gap:0;height:100%;min-height:0;position:relative;">
 
-      <!-- LEFT COLUMN -->
       <div style="overflow-y:auto;padding:14px 16px;border-right:1px solid var(--border);">
         ${uncontacted>0
           ?`<div class="alert-bar alert-warn"><i class="ti ti-alert-triangle"></i> ${uncontacted} lead${uncontacted>1?'s':''} uncontacted 48h+ — follow up today</div>`
@@ -1150,7 +1117,6 @@ async function showCEODashboard(){
           <div style="height:1px;background:var(--border);margin:6px 0;"></div>
           <div style="display:flex;justify-content:space-between;font-size:.78rem;"><span style="color:var(--muted);">Total MRR</span><span id="ph_total" style="color:var(--nes-blue);font-weight:700;">—</span></div>
         </div>`:''}\n      </div>\n      <div id="ceoResizer" title="Drag to resize"></div>
-      <!-- RIGHT COLUMN: SCROLLABLE FEED -->
       <div style="display:flex;flex-direction:column;overflow:hidden;">
         <div style="padding:9px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
           <div style="font-family:var(--mono);font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;display:flex;align-items:center;gap:5px;"><i class="ti ti-radar" style="font-size:11px;color:var(--nes-blue);"></i>Market Intelligence</div>
@@ -1162,22 +1128,17 @@ async function showCEODashboard(){
       </div>
     </div>
     `;
-  // Fade in dashboard after render
   const dashEl=document.getElementById('ceoDashContent');
   if(dashEl)requestAnimationFrame(()=>{dashEl.style.opacity='1';});
   loadCeoFeed();
-  // Show mobile toggle for CEO dashboard
   setTimeout(function(){
     if(window.innerWidth <= 700){
       const tog = document.querySelector('.ceo-panel-toggle');
       if(tog) tog.style.display='flex';
-      // Default show stats on mobile
       toggleCeoPanel('stats');
     }
   }, 100);
 }
-
-
 
 async function loadPartnerMrr(){
   try{
@@ -1238,13 +1199,12 @@ async function loadLeadTrends(){
     if(userClientId)q=q.eq('client_id',userClientId);
     const{data:monthLeads}=await q;
     if(!monthLeads)return;
-    // Week bars
     const days=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
     const weekCounts=new Array(7).fill(0);
     monthLeads.forEach(function(l){
       const d=new Date(l.created_at);
       if(d>=new Date(weekStart)){
-        const dow=(d.getDay()+6)%7; // Mon=0
+        const dow=(d.getDay()+6)%7;
         weekCounts[dow]++;
       }
     });
@@ -1261,7 +1221,6 @@ async function loadLeadTrends(){
         '<div style="font-size:.5rem;color:'+(isToday?'#409cff':'var(--muted)')+';">'+days[i].substring(0,1)+'</div></div>';
     }).join('');
     if(weekTot)weekTot.textContent=weekTotal+' leads';
-    // Month bars
     const daysInMonth=new Date(now.getFullYear(),now.getMonth()+1,0).getDate();
     const monthCounts=new Array(daysInMonth).fill(0);
     monthLeads.forEach(function(l){
@@ -1299,7 +1258,6 @@ async function loadApiSummary(){
     if(el){el.textContent=healthText;el.style.color=healthColor;}
     if(delta)delta.textContent=healthy+'/'+total+' services healthy';
     if(bar){bar.style.width=healthPct+'%';bar.style.background=healthColor;}
-    // Credits total
     const totalBalance=data.reduce((sum,r)=>sum+(parseFloat(r.current_balance)||0),0);
     const totalUsage=data.reduce((sum,r)=>sum+(parseFloat(r.monthly_usage)||0),0);
     const cv=document.getElementById('creditVal');
@@ -1322,7 +1280,6 @@ async function loadCeoFeed(){
       el.innerHTML='<div style="color:var(--muted);font-family:var(--mono);font-size:.7rem;padding:10px 0;">No intelligence feed data yet. Check back after 6AM tomorrow.</div>';
       return;
     }
-    // Unread tracking
     const lastRead=localStorage.getItem('nesai_feed_lastread')||'';
     const lastReadTime=lastRead?new Date(lastRead):new Date(0);
     const unreadItems=data.filter(function(item){return new Date(item.created_at)>lastReadTime;});
@@ -1336,9 +1293,7 @@ async function loadCeoFeed(){
     el.innerHTML=data.map(function(item,idx){
       const tagColor=tagColors[item.type]||tagColors.default;
       const tagLabel=tagLabels[item.type]||tagLabels.default;
-      // Extract URLs from content — handles href="..." and plain text
       const urls=[];
-      // First try source_url column (most reliable)
       if(item.source_url&&item.source_url.indexOf('http')===0){
         urls.push(item.source_url);
       } else if(item.content){
@@ -1353,7 +1308,6 @@ async function loadCeoFeed(){
             if(w.indexOf('http')===0){try{new URL(w);urls.push(w);}catch(e){}}
           });
         }
-        // Also try 🔗 lines
         if(item.content){
           item.content.split('\n').forEach(function(line){
             var l=line.trim();
@@ -1364,7 +1318,6 @@ async function loadCeoFeed(){
           });
         }
       }
-      // Clean content for preview
       const cleaned=item.content
         ?item.content
           .replace(/https?:\/\/\S+/g,'')
@@ -1374,7 +1327,6 @@ async function loadCeoFeed(){
           .replace(/\s+/g,' ')
           .trim()
         :'';
-      // Split into sections for expand view
       const sections=cleaned.split('  ').filter(function(s){return s.trim().length>10;});
       const preview=sections.slice(0,2).join(' ').substring(0,160)+'...';
       const uniqueUrls=[...new Set(urls)].slice(0,4);
@@ -1416,12 +1368,10 @@ async function loadCeoFeed(){
           var skipWords=['NES INTELLIGENCE','NES AI','Oman •','GCC •','Global Tech','AST','━','OMAN & GCC','AI & TECH','BUSINESS & ECO','MARKET INSIGHT','MORNING BRIEF','Intelligence Feed','CEO Briefing','---','http','🌐','📰','🔵','•'];
           for(var i=0;i<lines.length;i++){
             var l=lines[i];
-            // Must be 15-100 chars, not a header/meta line
             if(l.length>=15&&l.length<=100){
               var skip=false;
               for(var j=0;j<skipWords.length;j++){if(l.includes(skipWords[j])){skip=true;break;}}
               if(!skip){
-                // Clean leading symbols
                 var clean=l.replace(/^[*🔹◆·🔷📅👥☀️⛅🌧️🌫️🌤️⚙️📡☕🕌🌅\s]+/,'').trim();
                 if(clean.length>=15)return clean.substring(0,80);
               }
@@ -1442,7 +1392,6 @@ async function loadCeoFeed(){
         }).join('')+'</div>':'')+
         '</div></div>';
     }).join('');
-    // Mark as read on scroll to bottom
     const feedEl=document.getElementById('ceoFeedItems');
     if(feedEl){
       feedEl.onscroll=function(){
@@ -1489,7 +1438,6 @@ function detectCountry(email){
   return'Oman';
 }
 
-// ── TEAM HUB ──
 function showCommandCentre(){
   const mc=document.getElementById('mainContent');
   mc.style.overflow='hidden';
@@ -1513,7 +1461,6 @@ function hideTeamHub(){
   window._teamHubVisible=false;
 }
 
-// ── LEADS ──
 async function showLeadsPage(){
   const mc=document.getElementById('mainContent');
   mc.style.overflow='hidden';
@@ -1588,24 +1535,20 @@ function exportLeads(){
   const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);a.download='nes-leads-'+new Date().toISOString().split('T')[0]+'.csv';a.click();
 }
 
-// ── CLIENT MANAGER ──
 async function onboardClient(clientId, clientName){
   const btn = document.getElementById('onboard-btn-'+clientId);
   if(btn){btn.disabled=true;btn.innerHTML='<i class="ti ti-loader-2 ti-spin" style="font-size:12px"></i> Onboarding...';}
 
   try{
-    // Step 1: Get client full data
     const{data:client,error:ce}=await sb.from('clients').select('*').eq('id',clientId).single();
     if(ce||!client)throw new Error('Client not found');
 
-    // Step 2: Update status to active
     const{error:se}=await sb.from('clients').update({
       status:'active',
       trial_start:new Date().toISOString()
     }).eq('id',clientId);
     if(se)throw new Error('Status update failed: '+se.message);
 
-    // Step 3: Trigger n8n onboarding webhook
     const webhookUrl='https://n8n.essential-services.org/webhook/nes-client-onboard';
     const payload={
       client_id:clientId,
@@ -1626,7 +1569,6 @@ async function onboardClient(clientId, clientName){
     }
 
     showToast(clientName+' onboarded successfully ✓');
-    // Refresh client manager
     setTimeout(()=>showClientManager(),800);
 
   }catch(e){
@@ -1636,7 +1578,6 @@ async function onboardClient(clientId, clientName){
 }
 
 function hideAdminCMTabs(){
-  // Hide admin-only tabs from client portal users
   if(userRole !== 'nesadmin'){
     document.querySelectorAll('.cm-tab').forEach(tab => {
       const oc = tab.getAttribute('onclick') || '';
@@ -1676,7 +1617,6 @@ async function loadClientsFromDB(){
 function renderClientManagerFull(clients,activeId=null){
   const active=clients.find(c=>c.id===activeId)||clients[0]||null;
   window._activeClientId=active?.id||null;
-  // Restore active tab after render
   setTimeout(()=>{
     if(window._activeTab&&window._activeTab!=='modules'){
       const tabEl=document.querySelector('.cm-tab[onclick*="\'' +window._activeTab+ '\'"]');
@@ -1978,7 +1918,6 @@ async function saveClientCreds(id){
     });
     if(!res.ok){const e=await res.json();throw new Error(e.error||'Save failed');}
     showToast('Credentials saved ✓');
-    // Refresh client data
     await loadClientsFromDB();
   }catch(e){alert('Error saving credentials: '+e.message);}
   finally{if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-device-floppy"></i> Save Credentials';}}
@@ -2019,7 +1958,6 @@ async function saveClientModules(clientId){
 
 async function selectClientDB(id){
   window._activeClientId=id;
-  // Load decrypted credentials from backend
   try{
     const res=await fetch(API_URL+'/api/client/'+id+'/credentials',{
       headers:{'Authorization':'Bearer '+session.access_token}
@@ -2157,14 +2095,12 @@ async function deleteClient(clientId){
   catch(e){alert('Error: '+e.message);}
 }
 
-
-// ── API CREDITS DASHBOARD ──
 async function showApiCredits(){
   if(userRole!=='nesadmin')return;
   const mc=document.getElementById('mainContent');
   mc.style.overflow='auto';
   mc.innerHTML=`
-    <div style="padding:11px 18px 11px 60px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;">
+    <div style="padding:11px 120px 11px 60px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;">
       <div>
         <div style="font-family:var(--mono);font-size:.8rem;color:#7f77dd;font-weight:800;">API CREDITS</div>
         <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">Balance · Usage · Auto-recharge thresholds</div>
@@ -2270,7 +2206,6 @@ function showToast(msg){
   document.body.appendChild(t);setTimeout(()=>t.remove(),2800);
 }
 
-// ── CLIENT USERS ──
 async function loadClientUsers(clientId){
   const el=document.getElementById('cm-users-list-'+clientId);
   if(!el)return;
@@ -2374,7 +2309,6 @@ function cmTab(name,el){
   if(name==='email'&&window._activeClientId)loadEmailAccounts(window._activeClientId);
 }
 
-// ── CHAT INTERFACE ──
 function showChatInterface(mode='chat'){
   currentView=mode;
   const limits=getCurrentLimits();
@@ -2430,7 +2364,6 @@ async function sendMsg(){
   input.value='';setBusy(true);appendMsg(userBubble(text));history.push({role:'user',content:text});addTyping();
   saveRecentChat(text.substring(0,30));
 
-  // Image mode — no streaming
   if(currentView==='image'){
     try{
       const controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),45000);
@@ -2443,7 +2376,6 @@ async function sendMsg(){
     setBusy(false);return;
   }
 
-  // Deep Core mode — dedicated endpoint
   if(currentView==='deepcore'){
     try{
       const res2=await fetch(API_URL+'/api/deepcore',{
@@ -2468,7 +2400,6 @@ async function sendMsg(){
     setBusy(false);return;
   }
 
-  // Chat modes — streaming via SSE
   try{
     const useSearch=['chat','deepcore'].includes(currentView);
     const isDeepCore=currentView==='deepcore';
@@ -2485,7 +2416,6 @@ async function sendMsg(){
       setBusy(false);return;
     }
 
-    // Create streaming bubble
     removeTyping();
     const bubbleId='stream-'+Date.now();
     const bubbleHTML=`<div class="msg ai" id="${bubbleId}"><div class="chat-av-wrap"><div class="chat-av-ring"><div class="chat-av-mid"><div class="chat-av-dot"></div></div></div><div class="chat-av-online"></div></div><div class="msg-body"><div class="msg-role">NES AI</div><div class="msg-bubble" id="${bubbleId}-text"></div><button class="copy-btn" onclick="copyMsg(this)">Copy</button></div></div>`;
@@ -2516,7 +2446,6 @@ async function sendMsg(){
             scroll();
           }
           else if(data.type==='done'){
-            // Add sources if any
             if(sources.length){
               const el=document.getElementById(bubbleId+'-text');
               if(el){
@@ -2531,7 +2460,6 @@ async function sendMsg(){
       }
     }
 
-    // If nothing streamed — fallback message
     if(!fullReply){addAiMsg('Sorry, I could not generate a response.');}
 
   }catch(e){removeTyping();addAiMsg('Network error. Please check your connection.');}
@@ -2568,16 +2496,13 @@ async function extractText(file){
 function loadScript(src){return new Promise((resolve,reject)=>{if(document.querySelector('script[src="'+src+'"]'))  {resolve();return;}const s=document.createElement('script');s.src=src;s.onload=resolve;s.onerror=reject;document.head.appendChild(s);});}
 function toggleVoice(){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){addAiMsg('Voice not supported in this browser.');return;}const btn=document.getElementById('voiceBtn');const recognition=new SR();recognition.lang='en-US';btn.style.color='#f85149';setStatus('busy','Listening…');recognition.onresult=e=>{document.getElementById('msgInput').value=e.results[0][0].transcript;btn.style.color='';setStatus('ok','Ready');sendMsg();};recognition.onerror=recognition.onend=()=>{btn.style.color='';setStatus('ok','Ready');};recognition.start();}
 
-
-// ── PARTNER HUB ──
 let _partnerTab = 'overview';
 
-// ── USAGE ANALYTICS ──
 async function showAnalytics(){
   const mc = document.getElementById('mainContent');
   mc.style.overflow = 'auto';
   mc.innerHTML = `
-    <div style="padding:11px 18px 11px 60px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;">
+    <div style="padding:11px 120px 11px 60px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;">
       <div>
         <div style="font-family:var(--mono);font-size:.8rem;color:#d29922;font-weight:800;display:flex;align-items:center;gap:6px;"><i class="ti ti-chart-dots"></i>USAGE ANALYTICS</div>
         <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">Platform usage · All clients · Real-time</div>
@@ -2595,7 +2520,6 @@ async function showAnalytics(){
 }
 
 async function loadAnalytics(days){
-  // Update button styles
   ['7','30','90'].forEach(d => {
     const btn = document.getElementById('anBtn'+d);
     if(btn){
@@ -2611,7 +2535,6 @@ async function loadAnalytics(days){
   try{
     const since = new Date(Date.now() - parseInt(days)*24*60*60*1000).toISOString();
 
-    // Fetch data in parallel
     const [leadsRes, clientsRes, feedRes] = await Promise.all([
       sb.from('leads').select('id,created_at,status,client_id,country').gte('created_at',since),
       sb.from('clients').select('id,name,plan,status,created_at'),
@@ -2622,14 +2545,12 @@ async function loadAnalytics(days){
     const clients = clientsRes.data || [];
     const feed = feedRes.data || [];
 
-    // Calculate metrics
     const activeClients = clients.filter(c=>c.status==='active').length;
     const totalLeads = leads.length;
     const newLeads = leads.filter(l=>l.status==='new').length;
     const closedLeads = leads.filter(l=>l.status==='closed').length;
     const convRate = totalLeads > 0 ? Math.round((closedLeads/totalLeads)*100) : 0;
 
-    // Daily lead trend
     const dailyLeads = {};
     for(let i=parseInt(days)-1; i>=0; i--){
       const d = new Date(Date.now() - i*24*60*60*1000);
@@ -2645,7 +2566,6 @@ async function loadAnalytics(days){
     const dailyVals = Object.values(dailyLeads);
     const maxVal = Math.max(...dailyVals, 1);
 
-    // Client plan breakdown
     const planCounts = {presence:0,operations:0,workforce:0,infrastructure:0};
     clients.forEach(c => {
       const p = (c.plan||'').toLowerCase();
@@ -2655,16 +2575,13 @@ async function loadAnalytics(days){
       else planCounts.presence++;
     });
 
-    // Country breakdown
     const countries = {};
     leads.forEach(l => { const cn = l.country||'Unknown'; countries[cn]=(countries[cn]||0)+1; });
     const topCountries = Object.entries(countries).sort((a,b)=>b[1]-a[1]).slice(0,5);
 
-    // Feed stats
     const feedByType = {};
     feed.forEach(f => { const t=f.type||'intel'; feedByType[t]=(feedByType[t]||0)+1; });
 
-    // MRR calculation
     const planValues = {presence:29,operations:79,workforce:149,infrastructure:299};
     const mrr = clients.filter(c=>c.status==='active').reduce((s,c) => {
       const p=(c.plan||'').toLowerCase();
@@ -2694,7 +2611,6 @@ async function loadAnalytics(days){
         .client-row-an:last-child{border-bottom:none;}
       </style>
 
-      <!-- KPI CARDS -->
       <div class="an-grid">
         <div class="an-card" style="border-color:#409cff33;">
           <div class="an-lbl">Total MRR</div>
@@ -2722,7 +2638,6 @@ async function loadAnalytics(days){
         </div>
       </div>
 
-      <!-- LEAD TREND CHART -->
       <div class="an-sec"><i class="ti ti-chart-bar" style="font-size:11px;color:#409cff;"></i>Lead trend — last ${days} days</div>
       <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px;">
         <div style="display:flex;align-items:flex-end;gap:${parseInt(days)>30?'1':'3'}px;height:80px;">
@@ -2742,7 +2657,6 @@ async function loadAnalytics(days){
       </div>
 
       <div class="an-row2">
-        <!-- LEAD GEOGRAPHY -->
         <div>
           <div class="an-sec"><i class="ti ti-map-pin" style="font-size:11px;color:#7f77dd;"></i>Lead geography</div>
           <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px;">
@@ -2755,7 +2669,6 @@ async function loadAnalytics(days){
           </div>
         </div>
 
-        <!-- CLIENT PLAN BREAKDOWN -->
         <div>
           <div class="an-sec"><i class="ti ti-users" style="font-size:11px;color:#3fb950;"></i>Plan breakdown</div>
           <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px;">
@@ -2776,7 +2689,6 @@ async function loadAnalytics(days){
         </div>
       </div>
 
-      <!-- CLIENT LIST -->
       <div class="an-sec"><i class="ti ti-building" style="font-size:11px;color:#d29922;"></i>Client overview</div>
       <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px;">
         ${clients.length === 0 ? '<div style="color:var(--muted);font-size:.72rem;">No clients yet</div>' :
@@ -2832,7 +2744,6 @@ async function renderPartnerHub(){
   const el = document.getElementById('partnerContent');
   if(!el) return;
 
-  // Fetch clients with partner info
   let directClients = [], partnerClients = [], partners = [];
   try{
     const {data: allClients} = await sb.from('clients').select('id,name,plan,status,partner_id,monthly_fee');
@@ -2840,7 +2751,6 @@ async function renderPartnerHub(){
     partnerClients = (allClients||[]).filter(c => c.partner_id);
   }catch(e){}
 
-  // Plan values
   const planVal = {starter:29, operations:79, workforce:149, infrastructure:299, presence:29};
   const getPlanVal = (plan, fee) => {
     if(fee && fee > 0) return parseFloat(fee);
@@ -2851,17 +2761,14 @@ async function renderPartnerHub(){
     return 79;
   };
 
-  // NES platform fee %
   const NES_PLATFORM_PCT = 20;
 
-  // Calculate direct MRR
   const directMRR = directClients.filter(c=>c.status==='active').reduce((s,c) => s + getPlanVal(c.plan, c.monthly_fee), 0);
   const partnerMRR = partnerClients.filter(c=>c.status==='active').reduce((s,c) => s + getPlanVal(c.plan, c.monthly_fee), 0);
   const totalMRR = directMRR + partnerMRR;
 
-  // Pool from partner clients (80%)
   const partnerPool = partnerMRR * 0.80;
-  const nesFromPool = partnerPool * 0.40; // assume avg 60% partner share
+  const nesFromPool = partnerPool * 0.40;
   const nesPlatformFee = totalMRR * (NES_PLATFORM_PCT/100);
   const totalNesRevenue = directMRR + nesPlatformFee + nesFromPool;
 
@@ -2889,7 +2796,6 @@ async function renderPartnerHub(){
       .split-bar{display:flex;height:8px;border-radius:4px;overflow:hidden;margin:8px 0;}
     </style>
 
-    <!-- TABS -->
     <div class="ph-tabs">
       <button class="ph-tab active" onclick="switchPhTab('overview',this)">Overview</button>
       <button class="ph-tab" onclick="switchPhTab('tiers',this)">Incentive structure</button>
@@ -2898,7 +2804,6 @@ async function renderPartnerHub(){
       <button class="ph-tab" onclick="switchPhTab('calculator',this)">Calculator</button>
     </div>
 
-    <!-- OVERVIEW TAB -->
     <div id="ph-overview">
       <div class="ph-grid">
         <div class="ph-kcard" style="border-color:#409cff33;">
@@ -2927,7 +2832,6 @@ async function renderPartnerHub(){
         </div>
       </div>
 
-      <!-- Revenue split visual -->
       <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:14px;">
         <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;">Revenue split — partner clients</div>
         <div style="font-size:.75rem;color:var(--muted);margin-bottom:6px;">For every OMR 79 (Operations) via a partner:</div>
@@ -2944,7 +2848,6 @@ async function renderPartnerHub(){
       </div>
     </div>
 
-    <!-- TIERS TAB -->
     <div id="ph-tiers" style="display:none;">
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px;">
         ${[
@@ -2985,7 +2888,6 @@ async function renderPartnerHub(){
       </div>
     </div>
 
-    <!-- DIRECT CLIENTS TAB -->
     <div id="ph-direct" style="display:none;">
       <div style="background:var(--card);border:1px solid #3fb95033;border-radius:10px;padding:12px 14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;">
         <div>
@@ -3012,7 +2914,6 @@ async function renderPartnerHub(){
         }).join('')}
     </div>
 
-    <!-- PARTNER CLIENTS TAB -->
     <div id="ph-partners" style="display:none;">
       <div style="background:var(--card);border:1px solid #7f77dd33;border-radius:10px;padding:12px 14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;">
         <div>
@@ -3041,7 +2942,6 @@ async function renderPartnerHub(){
         }).join('')}
     </div>
 
-    <!-- CALCULATOR TAB -->
     <div id="ph-calculator" style="display:none;">
       <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;max-width:580px;">
         <div style="font-family:var(--mono);font-size:.65rem;color:var(--nes-blue);text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px;">Incentive calculator</div>
@@ -3070,7 +2970,6 @@ async function renderPartnerHub(){
     </div>
   `;
 
-  // Init calculator
   calcPartner();
 }
 
@@ -3138,8 +3037,6 @@ function calcPartner(){
 
 function renderSalesPortal(tab){ showSalesPortal(); }
 
-
-// ── MODALS ──
 function showAddContactModal(){
   const m=document.createElement('div');m.className='modal-overlay';m.id='contactModal';
   m.innerHTML=`
@@ -3247,7 +3144,6 @@ async function saveDeal(){
   if(!data.name){alert('Deal name is required');return;}
   try{
     await sb.from('sales_deals').insert([data]);
-    // Update referrer deal count if referrer selected
     if(data.referrer_id){
       const ref=_salesReferrers.find(r=>r.id===data.referrer_id);
       if(ref){
@@ -3367,8 +3263,6 @@ function filterContactsBySource(s){
     </div>`).join('');
 }
 
-
-// ── ADMIN STATUS PAGE ──
 async function showAdminStatus(){
   if(userRole!=='nesadmin'){return;}
   const mc=document.getElementById('mainContent');
@@ -3388,7 +3282,6 @@ async function showAdminStatus(){
   await checkPlatformStatus();
 }
 
-// ── Add Service Modal ──
 function showAddServiceModal(){
   const existing=document.getElementById('addServiceModal');
   if(existing){existing.remove();return;}
@@ -3423,7 +3316,6 @@ async function saveNewService(){
   }catch(e){showToast('Error: '+e.message);}
 }
 
-// ── Add API Modal (from Platform Status) ──
 function showAddApiModalQuick(){
   const existing=document.getElementById('addApiModalQuick');
   if(existing){existing.remove();return;}
@@ -3495,23 +3387,19 @@ async function checkPlatformStatus(){
   const totalDocsToday=todayUsage.reduce((s,u)=>s+(u.docs_used||0),0);
   const lowApis=apis.filter(a=>a.status==='low'||a.status==='critical');
 
-  // Platform Stats — sticky at top
   let html='<div style="position:sticky;top:0;z-index:10;background:var(--bg);padding-bottom:10px;">';
 
-  // Last checked + Refresh
   html+='<div style="display:flex;align-items:center;justify-content:space-between;padding-top:2px;margin-bottom:10px;">';
   html+='<div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">Last checked: '+now+'</div>';
   html+='<button onclick="checkPlatformStatus()" style="background:none;border:1px solid var(--border);border-radius:6px;padding:4px 10px;color:var(--muted);cursor:pointer;font-size:.72rem;font-family:var(--mono);"><i class="ti ti-refresh"></i> Refresh</button>';
   html+='</div>';
 
-  // Overall status banner
   html+='<div style="background:'+(allOk?'#0d2818':'#2d0e0e')+';border:1px solid '+(allOk?'#3fb95040':'#f8514940')+';border-radius:10px;padding:10px 16px;margin-bottom:10px;display:flex;align-items:center;gap:10px;">';
   html+='<div style="width:10px;height:10px;border-radius:50%;background:'+(allOk?'#3fb950':'#f85149')+';'+(allOk?'box-shadow:0 0 6px #3fb950;':'')+'"></div>';
   html+='<div style="font-family:var(--mono);font-size:.8rem;font-weight:700;color:'+(allOk?'#3fb950':'#f85149')+'">'+(allOk?'All systems operational':'Some services need attention')+'</div>';
   if(lowApis.length>0){html+='<div style="margin-left:auto;font-size:.65rem;font-family:var(--mono);color:#f85149;"><i class="ti ti-alert-triangle"></i> '+lowApis.length+' API'+(lowApis.length>1?'s':'')+' low</div>';}
   html+='</div>';
 
-  // All stats in ONE row — 6 cards
   html+='<div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;">Platform Stats & Today&#39;s Usage</div>';
   html+='<div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:10px;">';
   html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center;"><i class="ti ti-briefcase" style="font-size:16px;color:var(--nes-blue);display:block;margin-bottom:4px;"></i><div style="font-size:1.1rem;font-weight:700;color:var(--nes-blue);">'+(clientRes.count||0)+'</div><div style="font-size:.58rem;color:var(--muted);font-family:var(--mono);">Clients</div></div>';
@@ -3522,17 +3410,14 @@ async function checkPlatformStatus(){
   html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center;"><i class="ti ti-file-text" style="font-size:16px;color:#3fb950;display:block;margin-bottom:4px;"></i><div style="font-size:1.1rem;font-weight:700;color:#3fb950;">'+totalDocsToday+'</div><div style="font-size:.58rem;color:var(--muted);font-family:var(--mono);">Docs today</div></div>';
   html+='</div>';
 
-  html+='</div>'; // end sticky header
+  html+='</div>';
 
-  // ── SIDE BY SIDE: SERVICES (left) | API CREDITS (right) — scrollable ──
-  // Mobile toggle for platform status
   html+='<div class="status-panel-toggle" style="display:none;padding:6px 0;gap:6px;margin-bottom:10px;">';
   html+='<button onclick="toggleStatusPanel(&quot;services&quot;)" id="statusToggleServices" style="flex:1;padding:7px;border:none;border-radius:7px;background:var(--nes-blue);color:#fff;font-size:.75rem;font-weight:600;cursor:pointer;"><i class="ti ti-server"></i> Services</button>';
   html+='<button onclick="toggleStatusPanel(&quot;credits&quot;)" id="statusToggleCredits" style="flex:1;padding:7px;border:none;border-radius:7px;background:var(--surface);color:var(--muted);font-size:.75rem;font-weight:600;cursor:pointer;border:1px solid var(--border);"><i class="ti ti-credit-card"></i> API Credits</button>';
   html+='</div>';
   html+='<div id="statusPanelGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px;margin-bottom:16px;">';
 
-  // LEFT — Services
   html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;">';
   html+='<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border);">';
   html+='<div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;">Services</div>';
@@ -3549,7 +3434,6 @@ async function checkPlatformStatus(){
   });
   html+='</div>';
 
-  // RIGHT — API Credits
   html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;">';
   html+='<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border);flex-shrink:0;">';
   html+='<div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;">API Credits</div>';
@@ -3578,10 +3462,8 @@ async function checkPlatformStatus(){
     html+='<div style="padding:20px;text-align:center;font-family:var(--mono);font-size:.72rem;color:var(--muted);">No APIs yet — <span onclick="showAddApiModalQuick()" style="color:var(--nes-blue);cursor:pointer;">add one</span></div>';
   }
   html+='</div>';
-  html+='</div></div>'; // end side-by-side grid
-  // Show mobile toggle
+  html+='</div></div>';
   el.innerHTML=html;
-  // Show mobile toggle after render
   if(window.innerWidth<=700){
     const tog=document.querySelector('.status-panel-toggle');
     if(tog)tog.style.display='flex';
@@ -3590,7 +3472,6 @@ async function checkPlatformStatus(){
   }
 }
 
-// ── CLIENT PORTAL: MY CREDENTIALS ──
 async function showMyCredentials(){
   if(!userClientId){addAiMsg('No client account linked.');return;}
   const mc=document.getElementById('mainContent');
@@ -3619,7 +3500,6 @@ async function showMyCredentials(){
 
 function renderMyCredsForm(creds, client){
   const el=document.getElementById('myCredsContent');
-  // Trial banner
   let trialHtml='';
   if(client.trial_start){
     const trialEnd=new Date(new Date(client.trial_start).getTime()+((client.trial_duration_days||7)*86400000));
@@ -3634,7 +3514,6 @@ function renderMyCredsForm(creds, client){
       '<div style="font-size:.8rem;color:var(--muted);">'+(expired?'Your trial ended on '+trialEnd.toLocaleDateString()+'. Contact support to continue.':daysLeft+' day'+(daysLeft===1?'':'s')+' remaining — trial ends '+trialEnd.toLocaleDateString())+'</div>'+
       (urgent&&!expired?'<div style="font-size:.75rem;color:'+color+';margin-top:4px;font-weight:600;">Connect your credentials now to avoid interruption.</div>':'')+'</div>';
   }
-  // Checklist sections
   const sections=[
     {title:'Social media',items:[
       {label:'Facebook',desc:'Page token + Page ID',keys:['facebook_token','facebook_page_id'],icon:'ti-brand-facebook'},
@@ -3647,7 +3526,6 @@ function renderMyCredsForm(creds, client){
       {label:'Website',desc:'Your website URL',keys:['website'],icon:'ti-world'},
     ]},
   ];
-  // Progress
   let connected=0,total=0;
   sections.forEach(s=>s.items.forEach(item=>{
     total++;
@@ -3674,7 +3552,6 @@ function renderMyCredsForm(creds, client){
       html+='</div></div>';
     });
   });
-  // Feed Sources section
   const isPro=(client.plan==='pro'||client.plan==='enterprise'||client.plan==='growth');
   const isEnterprise=client.plan==='enterprise';
   const maxSources=isEnterprise?10:isPro?10:5;
@@ -3822,18 +3699,17 @@ function showPricing(){
       <div style="text-align:center;margin-bottom:6px;font-family:var(--mono);font-size:.75rem;color:var(--muted);">NES AI — Unified Business Platform · Oman Pricing</div>
       <div style="text-align:center;margin-bottom:16px;font-family:var(--mono);font-size:.68rem;color:var(--muted);">All plans include a 7-day trial · Cancel anytime</div>
       <div style="background:#0c1f3a;border:1px solid #1a3a5e;border-radius:10px;padding:11px 20px;display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
-        <div><div style="font-family:'Syne',sans-serif;font-size:.78rem;color:var(--nes-blue);font-weight:700;">Founder pricing — 50% off for the first 50 clients</div><div style="font-size:.65rem;color:var(--muted);margin-top:2px;">Lock in this price forever · Sara AI included in all plans</div></div>
+        <div><div style="font-family:'Syne',sans-serif;font-size:.78rem;color:var(--nes-blue);font-weight:700;">Founder pricing — 50% off for the first 50 clients · 1 year from signup</div><div style="font-size:.65rem;color:var(--muted);margin-top:2px;">Lock in this price for 1 year from signup · Sara AI included in all plans</div></div>
         <div style="font-family:var(--mono);font-size:.68rem;color:#3fb950;display:flex;align-items:center;gap:5px;"><div style="width:6px;height:6px;border-radius:50%;background:#3fb950;"></div>38 spots remaining</div>
       </div>
 
       <div class="plan-grid">
 
-        <!-- AI PRESENCE -->
         <div class="plan-card">
           <div style="font-family:'Syne',sans-serif;font-size:.65rem;color:var(--nes-blue);text-transform:uppercase;letter-spacing:.1em;text-align:center;margin-bottom:4px;">AI Presence</div>
-          <div style="text-align:center;font-size:.72rem;color:var(--red);text-decoration:line-through;font-family:var(--mono);margin-bottom:2px;">OMR 59/mo</div>
+          <div style="text-align:center;font-size:.72rem;color:var(--red);text-decoration:line-through;font-family:var(--mono);margin-bottom:2px;">OMR 59/mo (~$153)</div>
           <div class="plan-price">OMR 29</div>
-          <div class="plan-period">per month · ~$75 · founder price</div>
+          <div class="plan-period">per month · ~$75 USD · founder price for 1 year</div>
           <ul class="plan-features-list">
             <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>150 AI messages/day</li>
             <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>AI Chatbot (24/7)</li>
@@ -3850,13 +3726,12 @@ function showPricing(){
           <button class="plan-action-btn" onclick="window.open('https://nes-ai.com/register.html?plan=presence','_blank')">Get Started →</button>
         </div>
 
-        <!-- AI OPERATIONS -->
         <div class="plan-card" style="border-color:var(--nes-blue);position:relative;">
           <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--nes-btn-grad);color:#fff;font-size:.65rem;font-weight:700;padding:3px 12px;border-radius:20px;font-family:'Syne',sans-serif;">POPULAR</div>
           <div style="font-family:'Syne',sans-serif;font-size:.65rem;color:var(--nes-blue);text-transform:uppercase;letter-spacing:.1em;text-align:center;margin-bottom:4px;">AI Operations</div>
-          <div style="text-align:center;font-size:.72rem;color:var(--red);text-decoration:line-through;font-family:var(--mono);margin-bottom:2px;">OMR 159/mo</div>
+          <div style="text-align:center;font-size:.72rem;color:var(--red);text-decoration:line-through;font-family:var(--mono);margin-bottom:2px;">OMR 159/mo (~$413)</div>
           <div class="plan-price">OMR 79</div>
-          <div class="plan-period">per month · ~$205 · founder price</div>
+          <div class="plan-period">per month · ~$205 USD · founder price for 1 year</div>
           <ul class="plan-features-list">
             <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>500 AI messages/day</li>
             <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Everything in AI Presence</li>
@@ -3874,12 +3749,11 @@ function showPricing(){
           <button class="plan-action-btn" onclick="window.open('https://nes-ai.com/register.html?plan=operations','_blank')">Upgrade to Operations →</button>
         </div>
 
-        <!-- AI WORKFORCE -->
         <div class="plan-card" style="border-color:#3fb950;position:relative;">
           <div style="font-family:'Syne',sans-serif;font-size:.65rem;color:#3fb950;text-transform:uppercase;letter-spacing:.1em;text-align:center;margin-bottom:4px;">AI Workforce</div>
-          <div style="text-align:center;font-size:.72rem;color:var(--red);text-decoration:line-through;font-family:var(--mono);margin-bottom:2px;">OMR 299/mo</div>
+          <div style="text-align:center;font-size:.72rem;color:var(--red);text-decoration:line-through;font-family:var(--mono);margin-bottom:2px;">OMR 299/mo (~$777)</div>
           <div class="plan-price" style="color:#3fb950;">OMR 149</div>
-          <div class="plan-period">per month · ~$387 · founder price</div>
+          <div class="plan-period">per month · ~$387 USD · founder price for 1 year</div>
           <ul class="plan-features-list">
             <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Unlimited AI messages</li>
             <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Everything in AI Operations</li>
@@ -3896,7 +3770,6 @@ function showPricing(){
           <button class="plan-action-btn" style="background:linear-gradient(135deg,#1a7f37,#3fb950);" onclick="window.open('https://nes-ai.com/register.html?plan=workforce','_blank')">Upgrade to Workforce →</button>
         </div>
 
-        <!-- AI INFRASTRUCTURE -->
         <div class="plan-card" style="border-color:#d29922;position:relative;">
           <div style="font-family:var(--mono);font-size:.65rem;color:#d29922;text-transform:uppercase;letter-spacing:.1em;text-align:center;margin-bottom:4px;">AI Infrastructure</div>
           <div class="plan-price" style="color:#d29922;">Custom</div>
@@ -3921,7 +3794,6 @@ function showPricing(){
 
       </div>
 
-      <!-- APEX SUITE SECTION -->
       <div style="margin-top:36px;text-align:center;">
         <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:16px;">Apex Suite — AI Voice Agents</div>
         <div class="ph-tiers" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;max-width:700px;margin:0 auto;">
@@ -3947,13 +3819,12 @@ function showPricing(){
       </div>
 
       <div style="text-align:center;margin-top:28px;font-family:var(--mono);font-size:.72rem;color:var(--muted);">
-        All prices in Omani Rial (OMR) · UAE/KSA/EU pricing available on request<br>
+        All prices in Omani Rial (OMR) · 1 USD ≈ 0.385 OMR · UAE/KSA/EU pricing available on request<br>
         <a href="mailto:office@essential-services.org" style="color:var(--nes-blue);text-decoration:none;">office@essential-services.org</a>
       </div>
     </div>`;
 }
 
-// Helpers
 function loadLocal(){
   try{
     const h=localStorage.getItem(STORAGE_KEYS.h);if(h)history=JSON.parse(h);
@@ -3984,7 +3855,6 @@ function updateStats(){
   const fill=document.getElementById('usageFill');
   if(fill)fill.style.width=Math.min(100,(chatUsed/limits.messages)*100)+'%';
 }
-// ── PULL TO REFRESH ──
 (function(){
   let startY=0, startTime=0, pulling=false;
   const indicator = document.createElement('div');
@@ -4019,7 +3889,6 @@ function updateStats(){
     indicator.style.opacity='0';
     pulling = false;
     if(dy > 80){
-      // Trigger refresh based on current view
       const lastView = (() => { try{ return localStorage.getItem('nes_last_view'); }catch(e2){ return 'chat'; } })();
       if(lastView==='inbox' && window._inboxClientId) loadInboxEmails(window._inboxClientId);
       else if(lastView==='ceo') loadCeoFeed();
@@ -4037,10 +3906,10 @@ function toggleSidebar(){
     const isOpen = sb.classList.contains('open');
     if(isOpen){
       sb.classList.remove('open');
-      if(overlay){overlay.style.display='none';overlay.style.pointerEvents='none';}
+      if(overlay){overlay.style.display='none';overlay.style.pointerEvents='none';overlay.style.opacity='0';}
     } else {
       sb.classList.add('open');
-      if(overlay){overlay.style.display='block';overlay.style.pointerEvents='all';}
+      if(overlay){overlay.style.display='block';overlay.style.pointerEvents='all';overlay.style.opacity='1';}
     }
   } else {
     sb.classList.toggle('collapsed');
@@ -4088,7 +3957,6 @@ function setBusy(b){
   busy=b;
   const sb=document.getElementById('sendBtn');if(sb)sb.disabled=b;
   setStatus(b?'busy':'ok',b?'Thinking…':'Ready');
-  // Update ping dot color — blue=ready, amber=busy
   const dot=document.getElementById('promptPingDot');
   const ring=document.getElementById('promptPingRing');
   const avatar=document.getElementById('promptPingAvatar');
@@ -4102,9 +3970,16 @@ function md(s){let m=esc(s);m=m.replace(/```(\w*)\n?([\s\S]*?)```/g,'<pre style=
 
 let touchStartX=0;
 document.addEventListener('touchstart',e=>{touchStartX=e.changedTouches[0].screenX;});
-document.addEventListener('touchend',e=>{const tx=e.changedTouches[0].screenX;const sb=document.getElementById('sidebar');if(tx-touchStartX<-50&&sb.classList.contains('open'))sb.classList.remove('open');});
+document.addEventListener('touchend',e=>{
+  const tx=e.changedTouches[0].screenX;
+  const sb=document.getElementById('sidebar');
+  const overlay=document.getElementById('sidebarOverlay');
+  if(tx-touchStartX<-50&&sb.classList.contains('open')){
+    sb.classList.remove('open');
+    if(overlay){overlay.style.display='none';overlay.style.pointerEvents='none';overlay.style.opacity='0';}
+  }
+});
 
-// Expose globals
 window.switchTab=switchTab;window.doLogin=doLogin;window.doSignup=doSignup;window.doLogout=doLogout;
 window.toggleTheme=toggleTheme;window.showPricing=showPricing;window.showView=showView;
 window.sendMsg=sendMsg;window.handleAttach=handleAttach;window.toggleVoice=toggleVoice;
@@ -4121,7 +3996,6 @@ window.showSalesPortal=showSalesPortal;window.renderSalesPortal=renderSalesPorta
 window.showAdminStatus=showAdminStatus;window.checkPlatformStatus=checkPlatformStatus;window.showAddServiceModal=showAddServiceModal;window.saveNewService=saveNewService;window.showAddApiModalQuick=showAddApiModalQuick;window.saveApiQuick=saveApiQuick;window.showApiCredits=showApiCredits;window.loadApiCredits=loadApiCredits;window.saveAllThresholds=saveAllThresholds;window.addApiService=addApiService;window.saveNewApiService=saveNewApiService;window.updateApiBalance=updateApiBalance;window.showMyCredentials=showMyCredentials;window.saveMyCredentials=saveMyCredentials;window.editItCred=editItCred;window.saveItCred=saveItCred;window.toggleFeedItem=toggleFeedItem;window.saveFeedSources=saveFeedSources;window.showUpgradePopup=showUpgradePopup;
 window.openInNewTab=openInNewTab;
 
-// ── EMAIL FUNCTIONS ──
 function autoFillImapSettings(provider){
   const settings={
     gmail:{imap:'imap.gmail.com',imap_port:'993',smtp:'smtp.gmail.com',smtp_port:'587'},
@@ -4202,7 +4076,6 @@ async function deleteEmailAccount(id){
   }catch(e){showToast('Error: '+e.message);}
 }
 
-// ── DIN VIEW ──
 function showDeen(){
   const mc=document.getElementById('mainContent');
   mc.style.overflow='auto';
@@ -4218,11 +4091,9 @@ function showDeen(){
     </div>`;
 }
 
-// ── INBOX VIEW ──
 async function showInbox(){
   const mc=document.getElementById('mainContent');
   mc.style.overflow='hidden';
-  // Always load clients fresh for nesadmin
   let clientId = userClientId;
   if(!clientId){
     try{
@@ -4230,7 +4101,6 @@ async function showInbox(){
       window._clients = data || [];
     }catch(e){}
     if(window._clients && window._clients.length){
-      // Find client with email accounts first
       try{
         const {data:accs} = await sb.from('email_accounts').select('client_id').eq('is_active',true).limit(1);
         if(accs && accs.length){
@@ -4259,7 +4129,6 @@ async function showInbox(){
       <button id="inboxToggleRead" onclick="toggleInboxPanel('read')" style="flex:1;padding:7px;border:none;border-radius:7px;background:var(--surface);color:var(--muted);font-size:.75rem;font-weight:600;cursor:pointer;border:1px solid var(--border);"><i class="ti ti-mail-opened"></i> Read</button>
     </div>
     <div style="display:grid;grid-template-columns:280px 1fr;flex:1;overflow:hidden;height:calc(100% - 56px);" id="inboxGrid" class="inbox-grid-wrap">
-      <!-- Email list -->
       <div style="border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;background:var(--surface);">
         <div style="padding:8px 12px;border-bottom:1px solid var(--border);display:flex;gap:6px;overflow-x:auto;" id="acctFilters">
           <button onclick="filterInbox('all',this)" style="font-size:.65rem;padding:3px 10px;border-radius:20px;border:none;background:var(--nes-blue);color:#fff;cursor:pointer;white-space:nowrap;">All</button>
@@ -4268,7 +4137,6 @@ async function showInbox(){
           <div style="padding:20px;text-align:center;color:var(--muted);font-family:var(--mono);font-size:.75rem;">Loading emails...</div>
         </div>
       </div>
-      <!-- Email reading panel -->
       <div style="display:flex;flex-direction:column;overflow:hidden;" id="emailPanel">
         <div style="display:flex;align-items:center;justify-content:center;flex:1;flex-direction:column;gap:8px;color:var(--muted);">
           <i class="ti ti-mail" style="font-size:2rem;opacity:.3;"></i>
@@ -4288,8 +4156,6 @@ async function loadInboxEmails(clientId){
     if(!el)return;
     const colors=['#409cff','#3fb950','#7f77dd','#d29922','#f85149'];
     const accounts=[...new Set(emails.map(e=>e.account_email))];
-    // Update filter pills
-    // Load account labels from Supabase for friendly names
     let accountLabels = {};
     try{
       const {data:accsData} = await sb.from('email_accounts').select('email_address,label').eq('client_id', window._inboxClientId||clientId);
@@ -4299,7 +4165,6 @@ async function loadInboxEmails(clientId){
 
     const filters=document.getElementById('acctFilters');
     if(filters){
-      // Show up to 10 accounts — all visible, scrollable if more
       const visibleAccounts = accounts.slice(0,10);
       filters.innerHTML='<button onclick="filterInbox(&quot;all&quot;,this)" style="display:flex;align-items:center;gap:5px;font-size:.65rem;padding:4px 10px;border-radius:6px;border:none;background:var(--nes-blue);color:#fff;cursor:pointer;white-space:nowrap;flex-shrink:0;"><i class=\"ti ti-inbox\" style=\"font-size:11px;\"></i> All</button>'+
         visibleAccounts.map((a,i)=>{
@@ -4366,9 +4231,7 @@ function showEmail(idx){
   const color=colors[acctIdx%5]||'#409cff';
   const panel=document.getElementById('emailPanel');
   if(!panel)return;
-  // Store account info for body fetch
   window._currentEmail = e;
-  // Switch to read panel on mobile
   if(window.innerWidth <= 700) toggleInboxPanel('read');
   panel.innerHTML=`
     <div style="padding:14px 18px;border-bottom:1px solid var(--border);">
@@ -4405,10 +4268,8 @@ async function sendReply(to, originalSubject){
   const fromAccount=document.getElementById('replyFrom')?.value;
   const body=document.getElementById('replyBody')?.value.trim();
   if(!body){showToast('Write a reply first');return;}
-  // For nesadmin — find client with email accounts, fallback to first client
   let clientId = userClientId;
   if(!clientId && window._clients && window._clients.length){
-    // Try to find client with email accounts
     const nesClient = window._clients.find(c => c.name && c.name.toLowerCase().includes('essential'));
     clientId = nesClient?.id || window._clients[0]?.id;
   }
@@ -4427,7 +4288,6 @@ async function sendReply(to, originalSubject){
   }catch(e){showToast('Error: '+e.message);}
 }
 
-// Add another email form
 function addEmailForm(){
   const clientId = window._activeClientId;
   const planLimits = {presence:2, operations:5, workforce:10, infrastructure:99, starter:2, growth:5, enterprise:99};
@@ -4603,13 +4463,11 @@ window.loadInboxEmails=loadInboxEmails;
 window.filterInbox=filterInbox;
 window.showEmail=showEmail;
 
-// Auto fetch body after showEmail
 const _origShowEmail = showEmail;
 window.showEmail = async function(idx){
   _origShowEmail(idx);
   const e = window._inboxEmails && window._inboxEmails[idx];
   if(!e) return;
-  // Use cached account IDs to avoid extra Supabase query on every click
   if(!window._emailAccountIds){
     const clientId = window._inboxClientId;
     const {data:accs2} = await sb.from('email_accounts').select('id,email_address').eq('client_id',clientId);
@@ -4623,29 +4481,21 @@ window.showEmail = async function(idx){
   const body = await fetchEmailBody(accountId, e.uid);
   if(bodyEl){
     let cleaned = body || '';
-    // Convert URLs to clickable links — run AFTER HTML stripping
     cleaned = cleaned.replace(/(https?:\/\/[^\s<>"{}|\\^`[\]]+)/g, (url) => {
-      // Strip trailing punctuation
       const clean = url.replace(/[.,;:!?)]+$/, '');
       try {
         const display = clean.length > 55 ? clean.substring(0,55)+'...' : clean;
         return '<a href="'+clean+'" target="_blank" rel="noopener noreferrer" style="color:#409cff;text-decoration:underline;cursor:pointer;">'+display+'</a>';
       } catch(e){ return url; }
     });
-    // Remove base64 blocks
     cleaned = cleaned.replace(/[A-Za-z0-9+\/]{60,}={0,2}/g, '');
-    // Remove MIME headers
     cleaned = cleaned.replace(/--[\w\-]+=*\r?\n/g, '');
     cleaned = cleaned.replace(/^(Content-Type|Content-Transfer-Encoding|Content-Disposition|MIME-Version|X-[\w-]+):[^\n]*\n/gm, '');
-    // Remove HTML
     cleaned = cleaned.replace(/<style[\s\S]*?<\/style>/gi, '');
     cleaned = cleaned.replace(/<script[\s\S]*?<\/script>/gi, '');
     cleaned = cleaned.replace(/<[^>]+>/g, ' ');
-    // Decode entities
     cleaned = cleaned.replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&nbsp;/g,' ').replace(/&#39;/g,"'").replace(/&quot;/g,'"').replace(/&#[0-9]+;/g,' ');
-    // Clean whitespace
     cleaned = cleaned.replace(/[ \t]{2,}/g,' ').replace(/\n{3,}/g,'\n\n').trim();
-    // Remove lines that are just symbols/garbage
     cleaned = cleaned.split('\n').filter(l => {
       const t = l.trim();
       if(t.length === 0) return true;
@@ -4653,7 +4503,6 @@ window.showEmail = async function(idx){
       return alphaRatio > 0.3 || t.length < 10;
     }).join('\n');
     cleaned = cleaned.trim();
-    // Convert URLs to clickable links — AFTER all cleaning
     cleaned = cleaned.replace(/(https?:\/\/[^\s]+)/g, (url) => {
       const clean = url.replace(/[.,;:!?)>]+$/, '');
       const display = clean.length > 55 ? clean.substring(0,52)+'...' : clean;
@@ -4692,3 +4541,4 @@ window.addCustomCredField=addCustomCredField;
 </script>
 </body>
 </html>
+```
