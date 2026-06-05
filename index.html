@@ -403,7 +403,7 @@
       .ph-grid{grid-template-columns:1fr 1fr!important;}
       .sales-grid{grid-template-columns:1fr 1fr!important;}
       .kgrid5{grid-template-columns:repeat(3,1fr)!important;}
-      .top-bar{gap:4px!important;}
+      .top-bar{gap:4px!important;}.top-bar > button > span:not([style]){display:none!important;}
       .top-bar button span{font-size:.65rem;}
       /* Fix all page header overlap with hamburger */
       .page-header-inner{padding-left:60px!important;}
@@ -418,7 +418,7 @@
       /* API credits stats wrap */
       .ac-stats{grid-template-columns:1fr 1fr!important;}
       /* Team Hub iframe full width */
-      #teamHubFrame{width:100%!important;height:calc(100vh - 120px)!important;}
+      #teamHubFrame{width:100%!important;height:calc(100vh - 120px)!important;}#teamHubWrapper{left:0!important;}
       /* CM tabs wrap on mobile */
       .cm-tabs{flex-wrap:wrap!important;}
       .disclaimer{display:none;}
@@ -3729,6 +3729,7 @@ function showPricing(){
           <div style="text-align:center;font-size:.72rem;color:var(--red);text-decoration:line-through;font-family:var(--mono);margin-bottom:2px;">OMR 159/mo (~$413)</div>
           <div class="plan-price">OMR 79</div>
           <div class="plan-period">per month · ~$205 USD · founder price for 1 year</div>
+          <div style="font-family:var(--mono);font-size:.62rem;color:var(--muted);text-align:center;margin-bottom:4px;">Standard: OMR 109/mo after 1 year</div>
           <ul class="plan-features-list">
             <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>500 AI messages/day</li>
             <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Everything in AI Presence</li>
@@ -3750,7 +3751,8 @@ function showPricing(){
           <div style="font-family:'Syne',sans-serif;font-size:.65rem;color:#3fb950;text-transform:uppercase;letter-spacing:.1em;text-align:center;margin-bottom:4px;">AI Workforce</div>
           <div style="text-align:center;font-size:.72rem;color:var(--red);text-decoration:line-through;font-family:var(--mono);margin-bottom:2px;">OMR 299/mo (~$777)</div>
           <div class="plan-price" style="color:#3fb950;">OMR 149</div>
-          <div class="plan-period"><div style="font-family:var(--mono);font-size:.62rem;color:var(--muted);text-align:center;margin-bottom:4px;">Standard: OMR 169/mo after 1 year</div>
+          <div class="plan-period">per month · ~$387 USD · founder price for 1 year</div>
+          <div style="font-family:var(--mono);font-size:.62rem;color:var(--muted);text-align:center;margin-bottom:4px;">Standard: OMR 169/mo after 1 year</div>
           <ul class="plan-features-list">
             <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Unlimited AI messages</li>
             <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Everything in AI Operations</li>
