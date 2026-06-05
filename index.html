@@ -439,6 +439,9 @@
       .top-bar > button > span:not([style]){display:none!important;}
       /* Usage Analytics / API Credits header buttons */
       .top-bar{max-width:calc(100% - 60px)!important;}
+      /* All page headers clear the hamburger + top-bar on mobile */
+      .main [style*="padding:11px 18px 11px 60px"]{padding-top:56px!important;}
+      .main [style*="padding:56px"]{padding-top:56px!important;}
     }
   </style>
 </head>
@@ -2106,7 +2109,7 @@ async function showApiCredits(){
   const mc=document.getElementById('mainContent');
   mc.style.overflow='auto';
   mc.innerHTML=`
-    <div style="padding:11px 120px 11px 60px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;">
+    <div style="padding:11px 18px 11px 60px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:6px;">
       <div>
         <div style="font-family:var(--mono);font-size:.8rem;color:#7f77dd;font-weight:800;">API CREDITS</div>
         <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">Balance · Usage · Auto-recharge thresholds</div>
@@ -2508,7 +2511,7 @@ async function showAnalytics(){
   const mc = document.getElementById('mainContent');
   mc.style.overflow = 'auto';
   mc.innerHTML = `
-    <div style="padding:11px 120px 11px 60px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;">
+    <div style="padding:11px 18px 11px 60px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:6px;">
       <div>
         <div style="font-family:var(--mono);font-size:.8rem;color:#d29922;font-weight:800;display:flex;align-items:center;gap:6px;"><i class="ti ti-chart-dots"></i>USAGE ANALYTICS</div>
         <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">Platform usage · All clients · Real-time</div>
