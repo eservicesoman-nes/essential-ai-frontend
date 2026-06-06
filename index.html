@@ -1074,7 +1074,7 @@ function renderLogLines(lines){
 async function refreshSysLogs(){
   const lines = document.getElementById('logLinesSelect')?.value || 50;
   try {
-    const res = await fetch('/api/admin/logs?lines='+lines, {
+    const res = await fetch(API_URL+'/api/admin/logs?lines='+lines, {
       headers:{ 'Authorization': 'Bearer '+localStorage.getItem('nesai_token') }
     });
     const data = await res.json();
