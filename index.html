@@ -567,6 +567,11 @@
         <span style="flex:1;">API Credits</span>
         <div id="apiAlertDot" style="width:6px;height:6px;border-radius:50%;background:#7f77dd;"></div>
       </div>
+      <div class="client-mgr-btn" id="sysLogsNav" onclick="showView('syslogs')" style="display:none;margin-top:4px;background:rgba(248,81,73,.08);border-color:rgba(248,81,73,.2);color:#f85149;">
+        <i class="ti ti-terminal"></i>
+        <span style="flex:1;">System Logs</span>
+        <div id="sysLogsDot" style="width:6px;height:6px;border-radius:50%;background:#f85149;"></div>
+      </div>
     </div>
 
     <div class="usage-wrap">
@@ -822,6 +827,8 @@ function setupNavForRole(){
       if(statusNav)statusNav.style.display='flex';
       const apiNav=document.getElementById('apiCreditsNav');
       if(apiNav)apiNav.style.display='flex';
+      const logsNav=document.getElementById('sysLogsNav');
+      if(logsNav)logsNav.style.display='flex';
     }
   }
   loadLeadCount();
@@ -984,10 +991,110 @@ function showView(view){
   else if(view==='analytics'){showAnalytics();}
   else if(view==='adminstatus'){showAdminStatus();}
   else if(view==='apicredits'){showApiCredits();}
+  else if(view==='syslogs'){showSysLogs();}
   else if(view==='pricing'){showPricing();}
   else if(view==='deen'){showDeen();}
   else if(view==='inbox'){showInbox();}
 }
+// ── System Logs ──────────────────────────────────────────────────
+async function showSysLogs(){
+  const mainContent = document.getElementById('mainContent');
+  mainContent.innerHTML = `
+    <div class="page scrollable" id="sysLogsContent" style="padding:14px 18px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+        <div>
+          <div style="font-family:var(--mono);font-size:.8rem;color:#f85149;letter-spacing:1px;text-transform:uppercase;">System Logs</div>
+          <div style="font-size:.7rem;color:var(--muted);margin-top:2px;">Live backend error and output logs · NES Admin only</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <select id="logLinesSelect" onchange="refreshSysLogs()" style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:5px 8px;color:var(--text);font-size:.72rem;cursor:pointer;">
+            <option value="30">Last 30 lines</option>
+            <option value="50" selected>Last 50 lines</option>
+            <option value="100">Last 100 lines</option>
+            <option value="200">Last 200 lines</option>
+          </select>
+          <button onclick="refreshSysLogs()" style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:5px 12px;color:var(--text);font-size:.72rem;cursor:pointer;display:flex;align-items:center;gap:5px;">
+            <i class="ti ti-refresh"></i> Refresh
+          </button>
+          <div id="logsLastUpdated" style="font-size:.65rem;color:var(--muted);font-family:var(--mono);"></div>
+        </div>
+      </div>
+      <div id="logTabsRow" style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;">
+        <button class="log-tab-btn active" onclick="switchLogTab('nes_ai_errors',this)" style="padding:5px 12px;border-radius:6px;font-size:.72rem;font-weight:600;cursor:pointer;border:1px solid rgba(248,81,73,.3);background:rgba(248,81,73,.1);color:#f85149;">NES AI Errors</button>
+        <button class="log-tab-btn" onclick="switchLogTab('nes_backend_errors',this)" style="padding:5px 12px;border-radius:6px;font-size:.72rem;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--card);color:var(--muted);">Backend Errors</button>
+        <button class="log-tab-btn" onclick="switchLogTab('nes_ai_out',this)" style="padding:5px 12px;border-radius:6px;font-size:.72rem;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--card);color:var(--muted);">NES AI Output</button>
+        <button class="log-tab-btn" onclick="switchLogTab('nes_backend_out',this)" style="padding:5px 12px;border-radius:6px;font-size:.72rem;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--card);color:var(--muted);">Backend Output</button>
+      </div>
+      <div id="logDisplay" style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;font-family:var(--mono);font-size:.7rem;line-height:1.7;overflow-x:auto;min-height:400px;">
+        <div style="color:var(--muted);">Loading logs...</div>
+      </div>
+    </div>`;
+
+  await refreshSysLogs();
+  // Auto-refresh every 60 seconds
+  window._sysLogsInterval = setInterval(refreshSysLogs, 60000);
+}
+
+let _currentLogTab = 'nes_ai_errors';
+let _allLogs = {};
+
+function switchLogTab(tab, btn){
+  _currentLogTab = tab;
+  document.querySelectorAll('.log-tab-btn').forEach(b=>{
+    b.style.background='var(--card)';
+    b.style.color='var(--muted)';
+    b.style.borderColor='var(--border)';
+  });
+  btn.style.background='rgba(248,81,73,.1)';
+  btn.style.color='#f85149';
+  btn.style.borderColor='rgba(248,81,73,.3)';
+  renderLogLines(_allLogs[tab] || []);
+}
+
+function renderLogLines(lines){
+  const el = document.getElementById('logDisplay');
+  if(!el) return;
+  if(!lines || lines.length===0){
+    el.innerHTML='<div style="color:var(--muted);">No log entries found.</div>';
+    return;
+  }
+  el.innerHTML = lines.map(line=>{
+    let color = 'var(--text)';
+    if(/error|Error|ERROR|fatal|Fatal|FATAL|exception|Exception/i.test(line)) color='#f85149';
+    else if(/warn|Warn|WARN/i.test(line)) color='#d29922';
+    else if(/✅|success|Success|online|ready|started/i.test(line)) color='#3fb950';
+    else if(/Gemini|Claude|DeepSeek|Anthropic/i.test(line)) color='#409cff';
+    return '<div style="color:'+color+';padding:1px 0;border-bottom:1px solid rgba(255,255,255,0.03);">'+
+      line.replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</div>';
+  }).join('');
+  // Scroll to bottom
+  el.scrollTop = el.scrollHeight;
+}
+
+async function refreshSysLogs(){
+  const lines = document.getElementById('logLinesSelect')?.value || 50;
+  try {
+    const res = await fetch('/api/admin/logs?lines='+lines, {
+      headers:{ 'Authorization': 'Bearer '+localStorage.getItem('nesai_token') }
+    });
+    const data = await res.json();
+    if(data.success){
+      _allLogs = data.logs;
+      renderLogLines(_allLogs[_currentLogTab] || []);
+      const ts = document.getElementById('logsLastUpdated');
+      if(ts) ts.textContent = 'Updated: '+new Date(data.timestamp).toLocaleTimeString();
+    } else {
+      document.getElementById('logDisplay').innerHTML='<div style="color:#f85149;">'+( data.error||'Failed to load logs')+'</div>';
+    }
+  } catch(e){
+    const el=document.getElementById('logDisplay');
+    if(el) el.innerHTML='<div style="color:#f85149;">Connection error: '+e.message+'</div>';
+  }
+}
+
+// Clear interval when leaving logs view
+const _origShowView = typeof showView === 'function' ? showView : null;
+
 
 async function showCEODashboard(){
   const mc=document.getElementById('mainContent');
