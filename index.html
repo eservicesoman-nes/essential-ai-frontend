@@ -421,6 +421,9 @@
       #teamHubFrame{width:100%!important;height:calc(100vh - 120px)!important;}#teamHubWrapper{left:0!important;}
       /* CM tabs wrap on mobile */
       .cm-tabs{flex-wrap:wrap!important;}
+      .cm-content{max-height:50dvh!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch!important;}
+      #ph-calculator > div{max-width:100%!important;width:100%!important;box-sizing:border-box!important;}
+      #ph-calculator select,#ph-calculator input[type=range]{width:100%!important;}
       .disclaimer{display:none;}
       .kgrid3{grid-template-columns:1fr 1fr;}
       .row2,.cm-layout{grid-template-columns:1fr;}
@@ -440,8 +443,9 @@
       /* Usage Analytics / API Credits header buttons */
       .top-bar{max-width:calc(100% - 60px)!important;}
       /* All page headers clear the hamburger + top-bar on mobile */
-      .main [style*="padding:11px 18px 11px 60px"]{padding-top:56px!important;}
-      .main [style*="padding:56px"]{padding-top:56px!important;}
+      .main > div > div:first-child{padding-top:56px!important;}
+      /* Analytics + API Credits headers wrap on mobile */
+      .an-hdr{flex-wrap:wrap!important;gap:6px!important;}
     }
   </style>
 </head>
@@ -2109,12 +2113,11 @@ async function showApiCredits(){
   const mc=document.getElementById('mainContent');
   mc.style.overflow='auto';
   mc.innerHTML=`
-    <div style="padding:11px 18px 11px 60px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:6px;">
+    <div style="padding:11px 160px 11px 60px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;" class="an-hdr">
       <div>
         <div style="font-family:var(--mono);font-size:.8rem;color:#7f77dd;font-weight:800;">API CREDITS</div>
         <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">Balance · Usage · Auto-recharge thresholds</div>
       </div>
-      <button onclick="saveAllThresholds()" style="background:var(--nes-btn-grad);border:none;border-radius:8px;padding:6px 14px;color:#fff;font-size:.75rem;font-weight:700;cursor:pointer;margin-top:8px;display:block;"><i class="ti ti-device-floppy"></i> Save Thresholds</button>
     </div>
     <div class="page" id="apiCreditsContent" style="overflow-y:auto;flex:1;">
       <div style="color:var(--muted);font-family:var(--mono);font-size:.8rem;padding:20px 0;">Loading API credits...</div>
@@ -2148,7 +2151,7 @@ async function loadApiCredits(){
     <div style="background:var(--surface);border-radius:8px;padding:12px;border:1px solid var(--border);"><div style="font-size:.7rem;color:var(--muted);margin-bottom:4px;font-family:var(--mono);">Auto-recharge</div><div style="font-size:1.4rem;font-weight:700;color:#7f77dd;">${Object.values(thresholds).filter(t=>t.recharge_amount>0).length}</div></div>
     <div style="background:var(--surface);border-radius:8px;padding:12px;border:1px solid var(--border);"><div style="font-size:.7rem;color:var(--muted);margin-bottom:4px;font-family:var(--mono);">Est. monthly</div><div style="font-size:1.4rem;font-weight:700;color:var(--nes-blue);">~$25</div></div>
   </div>`;
-  html+=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;"><div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;">API Credit Status</div><button onclick="addApiService()" style="background:none;border:1px solid var(--border);border-radius:6px;padding:4px 10px;color:var(--muted);cursor:pointer;font-size:.72rem;font-family:var(--mono);"><i class="ti ti-plus"></i> Add API</button></div>`;
+  html+=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;"><div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;">API Credit Status</div><div style="display:flex;gap:8px;"><button onclick="saveAllThresholds()" style="background:var(--nes-btn-grad);border:none;border-radius:6px;padding:4px 12px;color:#fff;font-size:.72rem;font-weight:700;cursor:pointer;font-family:var(--mono);"><i class="ti ti-device-floppy"></i> Save Thresholds</button><button onclick="addApiService()" style="background:none;border:1px solid var(--border);border-radius:6px;padding:4px 10px;color:var(--muted);cursor:pointer;font-size:.72rem;font-family:var(--mono);"><i class="ti ti-plus"></i> Add API</button></div></div>`;
   html+=`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:10px;margin-bottom:20px;">`;
   apis.forEach(function(api){
     const t=thresholds[api.id]||{};
@@ -2511,7 +2514,7 @@ async function showAnalytics(){
   const mc = document.getElementById('mainContent');
   mc.style.overflow = 'auto';
   mc.innerHTML = `
-    <div style="padding:11px 18px 11px 60px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:6px;">
+    <div style="padding:11px 160px 11px 60px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;" class="an-hdr">
       <div>
         <div style="font-family:var(--mono);font-size:.8rem;color:#d29922;font-weight:800;display:flex;align-items:center;gap:6px;"><i class="ti ti-chart-dots"></i>USAGE ANALYTICS</div>
         <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">Platform usage · All clients · Real-time</div>
