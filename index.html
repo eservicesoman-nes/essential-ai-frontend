@@ -2856,6 +2856,65 @@ async function loadAnalytics(days){
         </div>
       </div>
     `;
+
+    // AI Cost by Client
+    const { data: costData } = await sb
+      .from('monthly_usage')
+      .select('client_id, month, model, calls, cost_usd')
+      .order('month', { ascending: false });
+
+    const costRows = costData || [];
+    const clientMap = {};
+    clients.forEach(c => { clientMap[c.id] = c.name; });
+
+    const grouped = {};
+    costRows.forEach(r => {
+      const key = (clientMap[r.client_id] || 'Unknown') + '|' + r.month;
+      if (!grouped[key]) grouped[key] = { client: clientMap[r.client_id] || 'Unknown', month: r.month, gemini: 0, anthropic: 0, deepseek: 0, total_usd: 0 };
+      grouped[key][r.model] = (grouped[key][r.model] || 0) + r.calls;
+      grouped[key].total_usd += parseFloat(r.cost_usd || 0);
+    });
+
+    const costTable = Object.values(grouped).sort((a,b) => b.month.localeCompare(a.month) || a.client.localeCompare(b.client));
+    const noData = costTable.length === 0;
+
+    el.innerHTML += `
+      <div style="margin-top:24px;">
+        <div style="font-family:var(--mono);font-size:.75rem;color:#d29922;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:6px;">
+          <i class="ti ti-currency-dollar"></i> AI COST BY CLIENT
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;">
+          <table style="width:100%;border-collapse:collapse;font-size:.72rem;">
+            <thead>
+              <tr style="background:rgba(210,153,34,0.08);">
+                <th style="padding:8px 12px;text-align:left;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border);">Client</th>
+                <th style="padding:8px 12px;text-align:left;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border);">Month</th>
+                <th style="padding:8px 12px;text-align:right;color:#409cff;font-weight:600;border-bottom:1px solid var(--border);">Gemini</th>
+                <th style="padding:8px 12px;text-align:right;color:#7f77dd;font-weight:600;border-bottom:1px solid var(--border);">Claude</th>
+                <th style="padding:8px 12px;text-align:right;color:#3fb950;font-weight:600;border-bottom:1px solid var(--border);">DeepSeek</th>
+                <th style="padding:8px 12px;text-align:right;color:#d29922;font-weight:600;border-bottom:1px solid var(--border);">Cost USD</th>
+                <th style="padding:8px 12px;text-align:right;color:#d29922;font-weight:600;border-bottom:1px solid var(--border);">Cost OMR</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${noData
+                ? `<tr><td colspan="7" style="padding:20px;text-align:center;color:var(--muted);font-family:var(--mono);">No usage data yet</td></tr>`
+                : costTable.map((r,i) => `
+                  <tr style="border-bottom:1px solid var(--border);background:${i%2===0?'transparent':'rgba(255,255,255,0.01)'};">
+                    <td style="padding:8px 12px;color:var(--text);font-weight:500;">${r.client}</td>
+                    <td style="padding:8px 12px;color:var(--muted);font-family:var(--mono);">${r.month}</td>
+                    <td style="padding:8px 12px;text-align:right;color:#409cff;">${r.gemini||0}</td>
+                    <td style="padding:8px 12px;text-align:right;color:#7f77dd;">${r.anthropic||0}</td>
+                    <td style="padding:8px 12px;text-align:right;color:#3fb950;">${r.deepseek||0}</td>
+                    <td style="padding:8px 12px;text-align:right;color:#d29922;font-family:var(--mono);">$${r.total_usd.toFixed(4)}</td>
+                    <td style="padding:8px 12px;text-align:right;color:#d29922;font-weight:600;font-family:var(--mono);">OMR ${(r.total_usd*0.385).toFixed(4)}</td>
+                  </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+
   }catch(e){
     if(el) el.innerHTML = `<div style="color:var(--red);font-family:var(--mono);font-size:.75rem;padding:20px;">Error loading analytics: ${e.message}</div>`;
   }
