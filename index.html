@@ -3493,7 +3493,7 @@ async function checkPlatformStatus(){
   const builtinServices=[
     {name:'Backend API',url:API_URL+'/health',label:'NES AI Backend'},
     {name:'Supabase',url:'https://sfpfjjdtczvuxyhjievt.supabase.co/rest/v1/',label:'Database'},
-    {name:'Frontend',url:'https://essential-ai-frontend.vercel.app',label:'Vercel Frontend'},
+    {name:'Frontend',url:'https://app.nes-ai.com',label:'Vercel Frontend'},
     {name:'Rocket.Chat',url:'https://chat.essential-services.org/api/v1/info',label:'Team Hub'},
   ];
   const customServices=JSON.parse(localStorage.getItem('nes_custom_services')||'[]');
@@ -3868,7 +3868,7 @@ function showPricing(){
           <div style="text-align:center;font-size:.72rem;color:var(--red);text-decoration:line-through;font-family:var(--mono);margin-bottom:2px;">OMR 159/mo (~$413)</div>
           <div class="plan-price">OMR 79</div>
           <div class="plan-period">per month · ~$205 USD · founder price for 1 year</div>
-          <div style="font-family:var(--mono);font-size:.62rem;color:var(--muted);text-align:center;margin-bottom:4px;">Standard: OMR 109/mo after 1 year</div>
+          <div style="font-family:var(--mono);font-size:.62rem;color:var(--muted);text-align:center;margin-bottom:4px;">Standard: OMR 159/mo after 1 year</div>
           <ul class="plan-features-list">
             <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>500 AI messages/day</li>
             <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Everything in AI Presence</li>
@@ -3891,7 +3891,7 @@ function showPricing(){
           <div style="text-align:center;font-size:.72rem;color:var(--red);text-decoration:line-through;font-family:var(--mono);margin-bottom:2px;">OMR 299/mo (~$777)</div>
           <div class="plan-price" style="color:#3fb950;">OMR 149</div>
           <div class="plan-period">per month · ~$387 USD · founder price for 1 year</div>
-          <div style="font-family:var(--mono);font-size:.62rem;color:var(--muted);text-align:center;margin-bottom:4px;">Standard: OMR 169/mo after 1 year</div>
+          <div style="font-family:var(--mono);font-size:.62rem;color:var(--muted);text-align:center;margin-bottom:4px;">Standard: OMR 299/mo after 1 year</div>
           <ul class="plan-features-list">
             <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Unlimited AI messages</li>
             <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Everything in AI Operations</li>
@@ -4688,3 +4688,4 @@ window.addCustomCredField=addCustomCredField;
 </body>
 </html>
 ```
+
