@@ -596,13 +596,7 @@
         </div>
         <i class="ti ti-chevron-up" id="profileChevron" style="font-size:12px;color:#8b949e;transition:transform .2s;"></i>
         <div class="profile-menu" id="profileMenu">
-          <div class="profile-menu-item" onclick="event.stopPropagation();showChangePassword()">
-            <i class="ti ti-key"></i><span>Change Password</span>
-          </div>
-          <div class="profile-menu-divider"></div>
-          <div class="profile-menu-item danger" onclick="event.stopPropagation();doLogout()">
-            <i class="ti ti-logout"></i><span>Sign Out</span>
-          </div>
+          <!-- populated by buildProfileMenu() -->
         </div>
       </div>
     </div>
@@ -865,6 +859,8 @@ async function showClientBrandingChip(){
     if(data.plan)window.clientPlan=data.plan;
     if(data.primary_color){
       document.documentElement.style.setProperty('--nes-blue',data.primary_color);
+      window.userPlan = data.plan || '';
+      window.userCompany = data.name || '';
     }
   }catch(e){}
 }
@@ -915,10 +911,69 @@ async function doSignup(){
   else{err.style.color='#3fb950';err.textContent='Account created! You can now sign in.';}
 }
 
+function buildProfileMenu(){
+  const menu = document.getElementById('profileMenu');
+  const email = document.getElementById('userEmail').textContent || '';
+  const role = document.getElementById('roleChip').textContent || '';
+  const isAdmin = role === 'nesadmin';
+  const isCEO = role === 'ceo';
+  const isManager = role === 'manager';
+
+  // Plan badge color
+  const planColors = { presence:'#409cff', operations:'#3fb950', workforce:'#d29922', infrastructure:'#7f77dd' };
+  const plan = (window.userPlan || '').toLowerCase();
+  const planColor = planColors[plan] || '#409cff';
+  const planLabel = plan ? plan.charAt(0).toUpperCase() + plan.slice(1) : '';
+
+  let html = '';
+
+  // Header info block
+  html += `<div style="padding:8px 10px 10px;border-bottom:1px solid #1a2332;margin-bottom:6px;">
+    <div style="font-size:.78rem;color:#e6edf3;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${email}</div>
+    <div style="display:flex;align-items:center;gap:6px;margin-top:4px;flex-wrap:wrap;">
+      <span style="font-size:.62rem;padding:2px 7px;border-radius:5px;background:rgba(64,156,255,0.12);color:#409cff;font-family:monospace;text-transform:uppercase;">${role}</span>
+      ${!isAdmin && planLabel ? `<span style="font-size:.62rem;padding:2px 7px;border-radius:5px;background:rgba(${planColor === '#409cff' ? '64,156,255' : planColor === '#3fb950' ? '63,185,80' : planColor === '#d29922' ? '210,153,34' : '127,119,221'},0.12);color:${planColor};font-family:monospace;">AI ${planLabel}</span>` : ''}
+      ${!isAdmin && window.userCompany ? `<span style="font-size:.65rem;color:#8b949e;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:120px;">${window.userCompany}</span>` : ''}
+      ${isAdmin ? `<span style="font-size:.62rem;padding:2px 7px;border-radius:5px;background:rgba(248,81,73,0.12);color:#f85149;font-family:monospace;">NES AI</span>` : ''}
+    </div>
+  </div>`;
+
+  // Change Password — all roles
+  html += `<div class="profile-menu-item" onclick="event.stopPropagation();toggleProfileMenu();showChangePassword()">
+    <i class="ti ti-key"></i><span>Change Password</span>
+  </div>`;
+
+  // Admin-only items
+  if(isAdmin){
+    html += `<div class="profile-menu-item" onclick="event.stopPropagation();toggleProfileMenu();showView('analytics')">
+      <i class="ti ti-chart-dots"></i><span>Usage Analytics</span>
+    </div>`;
+    html += `<div class="profile-menu-item" onclick="event.stopPropagation();toggleProfileMenu();showView('adminstatus')">
+      <i class="ti ti-server"></i><span>Platform Status</span>
+    </div>`;
+  }
+
+  // CEO/Manager — company profile
+  if(isCEO || isManager){
+    html += `<div class="profile-menu-item" onclick="event.stopPropagation();toggleProfileMenu();showView('mycredentials')">
+      <i class="ti ti-building"></i><span>Company Settings</span>
+    </div>`;
+  }
+
+  // Divider + sign out
+  html += `<div class="profile-menu-divider"></div>`;
+  html += `<div class="profile-menu-item danger" onclick="event.stopPropagation();doLogout()">
+    <i class="ti ti-logout"></i><span>Sign Out</span>
+  </div>`;
+
+  menu.innerHTML = html;
+}
+
 function toggleProfileMenu(){
   const menu = document.getElementById('profileMenu');
   const chevron = document.getElementById('profileChevron');
   const isOpen = menu.classList.contains('open');
+  if(!isOpen) buildProfileMenu();
   menu.classList.toggle('open');
   chevron.style.transform = isOpen ? '' : 'rotate(180deg)';
   if(!isOpen){
