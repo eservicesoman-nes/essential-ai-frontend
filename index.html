@@ -3068,8 +3068,28 @@ async function loadTeam(){
   const el = document.getElementById('teamContent');
   if(!el) return;
   try{
+    // NES Admin — pick a client first
+    if(!window.userClientId){
+      const {data:clients} = await sb.from('clients').select('id,name,plan,status').order('name');
+      el.innerHTML = `
+        <div style="margin-bottom:16px;">
+          <div style="font-family:var(--mono);font-size:.72rem;color:var(--muted);margin-bottom:10px;text-transform:uppercase;">Select Client to Manage</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            ${(clients||[]).map(c=>`
+              <div onclick="window._adminTeamClientId='${c.id}';window._adminTeamClientName='${c.name}';loadTeamForClient('${c.id}')" 
+                style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 16px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;transition:border-color .15s;"
+                onmouseover="this.style.borderColor='#409cff'" onmouseout="this.style.borderColor='var(--border)'">
+                <div>
+                  <div style="font-size:.82rem;color:#e6edf3;font-weight:600;">${c.name}</div>
+                  <div style="font-size:.68rem;color:var(--muted);margin-top:2px;">${c.plan||'starter'} · ${c.status||'active'}</div>
+                </div>
+                <i class="ti ti-chevron-right" style="color:var(--muted);font-size:14px;"></i>
+              </div>`).join('')}
+          </div>
+        </div>`;
+      return;
+    }
     const clientId = window.userClientId;
-    if(!clientId){ el.innerHTML='<div style="color:var(--muted);padding:20px;text-align:center;">No client assigned.</div>'; return; }
 
     // Get users + departments in parallel
     const [usersRes, deptsRes] = await Promise.all([
@@ -3216,6 +3236,23 @@ async function sendTeamInvite(){
     err.textContent=e.message; err.style.display='block';
     btn.textContent='Send Invite'; btn.disabled=false;
   }
+}
+
+async function loadTeamForClient(clientId){
+  const el = document.getElementById('teamContent');
+  if(!el) return;
+  el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);font-family:var(--mono);font-size:.8rem;">Loading...</div>';
+  // Temporarily set clientId for loadTeam
+  const orig = window.userClientId;
+  window.userClientId = clientId;
+  await loadTeam();
+  // Add back button
+  const backBtn = document.createElement('div');
+  backBtn.style.cssText = 'padding:10px 0;margin-bottom:16px;';
+  backBtn.innerHTML = `<button onclick="window.userClientId=null;loadTeam()" style="background:none;border:1px solid var(--border);border-radius:7px;padding:6px 12px;color:var(--muted);font-size:.75rem;cursor:pointer;display:flex;align-items:center;gap:6px;"><i class='ti ti-arrow-left'></i> Back to clients</button>`;
+  const teamContent = document.getElementById('teamContent');
+  if(teamContent) teamContent.insertBefore(backBtn, teamContent.firstChild);
+  window.userClientId = orig;
 }
 
 async function updateUserRole(userId, clientId, role){
