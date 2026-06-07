@@ -3313,37 +3313,42 @@ async function renderPartnerHub(){
   const el = document.getElementById('partnerContent');
   if(!el) return;
 
-  let directClients = [], partnerClients = [], partners = [];
-  try{
-    const {data: allClients} = await sb.from('clients').select('id,name,plan,status,partner_id,monthly_fee');
-    directClients = (allClients||[]).filter(c => !c.partner_id);
-    partnerClients = (allClients||[]).filter(c => c.partner_id);
-  }catch(e){}
+  // Fetch all data
+  const [clientsRes, partnersRes, commissionsRes] = await Promise.all([
+    sb.from('clients').select('id,name,plan,status,partner_ref,monthly_fee,first_payment_confirmed'),
+    sb.from('partners').select('*').order('created_at', {ascending:false}),
+    sb.from('partner_commissions').select('*').order('created_at', {ascending:false})
+  ]);
 
-  const planVal = {starter:29, operations:79, workforce:149, infrastructure:299, presence:29};
+  const allClients = clientsRes.data || [];
+  const allPartners = partnersRes.data || [];
+  const allCommissions = commissionsRes.data || [];
+
   const getPlanVal = (plan, fee) => {
     if(fee && fee > 0) return parseFloat(fee);
     const p = (plan||'').toLowerCase();
     if(p.includes('workforce')) return 149;
     if(p.includes('operations')) return 79;
-    if(p.includes('presence') || p.includes('starter')) return 29;
+    if(p.includes('presence')||p.includes('starter')) return 29;
     return 79;
   };
 
-  const NES_PLATFORM_PCT = 20;
-
-  const directMRR = directClients.filter(c=>c.status==='active').reduce((s,c) => s + getPlanVal(c.plan, c.monthly_fee), 0);
-  const partnerMRR = partnerClients.filter(c=>c.status==='active').reduce((s,c) => s + getPlanVal(c.plan, c.monthly_fee), 0);
+  // Stats
+  const directClients = allClients.filter(c => !c.partner_ref);
+  const partnerClients = allClients.filter(c => c.partner_ref);
+  const directMRR = directClients.filter(c=>c.status==='active').reduce((s,c)=>s+getPlanVal(c.plan,c.monthly_fee),0);
+  const partnerMRR = partnerClients.filter(c=>c.status==='active').reduce((s,c)=>s+getPlanVal(c.plan,c.monthly_fee),0);
   const totalMRR = directMRR + partnerMRR;
+  const pendingCommissions = allCommissions.filter(c=>c.status==='pending').reduce((s,c)=>s+parseFloat(c.amount_omr||0),0);
+  const paidCommissions = allCommissions.filter(c=>c.status==='paid').reduce((s,c)=>s+parseFloat(c.amount_omr||0),0);
+  const successRate = partnerClients.length > 0 ? Math.round((partnerClients.filter(c=>c.status==='active').length/partnerClients.length)*100) : 0;
 
-  const partnerPool = partnerMRR * 0.80;
-  const nesFromPool = partnerPool * 0.40;
-  const nesPlatformFee = totalMRR * (NES_PLATFORM_PCT/100);
-  const totalNesRevenue = directMRR + nesPlatformFee + nesFromPool;
+  const tierColors = {apex:'#409cff', alliance:'#3fb950', elite:'#d29922', custom:'#7f77dd'};
+  const tierBg = {apex:'rgba(64,156,255,0.08)', alliance:'rgba(63,185,80,0.08)', elite:'rgba(210,153,34,0.08)', custom:'rgba(127,119,221,0.08)'};
 
   el.innerHTML = `
     <style>
-      .ph-tabs{display:flex;gap:6px;margin-bottom:16px;}
+      .ph-tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;}
       .ph-tab{font-family:var(--mono);font-size:.72rem;padding:6px 14px;border-radius:7px;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer;}
       .ph-tab.active{background:var(--nes-blue);color:#fff;border-color:var(--nes-blue);}
       .ph-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px;}
@@ -3351,486 +3356,398 @@ async function renderPartnerHub(){
       .ph-klbl{font-size:.62rem;color:var(--muted);margin-bottom:3px;display:flex;align-items:center;gap:4px;}
       .ph-kval{font-size:1.2rem;font-weight:700;}
       .ph-kdelta{font-size:.62rem;color:var(--muted);margin-top:2px;}
-      .ph-kbar{height:3px;background:var(--border2);border-radius:2px;margin-top:7px;}
+      .ph-kbar{height:3px;background:var(--border);border-radius:2px;margin-top:7px;}
       .ph-kfill{height:100%;border-radius:2px;}
-      .tier-row-ph{display:flex;justify-content:space-between;align-items:center;font-size:.72rem;padding:5px 0;border-bottom:1px solid var(--border);}
-      .tier-row-ph:last-child{border-bottom:none;}
-      .tier-lbl-ph{color:var(--muted);}
-      .tier-val-ph{font-weight:600;font-family:var(--mono);}
-      .prog-track{height:5px;background:var(--border2);border-radius:3px;overflow:hidden;margin:8px 0 4px;}
-      .prog-fill{height:100%;border-radius:3px;}
-      .client-row-ph{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);}
-      .client-row-ph:last-child{border-bottom:none;}
-      .ph-av{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;flex-shrink:0;}
-      .split-bar{display:flex;height:8px;border-radius:4px;overflow:hidden;margin:8px 0;}
+      .partner-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:10px;}
+      .partner-card:hover{border-color:#409cff33;}
+      .ph-badge{font-size:.6rem;padding:2px 7px;border-radius:5px;font-family:monospace;text-transform:uppercase;font-weight:600;}
+      .ph-btn{padding:5px 12px;border-radius:7px;font-size:.72rem;cursor:pointer;font-weight:600;border:none;}
+      .ph-section-title{font-family:var(--mono);font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;}
+      @media(max-width:700px){.ph-grid{grid-template-columns:1fr 1fr;}}
     </style>
 
     <div class="ph-tabs">
       <button class="ph-tab active" onclick="switchPhTab('overview',this)">Overview</button>
-      <button class="ph-tab" onclick="switchPhTab('tiers',this)">Incentive structure</button>
-      <button class="ph-tab" onclick="switchPhTab('direct',this)">Direct clients</button>
-      <button class="ph-tab" onclick="switchPhTab('partners',this)">Partner clients</button>
-      <button class="ph-tab" onclick="switchPhTab('calculator',this)">Calculator</button>
+      <button class="ph-tab" onclick="switchPhTab('partners',this)">Partners</button>
+      <button class="ph-tab" onclick="switchPhTab('commissions',this)">Commissions</button>
+      <button class="ph-tab" onclick="switchPhTab('tiers',this)">Programme</button>
+      <button class="ph-tab" onclick="switchPhTab('add-partner',this)">+ Add Partner</button>
     </div>
 
+    <!-- OVERVIEW -->
     <div id="ph-overview">
       <div class="ph-grid">
         <div class="ph-kcard" style="border-color:#409cff33;">
-          <div class="ph-klbl"><i class="ti ti-trending-up" style="font-size:11px;color:var(--nes-blue);"></i>Total MRR</div>
-          <div class="ph-kval" style="color:var(--nes-blue);">OMR ${totalMRR.toFixed(0)}</div>
-          <div class="ph-kdelta">${directClients.filter(c=>c.status==='active').length + partnerClients.filter(c=>c.status==='active').length} active clients</div>
-          <div class="ph-kbar"><div class="ph-kfill" style="width:100%;background:var(--nes-blue);"></div></div>
+          <div class="ph-klbl"><i class="ti ti-trending-up" style="font-size:11px;color:#409cff;"></i>Total MRR</div>
+          <div class="ph-kval" style="color:#409cff;">OMR ${totalMRR.toFixed(0)}</div>
+          <div class="ph-kdelta">${allClients.filter(c=>c.status==='active').length} active clients</div>
+          <div class="ph-kbar"><div class="ph-kfill" style="width:100%;background:#409cff;"></div></div>
         </div>
         <div class="ph-kcard" style="border-color:#3fb95033;">
-          <div class="ph-klbl"><i class="ti ti-building" style="font-size:11px;color:#3fb950;"></i>Direct MRR</div>
-          <div class="ph-kval" style="color:#3fb950;">OMR ${directMRR.toFixed(0)}</div>
-          <div class="ph-kdelta">${directClients.filter(c=>c.status==='active').length} direct clients · 100% NES</div>
-          <div class="ph-kbar"><div class="ph-kfill" style="width:${totalMRR>0?Math.round((directMRR/totalMRR)*100):0}%;background:#3fb950;"></div></div>
-        </div>
-        <div class="ph-kcard" style="border-color:#7f77dd33;">
-          <div class="ph-klbl"><i class="ti ti-users-group" style="font-size:11px;color:#7f77dd;"></i>Partner MRR</div>
-          <div class="ph-kval" style="color:#7f77dd;">OMR ${partnerMRR.toFixed(0)}</div>
-          <div class="ph-kdelta">${partnerClients.filter(c=>c.status==='active').length} partner clients</div>
-          <div class="ph-kbar"><div class="ph-kfill" style="width:${totalMRR>0?Math.round((partnerMRR/totalMRR)*100):0}%;background:#7f77dd;"></div></div>
+          <div class="ph-klbl"><i class="ti ti-building" style="font-size:11px;color:#3fb950;"></i>Partner MRR</div>
+          <div class="ph-kval" style="color:#3fb950;">OMR ${partnerMRR.toFixed(0)}</div>
+          <div class="ph-kdelta">${partnerClients.filter(c=>c.status==='active').length} partner clients · ${totalMRR>0?Math.round((partnerMRR/totalMRR)*100):0}% of total</div>
+          <div class="ph-kbar"><div class="ph-kfill" style="width:${totalMRR>0?Math.round((partnerMRR/totalMRR)*100):0}%;background:#3fb950;"></div></div>
         </div>
         <div class="ph-kcard" style="border-color:#d2992233;">
-          <div class="ph-klbl"><i class="ti ti-coin" style="font-size:11px;color:#d29922;"></i>NES net revenue</div>
-          <div class="ph-kval" style="color:#d29922;">OMR ${totalNesRevenue.toFixed(0)}</div>
-          <div class="ph-kdelta">After partner incentives</div>
-          <div class="ph-kbar"><div class="ph-kfill" style="width:${totalMRR>0?Math.round((totalNesRevenue/totalMRR)*100):0}%;background:#d29922;"></div></div>
+          <div class="ph-klbl"><i class="ti ti-coin" style="font-size:11px;color:#d29922;"></i>Commission Due</div>
+          <div class="ph-kval" style="color:#d29922;">OMR ${pendingCommissions.toFixed(2)}</div>
+          <div class="ph-kdelta">Pending approval · OMR ${paidCommissions.toFixed(2)} paid to date</div>
+          <div class="ph-kbar"><div class="ph-kfill" style="width:60%;background:#d29922;"></div></div>
+        </div>
+        <div class="ph-kcard" style="border-color:#7f77dd33;">
+          <div class="ph-klbl"><i class="ti ti-chart-bar" style="font-size:11px;color:#7f77dd;"></i>Success Rate</div>
+          <div class="ph-kval" style="color:#7f77dd;">${successRate}%</div>
+          <div class="ph-kdelta">Partner clients still active</div>
+          <div class="ph-kbar"><div class="ph-kfill" style="width:${successRate}%;background:#7f77dd;"></div></div>
         </div>
       </div>
 
-      <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:14px;">
-        <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;">Revenue split — partner clients</div>
-        <div style="font-size:.75rem;color:var(--muted);margin-bottom:6px;">For every OMR 79 (Operations) via a partner:</div>
-        <div class="split-bar">
-          <div style="width:20%;background:#1a56db;"></div>
-          <div style="width:32%;background:#d29922;"></div>
-          <div style="width:48%;background:#7f77dd;"></div>
-        </div>
-        <div style="display:flex;gap:16px;font-size:.68rem;">
-          <div style="display:flex;align-items:center;gap:5px;"><div style="width:10px;height:10px;border-radius:2px;background:#1a56db;"></div><span style="color:var(--muted);">NES platform fee 20% = OMR 15.80</span></div>
-          <div style="display:flex;align-items:center;gap:5px;"><div style="width:10px;height:10px;border-radius:2px;background:#d29922;"></div><span style="color:var(--muted);">NES pool share ~40% = OMR 25.28</span></div>
-          <div style="display:flex;align-items:center;gap:5px;"><div style="width:10px;height:10px;border-radius:2px;background:#7f77dd;"></div><span style="color:var(--muted);">Partner share ~60% = OMR 37.92</span></div>
-        </div>
-      </div>
-    </div>
-
-    <div id="ph-tiers" style="display:none;">
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px;">
-        ${[
-          {name:'Apex Affiliate',who:'Individuals · freelancers · agents',color:'#409cff',dim:'#0c1f3a',levels:[
-            {name:'Starter',clients:'1–5',pct:50},{name:'Silver',clients:'6–15',pct:60},
-            {name:'Gold',clients:'16–30',pct:70},{name:'Platinum',clients:'31+',pct:75}
-          ]},
-          {name:'Alliance Partner',who:'Companies · agencies · IT firms',color:'#3fb950',dim:'#0d2818',levels:[
-            {name:'Base',clients:'5–15',pct:60},{name:'Growth',clients:'16–30',pct:65},{name:'Premium',clients:'31+',pct:70}
-          ]},
-          {name:'Elite Partner',who:'Exclusive territory · sector deals',color:'#d29922',dim:'#2d1800',levels:[
-            {name:'Fixed',clients:'10–29',pct:70},{name:'Scaled',clients:'30+',pct:75}
-          ]}
-        ].map(tier => `
-          <div style="background:var(--card);border:1px solid ${tier.color}33;border-radius:10px;padding:14px;">
-            <div style="font-size:.65rem;font-family:var(--mono);color:${tier.color};text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;">Partner tier</div>
-            <div style="font-size:.88rem;font-weight:700;margin-bottom:3px;">${tier.name}</div>
-            <div style="font-size:.7rem;color:var(--muted);margin-bottom:12px;">${tier.who}</div>
-            <div class="tier-row-ph"><span class="tier-lbl-ph">NES platform fee</span><span class="tier-val-ph">20% (fixed)</span></div>
-            <div class="tier-row-ph"><span class="tier-lbl-ph">Pool available</span><span class="tier-val-ph">80% of revenue</span></div>
-            <div style="font-size:.65rem;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin:10px 0 6px;">Incentive levels</div>
-            ${tier.levels.map(l => `
-              <div style="display:flex;align-items:center;justify-content:space-between;padding:5px 8px;border-radius:6px;margin-bottom:4px;background:${tier.dim};">
-                <div>
-                  <div style="font-size:.75rem;font-weight:600;color:var(--white);">${l.name}</div>
-                  <div style="font-size:.62rem;color:var(--muted);">${l.clients} clients</div>
+      <!-- Partner MRR strip -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:12px;">
+        <div class="ph-section-title">Active Partners</div>
+        ${allPartners.filter(p=>p.status==='active').length === 0
+          ? `<div style="color:var(--muted);font-size:.8rem;text-align:center;padding:16px;">No active partners yet. Add your first partner →</div>`
+          : allPartners.filter(p=>p.status==='active').map(p => {
+              const pClients = partnerClients.filter(c=>c.partner_ref===p.ref_code&&c.status==='active');
+              const pMRR = pClients.reduce((s,c)=>s+getPlanVal(c.plan,c.monthly_fee),0);
+              const color = tierColors[p.tier]||'#409cff';
+              const nextTier = p.tier==='apex' ? `${pClients.length}/8 to Alliance` : p.tier==='alliance' ? `${pClients.length}/20 to Elite` : 'Elite';
+              return `<div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--border);">
+                <div style="width:32px;height:32px;border-radius:8px;background:${tierBg[p.tier]||'rgba(64,156,255,0.08)'};display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:700;color:${color};">${(p.name||'?')[0].toUpperCase()}</div>
+                <div style="flex:1;">
+                  <div style="font-size:.8rem;font-weight:600;color:#e6edf3;">${p.name}</div>
+                  <div style="font-size:.65rem;color:var(--muted);">${nextTier} · ${pClients.length} active clients</div>
                 </div>
                 <div style="text-align:right;">
-                  <div style="font-size:.88rem;font-weight:700;color:${tier.color};">${l.pct}%</div>
-                  <div style="font-size:.6rem;color:var(--muted);">of pool</div>
+                  <div style="font-size:.82rem;font-weight:700;color:${color};">OMR ${pMRR.toFixed(0)}/mo</div>
+                  <span class="ph-badge" style="background:${tierBg[p.tier]};color:${color};">${p.tier}</span>
                 </div>
-              </div>`).join('')}
+              </div>`;
+            }).join('')}
+      </div>
+    </div>
+
+    <!-- PARTNERS -->
+    <div id="ph-partners" style="display:none;">
+      <div class="ph-section-title">All Partners (${allPartners.length})</div>
+      ${allPartners.length === 0
+        ? `<div style="background:var(--card);border:1px dashed var(--border);border-radius:10px;padding:32px;text-align:center;color:var(--muted);font-size:.8rem;">No partners yet. Use the + Add Partner tab to add your first partner.</div>`
+        : allPartners.map(p => {
+            const pClients = partnerClients.filter(c=>c.partner_ref===p.ref_code);
+            const activeClients = pClients.filter(c=>c.status==='active').length;
+            const pCommissions = allCommissions.filter(c=>c.partner_id===p.id);
+            const totalEarned = pCommissions.filter(c=>c.status==='paid').reduce((s,c)=>s+parseFloat(c.amount_omr||0),0);
+            const pendingAmt = pCommissions.filter(c=>c.status==='pending').reduce((s,c)=>s+parseFloat(c.amount_omr||0),0);
+            const color = tierColors[p.tier]||'#409cff';
+            const nextTierClients = p.tier==='apex' ? 8 : p.tier==='alliance' ? 20 : null;
+            const progress = nextTierClients ? Math.min(100,Math.round((activeClients/nextTierClients)*100)) : 100;
+            return `<div class="partner-card">
+              <div style="display:flex;align-items:flex-start;gap:12px;">
+                <div style="width:40px;height:40px;border-radius:10px;background:${tierBg[p.tier]};display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:700;color:${color};flex-shrink:0;">${(p.name||'?')[0].toUpperCase()}</div>
+                <div style="flex:1;">
+                  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                    <span style="font-size:.88rem;font-weight:700;color:#e6edf3;">${p.name}</span>
+                    <span class="ph-badge" style="background:${tierBg[p.tier]};color:${color};">${p.tier}</span>
+                    <span class="ph-badge" style="background:${p.status==='active'?'rgba(63,185,80,0.1)':'rgba(248,81,73,0.1)'};color:${p.status==='active'?'#3fb950':'#f85149'};">${p.status}</span>
+                    ${p.custom_rate ? `<span class="ph-badge" style="background:rgba(127,119,221,0.1);color:#7f77dd;">Custom ${p.custom_rate}%</span>` : ''}
+                  </div>
+                  <div style="font-size:.72rem;color:var(--muted);margin-top:3px;">${p.email} · ${p.phone||'—'}</div>
+                  <div style="font-size:.72rem;color:var(--muted);">Ref: <span style="color:#409cff;font-family:monospace;">${p.ref_code}</span></div>
+                </div>
+                <div style="display:flex;gap:6px;flex-shrink:0;">
+                  <button class="ph-btn" onclick="editPartner('${p.id}')" style="background:rgba(64,156,255,0.1);color:#409cff;">Edit</button>
+                  <button class="ph-btn" onclick="approveCommissions('${p.id}')" style="background:rgba(63,185,80,0.1);color:#3fb950;">Approve</button>
+                </div>
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px;">
+                <div style="background:var(--surface);border-radius:7px;padding:8px 10px;">
+                  <div style="font-size:.6rem;color:var(--muted);">ACTIVE CLIENTS</div>
+                  <div style="font-size:1rem;font-weight:700;color:#e6edf3;">${activeClients}</div>
+                </div>
+                <div style="background:var(--surface);border-radius:7px;padding:8px 10px;">
+                  <div style="font-size:.6rem;color:var(--muted);">TOTAL REFERRED</div>
+                  <div style="font-size:1rem;font-weight:700;color:#e6edf3;">${pClients.length}</div>
+                </div>
+                <div style="background:var(--surface);border-radius:7px;padding:8px 10px;">
+                  <div style="font-size:.6rem;color:var(--muted);">PAID TO DATE</div>
+                  <div style="font-size:1rem;font-weight:700;color:#3fb950;">OMR ${totalEarned.toFixed(2)}</div>
+                </div>
+                <div style="background:var(--surface);border-radius:7px;padding:8px 10px;">
+                  <div style="font-size:.6rem;color:var(--muted);">PENDING</div>
+                  <div style="font-size:1rem;font-weight:700;color:#d29922;">OMR ${pendingAmt.toFixed(2)}</div>
+                </div>
+              </div>
+              ${nextTierClients ? `
+              <div style="margin-top:10px;">
+                <div style="display:flex;justify-content:space-between;font-size:.65rem;color:var(--muted);margin-bottom:4px;">
+                  <span>Progress to ${p.tier==='apex'?'Alliance':'Elite'}</span>
+                  <span>${activeClients}/${nextTierClients} active clients</span>
+                </div>
+                <div style="height:4px;background:var(--border);border-radius:2px;overflow:hidden;">
+                  <div style="height:100%;width:${progress}%;background:${color};border-radius:2px;transition:width .3s;"></div>
+                </div>
+                ${progress >= 100 ? `<div style="font-size:.65rem;color:#3fb950;margin-top:4px;">🎉 Eligible for tier upgrade — review and offer ${p.tier==='apex'?'Alliance':'Elite'}</div>` : ''}
+              </div>` : `<div style="margin-top:8px;font-size:.65rem;color:#d29922;">⭐ Elite Partner — top tier achieved</div>`}
+              ${p.custom_notes ? `<div style="margin-top:8px;font-size:.7rem;color:var(--muted);background:var(--surface);border-radius:6px;padding:6px 10px;">📝 ${p.custom_notes}</div>` : ''}
+            </div>`;
+          }).join('')}
+    </div>
+
+    <!-- COMMISSIONS -->
+    <div id="ph-commissions" style="display:none;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <div class="ph-section-title" style="margin-bottom:0;">Commission Ledger</div>
+        <div style="display:flex;gap:6px;">
+          <select id="commFilter" onchange="filterCommissions()" style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:4px 8px;color:var(--muted);font-size:.72rem;">
+            <option value="all">All status</option>
+            <option value="pending">Pending</option>
+            <option value="approved">Approved</option>
+            <option value="paid">Paid</option>
+          </select>
+        </div>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;">
+        <table style="width:100%;border-collapse:collapse;font-size:.72rem;" id="commTable">
+          <thead>
+            <tr style="background:rgba(64,156,255,0.05);">
+              <th style="padding:8px 12px;text-align:left;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border);">Partner</th>
+              <th style="padding:8px 12px;text-align:left;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border);">Client</th>
+              <th style="padding:8px 12px;text-align:left;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border);">Type</th>
+              <th style="padding:8px 12px;text-align:left;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border);">Month</th>
+              <th style="padding:8px 12px;text-align:right;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border);">Rate</th>
+              <th style="padding:8px 12px;text-align:right;color:#d29922;font-weight:600;border-bottom:1px solid var(--border);">Amount</th>
+              <th style="padding:8px 12px;text-align:center;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border);">Status</th>
+              <th style="padding:8px 12px;text-align:center;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border);">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${allCommissions.length === 0
+              ? `<tr><td colspan="8" style="padding:24px;text-align:center;color:var(--muted);">No commissions yet</td></tr>`
+              : allCommissions.map((c,i) => {
+                  const partner = allPartners.find(p=>p.id===c.partner_id);
+                  const client = allClients.find(cl=>cl.id===c.client_id);
+                  const statusColors = {pending:'#d29922',approved:'#409cff',paid:'#3fb950',clawed_back:'#f85149',held:'#8b949e'};
+                  const sc = statusColors[c.status]||'#8b949e';
+                  return `<tr style="border-bottom:1px solid var(--border);background:${i%2===0?'transparent':'rgba(255,255,255,0.01)'};">
+                    <td style="padding:8px 12px;color:#e6edf3;">${partner?.name||'—'}</td>
+                    <td style="padding:8px 12px;color:var(--muted);">${client?.name||'—'}</td>
+                    <td style="padding:8px 12px;"><span style="font-size:.62rem;padding:2px 6px;border-radius:4px;background:${c.type==='first_sale'?'rgba(64,156,255,0.1)':'rgba(63,185,80,0.1)'};color:${c.type==='first_sale'?'#409cff':'#3fb950'};">${c.type==='first_sale'?'First Sale':'Recurring'}</span></td>
+                    <td style="padding:8px 12px;color:var(--muted);font-family:monospace;">${c.month||'—'}</td>
+                    <td style="padding:8px 12px;text-align:right;color:var(--muted);">${c.rate_pct}%</td>
+                    <td style="padding:8px 12px;text-align:right;color:#d29922;font-weight:600;font-family:monospace;">OMR ${parseFloat(c.amount_omr||0).toFixed(2)}</td>
+                    <td style="padding:8px 12px;text-align:center;"><span style="font-size:.62rem;padding:2px 7px;border-radius:5px;background:rgba(128,128,128,0.1);color:${sc};">${c.status}</span></td>
+                    <td style="padding:8px 12px;text-align:center;">
+                      ${c.status==='pending' ? `<button onclick="updateCommissionStatus('${c.id}','approved')" style="background:rgba(64,156,255,0.1);color:#409cff;border:none;border-radius:5px;padding:3px 8px;font-size:.65rem;cursor:pointer;">Approve</button>` : ''}
+                      ${c.status==='approved' ? `<button onclick="updateCommissionStatus('${c.id}','paid')" style="background:rgba(63,185,80,0.1);color:#3fb950;border:none;border-radius:5px;padding:3px 8px;font-size:.65rem;cursor:pointer;">Mark Paid</button>` : ''}
+                    </td>
+                  </tr>`;
+                }).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PROGRAMME / TIERS -->
+    <div id="ph-tiers" style="display:none;">
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px;">
+        ${[
+          {tier:'apex',name:'Apex Affiliate',who:'Individuals · freelancers · casual referrers',color:'#409cff',bg:'rgba(64,156,255,0.08)',first:40,recurring:null,setup:null,trigger:'8 active clients → offered Alliance'},
+          {tier:'alliance',name:'Alliance Partner',who:'Consultants · agencies · active referrers',color:'#3fb950',bg:'rgba(63,185,80,0.08)',first:40,recurring:20,setup:null,trigger:'20 active clients + agreement → offered Elite'},
+          {tier:'elite',name:'Elite Partner',who:'Resellers · integrators · strategic partners',color:'#d29922',bg:'rgba(210,153,34,0.08)',first:40,recurring:25,setup:50,trigger:'Negotiated — signed agreement required'}
+        ].map(t=>`
+          <div style="background:var(--card);border:1px solid ${t.color}33;border-radius:10px;padding:16px;">
+            <div style="font-size:.62rem;font-family:monospace;color:${t.color};text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;">${t.tier}</div>
+            <div style="font-size:.92rem;font-weight:700;margin-bottom:3px;color:#e6edf3;">${t.name}</div>
+            <div style="font-size:.7rem;color:var(--muted);margin-bottom:14px;">${t.who}</div>
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              <div style="display:flex;justify-content:space-between;font-size:.75rem;padding:6px 8px;background:${t.bg};border-radius:6px;">
+                <span style="color:var(--muted);">First sale</span>
+                <span style="font-weight:700;color:${t.color};">${t.first}% one-time</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:.75rem;padding:6px 8px;background:${t.bg};border-radius:6px;">
+                <span style="color:var(--muted);">Recurring</span>
+                <span style="font-weight:700;color:${t.color};">${t.recurring ? t.recurring+'%/mo' : '—'}</span>
+              </div>
+              ${t.setup ? `<div style="display:flex;justify-content:space-between;font-size:.75rem;padding:6px 8px;background:${t.bg};border-radius:6px;">
+                <span style="color:var(--muted);">Setup fee share</span>
+                <span style="font-weight:700;color:${t.color};">${t.setup}%</span>
+              </div>` : ''}
+            </div>
+            <div style="margin-top:12px;font-size:.65rem;color:var(--muted);border-top:1px solid var(--border);padding-top:8px;">
+              <i class="ti ti-arrow-up-right" style="color:${t.color};"></i> ${t.trigger}
+            </div>
           </div>`).join('')}
       </div>
-      <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;font-size:.75rem;color:var(--muted);line-height:1.7;">
-        <div style="font-family:var(--mono);font-size:.65rem;color:var(--nes-blue);margin-bottom:6px;">HOW IT WORKS</div>
-        NES takes a fixed 20% platform fee from every client payment — this covers infrastructure, AI costs and operations. The remaining 80% is the partnership pool. The pool is then split between NES and the partner based on tier and volume. All incentives are recurring monthly — partners earn every month their clients stay active. If a client upgrades their plan, incentives increase automatically.
+
+      <!-- Rules -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;">
+        <div class="ph-section-title">Programme Rules</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:.75rem;">
+          ${[
+            ['💰 Commission timing','Paid after client's full monthly payment confirmed'],
+            ['⏱️ First commission hold','7-day hold — NES Admin approves before payment'],
+            ['🔄 Plan upgrades','Commission automatically recalculates on new plan value'],
+            ['↩️ Clawback','First sale reversed if client refunded within 30 days'],
+            ['📊 Pro-rata churn','If client churns mid-month, commission paid for days active'],
+            ['🏆 Tier retention','Tier earned permanently — no downgrade for churn'],
+            ['😴 Inactive rule','Tier review if no activity for 12 months'],
+            ['🔗 Double referral','First registered ref code wins — timestamp is proof'],
+            ['🚨 Fraud protection','Flagged if partner and client email domains match'],
+            ['💳 Payment hold','Max 90 days if no bank details — then Telegram alert']
+          ].map(([label,desc])=>`
+            <div style="background:var(--surface);border-radius:7px;padding:8px 10px;">
+              <div style="font-weight:600;color:#e6edf3;margin-bottom:2px;">${label}</div>
+              <div style="color:var(--muted);font-size:.68rem;">${desc}</div>
+            </div>`).join('')}
+        </div>
       </div>
     </div>
 
-    <div id="ph-direct" style="display:none;">
-      <div style="background:var(--card);border:1px solid #3fb95033;border-radius:10px;padding:12px 14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;">
-        <div>
-          <div style="font-size:.75rem;font-weight:600;color:#3fb950;">Direct clients — 100% revenue to NES</div>
-          <div style="font-size:.68rem;color:var(--muted);">No partner involved · Full margin retained</div>
+    <!-- ADD PARTNER -->
+    <div id="ph-add-partner" style="display:none;">
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px;max-width:560px;">
+        <div class="ph-section-title">Add New Partner</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+          <div>
+            <label style="font-size:.68rem;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;">FULL NAME</label>
+            <input id="np-name" placeholder="Ahmed Al Rashdi" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:9px 12px;color:#e6edf3;font-size:.8rem;outline:none;box-sizing:border-box;">
+          </div>
+          <div>
+            <label style="font-size:.68rem;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;">TIER</label>
+            <select id="np-tier" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:9px 12px;color:#e6edf3;font-size:.8rem;outline:none;box-sizing:border-box;">
+              <option value="apex">Apex Affiliate</option>
+              <option value="alliance">Alliance Partner</option>
+              <option value="elite">Elite Partner</option>
+              <option value="custom">Custom/Strategic</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:.68rem;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;">EMAIL</label>
+            <input id="np-email" type="email" placeholder="ahmed@company.com" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:9px 12px;color:#e6edf3;font-size:.8rem;outline:none;box-sizing:border-box;">
+          </div>
+          <div>
+            <label style="font-size:.68rem;color:var(--muted);font-weight:600;display:block;margin-bottom:4px;">PHONE (WHATSAPP)</label>
+            <input id="np-phone" placeholder="+968 9XXX XXXX" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:9px 12px;color:#e6edf3;font-size:.8rem;outline:none;box-sizing:border-box;">
+          </div>
         </div>
-        <div style="font-family:var(--mono);font-size:1rem;font-weight:700;color:#3fb950;">OMR ${directMRR.toFixed(0)}/mo</div>
-      </div>
-      ${directClients.length === 0 ? `<div style="text-align:center;padding:30px;color:var(--muted);font-family:var(--mono);font-size:.75rem;">No direct clients yet</div>` :
-        directClients.map(cl => {
-          const val = getPlanVal(cl.plan, cl.monthly_fee);
-          const initials = cl.name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
-          return `<div class="client-row-ph">
-            <div class="ph-av" style="background:#0d2818;color:#3fb950;">${initials}</div>
-            <div style="flex:1;">
-              <div style="font-size:.8rem;font-weight:600;">${cl.name}</div>
-              <div style="font-size:.65rem;color:var(--muted);">${cl.plan||'—'} · ${cl.status}</div>
-            </div>
-            <div style="text-align:right;">
-              <div style="font-size:.8rem;font-weight:600;color:#3fb950;">OMR ${val.toFixed(0)}/mo</div>
-              <div style="font-size:.62rem;color:var(--muted);">100% NES</div>
-            </div>
-          </div>`;
-        }).join('')}
-    </div>
 
-    <div id="ph-partners" style="display:none;">
-      <div style="background:var(--card);border:1px solid #7f77dd33;border-radius:10px;padding:12px 14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;">
-        <div>
-          <div style="font-size:.75rem;font-weight:600;color:#7f77dd;">Partner clients — shared revenue</div>
-          <div style="font-size:.68rem;color:var(--muted);">NES platform fee 20% + pool share · Partner earns recurring incentive</div>
-        </div>
-        <div style="font-family:var(--mono);font-size:1rem;font-weight:700;color:#7f77dd;">OMR ${partnerMRR.toFixed(0)}/mo</div>
-      </div>
-      ${partnerClients.length === 0 ? `<div style="text-align:center;padding:30px;color:var(--muted);font-family:var(--mono);font-size:.75rem;">No partner clients yet</div>` :
-        partnerClients.map(cl => {
-          const val = getPlanVal(cl.plan, cl.monthly_fee);
-          const nesShare = val * 0.20 + val * 0.80 * 0.40;
-          const partnerShare = val * 0.80 * 0.60;
-          const initials = cl.name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
-          return `<div class="client-row-ph">
-            <div class="ph-av" style="background:#1a1040;color:#7f77dd;">${initials}</div>
-            <div style="flex:1;">
-              <div style="font-size:.8rem;font-weight:600;">${cl.name}</div>
-              <div style="font-size:.65rem;color:var(--muted);">${cl.plan||'—'} · ${cl.status}</div>
+        <div id="np-custom-section" style="display:none;background:rgba(127,119,221,0.05);border:1px solid rgba(127,119,221,0.2);border-radius:8px;padding:12px;margin-bottom:12px;">
+          <div style="font-size:.68rem;color:#7f77dd;font-weight:600;margin-bottom:8px;">CUSTOM RATE OVERRIDE</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+            <div>
+              <label style="font-size:.62rem;color:var(--muted);display:block;margin-bottom:3px;">RATE %</label>
+              <input id="np-custom-rate" type="number" min="0" max="100" placeholder="e.g. 50" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:7px 10px;color:#e6edf3;font-size:.78rem;outline:none;box-sizing:border-box;">
             </div>
-            <div style="text-align:right;">
-              <div style="font-size:.75rem;color:var(--muted);">NES: <span style="color:var(--nes-blue);">OMR ${nesShare.toFixed(2)}</span></div>
-              <div style="font-size:.75rem;color:var(--muted);">Partner: <span style="color:#7f77dd;">OMR ${partnerShare.toFixed(2)}</span></div>
+            <div>
+              <label style="font-size:.62rem;color:var(--muted);display:block;margin-bottom:3px;">TYPE</label>
+              <select id="np-custom-type" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:7px 10px;color:#e6edf3;font-size:.78rem;outline:none;box-sizing:border-box;">
+                <option value="one_time">One-time</option>
+                <option value="recurring">Recurring</option>
+              </select>
             </div>
-          </div>`;
-        }).join('')}
-    </div>
+            <div>
+              <label style="font-size:.62rem;color:var(--muted);display:block;margin-bottom:3px;">MONTHS (blank=forever)</label>
+              <input id="np-custom-months" type="number" min="1" placeholder="e.g. 12" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:7px 10px;color:#e6edf3;font-size:.78rem;outline:none;box-sizing:border-box;">
+            </div>
+          </div>
+          <div style="margin-top:8px;">
+            <label style="font-size:.62rem;color:var(--muted);display:block;margin-bottom:3px;">NOTES / TERMS</label>
+            <input id="np-custom-notes" placeholder="e.g. Strategic partner — exclusive Muscat territory, 6 month review" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:7px 10px;color:#e6edf3;font-size:.78rem;outline:none;box-sizing:border-box;">
+          </div>
+        </div>
 
-    <div id="ph-calculator" style="display:none;">
-      <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;max-width:580px;">
-        <div style="font-family:var(--mono);font-size:.65rem;color:var(--nes-blue);text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px;">Incentive calculator</div>
-        <div style="margin-bottom:12px;">
-          <div style="font-size:.72rem;color:var(--muted);margin-bottom:5px;">Plan</div>
-          <select id="calc_plan" onchange="calcPartner()" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:7px 10px;color:var(--white);font-size:.78rem;">
-            <option value="29">AI Presence — OMR 29/mo</option>
-            <option value="79" selected>AI Operations — OMR 79/mo</option>
-            <option value="149">AI Workforce — OMR 149/mo</option>
-          </select>
+        <div id="np-err" style="font-size:.72rem;color:#f85149;margin-bottom:10px;display:none;"></div>
+        <div style="display:flex;gap:8px;">
+          <button onclick="switchPhTab('partners',document.querySelector('.ph-tab'))" style="flex:1;background:none;border:1px solid var(--border);border-radius:8px;padding:10px;color:var(--muted);cursor:pointer;font-size:.78rem;">Cancel</button>
+          <button onclick="addPartner()" style="flex:1;background:linear-gradient(135deg,#1a56db,#2563eb);border:none;border-radius:8px;padding:10px;color:#fff;cursor:pointer;font-size:.78rem;font-weight:600;">Add Partner</button>
         </div>
-        <div style="margin-bottom:12px;">
-          <div style="font-size:.72rem;color:var(--muted);margin-bottom:5px;">Partner tier</div>
-          <select id="calc_tier" onchange="calcPartner()" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:7px 10px;color:var(--white);font-size:.78rem;">
-            <option value="apex">Apex Affiliate</option>
-            <option value="alliance">Alliance Partner</option>
-            <option value="elite">Elite Partner</option>
-          </select>
-        </div>
-        <div style="margin-bottom:14px;">
-          <div style="display:flex;justify-content:space-between;font-size:.72rem;color:var(--muted);margin-bottom:5px;"><span>Number of clients</span><span id="calc_clients_lbl">10</span></div>
-          <input type="range" id="calc_clients" min="1" max="50" value="10" oninput="calcPartner()" style="width:100%;">
-        </div>
-        <div id="calc_results" style="background:var(--bg);border-radius:8px;padding:12px;"></div>
       </div>
-    </div>
-  `;
+    </div>`;
 
-  calcPartner();
+  // Show/hide custom section based on tier
+  const tierSel = el.querySelector('#np-tier');
+  if(tierSel) tierSel.addEventListener('change', function(){
+    const customSec = document.getElementById('np-custom-section');
+    if(customSec) customSec.style.display = this.value==='custom' ? 'block' : 'none';
+  });
 }
 
 function switchPhTab(tab, btn){
-  ['overview','tiers','direct','partners','calculator'].forEach(t => {
-    const el = document.getElementById('ph-'+t);
+  ['overview','partners','commissions','tiers','add-partner'].forEach(t=>{
+    const el=document.getElementById('ph-'+t);
     if(el) el.style.display = t===tab ? 'block' : 'none';
   });
-  document.querySelectorAll('.ph-tab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.ph-tab').forEach(b=>b.classList.remove('active'));
   if(btn) btn.classList.add('active');
 }
 
-function calcPartner(){
-  const plan = parseInt(document.getElementById('calc_plan')?.value||79);
-  const tier = document.getElementById('calc_tier')?.value||'apex';
-  const clients = parseInt(document.getElementById('calc_clients')?.value||10);
-  if(document.getElementById('calc_clients_lbl')) document.getElementById('calc_clients_lbl').textContent = clients;
+async function addPartner(){
+  const name = document.getElementById('np-name').value.trim();
+  const email = document.getElementById('np-email').value.trim();
+  const phone = document.getElementById('np-phone').value.trim();
+  const tier = document.getElementById('np-tier').value;
+  const customRate = document.getElementById('np-custom-rate')?.value || null;
+  const customType = document.getElementById('np-custom-type')?.value || null;
+  const customMonths = document.getElementById('np-custom-months')?.value || null;
+  const customNotes = document.getElementById('np-custom-notes')?.value || null;
+  const err = document.getElementById('np-err');
+  err.style.display='none';
 
-  const pool = plan * 0.80;
-  const nesPlatform = plan * 0.20;
+  if(!name||!email){ err.textContent='Name and email are required.'; err.style.display='block'; return; }
 
-  let partnerPct, levelName;
-  if(tier==='apex'){
-    if(clients<=5){partnerPct=50;levelName='Starter';}
-    else if(clients<=15){partnerPct=60;levelName='Silver';}
-    else if(clients<=30){partnerPct=70;levelName='Gold';}
-    else{partnerPct=75;levelName='Platinum';}
-  } else if(tier==='alliance'){
-    if(clients<=15){partnerPct=60;levelName='Base';}
-    else if(clients<=30){partnerPct=65;levelName='Growth';}
-    else{partnerPct=70;levelName='Premium';}
-  } else {
-    if(clients<=30){partnerPct=70;levelName='Fixed';}
-    else{partnerPct=75;levelName='Scaled';}
-  }
+  // Generate ref code: TIER-INITIALS-RANDOM
+  const initials = name.split(' ').map(w=>w[0]||'').join('').toUpperCase().slice(0,2);
+  const rand = Math.random().toString(36).slice(-4).toUpperCase();
+  const ref_code = `${tier.toUpperCase().slice(0,4)}-${initials}-${rand}`;
 
-  const nesPct = 100 - partnerPct;
-  const partnerPerClient = pool * (partnerPct/100);
-  const nesPerClient = nesPlatform + pool * (nesPct/100);
-  const totalPartner = (partnerPerClient * clients).toFixed(2);
-  const totalNes = (nesPerClient * clients).toFixed(2);
+  const { error } = await sb.from('partners').insert({
+    name, email, phone, tier, ref_code,
+    custom_rate: customRate ? parseFloat(customRate) : null,
+    custom_type: customType || null,
+    custom_duration_months: customMonths ? parseInt(customMonths) : null,
+    custom_notes: customNotes || null,
+    status: 'active'
+  });
 
-  const el = document.getElementById('calc_results');
-  if(!el) return;
-  el.innerHTML = `
-    <div style="font-size:.65rem;font-family:var(--mono);color:var(--muted);margin-bottom:10px;">Level: <span style="color:var(--nes-blue);">${levelName} (${partnerPct}% of pool)</span></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
-      <div style="text-align:center;padding:10px;background:var(--card);border-radius:7px;border:1px solid var(--border);">
-        <div style="font-size:.6rem;color:var(--muted);margin-bottom:4px;">Pool per client</div>
-        <div style="font-size:1rem;font-weight:700;color:var(--nes-blue);">OMR ${pool.toFixed(2)}</div>
-        <div style="font-size:.6rem;color:var(--muted);">80% of OMR ${plan}</div>
-      </div>
-      <div style="text-align:center;padding:10px;background:var(--card);border-radius:7px;border:1px solid #7f77dd33;">
-        <div style="font-size:.6rem;color:var(--muted);margin-bottom:4px;">Partner earns/mo</div>
-        <div style="font-size:1rem;font-weight:700;color:#7f77dd;">OMR ${totalPartner}</div>
-        <div style="font-size:.6rem;color:var(--muted);">${partnerPct}% of pool × ${clients} clients</div>
-      </div>
-      <div style="text-align:center;padding:10px;background:var(--card);border-radius:7px;border:1px solid #3fb95033;">
-        <div style="font-size:.6rem;color:var(--muted);margin-bottom:4px;">NES earns/mo</div>
-        <div style="font-size:1rem;font-weight:700;color:#3fb950;">OMR ${totalNes}</div>
-        <div style="font-size:.6rem;color:var(--muted);">Platform fee + ${nesPct}% of pool</div>
-      </div>
-    </div>`;
+  if(error){ err.textContent = error.message; err.style.display='block'; return; }
+  showToast(`Partner added! Ref code: ${ref_code} ✓`);
+  await renderPartnerHub();
 }
 
-function renderSalesPortal(tab){ showSalesPortal(); }
-
-function showAddContactModal(){
-  const m=document.createElement('div');m.className='modal-overlay';m.id='contactModal';
-  m.innerHTML=`
-    <div class="modal-box">
-      <div class="modal-title">
-        <span><i class="ti ti-user-plus" style="color:var(--nes-blue);margin-right:6px"></i>Add Contact</span>
-        <button onclick="document.getElementById('contactModal').remove()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.2rem;">✕</button>
-      </div>
-      <div class="form-grid">
-        <div class="form-field"><label class="form-label">Full Name *</label><input id="c_name" class="form-input" placeholder="Ahmed Al Rashdi"></div>
-        <div class="form-field"><label class="form-label">Company</label><input id="c_company" class="form-input" placeholder="Company name"></div>
-        <div class="form-field"><label class="form-label">Title / Role</label><input id="c_title" class="form-input" placeholder="CEO, IT Manager..."></div>
-        <div class="form-field"><label class="form-label">Email</label><input id="c_email" class="form-input" type="email" placeholder="email@company.com"></div>
-        <div class="form-field"><label class="form-label">Phone</label><input id="c_phone" class="form-input" placeholder="+968..."></div>
-        <div class="form-field"><label class="form-label">Country</label><input id="c_country" class="form-input" placeholder="Oman"></div>
-        <div class="form-field"><label class="form-label">Industry</label><input id="c_industry" class="form-input" placeholder="Technology, Ports..."></div>
-        <div class="form-field"><label class="form-label">Source</label>
-          <select id="c_source" class="form-select">
-            <option value="referral">Referral</option>
-            <option value="linkedin">LinkedIn</option>
-            <option value="cold">Cold outreach</option>
-            <option value="event">Event</option>
-            <option value="website">Website</option>
-          </select>
-        </div>
-      </div>
-      <div class="form-field" style="margin-top:8px"><label class="form-label">Notes</label><textarea id="c_notes" class="form-input" rows="2" style="resize:vertical" placeholder="Any notes..."></textarea></div>
-      <button class="form-submit" onclick="saveContact()"><i class="ti ti-plus"></i> Save Contact</button>
-    </div>`;
-  document.body.appendChild(m);
+async function updateCommissionStatus(id, status){
+  const { error } = await sb.from('partner_commissions').update({status, payment_date: status==='paid'?new Date().toISOString().split('T')[0]:null}).eq('id',id);
+  if(!error){ showToast('Commission '+status+' ✓'); await renderPartnerHub(); switchPhTab('commissions', null); }
 }
 
-async function saveContact(){
-  const data={
-    name:document.getElementById('c_name')?.value.trim(),
-    company:document.getElementById('c_company')?.value.trim(),
-    title:document.getElementById('c_title')?.value.trim(),
-    email:document.getElementById('c_email')?.value.trim(),
-    phone:document.getElementById('c_phone')?.value.trim(),
-    country:document.getElementById('c_country')?.value.trim(),
-    industry:document.getElementById('c_industry')?.value.trim(),
-    source:document.getElementById('c_source')?.value,
-    notes:document.getElementById('c_notes')?.value.trim(),
-    last_contact:new Date().toISOString()
-  };
-  if(!data.name){alert('Name is required');return;}
-  try{
-    await sb.from('sales_contacts').insert([data]);
-    document.getElementById('contactModal')?.remove();
-    showToast('Contact saved');
-    await loadSalesData();
-  }catch(e){alert('Error: '+e.message);}
+async function approveCommissions(partnerId){
+  const { error } = await sb.from('partner_commissions').update({status:'approved'}).eq('partner_id',partnerId).eq('status','pending');
+  if(!error){ showToast('All pending commissions approved ✓'); await renderPartnerHub(); switchPhTab('commissions',null); }
 }
 
-function showAddDealModal(stage='lead'){
-  const m=document.createElement('div');m.className='modal-overlay';m.id='dealModal';
-  m.innerHTML=`
-    <div class="modal-box">
-      <div class="modal-title">
-        <span><i class="ti ti-file-dollar" style="color:var(--nes-blue);margin-right:6px"></i>Add Deal</span>
-        <button onclick="document.getElementById('dealModal').remove()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.2rem;">✕</button>
-      </div>
-      <div class="form-grid">
-        <div class="form-field"><label class="form-label">Deal Name *</label><input id="d_name" class="form-input" placeholder="Gulf Ports — AI Platform"></div>
-        <div class="form-field"><label class="form-label">Company</label><input id="d_company" class="form-input" placeholder="Company name"></div>
-        <div class="form-field"><label class="form-label">Contact Name</label><input id="d_contact" class="form-input" placeholder="Decision maker"></div>
-        <div class="form-field"><label class="form-label">Value (OMR)</label><input id="d_value" class="form-input" type="number" placeholder="0"></div>
-        <div class="form-field"><label class="form-label">Expected Close</label><input id="d_close" class="form-input" type="date"></div>
-        <div class="form-field"><label class="form-label">Stage</label>
-          <select id="d_stage" class="form-select">
-            <option value="lead" ${stage==='lead'?'selected':''}>Lead</option>
-            <option value="qualified" ${stage==='qualified'?'selected':''}>Qualified</option>
-            <option value="proposal" ${stage==='proposal'?'selected':''}>Proposal</option>
-            <option value="negotiation" ${stage==='negotiation'?'selected':''}>Negotiation</option>
-            <option value="won" ${stage==='won'?'selected':''}>Won</option>
-            <option value="lost">Lost</option>
-          </select>
-        </div>
-        <div class="form-field"><label class="form-label">Probability %</label><input id="d_prob" class="form-input" type="number" placeholder="50" min="0" max="100"></div>
-        <div class="form-field"><label class="form-label">Referrer</label>
-          <select id="d_ref" class="form-select">
-            <option value="">None</option>
-            ${_salesReferrers.map(r=>`<option value="${r.id}">${r.name}</option>`).join('')}
-          </select>
-        </div>
-      </div>
-      <div class="form-field" style="margin-top:8px"><label class="form-label">Notes</label><textarea id="d_notes" class="form-input" rows="2" style="resize:vertical"></textarea></div>
-      <button class="form-submit" onclick="saveDeal()"><i class="ti ti-plus"></i> Save Deal</button>
-    </div>`;
-  document.body.appendChild(m);
+async function editPartner(id){
+  const { data: p } = await sb.from('partners').select('*').eq('id',id).single();
+  if(!p) return;
+  const newRate = prompt(`Custom rate % for ${p.name} (current: ${p.custom_rate||'default'})`);
+  if(newRate === null) return;
+  const newNotes = prompt(`Notes/terms (current: ${p.custom_notes||'none'})`);
+  if(newNotes === null) return;
+  const { error } = await sb.from('partners').update({
+    custom_rate: newRate ? parseFloat(newRate) : null,
+    custom_notes: newNotes || null
+  }).eq('id',id);
+  if(!error){ showToast('Partner updated ✓'); await renderPartnerHub(); }
 }
 
-async function saveDeal(){
-  const data={
-    name:document.getElementById('d_name')?.value.trim(),
-    company:document.getElementById('d_company')?.value.trim(),
-    contact_name:document.getElementById('d_contact')?.value.trim(),
-    value:parseFloat(document.getElementById('d_value')?.value)||0,
-    close_date:document.getElementById('d_close')?.value,
-    stage:document.getElementById('d_stage')?.value,
-    probability:parseInt(document.getElementById('d_prob')?.value)||50,
-    referrer_id:document.getElementById('d_ref')?.value||null,
-    notes:document.getElementById('d_notes')?.value.trim()
-  };
-  if(!data.name){alert('Deal name is required');return;}
-  try{
-    await sb.from('sales_deals').insert([data]);
-    if(data.referrer_id){
-      const ref=_salesReferrers.find(r=>r.id===data.referrer_id);
-      if(ref){
-        const newComm=(parseFloat(ref.commission_earned)||0)+(data.value*(parseFloat(ref.commission_rate)||0)/100);
-        await sb.from('sales_referrers').update({
-          deals_referred:(ref.deals_referred||0)+1,
-          commission_earned:newComm
-        }).eq('id',data.referrer_id);
-      }
-    }
-    document.getElementById('dealModal')?.remove();
-    showToast('Deal saved');
-    await loadSalesData();
-  }catch(e){alert('Error: '+e.message);}
+function filterCommissions(){
+  const filter = document.getElementById('commFilter').value;
+  const rows = document.querySelectorAll('#commTable tbody tr');
+  rows.forEach(row => {
+    const status = row.querySelector('td:nth-child(7)')?.textContent?.trim()||'';
+    row.style.display = (filter==='all'||status===filter) ? '' : 'none';
+  });
 }
 
-function showAddReferrerModal(){
-  const m=document.createElement('div');m.className='modal-overlay';m.id='referrerModal';
-  m.innerHTML=`
-    <div class="modal-box">
-      <div class="modal-title">
-        <span><i class="ti ti-user-dollar" style="color:var(--nes-blue);margin-right:6px"></i>Add Referrer</span>
-        <button onclick="document.getElementById('referrerModal').remove()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.2rem;">✕</button>
-      </div>
-      <div class="form-grid">
-        <div class="form-field"><label class="form-label">Full Name *</label><input id="r_name" class="form-input" placeholder="Referrer name"></div>
-        <div class="form-field"><label class="form-label">Company</label><input id="r_company" class="form-input" placeholder="Company"></div>
-        <div class="form-field"><label class="form-label">Email</label><input id="r_email" class="form-input" type="email" placeholder="email@..."></div>
-        <div class="form-field"><label class="form-label">Phone</label><input id="r_phone" class="form-input" placeholder="+968..."></div>
-        <div class="form-field"><label class="form-label">Commission Rate %</label><input id="r_rate" class="form-input" type="number" placeholder="10" min="0" max="100"></div>
-        <div class="form-field"><label class="form-label">Type</label>
-          <select id="r_type" class="form-select">
-            <option value="individual">Individual</option>
-            <option value="company">Company</option>
-            <option value="partner">Partner</option>
-          </select>
-        </div>
-      </div>
-      <div class="form-field" style="margin-top:8px"><label class="form-label">Notes</label><textarea id="r_notes" class="form-input" rows="2" style="resize:vertical"></textarea></div>
-      <button class="form-submit" onclick="saveReferrer()"><i class="ti ti-plus"></i> Save Referrer</button>
-    </div>`;
-  document.body.appendChild(m);
-}
-
-async function saveReferrer(){
-  const data={
-    name:document.getElementById('r_name')?.value.trim(),
-    company:document.getElementById('r_company')?.value.trim(),
-    email:document.getElementById('r_email')?.value.trim(),
-    phone:document.getElementById('r_phone')?.value.trim(),
-    commission_rate:parseFloat(document.getElementById('r_rate')?.value)||10,
-    type:document.getElementById('r_type')?.value,
-    notes:document.getElementById('r_notes')?.value.trim(),
-    deals_referred:0,commission_earned:0,commission_paid:0
-  };
-  if(!data.name){alert('Name is required');return;}
-  try{
-    await sb.from('sales_referrers').insert([data]);
-    document.getElementById('referrerModal')?.remove();
-    showToast('Referrer saved');
-    await loadSalesData();
-  }catch(e){alert('Error: '+e.message);}
-}
-
-function showContactDetail(id){
-  const c=_salesContacts.find(x=>x.id===id);if(!c)return;
-  const relatedDeals=_salesDeals.filter(d=>d.contact_name===c.name||d.company===c.company);
-  const m=document.createElement('div');m.className='modal-overlay';m.id='contactDetailModal';
-  m.innerHTML=`
-    <div class="modal-box">
-      <div class="modal-title">
-        <span><i class="ti ti-user" style="color:var(--nes-blue);margin-right:6px"></i>${c.name}</span>
-        <button onclick="document.getElementById('contactDetailModal').remove()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.2rem;">✕</button>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
-        ${[['Company',c.company],['Title',c.title],['Email',c.email],['Phone',c.phone],['Country',c.country],['Industry',c.industry],['Source',c.source],['Last contact',c.last_contact?getTimeAgo(new Date(c.last_contact)):'Never']].map(([l,v])=>`
-          <div style="background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:7px 10px;">
-            <div style="font-size:.62rem;color:var(--muted);font-family:var(--mono);margin-bottom:2px">${l}</div>
-            <div style="font-size:.78rem;color:var(--text)">${v||'—'}</div>
-          </div>`).join('')}
-      </div>
-      ${c.notes?`<div style="background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:8px 10px;margin-bottom:12px;font-size:.78rem;color:var(--muted)">${c.notes}</div>`:''}
-      <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Related Deals (${relatedDeals.length})</div>
-      ${relatedDeals.length?relatedDeals.map(d=>`
-        <div style="background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:8px 10px;margin-bottom:5px;display:flex;align-items:center;justify-content:space-between;">
-          <div><div style="font-size:.78rem;font-weight:600;color:var(--text)">${d.name}</div><div style="font-size:.65rem;color:var(--muted);font-family:var(--mono)">Close: ${d.close_date||'—'}</div></div>
-          <div style="text-align:right"><div style="font-size:.82rem;font-weight:700;color:var(--nes-blue)">OMR ${Math.round(parseFloat(d.value)||0).toLocaleString()}</div><span class="stage-badge stage-${d.stage||'lead'}">${(d.stage||'lead').toUpperCase()}</span></div>
-        </div>`).join(''):`<div style="text-align:center;padding:12px;font-size:.75rem;color:#484f58;font-family:var(--mono)">No deals yet</div>`}
-      <button onclick="showAddDealModal();document.getElementById('contactDetailModal').remove();" class="form-submit" style="margin-top:12px"><i class="ti ti-plus"></i> Add Deal for this Contact</button>
-    </div>`;
-  document.body.appendChild(m);
-}
-
-function filterContacts(q){
-  const filtered=q?_salesContacts.filter(c=>(c.name+c.company+c.email+c.industry).toLowerCase().includes(q.toLowerCase())):_salesContacts;
-  const colors=['#1a3a6e','#2d1f00','#0d2818','#2d0e0e','#1a2332'];
-  const textColors=['#409cff','#d29922','#3fb950','#f85149','#8b949e'];
-  const el=document.getElementById('contactsList');
-  if(el)el.innerHTML=filtered.map((c,i)=>`
-    <div class="contact-card" onclick="showContactDetail('${c.id}')">
-      <div class="contact-av" style="background:${colors[i%5]};color:${textColors[i%5]}">${(c.name||'?').substring(0,2).toUpperCase()}</div>
-      <div style="flex:1"><div class="contact-name">${c.name||'—'}</div><div class="contact-meta">${c.title||''} ${c.company?'· '+c.company:''}</div></div>
-      <span style="font-size:.6rem;padding:2px 7px;border-radius:6px;font-family:var(--mono);background:#0c1f35;color:var(--nes-blue)">${c.industry||'—'}</span>
-    </div>`).join('');
-}
-function filterContactsBySource(s){
-  const filtered=s?_salesContacts.filter(c=>c.source===s):_salesContacts;
-  filterContacts('');
-  const colors=['#1a3a6e','#2d1f00','#0d2818','#2d0e0e','#1a2332'];
-  const textColors=['#409cff','#d29922','#3fb950','#f85149','#8b949e'];
-  const el=document.getElementById('contactsList');
-  if(el)el.innerHTML=filtered.map((c,i)=>`
-    <div class="contact-card" onclick="showContactDetail('${c.id}')">
-      <div class="contact-av" style="background:${colors[i%5]};color:${textColors[i%5]}">${(c.name||'?').substring(0,2).toUpperCase()}</div>
-      <div style="flex:1"><div class="contact-name">${c.name||'—'}</div><div class="contact-meta">${c.title||''} ${c.company?'· '+c.company:''}</div></div>
-      <span style="font-size:.6rem;padding:2px 7px;border-radius:6px;font-family:var(--mono);background:#0c1f35;color:var(--nes-blue)">${c.industry||'—'}</span>
-    </div>`).join('');
-}
 
 async function showAdminStatus(){
   if(userRole!=='nesadmin'){return;}
