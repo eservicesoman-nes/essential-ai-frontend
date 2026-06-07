@@ -537,6 +537,7 @@
         <div class="nav-item" data-view="ceo"><i class="ti ti-chart-pie"></i><span>CEO Dashboard</span><span class="nav-badge nb-blue">Live</span></div>
         <div class="nav-item" data-view="command"><i class="ti ti-terminal-2"></i><span>Team Hub</span><span class="nav-badge nb-orange" id="commandBadge" style="display:none;">5</span></div>
         <div class="nav-item" data-view="leads"><i class="ti ti-user-check"></i><span>Leads</span><span class="nav-badge nb-red" id="leadsBadge">—</span></div>
+        <div class="nav-item" id="teamNav" data-view="team" style="display:none;"><i class="ti ti-users"></i><span>Team</span></div>
         <div class="nav-item" id="myCredsNav" data-view="mycredentials" style="display:none;"><i class="ti ti-checklist"></i><span>IT Setup</span></div>
       </div>
     </div>
@@ -830,6 +831,8 @@ function setupNavForRole(){
   } else {
     if(['nesadmin','ceo','manager'].includes(userRole))intel.style.display='block';
     if(!['nesadmin','ceo'].includes(userRole)&&ceoNav)ceoNav.style.display='none';
+    const teamNavEl = document.getElementById('teamNav');
+    if(teamNavEl && ['ceo','manager','nesadmin'].includes(userRole)) teamNavEl.style.display='flex';
     if(userRole==='nesadmin'){const phn=document.getElementById('partnerHubNav');if(phn)phn.style.display='block';
       const dcNavAdmin=document.getElementById('deepCoreNav');
       if(dcNavAdmin){dcNavAdmin.style.display='flex';const dcb=document.getElementById('deepCoreBadge');if(dcb)dcb.style.display='flex';}
@@ -1120,6 +1123,7 @@ function showView(view){
   else if(view==='pricing'){showPricing();}
   else if(view==='deen'){showDeen();}
   else if(view==='inbox'){showInbox();}
+  else if(view==='team'){showTeam();}
 }
 // ── System Logs ──────────────────────────────────────────────────
 async function showSysLogs(){
@@ -3040,6 +3044,214 @@ async function loadAnalytics(days){
   }catch(e){
     if(el) el.innerHTML = `<div style="color:var(--red);font-family:var(--mono);font-size:.75rem;padding:20px;">Error loading analytics: ${e.message}</div>`;
   }
+}
+
+async function showTeam(){
+  const mc = document.getElementById('mainContent');
+  mc.innerHTML = `
+    <div style="padding:11px 160px 11px 60px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;" class="an-hdr">
+      <div>
+        <div style="font-family:var(--mono);font-size:.8rem;color:#3fb950;font-weight:800;display:flex;align-items:center;gap:6px;"><i class="ti ti-users"></i>TEAM MANAGEMENT</div>
+        <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">Invite staff · Assign departments · Manage roles</div>
+      </div>
+      <button onclick="showInviteModal()" style="background:linear-gradient(135deg,#1a56db,#2563eb);border:none;border-radius:8px;padding:7px 14px;color:#fff;font-size:.75rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;">
+        <i class="ti ti-user-plus"></i> Invite Staff
+      </button>
+    </div>
+    <div class="page scrollable" id="teamContent" style="padding:14px 18px;">
+      <div style="text-align:center;padding:40px;color:var(--muted);font-family:var(--mono);font-size:.8rem;">Loading team...</div>
+    </div>`;
+  await loadTeam();
+}
+
+async function loadTeam(){
+  const el = document.getElementById('teamContent');
+  if(!el) return;
+  try{
+    const clientId = window.userClientId;
+    if(!clientId){ el.innerHTML='<div style="color:var(--muted);padding:20px;text-align:center;">No client assigned.</div>'; return; }
+
+    // Get users + departments in parallel
+    const [usersRes, deptsRes] = await Promise.all([
+      fetch(API_URL+'/api/client/'+clientId+'/users', {headers:{Authorization:'Bearer '+session.access_token}}),
+      sb.from('departments').select('id,name,permissions').eq('client_id',clientId).order('name')
+    ]);
+    const usersData = await usersRes.json();
+    const users = usersData.users || [];
+    const depts = deptsRes.data || [];
+
+    const roleColors = {nesadmin:'#f85149',ceo:'#d29922',manager:'#409cff',staff:'#8b949e'};
+    const deptOptions = depts.map(d=>`<option value="${d.id}">${d.name}</option>`).join('');
+
+    // Stats row
+    const planLimits = {presence:3,operations:10,workforce:999,infrastructure:999};
+    const limit = planLimits[window.userPlan] || 3;
+    const used = users.length;
+
+    let html = `
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;">
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;">
+          <div style="font-size:.65rem;color:var(--muted);font-family:var(--mono);margin-bottom:4px;">TEAM MEMBERS</div>
+          <div style="font-size:1.4rem;font-weight:700;color:#e6edf3;">${used}<span style="font-size:.75rem;color:var(--muted);font-weight:400;"> / ${limit}</span></div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;">
+          <div style="font-size:.65rem;color:var(--muted);font-family:var(--mono);margin-bottom:4px;">DEPARTMENTS</div>
+          <div style="font-size:1.4rem;font-weight:700;color:#3fb950;">${depts.length}</div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;">
+          <div style="font-size:.65rem;color:var(--muted);font-family:var(--mono);margin-bottom:4px;">SEATS LEFT</div>
+          <div style="font-size:1.4rem;font-weight:700;color:#409cff;">${Math.max(0,limit-used)}</div>
+        </div>
+      </div>`;
+
+    // Departments section
+    html += `<div style="margin-bottom:20px;">
+      <div style="font-family:var(--mono);font-size:.72rem;color:var(--muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em;">Departments</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;">
+        ${depts.map(d=>`
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 14px;display:flex;align-items:center;gap:8px;">
+            <i class="ti ti-building" style="color:#409cff;font-size:13px;"></i>
+            <span style="font-size:.78rem;color:#e6edf3;font-weight:500;">${d.name}</span>
+            <span style="font-size:.65rem;color:var(--muted);">${users.filter(u=>u.department_id===d.id).length} staff</span>
+          </div>`).join('')}
+        <div onclick="showAddDeptModal()" style="background:rgba(64,156,255,0.05);border:1px dashed rgba(64,156,255,0.3);border-radius:8px;padding:8px 14px;display:flex;align-items:center;gap:6px;cursor:pointer;color:#409cff;font-size:.75rem;">
+          <i class="ti ti-plus"></i> Add Department
+        </div>
+      </div>
+    </div>`;
+
+    // Staff list
+    html += `<div>
+      <div style="font-family:var(--mono);font-size:.72rem;color:var(--muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em;">Staff</div>`;
+
+    if(users.length === 0){
+      html += `<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:32px;text-align:center;color:var(--muted);font-size:.8rem;">
+        No team members yet. <span style="color:#409cff;cursor:pointer;" onclick="showInviteModal()">Invite your first staff member →</span>
+      </div>`;
+    } else {
+      html += `<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;">`;
+      users.forEach((u,i) => {
+        const roleColor = roleColors[u.role] || '#8b949e';
+        html += `
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;${i<users.length-1?'border-bottom:1px solid var(--border);':''}">
+            <div style="width:34px;height:34px;border-radius:50%;background:rgba(64,156,255,0.1);border:1px solid rgba(64,156,255,0.2);display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:700;color:#409cff;flex-shrink:0;">
+              ${(u.email||'?')[0].toUpperCase()}
+            </div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:.8rem;color:#e6edf3;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${u.email||'—'}</div>
+              <div style="display:flex;align-items:center;gap:6px;margin-top:3px;">
+                <span style="font-size:.6rem;padding:1px 6px;border-radius:4px;background:rgba(${roleColor==='#f85149'?'248,81,73':roleColor==='#d29922'?'210,153,34':roleColor==='#409cff'?'64,156,255':'139,148,158'},0.12);color:${roleColor};font-family:monospace;">${u.role||'staff'}</span>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+              <select onchange="updateUserDept('${u.id}','${clientId}',this.value)" style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:4px 8px;color:var(--muted);font-size:.7rem;cursor:pointer;">
+                <option value="">No dept</option>
+                ${deptOptions}
+              </select>
+              <select onchange="updateUserRole('${u.id}','${clientId}',this.value)" style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:4px 8px;color:var(--muted);font-size:.7rem;cursor:pointer;">
+                <option value="ceo" ${u.role==='ceo'?'selected':''}>CEO</option>
+                <option value="manager" ${u.role==='manager'?'selected':''}>Manager</option>
+                <option value="staff" ${u.role==='staff'?'selected':''}>Staff</option>
+              </select>
+              <button onclick="removeTeamMember('${u.id}','${clientId}')" style="background:none;border:1px solid rgba(248,81,73,0.3);border-radius:6px;padding:4px 8px;color:#f85149;cursor:pointer;font-size:.7rem;">Remove</button>
+            </div>
+          </div>`;
+      });
+      html += `</div>`;
+    }
+    html += `</div>`;
+    el.innerHTML = html;
+  }catch(e){
+    if(el) el.innerHTML=`<div style="color:var(--red);padding:20px;font-size:.8rem;">Error loading team: ${e.message}</div>`;
+  }
+}
+
+function showInviteModal(){
+  const existing = document.getElementById('inviteModal');
+  if(existing) existing.remove();
+  const modal = document.createElement('div');
+  modal.id = 'inviteModal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;display:flex;align-items:center;justify-content:center;';
+  modal.innerHTML = `
+    <div style="background:#161b22;border:1px solid #1a2332;border-radius:14px;padding:28px;width:360px;max-width:90vw;">
+      <div style="font-size:16px;font-weight:700;margin-bottom:6px;color:#e6edf3;">Invite Staff Member</div>
+      <div style="font-size:12px;color:#8b949e;margin-bottom:20px;">They'll receive an email to set up their account</div>
+      <label style="font-size:11px;color:#8b949e;font-weight:600;display:block;margin-bottom:5px;">WORK EMAIL</label>
+      <input id="inviteEmail" type="email" placeholder="ahmed@company.com" style="width:100%;background:#0a0f1e;border:1px solid #1a2332;border-radius:8px;padding:10px 12px;color:#e6edf3;font-size:13px;margin-bottom:12px;outline:none;box-sizing:border-box;">
+      <label style="font-size:11px;color:#8b949e;font-weight:600;display:block;margin-bottom:5px;">ROLE</label>
+      <select id="inviteRole" style="width:100%;background:#0a0f1e;border:1px solid #1a2332;border-radius:8px;padding:10px 12px;color:#e6edf3;font-size:13px;margin-bottom:20px;outline:none;box-sizing:border-box;">
+        <option value="manager">Manager</option>
+        <option value="staff" selected>Staff</option>
+      </select>
+      <div id="inviteErr" style="font-size:12px;color:#f85149;margin-bottom:10px;display:none;"></div>
+      <div style="display:flex;gap:8px;">
+        <button onclick="document.getElementById('inviteModal').remove()" style="flex:1;background:none;border:1px solid #1a2332;border-radius:8px;padding:10px;color:#8b949e;cursor:pointer;font-size:13px;">Cancel</button>
+        <button onclick="sendTeamInvite()" style="flex:1;background:linear-gradient(135deg,#1a56db,#2563eb);border:none;border-radius:8px;padding:10px;color:#fff;cursor:pointer;font-size:13px;font-weight:600;">Send Invite</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+  document.getElementById('inviteEmail').focus();
+}
+
+async function sendTeamInvite(){
+  const email = document.getElementById('inviteEmail').value.trim();
+  const role = document.getElementById('inviteRole').value;
+  const err = document.getElementById('inviteErr');
+  err.style.display='none';
+  if(!email){ err.textContent='Email is required.'; err.style.display='block'; return; }
+  const btn = document.querySelector('#inviteModal button:last-child');
+  btn.textContent='Sending...'; btn.disabled=true;
+  try{
+    const res = await fetch(API_URL+'/api/client/'+window.userClientId+'/invite',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
+      body:JSON.stringify({email,role})
+    });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error||'Failed');
+    document.getElementById('inviteModal').remove();
+    showToast('Invite sent to '+email+' ✓');
+    loadTeam();
+  }catch(e){
+    err.textContent=e.message; err.style.display='block';
+    btn.textContent='Send Invite'; btn.disabled=false;
+  }
+}
+
+async function updateUserRole(userId, clientId, role){
+  try{
+    const res = await fetch(API_URL+'/api/client/'+clientId+'/user/'+userId+'/role',{
+      method:'PATCH',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
+      body:JSON.stringify({role})
+    });
+    if(res.ok) showToast('Role updated ✓');
+  }catch(e){ showToast('Failed: '+e.message); }
+}
+
+async function updateUserDept(userId, clientId, deptId){
+  try{
+    const { error } = await sb.from('profiles').update({department_id: deptId||null}).eq('id',userId).eq('client_id',clientId);
+    if(!error) showToast('Department updated ✓');
+  }catch(e){ showToast('Failed: '+e.message); }
+}
+
+async function removeTeamMember(userId, clientId){
+  if(!confirm('Remove this team member?')) return;
+  try{
+    const res = await fetch(API_URL+'/api/client/'+clientId+'/user/'+userId,{
+      method:'DELETE',
+      headers:{'Authorization':'Bearer '+session.access_token}
+    });
+    if(res.ok){ showToast('Member removed ✓'); loadTeam(); }
+  }catch(e){ showToast('Failed: '+e.message); }
+}
+
+function showAddDeptModal(){
+  const name = prompt('Department name:');
+  if(!name||!name.trim()) return;
+  sb.from('departments').insert({client_id:window.userClientId,name:name.trim(),permissions:[],is_default:false})
+    .then(({error})=>{ if(!error){ showToast('Department added ✓'); loadTeam(); } else showToast('Failed: '+error.message); });
 }
 
 async function showSalesPortal(){
