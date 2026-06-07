@@ -584,7 +584,7 @@
         <div class="user-av" id="userInitial">?</div>
         <div class="user-email" id="userEmail">—</div>
         <span class="role-chip" id="roleChip">staff</span>
-        <button class="logout-btn" onclick="doLogout()">Sign out</button>
+        <button class="logout-btn" onclick="showChangePassword()" style="margin-right:4px;">Change Password</button><button class="logout-btn" onclick="doLogout()">Sign out</button>
       </div>
     </div>
   </aside>
@@ -896,6 +896,36 @@ async function doSignup(){
   else{err.style.color='#3fb950';err.textContent='Account created! You can now sign in.';}
 }
 
+function showChangePassword(){
+  const existing=document.getElementById('changePwdModal');if(existing)existing.remove();
+  const modal=document.createElement('div');modal.id='changePwdModal';
+  modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;display:flex;align-items:center;justify-content:center;';
+  modal.innerHTML=`<div style="background:#161b22;border:1px solid #1a2332;border-radius:14px;padding:28px;width:320px;max-width:90vw;">
+    <div style="font-family:var(--font-head);font-size:16px;font-weight:700;margin-bottom:6px;color:#e6edf3;">Change Password</div>
+    <div style="font-size:12px;color:#8b949e;margin-bottom:20px;">Enter your new password below</div>
+    <input id="newPwd1" type="password" placeholder="New password" style="width:100%;background:#0a0f1e;border:1px solid #1a2332;border-radius:8px;padding:10px 12px;color:#e6edf3;font-size:13px;margin-bottom:10px;outline:none;box-sizing:border-box;">
+    <input id="newPwd2" type="password" placeholder="Confirm new password" style="width:100%;background:#0a0f1e;border:1px solid #1a2332;border-radius:8px;padding:10px 12px;color:#e6edf3;font-size:13px;margin-bottom:14px;outline:none;box-sizing:border-box;">
+    <div id="pwdErr" style="font-size:12px;color:#f85149;margin-bottom:10px;display:none;"></div>
+    <div style="display:flex;gap:8px;">
+      <button onclick="document.getElementById('changePwdModal').remove()" style="flex:1;background:none;border:1px solid #1a2332;border-radius:8px;padding:10px;color:#8b949e;cursor:pointer;font-size:13px;">Cancel</button>
+      <button onclick="doChangePassword()" style="flex:1;background:linear-gradient(135deg,#1a56db,#2563eb);border:none;border-radius:8px;padding:10px;color:#fff;cursor:pointer;font-size:13px;font-weight:600;">Update</button>
+    </div>
+  </div>`;
+  document.body.appendChild(modal);
+  document.getElementById('newPwd1').focus();
+}
+async function doChangePassword(){
+  const p1=document.getElementById('newPwd1').value;
+  const p2=document.getElementById('newPwd2').value;
+  const err=document.getElementById('pwdErr');err.style.display='none';
+  if(!p1||p1.length<6){err.textContent='Password must be at least 6 characters.';err.style.display='block';return;}
+  if(p1!==p2){err.textContent='Passwords do not match.';err.style.display='block';return;}
+  const btn=document.querySelector('#changePwdModal button:last-child');
+  btn.textContent='Updating...';btn.disabled=true;
+  const{error}=await sb.auth.updateUser({password:p1});
+  if(error){err.textContent=error.message;err.style.display='block';btn.textContent='Update';btn.disabled=false;}
+  else{document.getElementById('changePwdModal').remove();alert('Password updated successfully!');}
+}
 async function doLogout(){
   if(!confirm('Sign out?'))return;
   history=[];allMsgsHTML='';
