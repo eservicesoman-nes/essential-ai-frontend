@@ -660,7 +660,7 @@ async function showApp(user){
     if(!agreed){ showAgreementModal(user.id); return; }
   }
   let defaultView = localStorage.getItem('nesai_view')||'chat';
-  if(userClientId){
+  if(userClientId && !localStorage.getItem('nesai_view')){
     defaultView = userRole==='ceo' ? 'ceo' : 'leads';
   }
   showView(defaultView);
