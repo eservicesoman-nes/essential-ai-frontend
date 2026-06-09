@@ -3074,6 +3074,34 @@ async function loadAnalytics(days){
   }
 }
 
+function showDeptAccessModal(){
+  const depts = ['Management','Sales','IT','Finance','HR','Operations'];
+  const accessMap = {
+    Management: ['CEO Dashboard','Team','Intelligence Feed','Email','Social Media','Leads'],
+    Sales: ['Leads','Email','Social Media'],
+    IT: ['System Logs','Team','Email'],
+    Finance: ['CEO Dashboard','Email'],
+    HR: ['Team','Email'],
+    Operations: ['Email','Social Media']
+  };
+  const rows = depts.map(d => `
+    <div style="padding:8px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;">
+      <div style="width:90px;font-size:.75rem;font-weight:600;color:#e6edf3;">${d}</div>
+      <div style="flex:1;display:flex;flex-wrap:wrap;gap:4px;">${(accessMap[d]||[]).map(m=>`<span style="font-size:.62rem;padding:2px 7px;border-radius:4px;background:rgba(64,156,255,0.1);color:#409cff;">${m}</span>`).join('')}</div>
+    </div>`).join('');
+  const modal = document.createElement('div');
+  modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;display:flex;align-items:center;justify-content:center;';
+  modal.innerHTML=`<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;width:560px;max-width:95vw;max-height:80vh;overflow:hidden;display:flex;flex-direction:column;">
+    <div style="padding:14px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+      <div style="font-family:var(--mono);font-size:.8rem;color:#409cff;font-weight:700;">DEPARTMENT ACCESS</div>
+      <button onclick="this.closest('[style*=fixed]').remove()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.2rem;">×</button>
+    </div>
+    <div style="overflow-y:auto;padding:8px 0;">${rows}</div>
+    <div style="padding:10px 14px;border-top:1px solid var(--border);font-size:.68rem;color:var(--muted);">Access enforcement coming in next update — this shows the planned permissions per department.</div>
+  </div>`;
+  document.body.appendChild(modal);
+}
+
 async function showTeam(){
   const mc = document.getElementById('mainContent');
   mc.innerHTML = `
@@ -3085,6 +3113,10 @@ async function showTeam(){
       <button onclick="showInviteModal()" style="background:linear-gradient(135deg,#1a56db,#2563eb);border:none;border-radius:8px;padding:7px 14px;color:#fff;font-size:.75rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;">
         <i class="ti ti-user-plus"></i> Invite Staff
       </button>
+      ${userRole==='nesadmin'||userRole==='ceo'?`
+      <button onclick="showDeptAccessModal()" style="background:none;border:1px solid var(--border);border-radius:8px;padding:8px 14px;color:var(--muted);cursor:pointer;font-size:.78rem;margin-left:8px;">
+        <i class="ti ti-lock-access"></i> Access
+      </button>`:''}
     </div>
     <div class="page scrollable" id="teamContent" style="padding:14px 18px;">
       <div style="text-align:center;padding:40px;color:var(--muted);font-family:var(--mono);font-size:.8rem;">Loading team...</div>
@@ -3739,7 +3771,17 @@ async function addPartner(){
   });
 
   if(error){ err.textContent = error.message; err.style.display='block'; return; }
-  showToast(`Partner added! Ref code: ${ref_code} ✓`);
+  // Send agreement email via n8n
+  try {
+    await fetch('https://n8n.essential-services.org/webhook/partner-agreement', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ name, email, phone, tier, ref_code })
+    });
+    showToast(`Partner added! Agreement sent to ${email} ✓`);
+  } catch(e) {
+    showToast(`Partner added! Ref code: ${ref_code} ✓`);
+  }
   await renderPartnerHub();
 }
 
@@ -4640,11 +4682,21 @@ async function showInbox(){
     }
   }
   window._inboxClientId = clientId;
+  // Show email account limit based on plan
+  try {
+    const plan = (window.userPlan || '').toLowerCase();
+    const limitMap = {presence:2, operations:5, workforce:10, infrastructure:999};
+    const limit = limitMap[plan] || 2;
+    const {data:existingAccs} = await sb.from('email_accounts').select('id').eq('client_id', clientId).eq('is_active',true);
+    const used = existingAccs?.length || 0;
+    const el = document.getElementById('emailAccountLimit');
+    if(el) el.textContent = `${used}/${limit === 999 ? '∞' : limit} accounts`;
+  } catch(e) {}
   mc.innerHTML=`
     <div style="padding:11px 18px 11px 60px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;">
       <div>
         <div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;display:flex;align-items:center;gap:6px;"><i class="ti ti-mail"></i>INBOX</div>
-        <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">Unified email · All accounts</div>
+        <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">Unified email · All accounts · <span id="emailAccountLimit" style="color:#409cff;">Loading...</span></div>
       </div>
       <button onclick="if(window._inboxClientId)loadInboxEmails(window._inboxClientId);else showInbox();" style="background:none;border:1px solid var(--border);border-radius:6px;padding:4px 10px;color:var(--muted);cursor:pointer;font-size:.72rem;font-family:var(--mono);"><i class="ti ti-refresh"></i> Refresh</button>
     </div>
