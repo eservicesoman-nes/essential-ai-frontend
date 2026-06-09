@@ -822,6 +822,8 @@ function setupNavForRole(){
       const apiNav=document.getElementById('apiCreditsNav');if(apiNav)apiNav.style.display='flex';
       const logsNav=document.getElementById('sysLogsNav');if(logsNav)logsNav.style.display='flex';
       const teamNavEl=document.getElementById('teamNav');if(teamNavEl)teamNavEl.style.display='flex';
+      const dcNavEl=document.getElementById('deepCoreNav');if(dcNavEl){dcNavEl.style.display='flex';const dcb=document.getElementById('deepCoreBadge');if(dcb)dcb.style.display='flex';}
+      const myCredsNavEl=document.getElementById('myCredsNav');if(myCredsNavEl)myCredsNavEl.style.display='flex';
     } else {
       clientMgr.style.display='none';
       if(salesNav)salesNav.style.display='none';
