@@ -3895,6 +3895,54 @@ async function showAdminStatus(){
         </div>`;
     }
   } catch(e) { console.log('Backup status error:', e); }
+  // Load VPS stats
+  try {
+    const vr = await fetch(API_URL+'/api/admin/vps-stats', {headers:{'Authorization':'Bearer '+session.access_token}});
+    const vd = await vr.json();
+    const vel = document.getElementById('vpsStatsCard');
+    if(vel && vd) {
+      const cpuColor = vd.cpu >= 80 ? '#f85149' : vd.cpu >= 60 ? '#f0883e' : '#3fb950';
+      const ramColor = vd.ram_pct >= 85 ? '#f85149' : vd.ram_pct >= 70 ? '#f0883e' : '#3fb950';
+      const diskColor = vd.disk_pct >= 85 ? '#f85149' : vd.disk_pct >= 70 ? '#f0883e' : '#3fb950';
+      const pm2Online = (vd.pm2||[]).filter(p=>p.status==='online');
+      const pm2Err = (vd.pm2||[]).filter(p=>p.status!=='online');
+      vel.innerHTML = `
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px;">
+          <div style="background:#0d1117;border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center;">
+            <div style="font-size:.62rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px;">CPU</div>
+            <div style="font-size:1.3rem;font-weight:700;color:${cpuColor};font-family:var(--mono);">${vd.cpu}%</div>
+            <div style="height:4px;background:var(--border);border-radius:2px;margin-top:6px;"><div style="height:4px;background:${cpuColor};border-radius:2px;width:${vd.cpu}%;"></div></div>
+          </div>
+          <div style="background:#0d1117;border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center;">
+            <div style="font-size:.62rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px;">RAM</div>
+            <div style="font-size:1.3rem;font-weight:700;color:${ramColor};font-family:var(--mono);">${vd.ram_pct}%</div>
+            <div style="font-size:.62rem;color:var(--muted);margin-top:2px;">${vd.ram_used_mb} / ${vd.ram_total_mb} MB</div>
+          </div>
+          <div style="background:#0d1117;border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center;">
+            <div style="font-size:.62rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px;">DISK</div>
+            <div style="font-size:1.3rem;font-weight:700;color:${diskColor};font-family:var(--mono);">${vd.disk_pct}%</div>
+            <div style="font-size:.62rem;color:var(--muted);margin-top:2px;">${vd.disk_used} / ${vd.disk_total}</div>
+          </div>
+        </div>
+        <div style="font-size:.62rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;">PM2 PROCESSES</div>
+        <div style="display:flex;flex-direction:column;gap:5px;">
+          ${(vd.pm2||[]).map(p=>`
+            <div style="display:flex;align-items:center;justify-content:space-between;background:#0d1117;border:1px solid var(--border);border-radius:6px;padding:7px 12px;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <div style="width:7px;height:7px;border-radius:50%;background:${p.status==='online'?'#3fb950':'#f85149'};${p.status==='online'?'box-shadow:0 0 5px #3fb950;':''}"></div>
+                <span style="font-size:.75rem;font-family:var(--mono);color:#e6edf3;">${p.name}</span>
+                <span style="font-size:.65rem;color:var(--muted);">id:${p.id}</span>
+              </div>
+              <div style="display:flex;gap:12px;font-size:.65rem;font-family:var(--mono);color:var(--muted);">
+                <span>CPU ${p.cpu}%</span>
+                <span>MEM ${p.mem_mb}MB</span>
+                <span style="color:${p.status==='online'?'#3fb950':'#f85149'};">${p.status}</span>
+              </div>
+            </div>`).join('')}
+        </div>
+        ${vd.uptime ? `<div style="font-size:.65rem;color:var(--muted);margin-top:8px;font-family:var(--mono);">⏱ Uptime: ${vd.uptime}</div>` : ''}`;
+    }
+  } catch(e) { console.log('VPS stats error:', e); }
 }
 
 function showAddServiceModal(){
@@ -4080,6 +4128,8 @@ async function checkPlatformStatus(){
   html+='</div></div>';
   html+='<div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin:12px 0 8px;">BACKUP STATUS</div>';
   html+='<div id="backupStatusCard" style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:12px;"><div style="font-size:.75rem;color:var(--muted);">Loading backup status...</div></div>';
+  html+='<div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin:12px 0 8px;">VPS HEALTH</div>';
+  html+='<div id="vpsStatsCard" style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;"><div style="font-size:.75rem;color:var(--muted);">Loading VPS stats...</div></div>';
   el.innerHTML=html;
   if(window.innerWidth<=700){
     const tog=document.querySelector('.status-panel-toggle');
