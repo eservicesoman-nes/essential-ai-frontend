@@ -1792,8 +1792,31 @@ function renderLeadRows(leads){
   if(!leads.length)return'<div style="padding:20px;text-align:center;color:var(--muted);font-family:var(--mono);font-size:.8rem;">No leads found</div>';
   return leads.map(l=>{
     const date=new Date(l.created_at);const timeAgo=getTimeAgo(date);const badge=getBadge(l,date);
-    return`<div class="lt-row"><div><div class="lead-name">${l.name||'—'}</div><div class="lead-email">${l.email||'—'}</div></div><div class="lead-industry">${l.industry||'General'}</div><div class="lead-email">${l.phone||'—'}</div><div class="lead-time">${timeAgo}</div><div><span class="lead-badge ${badge.cls}">${badge.label}</span></div></div>`;
+    return`<div class="lt-row"><div><div class="lead-name">${l.name||'—'}</div><div class="lead-email">${l.email||'—'}</div></div><div class="lead-industry">${l.industry||'General'}</div><div class="lead-email">${l.phone||'—'}</div><div class="lead-time">${timeAgo}</div><div style="display:flex;align-items:center;gap:6px;"><span class="lead-badge ${badge.cls}">${badge.label}</span>${(userRole==='nesadmin'||userRole==='ceo')&&l.phone?`<button onclick="callWithSara('${l.id}','${(l.phone||'').replace(/'/g,'').replace(/\+/g,'%2B')}','${(l.name||'Lead').replace(/'/g,'')}')" style="font-size:.6rem;padding:2px 8px;border-radius:5px;background:rgba(63,185,80,0.1);color:#3fb950;border:1px solid rgba(63,185,80,0.3);cursor:pointer;white-space:nowrap;"><i class="ti ti-phone"></i> Sara</button>`:''}</div></div>`;
   }).join('');
+}
+
+async function callWithSara(leadId, phone, name){
+  const code = prompt(`Enter confirmation code to call ${name}:`);
+  if(!code) return;
+  if(code !== '2749'){ showToast('Incorrect code — call cancelled'); return; }
+  const decoded = decodeURIComponent(phone);
+  showToast(`Calling ${name}... Sara is dialing`);
+  try {
+    const res = await fetch(`${API}/leads/${leadId}/call`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json','Authorization':'Bearer '+userToken},
+      body: JSON.stringify({ phone: decoded, name })
+    });
+    const data = await res.json();
+    if(data.success){
+      showToast(`✅ Sara is calling ${name} now`);
+    } else {
+      showToast('❌ Call failed: ' + (data.error||'Unknown error'));
+    }
+  } catch(e) {
+    showToast('❌ Call failed: ' + e.message);
+  }
 }
 
 function getBadge(lead,date){
