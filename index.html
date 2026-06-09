@@ -4721,7 +4721,7 @@ async function showInbox(){
         <div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;display:flex;align-items:center;gap:6px;"><i class="ti ti-mail"></i>INBOX</div>
         <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">Unified email · All accounts · <span id="emailAccountLimit" style="color:#409cff;">Loading...</span></div>
       </div>
-      <button onclick="if(window._inboxClientId)loadInboxEmails(window._inboxClientId);else showInbox();" style="background:none;border:1px solid var(--border);border-radius:6px;padding:4px 10px;color:var(--muted);cursor:pointer;font-size:.72rem;font-family:var(--mono);"><i class="ti ti-refresh"></i> Refresh</button>
+      <button onclick="if(window._inboxClientId)loadInboxEmails(window._inboxClientId, true);else showInbox();" id="inboxRefreshBtn" title="Click to refresh" style="background:none;border:1px solid var(--border);border-radius:6px;padding:4px 10px;color:var(--muted);cursor:pointer;font-size:.72rem;font-family:var(--mono);"><i class="ti ti-refresh"></i> Refresh</button>
     </div>
     <div class="inbox-panel-toggle" style="display:none;padding:6px 12px;border-bottom:1px solid var(--border);gap:6px;">
       <button id="inboxToggleList" onclick="toggleInboxPanel('list')" style="flex:1;padding:7px;border:none;border-radius:7px;background:var(--nes-blue);color:#fff;font-size:.75rem;font-weight:600;cursor:pointer;"><i class="ti ti-inbox"></i> Inbox</button>
@@ -4746,7 +4746,24 @@ async function showInbox(){
   if(clientId) await loadInboxEmails(clientId);
 }
 
-async function loadInboxEmails(clientId){
+async function loadInboxEmails(clientId, forceRefresh=false){
+  // Cache check — skip fetch if cached within 60 seconds
+  const cacheKey = 'inbox_'+clientId;
+  const now = Date.now();
+  if(!forceRefresh && window._inboxCache && window._inboxCache[cacheKey] && (now - window._inboxCache[cacheKey].ts) < 60000){
+    const cached = window._inboxCache[cacheKey];
+    window._inboxEmails = cached.emails;
+    window._inboxAccounts = cached.accounts;
+    window._inboxColors = cached.colors;
+    window._accountLabels = cached.labels;
+    renderEmailList(cached.emails);
+    const el2 = document.getElementById('inboxRefreshBtn');
+    if(el2){ const secs = Math.round((now - cached.ts)/1000); el2.title = `Last updated ${secs}s ago · Click to refresh`; }
+    return;
+  }
+  // Show loading indicator
+  const emailListEl = document.getElementById('emailList');
+  if(emailListEl) emailListEl.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted);font-family:var(--mono);font-size:.75rem;">⟳ Loading emails...</div>';
   try{
     const res=await fetch(API_URL+'/api/email/inbox/'+clientId,{headers:{'Authorization':'Bearer '+session.access_token}});
     const data=await res.json();
@@ -4774,6 +4791,11 @@ async function loadInboxEmails(clientId){
     window._inboxEmails=emails;
     window._inboxAccounts=accounts;
     window._inboxColors=colors;
+    // Store in cache
+    if(!window._inboxCache) window._inboxCache={};
+    window._inboxCache[cacheKey]={emails, accounts, colors, labels:window._accountLabels||{}, ts:Date.now()};
+    const refreshBtn = document.getElementById('inboxRefreshBtn');
+    if(refreshBtn) refreshBtn.title = 'Just refreshed · Click to refresh again';
     renderEmailList(emails);
   }catch(e){
     const el=document.getElementById('emailList');
