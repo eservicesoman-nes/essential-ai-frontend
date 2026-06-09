@@ -805,7 +805,7 @@ function setupNavForRole(){
 
   if(userClientId){
     intel.style.display='block';
-    if(userRole==='ceo'){
+    if(userRole==='ceo'||userRole==='nesadmin'){
       if(ceoNav)ceoNav.style.display='flex';
     } else {
       if(ceoNav)ceoNav.style.display='none';
