@@ -3882,40 +3882,48 @@ async function showAdminStatus(){
       const color = ok ? '#3fb950' : '#f85149';
       bel.style.borderColor = ok ? '#3fb95040' : '#f8514940';
       bel.style.background = ok ? 'rgba(63,185,80,0.05)' : 'rgba(248,81,73,0.05)';
-      bel.innerHTML = `
-        <div style="display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;">
-          <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:200px;">
-            <div style="width:10px;height:10px;border-radius:50%;background:${color};flex-shrink:0;${ok?'box-shadow:0 0 6px '+color+';':''}"></div>
-            <div style="flex:1;">
-              <div style="font-size:.78rem;font-weight:600;color:#e6edf3;">Backblaze B2 — nes-vps-backup</div>
-              <div style="font-size:.68rem;color:var(--muted);">Last backup: ${bd.last_date||'Unknown'} · ${bd.last_time||''}</div>
-            </div>
-            <div style="text-align:right;flex-shrink:0;">
-              <div style="font-size:.75rem;font-weight:700;color:${color};">${ok?'✅ Success':'❌ Failed'}</div>
-              <div style="font-size:.65rem;color:var(--muted);">Daily at 2:00 AM</div>
-            </div>
-          </div>
-          ${bd.b2 ? `<div style="display:flex;gap:8px;width:100%;margin-top:6px;">
-            <div style="flex:1;background:#0d1117;border:1px solid var(--border);border-radius:8px;padding:8px 12px;">
-              <div style="font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:2px;">Storage Used</div>
-              <div style="font-size:1rem;font-weight:700;color:#409cff;font-family:var(--mono);">${bd.b2.totalSizeGB} GB</div>
-              <div style="height:4px;background:var(--border);border-radius:2px;margin-top:5px;"><div style="height:4px;background:#409cff;border-radius:2px;width:${Math.min(parseFloat(bd.b2.totalSizeGB)/10*100,100).toFixed(0)}%;"></div></div>
-            </div>
-            <div style="flex:1;background:#0d1117;border:1px solid var(--border);border-radius:8px;padding:8px 12px;">
-              <div style="font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:2px;">Free Remaining</div>
-              <div style="font-size:1rem;font-weight:700;color:${Math.max(10-parseFloat(bd.b2.totalSizeGB),0)<1?'#f0883e':'#3fb950'};font-family:var(--mono);">${Math.max(10-parseFloat(bd.b2.totalSizeGB),0).toFixed(2)} GB</div>
-              <div style="font-size:.6rem;color:var(--muted);margin-top:2px;">of 10 GB free tier</div>
-            </div>
-            <div style="flex:1;background:#0d1117;border:1px solid var(--border);border-radius:8px;padding:8px 12px;">
-              <div style="font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:2px;">Files Stored</div>
-              <div style="font-size:1rem;font-weight:700;color:#409cff;font-family:var(--mono);">${bd.b2.fileCount}</div>
-            </div>
-            <div style="flex:2;background:#0d1117;border:1px solid var(--border);border-radius:8px;padding:8px 12px;">
-              <div style="font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:2px;">Recent Backups</div>
-              <div style="font-size:.7rem;color:#e6edf3;font-family:var(--mono);">${(bd.b2.backupDates||[]).slice(0,5).join(' · ')||'—'}</div>
-            </div>
-          </div>` : ''}
-        </div>`;
+      const usedGB = bd.b2 ? parseFloat(bd.b2.totalSizeGB) : 0;
+      const freeGB = Math.max(10 - usedGB, 0).toFixed(2);
+      const usedPct = Math.min(usedGB/10*100, 100).toFixed(0);
+      const freeColor = freeGB < 1 ? '#f0883e' : '#3fb950';
+      const recentDates = bd.b2 ? (bd.b2.backupDates||[]).slice(0,5).join(' · ')||'—' : '—';
+      const b2Html = bd.b2 ? (
+        '<div style="display:flex;gap:8px;width:100%;margin-top:6px;">' +
+        '<div style="flex:1;background:#0d1117;border:1px solid var(--border);border-radius:8px;padding:8px 12px;">' +
+          '<div style="font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:2px;">Storage Used</div>' +
+          '<div style="font-size:1rem;font-weight:700;color:#409cff;font-family:var(--mono);">' + bd.b2.totalSizeGB + ' GB</div>' +
+          '<div style="height:4px;background:var(--border);border-radius:2px;margin-top:5px;"><div style="height:4px;background:#409cff;border-radius:2px;width:' + usedPct + '%;"></div></div>' +
+        '</div>' +
+        '<div style="flex:1;background:#0d1117;border:1px solid var(--border);border-radius:8px;padding:8px 12px;">' +
+          '<div style="font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:2px;">Free Remaining</div>' +
+          '<div style="font-size:1rem;font-weight:700;color:' + freeColor + ';font-family:var(--mono);">' + freeGB + ' GB</div>' +
+          '<div style="font-size:.6rem;color:var(--muted);margin-top:2px;">of 10 GB free tier</div>' +
+        '</div>' +
+        '<div style="flex:1;background:#0d1117;border:1px solid var(--border);border-radius:8px;padding:8px 12px;">' +
+          '<div style="font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:2px;">Files Stored</div>' +
+          '<div style="font-size:1rem;font-weight:700;color:#409cff;font-family:var(--mono);">' + bd.b2.fileCount + '</div>' +
+        '</div>' +
+        '<div style="flex:2;background:#0d1117;border:1px solid var(--border);border-radius:8px;padding:8px 12px;">' +
+          '<div style="font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:2px;">Recent Backups</div>' +
+          '<div style="font-size:.7rem;color:#e6edf3;font-family:var(--mono);">' + recentDates + '</div>' +
+        '</div>' +
+        '</div>'
+      ) : '';
+      bel.innerHTML =
+        '<div style="display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;">' +
+          '<div style="display:flex;align-items:center;gap:10px;flex:1;min-width:200px;">' +
+            '<div style="width:10px;height:10px;border-radius:50%;background:' + color + ';flex-shrink:0;' + (ok?'box-shadow:0 0 6px '+color+';':'') + '"></div>' +
+            '<div style="flex:1;">' +
+              '<div style="font-size:.78rem;font-weight:600;color:#e6edf3;">Backblaze B2 — nes-vps-backup</div>' +
+              '<div style="font-size:.68rem;color:var(--muted);">Last backup: ' + (bd.last_date||'Unknown') + ' · ' + (bd.last_time||'') + '</div>' +
+            '</div>' +
+            '<div style="text-align:right;flex-shrink:0;">' +
+              '<div style="font-size:.75rem;font-weight:700;color:' + color + ';">' + (ok?'✅ Success':'❌ Failed') + '</div>' +
+              '<div style="font-size:.65rem;color:var(--muted);">Daily at 2:00 AM</div>' +
+            '</div>' +
+          '</div>' +
+          b2Html +
+        '</div>';
     }
   } catch(e) { console.log('Backup status error:', e); }
   // Load VPS stats
