@@ -3883,15 +3883,32 @@ async function showAdminStatus(){
       bel.style.borderColor = ok ? '#3fb95040' : '#f8514940';
       bel.style.background = ok ? 'rgba(63,185,80,0.05)' : 'rgba(248,81,73,0.05)';
       bel.innerHTML = `
-        <div style="width:10px;height:10px;border-radius:50%;background:${color};flex-shrink:0;"></div>
-        <div style="flex:1;">
-          <div style="font-size:.78rem;font-weight:600;color:#e6edf3;">Backblaze B2 — nes-vps-backup</div>
-          <div style="font-size:.68rem;color:var(--muted);">Last backup: ${bd.last_date||'Unknown'} · ${bd.last_time||''}</div>
-          ${bd.b2 ? `<div style="font-size:.65rem;color:var(--muted);margin-top:3px;">💾 Storage: ${bd.b2.totalSizeGB} GB · ${bd.b2.fileCount} files · Recent: ${(bd.b2.backupDates||[]).slice(0,3).join(', ')}</div>` : ''}
-        </div>
-        <div style="text-align:right;">
-          <div style="font-size:.75rem;font-weight:700;color:${color};">${ok?'✅ Success':'❌ Failed'}</div>
-          <div style="font-size:.65rem;color:var(--muted);">Daily at 2:00 AM</div>
+        <div style="display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;">
+          <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:200px;">
+            <div style="width:10px;height:10px;border-radius:50%;background:${color};flex-shrink:0;${ok?'box-shadow:0 0 6px '+color+';':''}"></div>
+            <div style="flex:1;">
+              <div style="font-size:.78rem;font-weight:600;color:#e6edf3;">Backblaze B2 — nes-vps-backup</div>
+              <div style="font-size:.68rem;color:var(--muted);">Last backup: ${bd.last_date||'Unknown'} · ${bd.last_time||''}</div>
+            </div>
+            <div style="text-align:right;flex-shrink:0;">
+              <div style="font-size:.75rem;font-weight:700;color:${color};">${ok?'✅ Success':'❌ Failed'}</div>
+              <div style="font-size:.65rem;color:var(--muted);">Daily at 2:00 AM</div>
+            </div>
+          </div>
+          ${bd.b2 ? `<div style="display:flex;gap:8px;width:100%;margin-top:6px;">
+            <div style="flex:1;background:#0d1117;border:1px solid var(--border);border-radius:8px;padding:8px 12px;">
+              <div style="font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:2px;">Storage Used</div>
+              <div style="font-size:1rem;font-weight:700;color:#409cff;font-family:var(--mono);">${bd.b2.totalSizeGB} GB</div>
+            </div>
+            <div style="flex:1;background:#0d1117;border:1px solid var(--border);border-radius:8px;padding:8px 12px;">
+              <div style="font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:2px;">Files Stored</div>
+              <div style="font-size:1rem;font-weight:700;color:#409cff;font-family:var(--mono);">${bd.b2.fileCount}</div>
+            </div>
+            <div style="flex:2;background:#0d1117;border:1px solid var(--border);border-radius:8px;padding:8px 12px;">
+              <div style="font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:2px;">Recent Backups</div>
+              <div style="font-size:.7rem;color:#e6edf3;font-family:var(--mono);">${(bd.b2.backupDates||[]).slice(0,5).join(' · ')||'—'}</div>
+            </div>
+          </div>` : ''}
         </div>`;
     }
   } catch(e) { console.log('Backup status error:', e); }
@@ -4125,7 +4142,7 @@ async function checkPlatformStatus(){
   html+='</div>';
   html+='</div></div>';
   html+='<div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin:12px 0 8px;">BACKUP STATUS</div>';
-  html+='<div id="backupStatusCard" style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:12px;"><div style="font-size:.75rem;color:var(--muted);">Loading backup status...</div></div>';
+  html+='<div id="backupStatusCard" style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;"><div style="font-size:.75rem;color:var(--muted);">Loading backup status...</div></div>';
   html+='<div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin:12px 0 8px;">VPS HEALTH</div>';
   html+='<div id="vpsStatsCard" style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;"><div style="font-size:.75rem;color:var(--muted);">Loading VPS stats...</div></div>';
   el.innerHTML=html;
