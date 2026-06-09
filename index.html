@@ -3887,6 +3887,7 @@ async function showAdminStatus(){
         <div style="flex:1;">
           <div style="font-size:.78rem;font-weight:600;color:#e6edf3;">Backblaze B2 — nes-vps-backup</div>
           <div style="font-size:.68rem;color:var(--muted);">Last backup: ${bd.last_date||'Unknown'} · ${bd.last_time||''}</div>
+          ${bd.b2 ? `<div style="font-size:.65rem;color:var(--muted);margin-top:3px;">💾 Storage: ${bd.b2.totalSizeGB} GB · ${bd.b2.fileCount} files · Recent: ${(bd.b2.backupDates||[]).slice(0,3).join(', ')}</div>` : ''}
         </div>
         <div style="text-align:right;">
           <div style="font-size:.75rem;font-weight:700;color:${color};">${ok?'✅ Success':'❌ Failed'}</div>
