@@ -813,10 +813,21 @@ function setupNavForRole(){
     if(['manager','staff'].includes(userRole)){
       if(leadsNav)leadsNav.style.display='flex';
     }
-    clientMgr.style.display='none';
-    if(salesNav)salesNav.style.display='none';
-    const myCredsNav=document.getElementById('myCredsNav');
-    if(myCredsNav)myCredsNav.style.display='flex';
+    if(userRole==='nesadmin'){
+      clientMgr.style.display='block';
+      loadClientCount();
+      const phn=document.getElementById('partnerHubNav');if(phn)phn.style.display='block';
+      const an=document.getElementById('analyticsNav');if(an)an.style.display='flex';
+      const statusNav=document.getElementById('adminStatusNav');if(statusNav)statusNav.style.display='flex';
+      const apiNav=document.getElementById('apiCreditsNav');if(apiNav)apiNav.style.display='flex';
+      const logsNav=document.getElementById('sysLogsNav');if(logsNav)logsNav.style.display='flex';
+      const teamNavEl=document.getElementById('teamNav');if(teamNavEl)teamNavEl.style.display='flex';
+    } else {
+      clientMgr.style.display='none';
+      if(salesNav)salesNav.style.display='none';
+      const myCredsNav=document.getElementById('myCredsNav');
+      if(myCredsNav)myCredsNav.style.display='flex';
+    }
     const dcNav=document.getElementById('deepCoreNav');
     if(dcNav&&['operations','workforce','infrastructure','enterprise'].some(p=>(window.clientPlan||userPlan||'').toLowerCase().includes(p))){
       dcNav.style.display='flex';
