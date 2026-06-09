@@ -1376,13 +1376,18 @@ async function showCEODashboard(){
           </div>
         </div>
         ${userRole==='nesadmin'?`
-        <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:7px;margin-top:4px;display:flex;align-items:center;gap:5px;"><i class="ti ti-users-group" style="font-size:12px;color:#7f77dd;"></i>Partner hub</div>
+        <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:7px;margin-top:14px;">PARTNER OVERVIEW</div>
         <div id="partnerMrrStrip" style="background:var(--card);border:1px solid #7f77dd33;border-radius:8px;padding:10px 12px;margin-bottom:10px;">
-          <div style="display:flex;justify-content:space-between;font-size:.7rem;margin-bottom:4px;"><span style="color:var(--muted);">Direct MRR</span><span id="ph_direct" style="color:#3fb950;font-weight:600;">—</span></div>
-          <div style="display:flex;justify-content:space-between;font-size:.7rem;margin-bottom:4px;"><span style="color:var(--muted);">Partner MRR</span><span id="ph_partner" style="color:#7f77dd;font-weight:600;">—</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:.7rem;margin-bottom:4px;"><span style="color:var(--muted);">Direct MRR</span><span id="ph_direct" style="color:#409cff;font-weight:600;">—</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:.7rem;margin-bottom:4px;"><span style="color:var(--muted);">Partner MRR</span><span id="ph_partner" style="color:#3fb950;font-weight:600;">—</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:.7rem;margin-bottom:4px;"><span style="color:var(--muted);">Commission pending</span><span id="ph_commission" style="color:#d29922;font-weight:600;">—</span></div>
           <div style="height:1px;background:var(--border);margin:6px 0;"></div>
-          <div style="display:flex;justify-content:space-between;font-size:.78rem;"><span style="color:var(--muted);">Total MRR</span><span id="ph_total" style="color:var(--nes-blue);font-weight:700;">—</span></div>
-        </div>`:''}\n      </div>\n      <div id="ceoResizer" title="Drag to resize"></div>
+          <div style="display:flex;justify-content:space-between;font-size:.78rem;"><span style="color:var(--muted);">Total MRR</span><span id="ph_total" style="color:#e6edf3;font-weight:700;">—</span></div>
+        </div>
+        <div id="partnerRows" style="margin-bottom:10px;"></div>
+        <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:7px;margin-top:14px;">FOUNDER EXPIRY ALERTS</div>
+        <div id="founderAlerts" style="margin-bottom:10px;"><div style="font-size:.7rem;color:var(--muted);">Loading...</div></div>
+        `:''}\n      </div>\n      <div id="ceoResizer" title="Drag to resize"></div>
       <div style="display:flex;flex-direction:column;overflow:hidden;">
         <div style="padding:9px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
           <div style="font-family:var(--mono);font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;display:flex;align-items:center;gap:5px;"><i class="ti ti-radar" style="font-size:11px;color:var(--nes-blue);"></i>Market Intelligence</div>
@@ -1408,52 +1413,70 @@ async function showCEODashboard(){
 
 async function loadPartnerMrr(){
   try{
-    const{data:clients}=await sb.from('clients').select('plan,status,monthly_fee,partner_id');
-    if(!clients)return;
-    const getPV=c=>{const f=parseFloat(c.monthly_fee);if(f>0)return f;const p=(c.plan||'').toLowerCase();if(p.includes('workforce'))return 149;if(p.includes('operations'))return 79;if(p.includes('presence')||p.includes('starter'))return 29;return 79;};
-    const active=clients.filter(c=>c.status==='active');
-    const direct=active.filter(c=>!c.partner_id).reduce((s,c)=>s+getPV(c),0);
-    const partner=active.filter(c=>c.partner_id).reduce((s,c)=>s+getPV(c),0);
-    const total=direct+partner;
+    const getPV=c=>{const f=parseFloat(c.monthly_fee);if(f>0)return f;const p=(c.plan||'').toLowerCase();if(p.includes('workforce'))return 149;if(p.includes('operations'))return 79;return 29;};
+    const[{data:clients},{data:partners},{data:commissions}]=await Promise.all([
+      sb.from('clients').select('id,name,plan,status,monthly_fee,partner_ref,founder_discount_expires_at'),
+      sb.from('partners').select('id,name,tier,ref_code,status'),
+      sb.from('partner_commissions').select('partner_id,amount_omr,status').eq('status','pending')
+    ]);
+    const cl=clients||[],pt=partners||[],cm=commissions||[];
+    const active=cl.filter(c=>c.status==='active');
+    const direct=active.filter(c=>!c.partner_ref).reduce((s,c)=>s+getPV(c),0);
+    const partnerMRR=active.filter(c=>c.partner_ref).reduce((s,c)=>s+getPV(c),0);
+    const total=direct+partnerMRR;
+    const pendingComm=cm.reduce((s,c)=>s+parseFloat(c.amount_omr||0),0);
     const d=document.getElementById('ph_direct');if(d)d.textContent='OMR '+direct.toFixed(0);
-    const p=document.getElementById('ph_partner');if(p)p.textContent='OMR '+partner.toFixed(0);
+    const p=document.getElementById('ph_partner');if(p)p.textContent='OMR '+partnerMRR.toFixed(0);
     const t=document.getElementById('ph_total');if(t)t.textContent='OMR '+total.toFixed(0);
-  }catch(e){}
-}
-
-function initCeoResizer(){
-  const grid=document.getElementById('ceoDashGrid');
-  const r=document.getElementById('ceoResizer');
-  if(!grid||!r)return;
-  const saved=localStorage.getItem('nesai_feed_width');
-  if(saved)grid.style.gridTemplateColumns='1fr 6px '+parseInt(saved)+'px';
-  let dragging=false;
-  r.addEventListener('mousedown',function(e){
-    dragging=true;
-    r.setPointerCapture(e.pointerId);
-    r.classList.add('dragging');
-    document.body.style.cursor='col-resize';
-    document.body.style.userSelect='none';
-    e.preventDefault();
-  });
-  r.addEventListener('pointermove',function(e){
-    if(!dragging)return;
-    const cols=grid.style.gridTemplateColumns.split(' ');
-    const currentW=parseInt(cols[cols.length-1])||420;
-    const newW=Math.max(280,Math.min(window.innerWidth-300,currentW-e.movementX));
-    grid.style.gridTemplateColumns='1fr 6px '+newW+'px';
-    e.preventDefault();
-  });
-  r.addEventListener('pointerup',function(e){
-    if(!dragging)return;
-    dragging=false;
-    r.releasePointerCapture(e.pointerId);
-    r.classList.remove('dragging');
-    document.body.style.cursor='';
-    document.body.style.userSelect='';
-    const cols=grid.style.gridTemplateColumns.split(' ');
-    localStorage.setItem('nesai_feed_width',parseInt(cols[cols.length-1])||420);
-  });
+    const pc=document.getElementById('ph_commission');if(pc)pc.textContent='OMR '+pendingComm.toFixed(2);
+    // Per-partner rows
+    const tierColors={apex:'#409cff',alliance:'#3fb950',elite:'#d29922',custom:'#7f77dd'};
+    const rowsEl=document.getElementById('partnerRows');
+    if(rowsEl&&pt.length>0){
+      rowsEl.innerHTML=pt.filter(p=>p.status==='active').map(p=>{
+        const pClients=active.filter(c=>c.partner_ref===p.ref_code);
+        const pMRR=pClients.reduce((s,c)=>s+getPV(c),0);
+        const pComm=cm.filter(c=>c.partner_id===p.id).reduce((s,c)=>s+parseFloat(c.amount_omr||0),0);
+        const color=tierColors[p.tier]||'#409cff';
+        const nextTier=p.tier==='apex'?8:p.tier==='alliance'?20:null;
+        const prog=nextTier?Math.min(100,Math.round((pClients.length/nextTier)*100)):100;
+        return `<div style="background:var(--card);border:1px solid var(--border);border-radius:7px;padding:8px 10px;margin-bottom:6px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;">
+            <div style="width:24px;height:24px;border-radius:6px;background:rgba(64,156,255,0.08);display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;color:${color};">${(p.name||'?')[0].toUpperCase()}</div>
+            <div style="flex:1;font-size:.75rem;font-weight:600;color:#e6edf3;">${p.name}</div>
+            <span style="font-size:.6rem;padding:1px 6px;border-radius:4px;background:rgba(64,156,255,0.08);color:${color};">${p.tier}</span>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;font-size:.65rem;">
+            <div style="color:var(--muted);">Clients: <span style="color:#e6edf3;">${pClients.length}</span></div>
+            <div style="color:var(--muted);">MRR: <span style="color:#3fb950;">OMR ${pMRR.toFixed(0)}</span></div>
+            <div style="color:var(--muted);">Due: <span style="color:#d29922;">OMR ${pComm.toFixed(2)}</span></div>
+          </div>
+          ${nextTier?`<div style="margin-top:5px;height:3px;background:var(--border);border-radius:2px;overflow:hidden;"><div style="height:100%;width:${prog}%;background:${color};border-radius:2px;"></div></div>
+          <div style="font-size:.6rem;color:var(--muted);margin-top:2px;">${pClients.length}/${nextTier} to ${p.tier==='apex'?'Alliance':'Elite'}${prog>=100?' — eligible for upgrade!':''}</div>`:''}
+        </div>`;
+      }).join('')||'<div style="font-size:.7rem;color:var(--muted);">No active partners yet</div>';
+    }
+    // Founder expiry alerts
+    const alertsEl=document.getElementById('founderAlerts');
+    if(alertsEl){
+      const now=new Date();
+      const expiring=cl.filter(c=>{
+        if(!c.founder_discount_expires_at)return false;
+        const exp=new Date(c.founder_discount_expires_at);
+        const days=Math.ceil((exp-now)/(1000*60*60*24));
+        return days<=60&&days>0;
+      }).map(c=>{
+        const exp=new Date(c.founder_discount_expires_at);
+        const days=Math.ceil((exp-now)/(1000*60*60*24));
+        const color=days<=7?'#f85149':days<=30?'#d29922':'#3fb950';
+        return `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 8px;background:var(--card);border:1px solid ${color}33;border-radius:6px;margin-bottom:4px;font-size:.7rem;">
+          <span style="color:#e6edf3;">${c.name||c.id}</span>
+          <span style="color:${color};font-family:monospace;">${days}d left</span>
+        </div>`;
+      });
+      alertsEl.innerHTML=expiring.length?expiring.join(''):'<div style="font-size:.7rem;color:var(--muted);">No expiries within 60 days</div>';
+    }
+  }catch(e){console.error('loadPartnerMrr',e);}
 }
 
 async function loadLeadTrends(){
@@ -2996,11 +3019,14 @@ async function loadAnalytics(days){
     const grouped = {};
     costRows.forEach(r => {
       const key = (clientMap[r.client_id] || 'Unknown') + '|' + r.month;
-      if (!grouped[key]) grouped[key] = { client: clientMap[r.client_id] || 'Unknown', month: r.month, gemini: 0, anthropic: 0, deepseek: 0, total_usd: 0 };
-      grouped[key][r.model] = (grouped[key][r.model] || 0) + r.calls;
+      if (!grouped[key]) grouped[key] = { client: clientMap[r.client_id] || 'Unknown', month: r.month, gemini: 0, anthropic: 0, deepseek: 0, stream: 0, total_usd: 0 };
+      const model = r.model || 'gemini';
+      if (model.includes('gemini')) grouped[key].gemini += (r.calls || 0);
+      else if (model.includes('anthropic') || model.includes('claude')) grouped[key].anthropic += (r.calls || 0);
+      else if (model.includes('deepseek')) grouped[key].deepseek += (r.calls || 0);
+      else if (model.includes('stream')) grouped[key].stream += (r.calls || 0);
       grouped[key].total_usd += parseFloat(r.cost_usd || 0);
     });
-
     const costTable = Object.values(grouped).sort((a,b) => b.month.localeCompare(a.month) || a.client.localeCompare(b.client));
     const noData = costTable.length === 0;
 
@@ -3018,13 +3044,14 @@ async function loadAnalytics(days){
                 <th style="padding:8px 12px;text-align:right;color:#409cff;font-weight:600;border-bottom:1px solid var(--border);">Gemini</th>
                 <th style="padding:8px 12px;text-align:right;color:#7f77dd;font-weight:600;border-bottom:1px solid var(--border);">Claude</th>
                 <th style="padding:8px 12px;text-align:right;color:#3fb950;font-weight:600;border-bottom:1px solid var(--border);">DeepSeek</th>
+                <th style="padding:8px 12px;text-align:right;color:#f85149;font-weight:600;border-bottom:1px solid var(--border);">Stream</th>
                 <th style="padding:8px 12px;text-align:right;color:#d29922;font-weight:600;border-bottom:1px solid var(--border);">Cost USD</th>
                 <th style="padding:8px 12px;text-align:right;color:#d29922;font-weight:600;border-bottom:1px solid var(--border);">Cost OMR</th>
               </tr>
             </thead>
             <tbody>
               ${noData
-                ? `<tr><td colspan="7" style="padding:20px;text-align:center;color:var(--muted);font-family:var(--mono);">No usage data yet</td></tr>`
+                ? `<tr><td colspan="8" style="padding:20px;text-align:center;color:var(--muted);font-family:var(--mono);">No usage data yet</td></tr>`
                 : costTable.map((r,i) => `
                   <tr style="border-bottom:1px solid var(--border);background:${i%2===0?'transparent':'rgba(255,255,255,0.01)'};">
                     <td style="padding:8px 12px;color:var(--text);font-weight:500;">${r.client}</td>
@@ -3032,6 +3059,7 @@ async function loadAnalytics(days){
                     <td style="padding:8px 12px;text-align:right;color:#409cff;">${r.gemini||0}</td>
                     <td style="padding:8px 12px;text-align:right;color:#7f77dd;">${r.anthropic||0}</td>
                     <td style="padding:8px 12px;text-align:right;color:#3fb950;">${r.deepseek||0}</td>
+                    <td style="padding:8px 12px;text-align:right;color:#f85149;">${r.stream||0}</td>
                     <td style="padding:8px 12px;text-align:right;color:#d29922;font-family:var(--mono);">$${r.total_usd.toFixed(4)}</td>
                     <td style="padding:8px 12px;text-align:right;color:#d29922;font-weight:600;font-family:var(--mono);">OMR ${(r.total_usd*0.385).toFixed(4)}</td>
                   </tr>`).join('')}
