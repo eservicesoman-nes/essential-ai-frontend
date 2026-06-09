@@ -1799,7 +1799,7 @@ function renderLeadRows(leads){
 async function callWithSara(leadId, phone, name){
   const code = prompt(`Enter confirmation code to call ${name}:`);
   if(!code) return;
-  if(code !== '2749'){ showToast('Incorrect code — call cancelled'); return; }
+  if(code !== '4321'){ showToast('Incorrect code — call cancelled'); return; }
   const decoded = decodeURIComponent(phone);
   showToast(`Calling ${name}... Sara is dialing`);
   try {
