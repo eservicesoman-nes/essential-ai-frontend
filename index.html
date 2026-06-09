@@ -4746,24 +4746,7 @@ async function showInbox(){
   if(clientId) await loadInboxEmails(clientId);
 }
 
-async function loadInboxEmails(clientId, forceRefresh=false){
-  // Cache check — skip fetch if cached within 60 seconds
-  const cacheKey = 'inbox_'+clientId;
-  const now = Date.now();
-  if(!forceRefresh && window._inboxCache && window._inboxCache[cacheKey] && (now - window._inboxCache[cacheKey].ts) < 60000){
-    const cached = window._inboxCache[cacheKey];
-    window._inboxEmails = cached.emails;
-    window._inboxAccounts = cached.accounts;
-    window._inboxColors = cached.colors;
-    window._accountLabels = cached.labels;
-    renderEmailList(cached.emails);
-    const el2 = document.getElementById('inboxRefreshBtn');
-    if(el2){ const secs = Math.round((now - cached.ts)/1000); el2.title = `Last updated ${secs}s ago · Click to refresh`; }
-    return;
-  }
-  // Show loading indicator
-  const emailListEl = document.getElementById('emailList');
-  if(emailListEl) emailListEl.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted);font-family:var(--mono);font-size:.75rem;">⟳ Loading emails...</div>';
+async function loadInboxEmails(clientId){
   try{
     const res=await fetch(API_URL+'/api/email/inbox/'+clientId,{headers:{'Authorization':'Bearer '+session.access_token}});
     const data=await res.json();
@@ -4791,11 +4774,6 @@ async function loadInboxEmails(clientId, forceRefresh=false){
     window._inboxEmails=emails;
     window._inboxAccounts=accounts;
     window._inboxColors=colors;
-    // Store in cache
-    if(!window._inboxCache) window._inboxCache={};
-    window._inboxCache[cacheKey]={emails, accounts, colors, labels:window._accountLabels||{}, ts:Date.now()};
-    const refreshBtn = document.getElementById('inboxRefreshBtn');
-    if(refreshBtn) refreshBtn.title = 'Just refreshed · Click to refresh again';
     renderEmailList(emails);
   }catch(e){
     const el=document.getElementById('emailList');
