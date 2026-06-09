@@ -3899,6 +3899,12 @@ async function showAdminStatus(){
             <div style="flex:1;background:#0d1117;border:1px solid var(--border);border-radius:8px;padding:8px 12px;">
               <div style="font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:2px;">Storage Used</div>
               <div style="font-size:1rem;font-weight:700;color:#409cff;font-family:var(--mono);">${bd.b2.totalSizeGB} GB</div>
+              <div style="height:4px;background:var(--border);border-radius:2px;margin-top:5px;"><div style="height:4px;background:#409cff;border-radius:2px;width:${Math.min(parseFloat(bd.b2.totalSizeGB)/10*100,100).toFixed(0)}%;"></div></div>
+            </div>
+            <div style="flex:1;background:#0d1117;border:1px solid var(--border);border-radius:8px;padding:8px 12px;">
+              <div style="font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:2px;">Free Remaining</div>
+              <div style="font-size:1rem;font-weight:700;color:${Math.max(10-parseFloat(bd.b2.totalSizeGB),0)<1?'#f0883e':'#3fb950'};font-family:var(--mono);">${Math.max(10-parseFloat(bd.b2.totalSizeGB),0).toFixed(2)} GB</div>
+              <div style="font-size:.6rem;color:var(--muted);margin-top:2px;">of 10 GB free tier</div>
             </div>
             <div style="flex:1;background:#0d1117;border:1px solid var(--border);border-radius:8px;padding:8px 12px;">
               <div style="font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:2px;">Files Stored</div>
