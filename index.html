@@ -4078,6 +4078,8 @@ async function checkPlatformStatus(){
   }
   html+='</div>';
   html+='</div></div>';
+  html+='<div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin:12px 0 8px;">BACKUP STATUS</div>';
+  html+='<div id="backupStatusCard" style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:12px;"><div style="font-size:.75rem;color:var(--muted);">Loading backup status...</div></div>';
   el.innerHTML=html;
   if(window.innerWidth<=700){
     const tog=document.querySelector('.status-panel-toggle');
