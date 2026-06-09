@@ -3872,6 +3872,28 @@ async function showAdminStatus(){
       </div>
     </div>`;
   await checkPlatformStatus();
+  // Load backup status
+  try {
+    const br = await fetch(API_URL+'/api/admin/backup-status', {headers:{'Authorization':'Bearer '+session.access_token}});
+    const bd = await br.json();
+    const bel = document.getElementById('backupStatusCard');
+    if(bel && bd) {
+      const ok = bd.status === 'success';
+      const color = ok ? '#3fb950' : '#f85149';
+      bel.style.borderColor = ok ? '#3fb95040' : '#f8514940';
+      bel.style.background = ok ? 'rgba(63,185,80,0.05)' : 'rgba(248,81,73,0.05)';
+      bel.innerHTML = `
+        <div style="width:10px;height:10px;border-radius:50%;background:${color};flex-shrink:0;"></div>
+        <div style="flex:1;">
+          <div style="font-size:.78rem;font-weight:600;color:#e6edf3;">Backblaze B2 — nes-vps-backup</div>
+          <div style="font-size:.68rem;color:var(--muted);">Last backup: ${bd.last_date||'Unknown'} · ${bd.last_time||''}</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:.75rem;font-weight:700;color:${color};">${ok?'✅ Success':'❌ Failed'}</div>
+          <div style="font-size:.65rem;color:var(--muted);">Daily at 2:00 AM</div>
+        </div>`;
+    }
+  } catch(e) { console.log('Backup status error:', e); }
 }
 
 function showAddServiceModal(){
