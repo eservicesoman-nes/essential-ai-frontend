@@ -1601,6 +1601,7 @@ async function loadCeoFeed(){
     const tagColors={briefing:'#409cff',intelligence:'#3fb950',default:'#d29922'};
     const tagLabels={briefing:'BRIEF',intelligence:'INTEL',default:'INFO'};
     el.innerHTML=data.map(function(item,idx){
+      try{
       const tagColor=tagColors[item.type]||tagColors.default;abels.default;
       const urls=[];
       if(item.source_url&&item.source_url.indexOf('http')===0){
@@ -1700,6 +1701,7 @@ async function loadCeoFeed(){
           return '<a href="'+u+'" target="_blank" rel="noopener" style="font-size:.62rem;font-family:var(--mono);padding:2px 8px;border-radius:5px;background:var(--bg);border:1px solid var(--border);color:var(--nes-blue);text-decoration:none;">'+label+'</a>';
         }).join('')+'</div>':'')+
         '</div></div>';
+      }catch(e){console.error('feed item error:',e,item);return '<div style="padding:8px;font-size:.75rem;color:#e6edf3;border-bottom:1px solid var(--border);">'+( item.title||'')+'</div>';}
     }).join('');
     const feedEl=document.getElementById('ceoFeedItems');
     if(feedEl){
