@@ -3422,15 +3422,19 @@ async function renderPartnerHub(){
   if(!el) return;
 
   // Fetch all data
-  const [clientsRes, partnersRes, commissionsRes] = await Promise.all([
+  const [clientsRes, partnersRes, pendingRes, commissionsRes] = await Promise.all([
     sb.from('clients').select('id,name,plan,status,partner_ref,monthly_fee,first_payment_confirmed'),
     sb.from('partners').select('*').order('created_at', {ascending:false}),
+    sb.from('partners').select('*').eq('status','pending').order('applied_at', {ascending:false}),
     sb.from('partner_commissions').select('*').order('created_at', {ascending:false})
   ]);
 
   const allClients = clientsRes.data || [];
-  const allPartners = partnersRes.data || [];
+  const allPartners = (partnersRes.data || []).filter(p => p.status !== 'pending');
+  const pendingPartners = pendingRes.data || [];
   const allCommissions = commissionsRes.data || [];
+  // Update pending badge
+  setTimeout(()=>updatePendingBadge(pendingPartners.length), 100);
 
   const getPlanVal = (plan, fee) => {
     if(fee && fee > 0) return parseFloat(fee);
@@ -3476,6 +3480,7 @@ async function renderPartnerHub(){
 
     <div class="ph-tabs">
       <button class="ph-tab active" onclick="switchPhTab('overview',this)">Overview</button>
+      <button class="ph-tab" onclick="switchPhTab('pending',this)">Pending <span id="pendingBadge" style="display:none;background:#f85149;color:#fff;font-size:.55rem;padding:1px 5px;border-radius:8px;margin-left:4px;"></span></button>
       <button class="ph-tab" onclick="switchPhTab('partners',this)">Partners</button>
       <button class="ph-tab" onclick="switchPhTab('commissions',this)">Commissions</button>
       <button class="ph-tab" onclick="switchPhTab('tiers',this)">Programme</button>
@@ -3534,6 +3539,37 @@ async function renderPartnerHub(){
               </div>`;
             }).join('')}
       </div>
+    </div>
+
+    <!-- PENDING APPLICATIONS -->
+    <div id="ph-pending" style="display:none;">
+      <div class="ph-section-title">Pending Applications (${pendingPartners.length})</div>
+      ${pendingPartners.length === 0
+        ? `<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:24px;text-align:center;color:var(--muted);font-size:.8rem;">No pending applications</div>`
+        : pendingPartners.map(p=>`
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:10px;">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:.85rem;font-weight:700;color:#e6edf3;margin-bottom:2px;">${p.name}</div>
+              <div style="font-size:.72rem;color:var(--muted);">${p.email} · ${p.phone||'—'}</div>
+              <div style="font-size:.72rem;color:var(--muted);margin-top:2px;">${p.partner_type||'—'} · ${p.region||'—'}</div>
+              <div style="font-size:.72rem;color:var(--muted);margin-top:2px;">Self-selected: <span style="color:#d29922;font-weight:600;">${(p.tier||'apex').toUpperCase()}</span> · ${p.expected_referrals||'—'}/month</div>
+              ${p.network_description?`<div style="font-size:.7rem;color:var(--muted);margin-top:6px;padding:8px;background:rgba(255,255,255,.03);border-radius:6px;border:1px solid var(--border);">${p.network_description}</div>`:''}
+              <div style="font-size:.65rem;color:var(--muted);margin-top:6px;">Applied: ${new Date(p.applied_at||p.created_at).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;flex-shrink:0;">
+              <select id="tier-assign-${p.id}" style="background:#0a0f1e;border:1px solid var(--border);border-radius:6px;padding:5px 10px;color:#e6edf3;font-size:.72rem;outline:none;">
+                <option value="apex" ${(p.tier||'apex')==='apex'?'selected':''}>Apex</option>
+                <option value="alliance" ${p.tier==='alliance'?'selected':''}>Alliance</option>
+                <option value="elite" ${p.tier==='elite'?'selected':''}>Elite</option>
+              </select>
+              <div style="display:flex;gap:6px;">
+                <button onclick="approvePendingPartner('${p.id}','${p.name}','${p.email}')" style="background:linear-gradient(135deg,#1a56db,#2563eb);border:none;border-radius:6px;padding:6px 14px;color:#fff;font-size:.72rem;font-family:var(--mono);cursor:pointer;display:flex;align-items:center;gap:4px;"><i class="ti ti-check"></i> Approve</button>
+                <button onclick="rejectPendingPartner('${p.id}','${p.name}')" style="background:rgba(248,81,73,.1);border:1px solid #f8514940;border-radius:6px;padding:6px 14px;color:#f85149;font-size:.72rem;font-family:var(--mono);cursor:pointer;"><i class="ti ti-x"></i> Reject</button>
+              </div>
+            </div>
+          </div>
+        </div>`).join('')}
     </div>
 
     <!-- PARTNERS -->
@@ -3788,6 +3824,80 @@ function switchPhTab(tab, btn){
   });
   document.querySelectorAll('.ph-tab').forEach(b=>b.classList.remove('active'));
   if(btn) btn.classList.add('active');
+}
+
+// Update pending badge
+function updatePendingBadge(count) {
+  const badge = document.getElementById('pendingBadge');
+  if (badge) {
+    badge.textContent = count;
+    badge.style.display = count > 0 ? 'inline' : 'none';
+  }
+}
+
+async function approvePendingPartner(id, name, email) {
+  const tierEl = document.getElementById('tier-assign-' + id);
+  const tier = tierEl ? tierEl.value : 'apex';
+  if (!confirm('Approve ' + name + ' as ' + tier.toUpperCase() + ' partner and send agreement link?')) return;
+
+  // Generate unique token
+  const token = crypto.randomUUID().replace(/-/g,'').slice(0,24);
+  const refInitials = name.split(' ').map(w=>w[0]||'').join('').toUpperCase().slice(0,2);
+  const rand = Math.random().toString(36).slice(-4).toUpperCase();
+  const ref_code = tier.toUpperCase().slice(0,4) + '-' + refInitials + '-' + rand;
+
+  const { error } = await sb.from('partners').update({
+    tier,
+    status: 'agreement_pending',
+    ref_code,
+    agreement_token: token,
+    agreement_sent_at: new Date().toISOString()
+  }).eq('id', id);
+
+  if (error) { showToast('Error: ' + error.message); return; }
+
+  // Send agreement email via n8n
+  try {
+    await fetch('https://n8n.essential-services.org/webhook/partner-agreement-approval', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        name, email, tier, ref_code,
+        agreement_url: 'https://nes-ai.com/partner-agreement.html?token=' + token
+      })
+    });
+  } catch(e) { console.log('n8n webhook failed:', e.message); }
+
+  // Telegram alert
+  try {
+    await fetch('https://api.telegram.org/bot8526807773:AAH97QxyNKZBkk433uOmtXGRVZZ8QuXHsNQ/sendMessage', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        chat_id: '7970588541',
+        text: '✅ Partner Approved\n\nName: ' + name + '\nTier: ' + tier.toUpperCase() + '\nRef Code: ' + ref_code + '\nAgreement link sent to: ' + email
+      })
+    });
+  } catch(e) {}
+
+  showToast('✓ ' + name + ' approved — agreement link sent to ' + email);
+  await renderPartnerHub();
+}
+
+async function rejectPendingPartner(id, name) {
+  const reason = prompt('Reason for rejection (optional — will be included in email):');
+  if (reason === null) return;
+  const { error } = await sb.from('partners').update({ status: 'rejected' }).eq('id', id);
+  if (error) { showToast('Error: ' + error.message); return; }
+
+  try {
+    await fetch('https://n8n.essential-services.org/webhook/partner-agreement-approval', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ name, status: 'rejected', reason: reason || 'No reason provided' })
+    });
+  } catch(e) {}
+
+  showToast(name + ' application rejected');
+  await renderPartnerHub();
 }
 
 async function addPartner(){
