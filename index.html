@@ -5399,11 +5399,6 @@ window.sendReply=sendReply;
 window.upgradeContact=function(){document.querySelectorAll('div[style*="position:fixed"]').forEach(function(el){if(el.querySelector('.ti-check'))el.remove();});window.location.href='mailto:office@essential-services.org?subject=Upgrade to Pro';};
 window.closeUpgradePopup=function(){document.querySelectorAll('div[style*="position:fixed"]').forEach(function(el){if(el.style.zIndex==='9999')el.remove();});};
 window.loadClientUsers=loadClientUsers;window.showInviteUserForm=showInviteUserForm;window.sendClientInvite=sendClientInvite;window.removeClientUser=removeClientUser;
-window.showAddContactModal=showAddContactModal;window.saveContact=saveContact;
-window.showAddDealModal=showAddDealModal;window.saveDeal=saveDeal;
-window.showAddReferrerModal=showAddReferrerModal;window.saveReferrer=saveReferrer;
-window.showContactDetail=showContactDetail;window.filterContacts=filterContacts;
-window.filterContactsBySource=filterContactsBySource;
 
 function addCustomCredField(clientId){
   const grid=document.querySelector('#cm-creds .creds-grid');
