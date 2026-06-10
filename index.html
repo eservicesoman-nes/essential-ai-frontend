@@ -1602,6 +1602,8 @@ async function loadCeoFeed(){
     const tagLabels={briefing:'BRIEF',intelligence:'INTEL',default:'INFO'};
     el.innerHTML=data.map(function(item,idx){
       try{
+      const isAlert=item.title&&(item.title.indexOf('Alert')>-1||item.title.indexOf('ALERT')>-1||item.title.indexOf('Breaking')>-1||item.title.indexOf('BREAKING')>-1);
+      const alertIcon=isAlert?'<span style="color:#f0883e;margin-right:4px;">⚡</span>':'';
       const tagColor=tagColors[item.type]||tagColors.default;
       const tagLabel=tagLabels[item.type]||tagLabels.default;
       const urls=[];
@@ -1662,8 +1664,7 @@ async function loadCeoFeed(){
       let dividerHtml='';
       if(idx===0){dividerHtml='<div style="text-align:center;font-family:var(--mono);font-size:.58rem;color:var(--muted);padding:4px 0 6px;display:flex;align-items:center;gap:6px;margin-bottom:4px;"><div style=\"flex:1;height:1px;background:var(--border)\"></div>Today<div style=\"flex:1;height:1px;background:var(--border)\"></div></div>';}
       else if(!isToday&&new Date(data[idx-1]?.created_at).toDateString()===new Date().toDateString()){dividerHtml='<div style="text-align:center;font-family:var(--mono);font-size:.58rem;color:var(--muted);padding:4px 0 6px;display:flex;align-items:center;gap:6px;margin-bottom:4px;"><div style=\"flex:1;height:1px;background:var(--border)\"></div>Earlier<div style=\"flex:1;height:1px;background:var(--border)\"></div></div>';}
-      const isAlert=item.title&&(item.title.indexOf('Alert')>-1||item.title.indexOf('ALERT')>-1||item.title.indexOf('Breaking')>-1||item.title.indexOf('BREAKING')>-1);
-      const alertIcon=isAlert?'<span style="color:#f0883e;margin-right:4px;">⚡</span>':'';
+      // isAlert and alertIcon declared at top of try block
       return dividerHtml+'<div class="feed-card" id="feed-'+idx+'" style="background:'+(isNew?'#0c1827':'var(--surface)')+';border:1px solid '+(isNew?'#409cff33':'var(--border)')+';border-radius:12px;margin-bottom:8px;overflow:hidden;">'+
         '<div style="display:flex;align-items:flex-start;gap:10px;padding:12px 14px;cursor:pointer;" onclick="toggleFeedItem('+idx+')">'+
         (isNew?'<div style="width:7px;height:7px;border-radius:50%;background:#409cff;flex-shrink:0;margin-top:5px;" class="feed-new-dot-'+idx+'"></div>':'')+
