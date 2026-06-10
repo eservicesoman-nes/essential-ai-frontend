@@ -1582,7 +1582,7 @@ async function loadApiSummary(){
 async function loadCeoFeed(){
   try{
     let feedQ=sb.from('ceo_feed').select('id,title,content,tag,type,source_url,created_at,client_id').order('created_at',{ascending:false}).limit(20);
-    if(userClientId)feedQ=feedQ.eq('client_id',userClientId);
+    if(userClientId && userRole !== 'nesadmin')feedQ=feedQ.eq('client_id',userClientId);
     const{data,error}=await feedQ;
     const el=document.getElementById('ceoFeedItems');
     if(!el)return;
