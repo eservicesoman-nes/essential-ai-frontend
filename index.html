@@ -1640,11 +1640,17 @@ async function loadCeoFeed(){
         :'';
       const sections=cleaned.split('  ').filter(function(s){return s.trim().length>10;});
       const preview=sections.slice(0,2).join(' ').substring(0,160)+'...';
-      const uniqueUrls=[...new Set(urls)].slice(0,4);
+      if(!isAlert && urls.length===0 && item.title){
+        urls.push('https://www.google.com/search?q='+encodeURIComponent(item.title));
+      }
       const sourceHtml=uniqueUrls.length
         ?'<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:5px;">'+
           uniqueUrls.map(function(u){
-            var label=u;try{label=new URL(u).hostname.replace('www.','');}catch(e){}
+            var label=u;try{
+                var host=new URL(u).hostname.replace('www.','');
+                if(host==='news.google.com'){var tp=item.title.split(' - ');label=tp.length>1?tp[tp.length-1].trim():host;}
+                else{label=host;}
+              }catch(e){}
             return '<a href="'+u+'" target="_blank" rel="noopener" style="font-size:.62rem;font-family:var(--mono);padding:2px 7px;border-radius:5px;background:var(--bg);border:1px solid var(--border);color:var(--nes-blue);text-decoration:none;cursor:pointer;">'+label+'</a>';
           }).join('')+'</div>'
         :'';
