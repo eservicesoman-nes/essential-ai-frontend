@@ -1642,9 +1642,8 @@ async function loadCeoFeed(){
         :'';
       const sections=cleaned.split('  ').filter(function(s){return s.trim().length>10;});
       const preview=sections.slice(0,2).join(' ').substring(0,160)+'...';
-      if(!isAlert && urls.length===0 && item.title){
-        urls.push('https://www.google.com/search?q='+encodeURIComponent(item.title));
-      }
+      if(!isAlert && urls.length===0 && item.title){urls.push('https://www.google.com/search?q='+encodeURIComponent(item.title));}
+      const uniqueUrls=[...new Set(urls)].slice(0,4);
       const sourceHtml=uniqueUrls.length
         ?'<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:5px;">'+
           uniqueUrls.map(function(u){
