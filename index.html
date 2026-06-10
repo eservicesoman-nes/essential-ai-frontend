@@ -1259,7 +1259,7 @@ async function showCEODashboard(){
       <div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;">CEO DASHBOARD</div>
       <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">Live · ${new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</div>
     </div>
-    <div class="page" id="ceoDashContent" style="opacity:0;transition:opacity .3s;display:flex;flex-direction:column;">
+    <div class="page" id="ceoDashContent" style="opacity:0;transition:opacity .3s;flex:1;min-height:0;overflow:hidden;">
       <div style="text-align:center;padding:40px;color:var(--muted);font-family:var(--mono);font-size:.8rem;">Loading dashboard...</div>
     </div>`;
   let leads=[],leadsToday=0,totalLeads=0;
