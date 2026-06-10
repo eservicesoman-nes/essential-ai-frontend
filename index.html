@@ -156,6 +156,8 @@
     .msg{display:flex;gap:12px;animation:fadeIn .2s ease;}
     @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
     @keyframes bounce{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-5px);opacity:1}}
+    @keyframes pulse-slow{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(1.3)}}
+    @keyframes pulse-fast{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(1.4)}}
     .msg.user{flex-direction:row-reverse;}
 
     /* Chat avatar with ping */
@@ -2446,7 +2448,7 @@ async function loadApiCredits(){
     {id:'openai',name:'OpenAI (DALL-E)',icon:'ti-photo-ai',color:'#3fb950',note:'Image generation fallback'},
     {id:'deepseek',name:'DeepSeek',icon:'ti-robot',color:'#7f77dd',note:'Chat fallback 2'},
     {id:'fal',name:'Flux (FAL)',icon:'ti-wand',color:'#f0883e',note:'Primary image generation'},
-    {id:'tavily',name:'Tavily Search',icon:'ti-search',color:'#409cff',note:'Web search for chat'},
+    {id:'tavily',name:'Tavily Search',icon:'ti-search',color:'#8b949e',note:'Retired Jun 2026 — replaced by Gemini grounding',retired:true},
     {id:'apex_connect',name:'Apex Connect (Sara)',icon:'ti-phone',color:'#3fb950',note:'60-sec callback — Apex Connect'},
     {id:'apex_outreach',name:'Apex Outreach (Layla)',icon:'ti-headset',color:'#7f77dd',note:'3-day follow-up — Apex Outreach'},
     {id:'apex_advisory',name:'Apex Advisory (Adam)',icon:'ti-phone-call',color:'#f0883e',note:'Enterprise consultant — Apex Advisory'},
@@ -2742,6 +2744,7 @@ async function sendMsg(){
 
     removeTyping();
     const bubbleId='stream-'+Date.now();
+    const streamStart=Date.now();
     const bubbleHTML=`<div class="msg ai" id="${bubbleId}"><div class="chat-av-wrap"><div class="chat-av-ring"><div class="chat-av-mid"><div class="chat-av-dot"></div></div></div><div class="chat-av-online"></div></div><div class="msg-body"><div class="msg-role">NES AI</div><div class="msg-bubble" id="${bubbleId}-text"></div><button class="copy-btn" onclick="copyMsg(this)">Copy</button></div></div>`;
     document.getElementById('messages')?.insertAdjacentHTML('beforeend',bubbleHTML);
     scroll();
@@ -2764,6 +2767,15 @@ async function sendMsg(){
           const data=JSON.parse(line.slice(6));
           if(data.type==='sources'){sources=data.sources||[];}
           else if(data.type==='chunk'){
+            if(!fullReply && data.text){
+              // first chunk - check if we need to show fallback notice
+              const elapsed=Date.now()-streamStart;
+              if(elapsed>4000){
+                const nb=document.getElementById(bubbleId+'-text');
+                if(nb)nb.innerHTML='<div style="font-size:.72rem;color:var(--amber);margin-bottom:6px;font-style:italic;">⚡ Switching to faster server...</div>';
+                await new Promise(r=>setTimeout(r,600));
+              }
+            }
             fullReply+=data.text;
             const el=document.getElementById(bubbleId+'-text');
             if(el){el.innerHTML=md(cleanDisplay(fullReply));}
@@ -3954,7 +3966,7 @@ async function showAdminStatus(){
             <div style="font-size:.62rem;color:var(--muted);margin-top:2px;">${vd.diskUsed} / ${vd.diskTotal}</div>
           </div>
         </div>
-        <div style="font-size:.62rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;">PM2 PROCESSES</div>
+        <div style="font-family:var(--mono);font-size:.62rem;color:#7f77dd;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;">PM2 PROCESSES</div>
         <div style="display:flex;flex-direction:column;gap:5px;">
           ${(vd.processes||[]).map(p=>`
             <div style="display:flex;align-items:center;justify-content:space-between;background:#0d1117;border:1px solid var(--border);border-radius:6px;padding:7px 12px;">
@@ -4050,17 +4062,25 @@ async function checkPlatformStatus(){
     {name:'Backend API',url:API_URL+'/health',label:'NES AI Backend'},
     {name:'Supabase',url:'https://sfpfjjdtczvuxyhjievt.supabase.co/rest/v1/',label:'Database'},
     {name:'Frontend',url:'https://app.nes-ai.com',label:'Vercel Frontend'},
-    {name:'Rocket.Chat',url:'https://chat.essential-services.org/api/v1/info',label:'Team Hub'},
+    {name:'GitHub',url:API_URL+'/api/admin/ping/github-proxy',label:'GitHub'},
   ];
   const customServices=JSON.parse(localStorage.getItem('nes_custom_services')||'[]');
   const services=[...builtinServices,...customServices];
 
-  const [results, apiCredits, platformStats] = await Promise.all([
+  const [results, extraPings, apiCredits, platformStats] = await Promise.all([
     Promise.all(services.map(async function(s){
       const start=Date.now();
-      try{const r=await fetch(s.url,{method:'GET',signal:AbortSignal.timeout(5000)});const ms=Date.now()-start;return{...s,ok:r.ok||r.status===401,ms,status:r.ok||r.status===401?'online':'error'};}
+      try{
+        const opts={method:'GET',signal:AbortSignal.timeout(5000)};
+        if(s.authHeader)opts.headers={'Authorization':s.authHeader,'User-Agent':'NES-AI'};
+        const r=await fetch(s.url,opts);const ms=Date.now()-start;return{...s,ok:r.ok||r.status===401,ms,status:r.ok||r.status===401?'online':'error'};
+      }
       catch(e){return{...s,ok:false,ms:Date.now()-start,status:'offline'};}
     })),
+    Promise.all([
+      fetch(API_URL+'/api/admin/ping/pm2',{headers:{'Authorization':'Bearer '+session.access_token}}).then(r=>r.json()).catch(()=>({online:false,ms:0})),
+      fetch(API_URL+'/api/admin/ping/backblaze',{headers:{'Authorization':'Bearer '+session.access_token}}).then(r=>r.json()).catch(()=>({online:false,ms:0})),
+    ]),
     sb.from('api_credits').select('*').order('service_name'),
     Promise.all([
       sb.from('clients').select('*',{count:'exact',head:true}),
@@ -4115,15 +4135,39 @@ async function checkPlatformStatus(){
   html+='<div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;">Services</div>';
   html+='<button onclick="showAddServiceModal()" style="background:linear-gradient(135deg,#1a56db,#2563eb);border:none;border-radius:6px;padding:3px 10px;color:#fff;cursor:pointer;font-size:.65rem;font-family:var(--mono);font-weight:700;display:flex;align-items:center;gap:4px;"><i class="ti ti-plus"></i> Add</button>';
   html+='</div>';
+  // ping dot helper with pulse effects
+  function pingDot(status, slowPulse){
+    const color=status==='online'?'#3fb950':status==='error'?'#d29922':'#f85149';
+    const anim=status!=='online'?(slowPulse?'animation:pulse-slow 2s infinite;':'animation:pulse-fast .7s infinite;'):(status==='online'?'':'');
+    return '<div style="width:8px;height:8px;border-radius:50%;background:'+color+';flex-shrink:0;'+anim+'"></div>';
+  }
   results.forEach(function(r){
     const color=r.status==='online'?'#3fb950':r.status==='error'?'#d29922':'#f85149';
     const bg=r.status==='online'?'#0d2818':r.status==='error'?'#2d1f00':'#2d0e0e';
     html+='<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid rgba(26,35,50,.4);">';
-    html+='<div style="width:7px;height:7px;border-radius:50%;background:'+color+';flex-shrink:0;'+(r.status==='online'?'box-shadow:0 0 5px '+color+';':'')+'"></div>';
+    html+=pingDot(r.status, false);
     html+='<div style="flex:1;min-width:0;"><div style="font-size:.78rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+r.label+'</div><div style="font-size:.6rem;color:var(--muted);font-family:var(--mono);">'+r.ms+'ms</div></div>';
     html+='<span style="font-size:.58rem;font-family:var(--mono);padding:2px 7px;border-radius:8px;background:'+bg+';color:'+color+';font-weight:700;flex-shrink:0;">'+r.status.toUpperCase()+'</span>';
     html+='</div>';
   });
+  // PM2 ping row
+  const pm2ping=extraPings[0];
+  const pm2color=pm2ping.online?'#3fb950':'#f85149';
+  const pm2bg=pm2ping.online?'#0d2818':'#2d0e0e';
+  html+='<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid rgba(26,35,50,.4);">';
+  html+=pingDot(pm2ping.online?'online':'error',false);
+  html+='<div style="flex:1;min-width:0;"><div style="font-size:.78rem;font-weight:600;color:var(--text);">PM2 Processes</div><div style="font-size:.6rem;color:var(--muted);font-family:var(--mono);">'+(pm2ping.count||0)+' processes</div></div>';
+  html+='<span style="font-size:.58rem;font-family:var(--mono);padding:2px 7px;border-radius:8px;background:'+pm2bg+';color:'+pm2color+';font-weight:700;flex-shrink:0;">'+(pm2ping.online?'ONLINE':'ERROR')+'</span>';
+  html+='</div>';
+  // Backblaze ping row
+  const b2ping=extraPings[1];
+  const b2color=b2ping.online?'#3fb950':'#f85149';
+  const b2bg=b2ping.online?'#0d2818':'#2d0e0e';
+  html+='<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;">';
+  html+=pingDot(b2ping.online?'online':'error',false);
+  html+='<div style="flex:1;min-width:0;"><div style="font-size:.78rem;font-weight:600;color:var(--text);">Backblaze B2</div><div style="font-size:.6rem;color:var(--muted);font-family:var(--mono);">nes-vps-backup</div></div>';
+  html+='<span style="font-size:.58rem;font-family:var(--mono);padding:2px 7px;border-radius:8px;background:'+b2bg+';color:'+b2color+';font-weight:700;flex-shrink:0;">'+(b2ping.online?'ONLINE':'DOWN')+'</span>';
+  html+='</div>';
   html+='</div>';
 
   html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;">';
@@ -4155,10 +4199,12 @@ async function checkPlatformStatus(){
   }
   html+='</div>';
   html+='</div></div>';
-  html+='<div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin:12px 0 8px;">BACKUP STATUS</div>';
+  html+='<div style="border:1px solid #7f77dd40;border-radius:12px;padding:14px;margin-top:4px;">';
+  html+='<div style="font-family:var(--mono);font-size:.65rem;color:#7f77dd;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;">BACKUP STATUS</div>';
   html+='<div id="backupStatusCard" style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;"><div style="font-size:.75rem;color:var(--muted);">Loading backup status...</div></div>';
-  html+='<div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin:12px 0 8px;">VPS HEALTH</div>';
+  html+='<div style="font-family:var(--mono);font-size:.65rem;color:#7f77dd;letter-spacing:.1em;text-transform:uppercase;margin:12px 0 8px;">VPS HEALTH</div>';
   html+='<div id="vpsStatsCard" style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;"><div style="font-size:.75rem;color:var(--muted);">Loading VPS stats...</div></div>';
+  html+='</div>'; // close purple wrapper
   el.innerHTML=html;
   if(window.innerWidth<=700){
     const tog=document.querySelector('.status-panel-toggle');
@@ -4173,11 +4219,14 @@ async function showMyCredentials(){
   const mc=document.getElementById('mainContent');
   mc.style.overflow='auto';
   mc.innerHTML=`
-    <div style="padding:11px 18px 11px 60px;border-bottom:1px solid var(--border);flex-shrink:0;">
-      <div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;">IT SETUP</div>
-      <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">Integration checklist · Connect your services</div>
+    <div style="padding:11px 18px 11px 60px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;">IT SETUP</div>
+        <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">Integration checklist · Connect your services</div>
+      </div>
+      <button onclick="showView('chat')" style="background:none;border:1px solid var(--border);border-radius:6px;padding:5px 12px;color:var(--muted);cursor:pointer;font-size:.72rem;font-family:var(--mono);margin-right:12px;"><i class="ti ti-arrow-left"></i> Back</button>
     </div>
-    <div class="page"><div style="max-width:640px;padding-bottom:40px;" id="myCredsContent">
+    <div class="page" style="overflow-y:auto;flex:1;"><div style="max-width:640px;padding-bottom:40px;" id="myCredsContent">
       <div style="color:var(--muted);font-family:var(--mono);font-size:.8rem;padding:20px 0;">Loading...</div>
     </div></div>`;
   try{
@@ -4644,7 +4693,8 @@ function imgBubble(url){return`<div class="msg ai"><div class="chat-av-wrap"><di
 function addAiMsg(text,sources=[]){appendMsg(aiBubble(text,sources));saveHistory();}
 function addTyping(){
   const el=document.createElement('div');el.className='msg ai';el.id='typing';
-  el.innerHTML=`<div class="chat-av-wrap"><div class="chat-av-ring"><div class="chat-av-mid"><div class="chat-av-dot"></div></div></div><div class="chat-av-online"></div></div><div class="msg-body"><div class="msg-role">NES AI</div><div class="msg-bubble"><div style="display:flex;gap:5px;">${[0,.2,.4].map(d=>`<div style="width:7px;height:7px;background:var(--nes-blue);border-radius:50%;animation:bounce 1.4s ${d}s infinite;"></div>`).join('')}</div></div></div>`;
+  el.innerHTML=`<div class="chat-av-wrap"><div class="chat-av-ring"><div class="chat-av-mid"><div class="chat-av-dot"></div></div></div><div class="chat-av-online"></div></div><div class="msg-body"><div class="msg-role">NES AI</div><div class="msg-bubble" id="typingBubble"><div style="display:flex;gap:5px;">${[0,.2,.4].map(d=>`<div style="width:7px;height:7px;background:var(--nes-blue);border-radius:50%;animation:bounce 1.4s ${d}s infinite;"></div>`).join('')}</div></div></div>`;
+  setTimeout(()=>{const b=document.getElementById('typingBubble');if(b)b.innerHTML='<span style="font-size:.78rem;color:var(--muted);font-style:italic;">Thinking...</span>';},2500);
   document.getElementById('messages')?.appendChild(el);scroll();
 }
 function removeTyping(){document.getElementById('typing')?.remove();}
