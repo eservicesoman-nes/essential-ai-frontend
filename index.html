@@ -3886,10 +3886,9 @@ async function approvePendingPartner(id, name, email) {
 
   // Telegram alert
   try {
-    await fetch('https://api.telegram.org/bot8526807773:AAH97QxyNKZBkk433uOmtXGRVZZ8QuXHsNQ/sendMessage', {
-      method: 'POST', headers: {'Content-Type':'application/json'},
+    await fetch(API_URL+'/api/admin/notify', {
+      method: 'POST', headers: {'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
       body: JSON.stringify({
-        chat_id: '7970588541',
         text: '✅ Partner Approved\n\nName: ' + name + '\nTier: ' + tier.toUpperCase() + '\nRef Code: ' + ref_code + '\nAgreement link sent to: ' + email
       })
     });
