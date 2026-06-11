@@ -4395,6 +4395,11 @@ function renderMyCredsForm(creds, client){
       {label:'Lead alerts email',desc:'Where new leads are sent',keys:['lead_email'],icon:'ti-mail'},
       {label:'Website',desc:'Your website URL',keys:['website'],icon:'ti-world'},
     ]},
+    {title:'Inbox & Email',items:[
+      {label:'Inbox Email',desc:'IMAP email account for unified inbox',keys:['imap_email','imap_password'],icon:'ti-inbox'},
+      {label:'IMAP Server',desc:'Incoming mail server (e.g. mail.yourdomain.com)',keys:['imap_host'],icon:'ti-server'},
+      {label:'SMTP Server',desc:'Outgoing mail server for sending replies',keys:['smtp_host','smtp_port'],icon:'ti-send'},
+    ]},
   ];
   let connected=0,total=0;
   sections.forEach(s=>s.items.forEach(item=>{
