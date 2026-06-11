@@ -547,6 +547,7 @@
         <div class="nav-item" data-view="leads"><i class="ti ti-user-check"></i><span>Leads</span><span class="nav-badge nb-red" id="leadsBadge">—</span></div>
         <div class="nav-item" id="teamNav" data-view="team" style="display:none;"><i class="ti ti-users"></i><span>Team</span></div>
         <div class="nav-item" id="myCredsNav" data-view="mycredentials" style="display:none;"><i class="ti ti-checklist"></i><span>IT Setup</span></div>
+      <div class="nav-item" id="partnerDashNav" data-view="partner_dashboard" style="display:none;"><i class="ti ti-layout-dashboard" style="color:#7f77dd;"></i><span>My Dashboard</span></div>
       </div>
     </div>
 
@@ -782,7 +783,7 @@ async function submitAgreement(userId){
     });
     document.getElementById('agreementModal').remove();
     let defaultView = localStorage.getItem('nesai_view')||'chat';
-    if(userClientId){ defaultView = userRole==='ceo' ? 'ceo' : 'leads'; }
+    if(userClientId){ defaultView = userRole==='ceo' ? 'ceo' : userRole==='nes_partner' ? 'partner_dashboard' : 'leads'; }
     showView(defaultView);
     loadUsageFromServer();
     bindNav();
@@ -813,13 +814,21 @@ function setupNavForRole(){
 
   if(userClientId){
     intel.style.display='block';
-    if(userRole==='ceo'||userRole==='nesadmin'){
+    if(userRole==='ceo'||userRole==='nesadmin'||userRole==='nes_partner'){
       if(ceoNav)ceoNav.style.display='flex';
     } else {
       if(ceoNav)ceoNav.style.display='none';
     }
     if(['manager','staff'].includes(userRole)){
       if(leadsNav)leadsNav.style.display='flex';
+    }
+    if(userRole==='nes_partner'){
+      const pnDashNav=document.getElementById('partnerDashNav');if(pnDashNav)pnDashNav.style.display='flex';
+      const pnInbox=document.getElementById('inboxNav');if(pnInbox)pnInbox.style.display='flex';
+      const pnDC=document.getElementById('deepCoreNav');if(pnDC){pnDC.style.display='flex';const dcb=document.getElementById('deepCoreBadge');if(dcb)dcb.style.display='flex';}
+      const pnTeam=document.getElementById('teamNav');if(pnTeam)pnTeam.style.display='flex';
+      const pnLeads=document.getElementById('leadsNav');if(pnLeads)pnLeads.style.display='flex';
+      clientMgr.style.display='block'; loadClientCount();
     }
     if(userRole==='nesadmin'){
       clientMgr.style.display='block';
@@ -1136,6 +1145,7 @@ function showView(view){
   if(clearBtn)clearBtn.style.display=['chat','deepcore','docs','image'].includes(view)?'grid':'none';
   if(['chat','deepcore','docs','image'].includes(view)){showChatInterface(view);}
   else if(view==='ceo'){showCEODashboard();}
+  else if(view==='partner_dashboard'){showPartnerDashboard();}
   else if(view==='command'){showCommandCentre();}
   else if(view==='leads'){showLeadsPage();}
   else if(view==='clientmgr'){showClientManager();}
@@ -1249,6 +1259,177 @@ async function refreshSysLogs(){
 // Clear interval when leaving logs view
 const _origShowView = typeof showView === 'function' ? showView : null;
 
+
+
+async function showPartnerDashboard(){
+  const mc=document.getElementById('mainContent');
+  mc.style.overflow='hidden';
+  const now=new Date();
+  const dayNames=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const monNames=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const dateStr=dayNames[now.getDay()]+', '+now.getDate()+' '+monNames[now.getMonth()]+' '+now.getFullYear();
+
+  mc.innerHTML=`
+  <div style="display:flex;height:100%;overflow:hidden;">
+    <div style="flex:1;overflow-y:auto;padding:14px 18px;" id="partnerMainPanel">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <div>
+          <div style="font-family:var(--mono);font-size:.8rem;color:#7f77dd;font-weight:800;">PARTNER DASHBOARD</div>
+          <div style="font-size:.7rem;color:var(--muted);">Live · ${dateStr}</div>
+        </div>
+      </div>
+      <div id="partnerStatusBar" style="background:rgba(63,185,80,.08);border:1px solid rgba(63,185,80,.2);border-radius:8px;padding:8px 14px;margin-bottom:12px;font-size:.72rem;color:#3fb950;display:flex;align-items:center;gap:6px;">
+        <i class="ti ti-circle-check"></i> Platform running smoothly — all systems normal
+      </div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <i class="ti ti-sun" style="font-size:1.6rem;color:var(--amber);"></i>
+          <div>
+            <div style="font-family:var(--mono);font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:2px;"><i class="ti ti-map-pin" style="font-size:10px"></i> WEATHER — MUSCAT</div>
+            <div id="partnerWeatherDesc" style="font-size:.78rem;color:var(--text);">Loading...</div>
+          </div>
+        </div>
+        <div style="text-align:right;">
+          <div id="partnerWeatherTemp" style="font-size:1.4rem;font-weight:700;color:var(--nes-blue);">—</div>
+          <div id="partnerWeatherFeel" style="font-size:.65rem;color:var(--muted);"></div>
+        </div>
+      </div>
+      <div style="font-family:var(--mono);font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;display:flex;align-items:center;gap:4px;"><i class="ti ti-chart-bar"></i> PERFORMANCE</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 14px;">
+          <div style="font-size:.62rem;color:var(--muted);margin-bottom:3px;display:flex;align-items:center;gap:4px;"><i class="ti ti-building"></i> Clients installed</div>
+          <div id="pClientsCount" style="font-size:1.05rem;font-weight:700;color:var(--nes-blue);">0</div>
+          <div style="display:flex;justify-content:space-between;font-size:.6rem;color:var(--muted);margin-top:3px;"><span id="pClientsTotal">Total: 0</span><span id="pClientsNew">+0 this month</span></div>
+          <div style="height:3px;background:var(--border);border-radius:2px;margin-top:6px;"><div id="pClientsBar" style="height:100%;width:0%;background:var(--nes-blue);border-radius:2px;"></div></div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 14px;">
+          <div style="font-size:.62rem;color:var(--muted);margin-bottom:3px;display:flex;align-items:center;gap:4px;"><i class="ti ti-coin"></i> Installation earned</div>
+          <div id="pInstallEarned" style="font-size:1.05rem;font-weight:700;color:#3fb950;">OMR 0.000</div>
+          <div style="display:flex;justify-content:space-between;font-size:.6rem;color:var(--muted);margin-top:3px;"><span>OMR 49.500 each</span><span id="pInstallCount">0 installs</span></div>
+          <div style="height:3px;background:var(--border);border-radius:2px;margin-top:6px;"><div style="height:100%;width:0%;background:#3fb950;border-radius:2px;"></div></div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 14px;">
+          <div style="font-size:.62rem;color:var(--muted);margin-bottom:3px;display:flex;align-items:center;gap:4px;"><i class="ti ti-repeat"></i> Recurring this month</div>
+          <div id="pRecurring" style="font-size:1.05rem;font-weight:700;color:#3fb950;">OMR 0.000</div>
+          <div style="display:flex;justify-content:space-between;font-size:.6rem;color:var(--muted);margin-top:3px;"><span>25% of client MRR</span><span id="pActiveClients">0 active</span></div>
+          <div style="height:3px;background:var(--border);border-radius:2px;margin-top:6px;"><div id="pRecurringBar" style="height:100%;width:0%;background:#3fb950;border-radius:2px;"></div></div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 14px;">
+          <div style="font-size:.62rem;color:var(--muted);margin-bottom:3px;display:flex;align-items:center;gap:4px;"><i class="ti ti-wallet"></i> Total earned</div>
+          <div id="pTotalEarned" style="font-size:1.05rem;font-weight:700;color:var(--text);">OMR 0.000</div>
+          <div style="display:flex;justify-content:space-between;font-size:.6rem;color:var(--muted);margin-top:3px;"><span>Cumulative</span><span>Paid 10th monthly</span></div>
+          <div style="height:3px;background:var(--border);border-radius:2px;margin-top:6px;"></div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 16px;">
+          <div style="font-family:var(--mono);font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;display:flex;align-items:center;gap:4px;"><i class="ti ti-heartbeat"></i> PLATFORM HEALTH</div>
+          <div style="display:flex;flex-direction:column;gap:8px;" id="partnerHealthItems">
+            <div style="display:flex;justify-content:space-between;font-size:.72rem;"><span style="color:var(--muted);">Backend</span><span style="color:#3fb950;">● Online</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:.72rem;"><span style="color:var(--muted);">Database</span><span style="color:#3fb950;">● Online</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:.72rem;"><span style="color:var(--muted);">Automations</span><span style="color:#3fb950;">● Online</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:.72rem;"><span style="color:var(--muted);">Platform uptime</span><span style="color:var(--text);font-weight:600;">99.9%</span></div>
+          </div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 16px;">
+          <div style="font-family:var(--mono);font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;display:flex;align-items:center;gap:4px;"><i class="ti ti-bolt"></i> QUICK ACTIONS</div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <button onclick="window.open('https://nes-ai.com/nes-assessment.html','_blank')" style="text-align:left;font-size:.7rem;padding:6px 10px;border-radius:6px;cursor:pointer;display:flex;align-items:center;gap:6px;background:none;border:1px solid var(--border);color:var(--text);"><i class="ti ti-clipboard-plus"></i> New assessment</button>
+            <button onclick="showView('clientmanager')" style="text-align:left;font-size:.7rem;padding:6px 10px;border-radius:6px;cursor:pointer;display:flex;align-items:center;gap:6px;background:none;border:1px solid var(--border);color:var(--text);"><i class="ti ti-key"></i> Client credentials</button>
+            <button onclick="showView('inbox')" style="text-align:left;font-size:.7rem;padding:6px 10px;border-radius:6px;cursor:pointer;display:flex;align-items:center;gap:6px;background:none;border:1px solid var(--border);color:var(--text);"><i class="ti ti-mail"></i> Inbox</button>
+            <button onclick="showView('command')" style="text-align:left;font-size:.7rem;padding:6px 10px;border-radius:6px;cursor:pointer;display:flex;align-items:center;gap:6px;background:none;border:1px solid var(--border);color:var(--text);"><i class="ti ti-message-circle"></i> Command centre</button>
+          </div>
+        </div>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 16px;">
+        <div style="font-family:var(--mono);font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;display:flex;align-items:center;gap:4px;"><i class="ti ti-building"></i> MY CLIENTS</div>
+        <div id="partnerClientList" style="font-size:.72rem;color:var(--muted);text-align:center;padding:12px 0;">Loading...</div>
+      </div>
+    </div>
+    <div style="width:320px;border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;" id="partnerFeedPanel">
+      <div style="padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+        <div style="font-family:var(--mono);font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;display:flex;align-items:center;gap:4px;"><i class="ti ti-news"></i> MARKET INTELLIGENCE</div>
+        <span id="partnerFeedBadge" style="font-size:.6rem;padding:1px 6px;border-radius:10px;background:rgba(64,156,255,.1);color:var(--nes-blue);display:none;">0 NEW</span>
+      </div>
+      <div style="flex:1;overflow-y:auto;padding:10px 14px;" id="partnerFeedItems">
+        <div style="text-align:center;color:var(--muted);font-size:.72rem;padding:20px;">Loading feed...</div>
+      </div>
+    </div>
+  </div>`;
+
+  // Load weather
+  try{
+    const wr=await fetch('https://api.open-meteo.com/v1/forecast?latitude=23.6&longitude=58.59&current=temperature_2m,apparent_temperature,weathercode,relativehumidity_2m&timezone=Asia/Muscat');
+    const wd=await wr.json();
+    const c=wd.current;
+    const wDesc=c.weathercode<=1?'Sunny':c.weathercode<=3?'Partly cloudy':c.weathercode<=48?'Foggy':c.weathercode<=67?'Rainy':'Cloudy';
+    document.getElementById('partnerWeatherDesc').textContent=wDesc+' · Humidity '+c.relativehumidity_2m+'%';
+    document.getElementById('partnerWeatherTemp').textContent=Math.round(c.temperature_2m)+'°C';
+    document.getElementById('partnerWeatherFeel').textContent='Feels like '+Math.round(c.apparent_temperature)+'°C';
+  }catch(e){}
+
+  // Load partner metrics from Supabase
+  try{
+    const planPrice={presence:59,operations:109,workforce:169};
+    const {data:allClients} = await sb.from('clients').select('id,name,plan,status,created_at,installed_by').eq('installed_by',session.user.email);
+    const clients=allClients||[];
+    const activeClients=clients.filter(c=>c.status==='active');
+    const now2=new Date();
+    const thisMonth=now2.getMonth();
+    const thisYear=now2.getFullYear();
+    const newThisMonth=clients.filter(c=>{const d=new Date(c.created_at);return d.getMonth()===thisMonth&&d.getFullYear()===thisYear;}).length;
+    const installEarned=(clients.length*49.5);
+    const recurring=activeClients.reduce((s,c)=>s+((planPrice[c.plan]||59)*0.25),0);
+    const total=installEarned+recurring;
+    document.getElementById('pClientsCount').textContent=activeClients.length;
+    document.getElementById('pClientsTotal').textContent='Total: '+clients.length;
+    document.getElementById('pClientsNew').textContent='+'+newThisMonth+' this month';
+    document.getElementById('pInstallEarned').textContent='OMR '+installEarned.toFixed(3);
+    document.getElementById('pInstallCount').textContent=clients.length+' installs';
+    document.getElementById('pRecurring').textContent='OMR '+recurring.toFixed(3);
+    document.getElementById('pActiveClients').textContent=activeClients.length+' active';
+    document.getElementById('pTotalEarned').textContent='OMR '+total.toFixed(3);
+    if(clients.length>0)document.getElementById('pClientsBar').style.width=Math.min(100,activeClients.length*10)+'%';
+
+    // Client list
+    const listEl=document.getElementById('partnerClientList');
+    if(clients.length===0){listEl.innerHTML='<i class="ti ti-inbox" style="font-size:1.4rem;display:block;margin-bottom:6px;opacity:.3;"></i>No clients installed yet';
+    }else{
+      listEl.innerHTML=clients.map(c=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);"><div><div style="font-size:.75rem;color:var(--text);font-weight:600;">${c.name||'—'}</div><div style="font-size:.65rem;color:var(--muted);text-transform:capitalize;">${c.plan||'—'}</div></div><span style="font-size:.6rem;padding:2px 8px;border-radius:10px;background:${c.status==='active'?'rgba(63,185,80,.1)':'rgba(248,81,73,.1)'};color:${c.status==='active'?'#3fb950':'#f85149'};">${c.status}</span></div>`).join('');
+    }
+  }catch(e){console.error('Partner metrics error:',e);}
+
+  // Load intel feed (same as CEO)
+  try{
+    loadPartnerFeed();
+  }catch(e){}
+}
+
+async function loadPartnerFeed(){
+  try{
+    const {data:feed}=await sb.from('ceo_feed').select('title,summary,source,tag,created_at').order('created_at',{ascending:false}).limit(20);
+    const feedEl=document.getElementById('partnerFeedItems');
+    if(!feedEl)return;
+    const badge=document.getElementById('partnerFeedBadge');
+    const today=new Date().toDateString();
+    const todayItems=(feed||[]).filter(f=>new Date(f.created_at).toDateString()===today);
+    if(badge&&todayItems.length>0){badge.textContent=todayItems.length+' NEW';badge.style.display='inline';}
+    if(!feed||feed.length===0){feedEl.innerHTML='<div style="text-align:center;color:var(--muted);font-size:.72rem;padding:20px;">No feed items yet</div>';return;}
+    let html='<div style="font-size:.65rem;color:var(--muted);margin-bottom:8px;">Today</div>';
+    html+=feed.map(f=>{
+      const isAlert=f.tag==='ALERT';
+      return`<div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:8px;">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+          <span style="font-size:.58rem;padding:1px 6px;border-radius:10px;background:${isAlert?'rgba(210,153,34,.15)':'rgba(64,156,255,.1)'};color:${isAlert?'#d29922':'var(--nes-blue)'};">${isAlert?'⚡ ALERT':'INTEL'}</span>
+          <span style="font-size:.6rem;color:var(--muted);">${new Date(f.created_at).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}</span>
+        </div>
+        <div style="font-size:.72rem;color:var(--text);font-weight:600;margin-bottom:3px;">${f.title||''}</div>
+        <div style="font-size:.65rem;color:var(--muted);">${(f.summary||'').substring(0,80)}${(f.summary||'').length>80?'...':''}</div>
+      </div>`;
+    }).join('');
+    feedEl.innerHTML=html;
+  }catch(e){}
+}
 
 async function showCEODashboard(){
   const mc=document.getElementById('mainContent');
@@ -2564,7 +2745,7 @@ async function loadClientUsers(clientId){
       el.innerHTML='<div style="color:var(--muted);font-family:var(--mono);font-size:.75rem;padding:12px 0;">No users linked yet. Click Invite User to add one.</div>';
       return;
     }
-    const roleColors={ceo:'#409cff',manager:'#3fb950',staff:'#8b949e'};
+    const roleColors={ceo:'#409cff',manager:'#3fb950',staff:'#8b949e',nes_partner:'#7f77dd'};
     el.innerHTML=users.map(u=>`
       <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-radius:8px;margin-bottom:6px;">
         <div style="display:flex;align-items:center;gap:10px;">
@@ -3228,7 +3409,7 @@ async function loadTeam(){
     const users = usersData.users || [];
     const depts = deptsRes.data || [];
 
-    const roleColors = {nesadmin:'#f85149',ceo:'#d29922',manager:'#409cff',staff:'#8b949e'};
+    const roleColors = {nesadmin:'#f85149',ceo:'#d29922',manager:'#409cff',staff:'#8b949e',nes_partner:'#7f77dd'};
     const deptOptions = depts.map(d=>`<option value="${d.id}">${d.name}</option>`).join('');
 
     // Stats row
@@ -3298,6 +3479,7 @@ async function loadTeam(){
               </select>
               <select onchange="updateUserRole('${u.id}','${clientId}',this.value)" style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:4px 8px;color:var(--muted);font-size:.7rem;cursor:pointer;">
                 <option value="ceo" ${u.role==='ceo'?'selected':''}>CEO</option>
+                <option value="nes_partner" ${u.role==='nes_partner'?'selected':''}>Technology Partner</option>
                 <option value="manager" ${u.role==='manager'?'selected':''}>Manager</option>
                 <option value="staff" ${u.role==='staff'?'selected':''}>Staff</option>
               </select>
