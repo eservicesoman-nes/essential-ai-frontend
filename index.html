@@ -4504,7 +4504,7 @@ async function saveItCred(){
   try{
     const res=await fetch(API_URL+'/api/client/'+userClientId+'/credentials',{
       method:'POST',
-      headers:{'Content-Type':'application/json'},
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
       body:JSON.stringify({credentials:creds})
     });
     if(!res.ok)throw new Error(await res.text());
