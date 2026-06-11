@@ -1120,6 +1120,10 @@ function bindNav(){
 }
 
 function showView(view){
+  // Always hide sidebar overlay on any view change
+  const _ov=document.getElementById('sidebarOverlay');
+  if(_ov){_ov.style.display='none';_ov.style.pointerEvents='none';_ov.style.opacity='0';}
+  if(window.innerWidth<=900){const _sb=document.getElementById('sidebar');if(_sb)_sb.classList.remove('open');}
   try{ localStorage.setItem('nes_last_view', view); }catch(e){}
   document.querySelectorAll('.nav-item[data-view]').forEach(el=>{
     el.classList.toggle('active', el.getAttribute('data-view') === view);
