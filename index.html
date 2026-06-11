@@ -5408,8 +5408,13 @@ window.showEmail = async function(idx){
       const display = clean.length > 55 ? clean.substring(0,52)+'...' : clean;
       return '<a href="'+clean+'" target="_blank" rel="noopener noreferrer" style="color:#409cff;text-decoration:underline;cursor:pointer;word-break:break-all;">'+display+'</a>';
     });
+    // Convert plain text to readable paragraphs
+    const paras = cleaned.split(/\n\n+/).map(p => p.replace(/\n/g,' ').trim()).filter(p=>p.length>0);
+    const htmlBody = paras.length > 1
+      ? paras.map(p=>'<p style="margin:0 0 10px;">'+p+'</p>').join('')
+      : '<p style="margin:0;">'+cleaned.replace(/\n/g,'<br>')+'</p>';
     bodyEl.innerHTML = cleaned && cleaned.length > 10
-      ? '<div style="white-space:pre-wrap;line-height:1.9;font-size:.82rem;color:var(--text);padding-bottom:20px;word-break:break-word;">'+cleaned+'</div>'
+      ? '<div style="line-height:1.6;font-size:.82rem;color:var(--text);padding-bottom:20px;word-break:break-word;">'+htmlBody+'</div>'
       : '<div style="color:var(--muted);font-family:var(--mono);font-size:.72rem;text-align:center;padding:20px;">No readable content</div>';
   }
 };
