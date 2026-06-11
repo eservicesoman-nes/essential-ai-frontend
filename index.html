@@ -5096,7 +5096,7 @@ function renderEmailList(emails){
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;">
         <div style="font-size:.75rem;font-weight:${e.is_read?'400':'600'};color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;">${e.from_name||e.from_address||'Unknown'}</div>
         <div style="font-size:.6rem;color:var(--muted);margin-left:8px;flex-shrink:0;">${date}</div>
-        ${!e.is_read?'<div style="width:6px;height:6px;border-radius:50%;background:var(--nes-blue);margin-left:6px;flex-shrink:0;"></div>':''}
+        ${!e.is_read?'<div style="width:6px;height:6px;border-radius:50%;background:'+color+';margin-left:6px;flex-shrink:0;"></div>':''}
       </div>
       <div style="font-size:.72rem;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:2px;">${e.subject||'(no subject)'}</div>
       <div style="font-size:.65rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${(window._accountLabels&&window._accountLabels[e.account_email])||e.account_label||e.account_email.split("@")[0]}</div>
