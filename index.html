@@ -4650,6 +4650,16 @@ function renderMyCredsForm(creds, client){
   html+='<button onclick="saveItCred()" class="form-submit" style="flex:1;"><i class="ti ti-device-floppy"></i> Save</button>';
   html+='<button onclick="document.getElementById(\'it-cred-form\').style.display=\'none\'" style="background:none;border:1px solid var(--border);border-radius:8px;padding:8px 14px;color:var(--muted);cursor:pointer;font-size:.8rem;">Cancel</button>';
   html+='</div></div>';
+
+  html+='<div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;margin-top:20px;">Website Chat Widget</div>';
+  html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:16px;">';
+  html+='<div style="font-size:.75rem;color:var(--muted);margin-bottom:10px;">Add an AI chat widget to your website by pasting this one line before </head> on your site.</div>';
+  html+='<div style="display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-family:var(--mono);font-size:.68rem;color:#409cff;word-break:break-all;">';
+  html+='<span id="widget-snippet">&lt;script src=\"https://api.essential-services.org/widget.js?client_id='+client.id+'\"&gt;&lt;/script&gt;</span>';
+  html+='<button onclick="navigator.clipboard.writeText('<script src=\"https://api.essential-services.org/widget.js?client_id='+client.id+'\"></script>').then(()=>{this.textContent='Copied!';setTimeout(()=>{this.textContent='Copy'},2000)})" style="background:var(--nes-btn-grad);border:none;border-radius:6px;padding:4px 12px;color:#fff;font-size:.68rem;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;">Copy</button>';
+  html+='</div>';
+  html+='<div style="font-size:.68rem;color:var(--muted);margin-top:8px;"><i class="ti ti-info-circle"></i> Works on WordPress, Wix, Squarespace, or any HTML site.</div>';
+  html+='</div>';
   el.innerHTML=html;
   window._itCredsCache=creds;
 }
@@ -5625,3 +5635,4 @@ window.addCustomCredField=addCustomCredField;
 </body>
 </html>
 ```
+
