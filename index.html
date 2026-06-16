@@ -209,7 +209,6 @@
     .stat-item .ti{font-size:13px;}
     .stat-item b{font-weight:700;}
     .stat-msgs b{color:var(--nes-blue);}
-    .stat-imgs b{color:var(--purple);}
     .stat-docs b{color:var(--green);}
 
     /* ── PAGE (CEO, Leads etc) ── */
@@ -2861,7 +2860,6 @@ function showChatInterface(mode='chat'){
         </div>
         <div class="bottom-right">
           <div class="stat-item stat-msgs"><i class="ti ti-message"></i> <b id="statMsgs">${limits.messages-chatUsed}</b> left</div>
-          <div class="stat-item stat-imgs"><i class="ti ti-photo"></i> <b id="statImages">${limits.images-imagesUsed}</b> left</div>
           <div class="stat-item stat-docs"><i class="ti ti-file"></i> <b id="statDocs">${limits.docs-docsUsed}</b> left</div>
         </div>
       </div>
@@ -4891,9 +4889,8 @@ async function loadUsageFromServer(){
 }
 function updateStats(){
   const limits=getCurrentLimits();
-  const sm=document.getElementById('statMsgs');const si=document.getElementById('statImages');const sd=document.getElementById('statDocs');
+  const sm=document.getElementById('statMsgs');const sd=document.getElementById('statDocs');
   if(sm)sm.textContent=Math.max(0,limits.messages-chatUsed);
-  if(si)si.textContent=Math.max(0,limits.images-imagesUsed);
   if(sd)sd.textContent=Math.max(0,limits.docs-docsUsed);
   document.getElementById('usageTxt').textContent=chatUsed+' / '+limits.messages;
   const fill=document.getElementById('usageFill');
