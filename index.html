@@ -531,8 +531,7 @@
     <div class="nav-section">
       <div class="nav-label">Workspace</div>
       <div class="nav nav-workspace">
-        <div class="nav-item active" data-view="chat"><i class="ti ti-message-2"></i><span>Chat</span></div>
-        <div class="nav-item" data-view="deepcore" id="deepCoreNav" style="display:none;"><i class="ti ti-atom"></i><span>Deep Core</span><span class="nav-badge nb-purple" id="deepCoreBadge" style="display:none;">20</span></div>
+        <div class="nav-item active" data-view="chat"><i class="ti ti-message-2"></i><span>Ask <span style="color:#409cff;">NES</span><span style="color:#fff;">AI</span></span></div>
         <div class="nav-item" data-view="docs"><i class="ti ti-notes"></i><span>Documents</span></div>
         <div class="nav-item" data-view="image"><i class="ti ti-photo"></i><span>Image Gen</span></div>
       </div>
@@ -650,7 +649,7 @@ let chatUsed=0,imagesUsed=0,docsUsed=0;
 let userPlan='free',userRole='staff',allMsgsHTML='';
 let userClientId=null;
 const STORAGE_KEYS={h:'nesai_h',m:'nesai_m',u:'nesai_u',rc:'nesai_rc'};
-const MODE_LABELS={chat:'CHAT MODE',deepcore:'DEEP CORE MODE',docs:'DOCUMENTS MODE',image:'IMAGE GEN MODE'};
+const MODE_LABELS={chat:'ASK NESAI',docs:'DOCUMENTS MODE',image:'IMAGE GEN MODE'};
 
 sb.auth.onAuthStateChange((_e,s)=>{session=s;if(s){const uid=s.user?.id;if(!window._appLoaded||window._loadedUid!==uid){window._loadedUid=uid;showApp(s.user);}}else{window._appLoaded=false;window._loadedUid=null;showAuthScreen();}});
 
@@ -825,7 +824,6 @@ function setupNavForRole(){
     if(userRole==='nes_partner'){
       const pnDashNav=document.getElementById('partnerDashNav');if(pnDashNav)pnDashNav.style.display='flex';
       const pnInbox=document.getElementById('inboxNav');if(pnInbox)pnInbox.style.display='flex';
-      const pnDC=document.getElementById('deepCoreNav');if(pnDC){pnDC.style.display='flex';const dcb=document.getElementById('deepCoreBadge');if(dcb)dcb.style.display='flex';}
       const pnTeam=document.getElementById('teamNav');if(pnTeam)pnTeam.style.display='flex';
       const pnLeads=document.getElementById('leadsNav');if(pnLeads)pnLeads.style.display='flex';
       clientMgr.style.display='block'; loadClientCount();
@@ -839,19 +837,12 @@ function setupNavForRole(){
       const apiNav=document.getElementById('apiCreditsNav');if(apiNav)apiNav.style.display='flex';
       const logsNav=document.getElementById('sysLogsNav');if(logsNav)logsNav.style.display='flex';
       const teamNavEl=document.getElementById('teamNav');if(teamNavEl)teamNavEl.style.display='flex';
-      const dcNavEl=document.getElementById('deepCoreNav');if(dcNavEl){dcNavEl.style.display='flex';const dcb=document.getElementById('deepCoreBadge');if(dcb)dcb.style.display='flex';}
       const myCredsNavEl=document.getElementById('myCredsNav');if(myCredsNavEl)myCredsNavEl.style.display='flex';
     } else {
       clientMgr.style.display='none';
       if(salesNav)salesNav.style.display='none';
       const myCredsNav=document.getElementById('myCredsNav');
       if(myCredsNav)myCredsNav.style.display='flex';
-    }
-    const dcNav=document.getElementById('deepCoreNav');
-    if(dcNav&&['operations','workforce','infrastructure','enterprise'].some(p=>(window.clientPlan||userPlan||'').toLowerCase().includes(p))){
-      dcNav.style.display='flex';
-      const dcBadge=document.getElementById('deepCoreBadge');
-      if(dcBadge)dcBadge.style.display='flex';
     }
     const deenNavEl = document.getElementById('deenNav');
     if(deenNavEl) deenNavEl.style.display='flex';
@@ -864,8 +855,6 @@ function setupNavForRole(){
     const teamNavEl = document.getElementById('teamNav');
     if(teamNavEl && ['ceo','manager','nesadmin'].includes(userRole)) teamNavEl.style.display='flex';
     if(userRole==='nesadmin'){const phn=document.getElementById('partnerHubNav');if(phn)phn.style.display='block';
-      const dcNavAdmin=document.getElementById('deepCoreNav');
-      if(dcNavAdmin){dcNavAdmin.style.display='flex';const dcb=document.getElementById('deepCoreBadge');if(dcb)dcb.style.display='flex';}
       const inboxNavAdmin=document.getElementById('inboxNav');
       if(inboxNavAdmin)inboxNavAdmin.style.display='flex';
       const deenNavAdmin=document.getElementById('deenNav');
@@ -1142,8 +1131,8 @@ function showView(view){
   if(view!=='ceo')window._ceoRendered=false;
   if(view!=='command'&&window._teamHubVisible)hideTeamHub();
   const clearBtn=document.getElementById('clearBtn');
-  if(clearBtn)clearBtn.style.display=['chat','deepcore','docs','image'].includes(view)?'grid':'none';
-  if(['chat','deepcore','docs','image'].includes(view)){showChatInterface(view);}
+  if(clearBtn)clearBtn.style.display=['chat','docs','image'].includes(view)?'grid':'none';
+  if(['chat','docs','image'].includes(view)){showChatInterface(view);}
   else if(view==='ceo'){showCEODashboard();}
   else if(view==='partner_dashboard'){showPartnerDashboard();}
   else if(view==='command'){showCommandCentre();}
@@ -2844,7 +2833,7 @@ function showChatInterface(mode='chat'){
   document.getElementById('mainContent').innerHTML=`
     <div class="welcome-card">
       <div class="mode-label">${MODE_LABELS[mode]}</div>
-      <div class="version-label">NES AI v3.0 · ${mode==='deepcore'?'Deep Core · Claude Sonnet':mode==='chat'?'Web Search ON':''}</div>
+      <div class="version-label">NES AI v3.0 · ${mode==='chat'?'Web Search ON':''}</div>
     </div>
     <div class="messages" id="messages"></div>
     <div class="input-area">
@@ -2904,33 +2893,8 @@ async function sendMsg(){
     setBusy(false);return;
   }
 
-  if(currentView==='deepcore'){
-    try{
-      const res2=await fetch(API_URL+'/api/deepcore',{
-        method:'POST',
-        headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
-        body:JSON.stringify({message:text,history:history.slice(-6)})
-      });
-      removeTyping();
-      if(res2.ok){
-        const data=await res2.json();
-        addAiMsg(data.reply);
-        history.push({role:'assistant',content:data.reply});
-        chatUsed++;
-        const dcb=document.getElementById('deepCoreBadge');
-        if(dcb&&data.usage)dcb.textContent=data.usage.remaining;
-        saveHistory();saveUsage();updateStats();
-      } else {
-        const err=await res2.json().catch(()=>({}));
-        addAiMsg(err.error||'Deep Core unavailable. Please try again.');
-      }
-    }catch(e){removeTyping();addAiMsg('Network error. Please check your connection.');}
-    setBusy(false);return;
-  }
-
   try{
-    const useSearch=['chat','deepcore'].includes(currentView);
-    const isDeepCore=currentView==='deepcore';
+    const useSearch=currentView==='chat';
     const res=await fetch(API_URL+'/api/chat/stream',{
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
@@ -4819,7 +4783,6 @@ function showPricing(){
             <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>CEO Dashboard + NES Pulse</li>
             <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i><b style="color:var(--nes-blue);">Sara AI — 60 calls/mo</b></li>
             <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Social Media — 3x/week</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>AI Advisory — 20/mo</li>
             <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Sales Portal (CRM)</li>
             <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>10 team users</li>
             <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Priority email support</li>
@@ -4842,7 +4805,6 @@ function showPricing(){
             <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i><b style="color:#3fb950;">Sara AI — 150 calls/mo</b></li>
             <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Apex Outreach — Layla AI</li>
             <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Social Media — daily</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>AI Advisory — 50/mo</li>
             <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Unlimited team users</li>
             <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>WhatsApp support</li>
           </ul>
