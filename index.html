@@ -209,6 +209,7 @@
     .stat-item .ti{font-size:13px;}
     .stat-item b{font-weight:700;}
     .stat-msgs b{color:var(--nes-blue);}
+    .stat-credits b{color:var(--amber);}
     .stat-docs b{color:var(--green);}
 
     /* ── PAGE (CEO, Leads etc) ── */
@@ -1131,7 +1132,7 @@ function showView(view){
   if(view!=='command'&&window._teamHubVisible)hideTeamHub();
   const clearBtn=document.getElementById('clearBtn');
   if(clearBtn)clearBtn.style.display=['chat','docs','image'].includes(view)?'grid':'none';
-  if(['chat','docs','image'].includes(view)){showChatInterface(view);}
+  if(['chat','docs','image'].includes(view)){showChatInterface(view);if(view==='image')loadUsageFromServer();}
   else if(view==='ceo'){showCEODashboard();}
   else if(view==='partner_dashboard'){showPartnerDashboard();}
   else if(view==='command'){showCommandCentre();}
@@ -2860,6 +2861,7 @@ function showChatInterface(mode='chat'){
         </div>
         <div class="bottom-right">
           <div class="stat-item stat-msgs"><i class="ti ti-message"></i> <b id="statMsgs">${limits.messages-chatUsed}</b> left</div>
+          ${currentView==='image'?'<div class="stat-item stat-credits" id="creditsStat" style="cursor:pointer;" onclick="openCreditsModal()"><i class="ti ti-coin"></i> <b id="statCredits">…</b></div>':''}
           <div class="stat-item stat-docs"><i class="ti ti-file"></i> <b id="statDocs">${limits.docs-docsUsed}</b> left</div>
         </div>
       </div>
@@ -2884,7 +2886,7 @@ async function sendMsg(){
       const controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),45000);
       const res=await fetch(API_URL+'/api/image',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify({prompt:text}),signal:controller.signal});
       clearTimeout(timeout);removeTyping();
-      if(res.ok){const data=await res.json();appendMsg(imgBubble(data.url,data.revisedPrompt||text));imagesUsed++;}
+      if(res.ok){const data=await res.json();appendMsg(imgBubble(data.url,data.revisedPrompt||text));imagesUsed++;loadUsageFromServer();}
       else{const err=await res.json().catch(()=>({}));addAiMsg('Error '+(err.error||res.status)+'. Please try again.');}
       saveHistory();saveUsage();updateStats();
     }catch(e){removeTyping();addAiMsg('Network error. Please check your connection.');}
@@ -4883,18 +4885,49 @@ function saveHistory(){
   }catch(e){}
 }
 function saveUsage(){try{localStorage.setItem(STORAGE_KEYS.u,JSON.stringify({date:new Date().toDateString(),c:chatUsed,i:imagesUsed,d:docsUsed}));}catch(e){}}
+let imageCredits={dailyFreeRemaining:3,trialCreditsRemaining:0,balance:0};
 async function loadUsageFromServer(){
   if(!session)return;
-  try{const res=await fetch(API_URL+'/api/usage',{headers:{'Authorization':'Bearer '+session.access_token}});if(res.ok){const d=await res.json();chatUsed=d.chats||chatUsed;imagesUsed=d.images||imagesUsed;docsUsed=d.docs||docsUsed;updateStats();}}catch(e){}
+  try{const res=await fetch(API_URL+'/api/usage',{headers:{'Authorization':'Bearer '+session.access_token}});if(res.ok){const d=await res.json();chatUsed=d.chats||chatUsed;imagesUsed=d.images||imagesUsed;docsUsed=d.docs||docsUsed;if(d.imageCredits)imageCredits=d.imageCredits;updateStats();}}catch(e){}
 }
 function updateStats(){
   const limits=getCurrentLimits();
-  const sm=document.getElementById('statMsgs');const sd=document.getElementById('statDocs');
+  const sm=document.getElementById('statMsgs');const sd=document.getElementById('statDocs');const sc=document.getElementById('statCredits');
   if(sm)sm.textContent=Math.max(0,limits.messages-chatUsed);
   if(sd)sd.textContent=Math.max(0,limits.docs-docsUsed);
+  if(sc){
+    const extra=imageCredits.trialCreditsRemaining+imageCredits.balance;
+    sc.textContent=imageCredits.dailyFreeRemaining+' free'+(extra>0?' + '+extra+' credits':'');
+  }
   document.getElementById('usageTxt').textContent=chatUsed+' / '+limits.messages;
   const fill=document.getElementById('usageFill');
   if(fill)fill.style.width=Math.min(100,(chatUsed/limits.messages)*100)+'%';
+}
+function showModal(title,bodyHtml){
+  const existing=document.getElementById('genericModalOverlay');
+  if(existing)existing.remove();
+  const overlay=document.createElement('div');
+  overlay.className='modal-overlay';
+  overlay.id='genericModalOverlay';
+  overlay.onclick=(e)=>{if(e.target===overlay)overlay.remove();};
+  overlay.innerHTML=`<div class="modal-box">
+    <div class="modal-title"><span>${esc(title)}</span><i class="ti ti-x" style="cursor:pointer;" onclick="document.getElementById('genericModalOverlay').remove()"></i></div>
+    ${bodyHtml}
+  </div>`;
+  document.body.appendChild(overlay);
+}
+function openCreditsModal(){
+  const packs=[{n:50,p:5},{n:200,p:18},{n:500,p:40}];
+  const packsHtml=packs.map(pk=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px;">
+    <span><b>${pk.n}</b> credits</span><span style="color:var(--muted);">OMR ${pk.p}</span>
+    <button class="act-btn" style="opacity:.5;cursor:not-allowed;" disabled>Coming soon</button>
+  </div>`).join('');
+  const html=`<div style="padding:4px 0;">
+    <p style="color:var(--muted);font-size:.85rem;margin-bottom:14px;">Each credit generates one image. You get ${imageCredits.dailyFreeRemaining} free images today, plus ${imageCredits.trialCreditsRemaining} trial credits and ${imageCredits.balance} paid credits in your balance.</p>
+    ${packsHtml}
+    <p style="color:var(--muted);font-size:.75rem;margin-top:10px;">Credit pack purchases are launching soon. Contact us if you'd like early access.</p>
+  </div>`;
+  showModal('Image Credits',html);
 }
 (function(){
   let startY=0, startTime=0, pulling=false;
