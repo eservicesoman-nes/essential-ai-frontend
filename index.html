@@ -2157,7 +2157,7 @@ function renderClientManagerFull(clients,activeId=null){
   setTimeout(()=>{
     if(window._activeTab&&window._activeTab!=='modules'){
       const tabEl=document.querySelector('.cm-tab[onclick*="\'' +window._activeTab+ '\'"]');
-      if(tabEl){['modules','creds','branding','agents','billing','users'].forEach(t=>{const e=document.getElementById('cm-'+t);if(e)e.style.display=t===window._activeTab?'block':'none';});document.querySelectorAll('.cm-tab').forEach(t=>t.classList.remove('active'));tabEl.classList.add('active');if(window._activeTab==='users'&&window._activeClientId)loadClientUsers(window._activeClientId);}
+      if(tabEl){['modules','creds','branding','agents','billing','users'].forEach(t=>{const e=document.getElementById('cm-'+t);if(e)e.style.display=t===window._activeTab?'block':'none';});document.querySelectorAll('.cm-tab').forEach(t=>t.classList.remove('active'));tabEl.classList.add('active');if(window._activeTab==='users'&&window._activeClientId)loadClientUsers(window._activeClientId);if(window._activeTab==='billing'&&window._activeClientId)loadPaymentHistory(window._activeClientId);}
     }
   },50);
   const colors=['#1a3a6e','#2d1f00','#0d2818','#2d0e0e','#1a2332'];
@@ -2362,6 +2362,32 @@ function renderClientDetail(c,colors,textColors,idx){
             </div>
           </div>
           <button class="form-submit" style="margin-top:10px;" onclick="saveClientBilling('${c.id}')"><i class="ti ti-device-floppy"></i> Save Billing</button>
+
+          <div style="border-top:1px solid var(--border);margin-top:20px;padding-top:16px;">
+            <div style="font-family:var(--mono);font-size:.65rem;color:var(--nes-blue);font-weight:800;margin-bottom:10px;">PAYMENT HISTORY</div>
+            <div id="paymentLifetimeTotal_${c.id}" style="font-size:.8rem;color:var(--muted);margin-bottom:12px;">Loading...</div>
+
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:14px;">
+              <div style="font-size:.75rem;font-weight:700;margin-bottom:8px;">Record a payment or adjustment</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px;">
+                <select id="payType_${c.id}" class="form-select">
+                  <option value="payment">Payment</option>
+                  <option value="adjustment">Rebate / credit</option>
+                </select>
+                <select id="payMethod_${c.id}" class="form-select">
+                  <option value="cash">Cash</option>
+                  <option value="bank_transfer">Bank transfer</option>
+                  <option value="rebate">Rebate</option>
+                  <option value="other">Other</option>
+                </select>
+                <input id="payAmount_${c.id}" type="number" placeholder="Amount OMR" class="form-input">
+              </div>
+              <input id="payNote_${c.id}" type="text" placeholder="Note (required) — e.g. received in person, receipt #102" class="form-input" style="margin-bottom:8px;">
+              <button class="act-btn" onclick="recordClientPayment('${c.id}')" style="width:100%;"><i class="ti ti-check"></i> Record entry</button>
+            </div>
+
+            <div id="paymentHistoryList_${c.id}" style="font-size:.75rem;color:var(--muted);">Loading history...</div>
+          </div>
         </div>
 
         <div id="cm-email" style="display:none;">
@@ -2485,6 +2511,69 @@ async function saveClientBilling(id){
   const data={};
   document.querySelectorAll('#cm-billing [data-field]').forEach(el=>{data[el.dataset.field]=el.value.trim();});
   try{await sb.from('clients').update(data).eq('id',id);showToast('Billing saved');}catch(e){alert('Error: '+e.message);}
+}
+
+async function recordClientPayment(clientId){
+  const type=document.getElementById('payType_'+clientId).value;
+  const method=document.getElementById('payMethod_'+clientId).value;
+  const amount=document.getElementById('payAmount_'+clientId).value;
+  const note=document.getElementById('payNote_'+clientId).value.trim();
+
+  if(!amount||parseFloat(amount)<=0){showToast('Enter a valid amount');return;}
+  if(!note){showToast('A note is required for manual entries');return;}
+
+  const label=type==='adjustment'?'rebate/credit of':'payment of';
+  if(!confirm(`Record a ${label} OMR ${amount} (${method})?`))return;
+
+  try{
+    const res=await fetch(`${API_URL}/api/clients/${clientId}/payments`,{
+      method:'POST',
+      headers:{'Authorization':'Bearer '+session.access_token,'Content-Type':'application/json'},
+      body:JSON.stringify({type,method,amount,note})
+    });
+    const data=await res.json();
+    if(res.ok&&data.success){
+      showToast(data.warning?data.warning:'Entry recorded');
+      document.getElementById('payAmount_'+clientId).value='';
+      document.getElementById('payNote_'+clientId).value='';
+      loadPaymentHistory(clientId);
+    }else{
+      showToast('Failed: '+(data.error||'unknown error'));
+    }
+  }catch(e){
+    showToast('Failed: network error');
+  }
+}
+
+async function loadPaymentHistory(clientId){
+  const totalEl=document.getElementById('paymentLifetimeTotal_'+clientId);
+  const listEl=document.getElementById('paymentHistoryList_'+clientId);
+  if(!totalEl||!listEl)return;
+  try{
+    const res=await fetch(`${API_URL}/api/clients/${clientId}/payments`,{
+      headers:{'Authorization':'Bearer '+session.access_token}
+    });
+    const data=await res.json();
+    if(!res.ok){totalEl.textContent='Could not load payment history';listEl.textContent='';return;}
+
+    totalEl.innerHTML=`<b style="color:var(--text);font-size:1rem;">OMR ${data.lifetimeTotalOMR.toFixed(2)}</b> lifetime plan payments`+(data.creditPurchases.length?` · ${data.creditPurchases.length} image credit purchase(s) (tracked separately, not included in OMR total)`:'');
+
+    if(!data.payments.length){
+      listEl.textContent='No payments recorded yet.';
+      return;
+    }
+    listEl.innerHTML=data.payments.map(p=>{
+      const sign=p.type==='adjustment'?'-':'+';
+      const color=p.type==='adjustment'?'#f85149':'#3fb950';
+      const date=new Date(p.created_at).toLocaleDateString();
+      return `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);">
+        <span>${date} · ${p.method}${p.source==='auto'?' (auto)':''}</span>
+        <span style="color:${color};font-weight:700;">${sign}OMR ${Math.abs(p.amount).toFixed(2)}</span>
+      </div>${p.note?`<div style="color:var(--muted);font-size:.7rem;padding-bottom:6px;">${esc(p.note)}</div>`:''}`;
+    }).join('');
+  }catch(e){
+    totalEl.textContent='Could not load payment history';
+  }
 }
 
 async function saveClientModules(clientId){
@@ -2901,6 +2990,7 @@ function cmTab(name,el){
   document.querySelectorAll('.cm-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');
   if(name==='users'&&window._activeClientId)loadClientUsers(window._activeClientId);
   if(name==='email'&&window._activeClientId)loadEmailAccounts(window._activeClientId);
+  if(name==='billing'&&window._activeClientId)loadPaymentHistory(window._activeClientId);
 }
 
 function showChatInterface(mode='chat'){
