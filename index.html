@@ -2067,6 +2067,24 @@ async function onboardClient(clientId, clientName){
     }).eq('id',clientId);
     if(se)throw new Error('Status update failed: '+se.message);
 
+    let loginInfo='';
+    if(!client.user_id){
+      try{
+        const loginRes=await fetch(`${API_URL}/api/clients/${clientId}/create-login`,{
+          method:'POST',
+          headers:{'Authorization':'Bearer '+session.access_token}
+        });
+        const loginData=await loginRes.json();
+        if(loginRes.ok&&loginData.success){
+          loginInfo=`\n\nLogin created: ${loginData.email} / ${loginData.temp_password}\n(Share this with the client and ask them to change it after first login.)`;
+        }else{
+          loginInfo=`\n\nNote: could not auto-create a login (${loginData.error||'unknown error'}). You may need to create one manually.`;
+        }
+      }catch(le){
+        loginInfo='\n\nNote: could not auto-create a login (network error). You may need to create one manually.';
+      }
+    }
+
     const webhookUrl='https://n8n.essential-services.org/webhook/nes-client-onboard';
     const payload={
       client_id:clientId,
@@ -2087,6 +2105,7 @@ async function onboardClient(clientId, clientName){
     }
 
     showToast(clientName+' onboarded successfully ✓');
+    if(loginInfo){alert(clientName+' onboarded.'+loginInfo);}
     setTimeout(()=>showClientManager(),800);
 
   }catch(e){
@@ -4770,7 +4789,7 @@ function showPricing(){
             <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i><b style="color:var(--nes-blue);">Sara AI — 30 calls/mo</b></li>
             <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Email notifications</li>
             <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>3 team users</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Islam360 — free globally</li>
+            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Deen NES AI — free globally</li>
             <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>7-day trial</li>
           </ul>
           <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);margin-bottom:8px;padding:6px 8px;background:var(--accent-lo);border-radius:6px;">
