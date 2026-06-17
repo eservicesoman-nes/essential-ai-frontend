@@ -5052,7 +5052,7 @@ function saveHistory(){
   }catch(e){}
 }
 function saveUsage(){try{localStorage.setItem(STORAGE_KEYS.u,JSON.stringify({date:new Date().toDateString(),c:chatUsed,i:imagesUsed,d:docsUsed}));}catch(e){}}
-let imageCredits={dailyFreeRemaining:3,balance:0};
+let imageCredits={dailyFreeRemaining:3,balance:0,freeAllowanceActive:true};
 async function loadUsageFromServer(){
   if(!session)return;
   try{const res=await fetch(API_URL+'/api/usage',{headers:{'Authorization':'Bearer '+session.access_token}});if(res.ok){const d=await res.json();chatUsed=d.chats||chatUsed;imagesUsed=d.images||imagesUsed;docsUsed=d.docs||docsUsed;if(d.imageCredits)imageCredits=d.imageCredits;updateStats();}}catch(e){}
@@ -5063,7 +5063,7 @@ function updateStats(){
   if(sm)sm.textContent=Math.max(0,limits.messages-chatUsed);
   if(sd)sd.textContent=Math.max(0,limits.docs-docsUsed);
   if(sc){
-    sc.textContent=imageCredits.dailyFreeRemaining+' free'+(imageCredits.balance>0?' + '+imageCredits.balance+' credits':'');
+    sc.textContent=imageCredits.freeAllowanceActive===false?(imageCredits.balance>0?imageCredits.balance+' credits':'Trial ended'):imageCredits.dailyFreeRemaining+' free'+(imageCredits.balance>0?' + '+imageCredits.balance+' credits':'');
   }
   document.getElementById('usageTxt').textContent=chatUsed+' / '+limits.messages;
   const fill=document.getElementById('usageFill');
@@ -5088,9 +5088,13 @@ function openCreditsModal(){
     <span><b>${pk.n}</b> credits</span><span style="color:var(--muted);">OMR ${pk.p}</span>
     <button class="act-btn" style="opacity:.5;cursor:not-allowed;" disabled>Coming soon</button>
   </div>`).join('');
+  const trialEnded=imageCredits.freeAllowanceActive===false;
+  const statusHtml=trialEnded
+    ? `<p style="font-size:.8rem;margin-bottom:14px;color:#f85149;"><b>Your free trial has ended.</b> ${imageCredits.balance>0?`You have <b>${imageCredits.balance}</b> credits remaining in your balance.`:'Top up with a credit pack below to keep generating images.'}</p>`
+    : `<p style="font-size:.8rem;margin-bottom:14px;">You currently have <b>${imageCredits.dailyFreeRemaining}</b> free images left today${imageCredits.balance>0?` and <b>${imageCredits.balance}</b> credits in your balance`:''}.</p>`;
   const html=`<div style="padding:4px 0;">
-    <p style="color:var(--muted);font-size:.85rem;margin-bottom:14px;">Every plan includes 3 free images per day. Need more? Top up with a credit pack — each credit generates one extra image, on top of your daily 3, and credits never expire.</p>
-    <p style="font-size:.8rem;margin-bottom:14px;">You currently have <b>${imageCredits.dailyFreeRemaining}</b> free images left today${imageCredits.balance>0?` and <b>${imageCredits.balance}</b> credits in your balance`:''}.</p>
+    <p style="color:var(--muted);font-size:.85rem;margin-bottom:14px;">Every plan includes 3 free images per day during your trial. Need more? Top up with a credit pack — each credit generates one extra image, and credits never expire.</p>
+    ${statusHtml}
     ${packsHtml}
     <p style="color:var(--muted);font-size:.75rem;margin-top:10px;">Credit pack purchases are launching soon. Contact us if you'd like early access.</p>
   </div>`;
