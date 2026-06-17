@@ -2581,6 +2581,13 @@ function clientFormFields(c={}){
       </div>
       <div class="form-field"><label class="form-label">Trial Start Date</label><input id="field_trial_start" type="date" value="${esc(c.trial_start||'')}" class="form-input"></div>
       <div class="form-field"><label class="form-label">Trial Duration (days)</label><input id="field_trial_duration_days" type="number" value="${esc(String(c.trial_duration_days||7))}" class="form-input" placeholder="7"></div>
+      <div class="form-field">
+        <label class="form-label">PAYG Full Access (testing)</label>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:8px 0;">
+          <input id="field_full_access_override" type="checkbox" ${c.full_access_override?'checked':''} style="width:36px;height:20px;cursor:pointer;">
+          <span style="font-size:.8rem;color:var(--muted);">Bypass trial/PAYG limits entirely (unlimited free images, for testing)</span>
+        </label>
+      </div>
     </div>`;
 }
 
@@ -2588,6 +2595,8 @@ function getFormData(){
   const fields=['name','email','website','industry','region','country','language','lead_email','primary_color','logo_url','plan','status','trial_start','trial_duration_days'];
   const data={};
   fields.forEach(f=>{const el=document.getElementById('field_'+f);if(el)data[f]=el.value.trim();});
+  const overrideEl=document.getElementById('field_full_access_override');
+  if(overrideEl)data.full_access_override=overrideEl.checked;
   return data;
 }
 
