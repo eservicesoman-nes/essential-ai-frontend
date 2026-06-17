@@ -87,7 +87,6 @@
     .nb-green{background:#0d2818;color:#3fb950;}
     .nb-orange{background:#2d1b0e;color:#f0883e;}
     .nb-red{background:#2d0e0e;color:#f85149;}
-    .nb-amber{background:#2d240e;color:#d29922;}
 
     .sb-divider{height:1px;background:var(--border);margin:8px 12px;}
 
@@ -534,7 +533,7 @@
       <div class="nav nav-workspace">
         <div class="nav-item active" data-view="chat"><i class="ti ti-message-2"></i><span>Ask <span style="color:#409cff;">NES</span><span style="color:#fff;">AI</span></span></div>
         <div class="nav-item" data-view="docs"><i class="ti ti-notes"></i><span>Documents</span></div>
-        <div class="nav-item" data-view="image"><i class="ti ti-photo"></i><span>Image Gen</span><span class="nav-badge nb-amber" onclick="event.stopPropagation();showView('image');setTimeout(openCreditsModal,50);">PAYG</span></div>
+        <div class="nav-item" data-view="image"><i class="ti ti-photo"></i><span>Image Gen</span><span class="nav-badge nb-blue" style="cursor:pointer;" onclick="event.stopPropagation();showView('image');setTimeout(openCreditsModal,50);">PAYG</span></div>
       </div>
     </div>
 
@@ -4886,7 +4885,7 @@ function saveHistory(){
   }catch(e){}
 }
 function saveUsage(){try{localStorage.setItem(STORAGE_KEYS.u,JSON.stringify({date:new Date().toDateString(),c:chatUsed,i:imagesUsed,d:docsUsed}));}catch(e){}}
-let imageCredits={dailyFreeRemaining:3,trialCreditsRemaining:0,balance:0};
+let imageCredits={dailyFreeRemaining:3,balance:0};
 async function loadUsageFromServer(){
   if(!session)return;
   try{const res=await fetch(API_URL+'/api/usage',{headers:{'Authorization':'Bearer '+session.access_token}});if(res.ok){const d=await res.json();chatUsed=d.chats||chatUsed;imagesUsed=d.images||imagesUsed;docsUsed=d.docs||docsUsed;if(d.imageCredits)imageCredits=d.imageCredits;updateStats();}}catch(e){}
@@ -4897,8 +4896,7 @@ function updateStats(){
   if(sm)sm.textContent=Math.max(0,limits.messages-chatUsed);
   if(sd)sd.textContent=Math.max(0,limits.docs-docsUsed);
   if(sc){
-    const extra=imageCredits.trialCreditsRemaining+imageCredits.balance;
-    sc.textContent=imageCredits.dailyFreeRemaining+' free'+(extra>0?' + '+extra+' credits':'');
+    sc.textContent=imageCredits.dailyFreeRemaining+' free'+(imageCredits.balance>0?' + '+imageCredits.balance+' credits':'');
   }
   document.getElementById('usageTxt').textContent=chatUsed+' / '+limits.messages;
   const fill=document.getElementById('usageFill');
@@ -4924,7 +4922,8 @@ function openCreditsModal(){
     <button class="act-btn" style="opacity:.5;cursor:not-allowed;" disabled>Coming soon</button>
   </div>`).join('');
   const html=`<div style="padding:4px 0;">
-    <p style="color:var(--muted);font-size:.85rem;margin-bottom:14px;">Each credit generates one image. You get ${imageCredits.dailyFreeRemaining} free images today, plus ${imageCredits.trialCreditsRemaining} trial credits and ${imageCredits.balance} paid credits in your balance.</p>
+    <p style="color:var(--muted);font-size:.85rem;margin-bottom:14px;">Every plan includes 3 free images per day. Need more? Top up with a credit pack — each credit generates one extra image, on top of your daily 3, and credits never expire.</p>
+    <p style="font-size:.8rem;margin-bottom:14px;">You currently have <b>${imageCredits.dailyFreeRemaining}</b> free images left today${imageCredits.balance>0?` and <b>${imageCredits.balance}</b> credits in your balance`:''}.</p>
     ${packsHtml}
     <p style="color:var(--muted);font-size:.75rem;margin-top:10px;">Credit pack purchases are launching soon. Contact us if you'd like early access.</p>
   </div>`;
