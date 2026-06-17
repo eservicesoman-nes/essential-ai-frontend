@@ -87,6 +87,7 @@
     .nb-green{background:#0d2818;color:#3fb950;}
     .nb-orange{background:#2d1b0e;color:#f0883e;}
     .nb-red{background:#2d0e0e;color:#f85149;}
+    .nb-amber{background:#2d240e;color:#d29922;}
 
     .sb-divider{height:1px;background:var(--border);margin:8px 12px;}
 
@@ -533,7 +534,7 @@
       <div class="nav nav-workspace">
         <div class="nav-item active" data-view="chat"><i class="ti ti-message-2"></i><span>Ask <span style="color:#409cff;">NES</span><span style="color:#fff;">AI</span></span></div>
         <div class="nav-item" data-view="docs"><i class="ti ti-notes"></i><span>Documents</span></div>
-        <div class="nav-item" data-view="image"><i class="ti ti-photo"></i><span>Image Gen</span></div>
+        <div class="nav-item" data-view="image"><i class="ti ti-photo"></i><span>Image Gen</span><span class="nav-badge nb-amber" onclick="event.stopPropagation();showView('image');setTimeout(openCreditsModal,50);">PAYG</span></div>
       </div>
     </div>
 
