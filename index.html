@@ -2607,7 +2607,56 @@ function clientFormFields(c={}){
           <span style="font-size:.8rem;color:var(--muted);">Bypass trial/PAYG limits entirely (unlimited free images, for testing)</span>
         </label>
       </div>
+      <div class="form-field">
+        <label class="form-label">Grant Image Credits</label>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <select id="creditPackSelect_${c.id}" class="form-select" style="flex:1;" onchange="onCreditPackChange('${c.id}')">
+            <option value="50:5">50 credits — OMR 5</option>
+            <option value="200:18">200 credits — OMR 18</option>
+            <option value="500:40">500 credits — OMR 40</option>
+            <option value="custom">Custom amount</option>
+          </select>
+          <input id="creditCustomAmount_${c.id}" type="number" placeholder="Amount" class="form-input" style="width:90px;display:none;">
+          <button class="act-btn" onclick="grantClientCredits('${c.id}')">Grant</button>
+        </div>
+        <div style="font-size:.7rem;color:var(--muted);margin-top:4px;">Applies after payment is received (e.g. via Thawani or manual transfer). Adds to the client's existing balance.</div>
+      </div>
     </div>`;
+}
+
+function onCreditPackChange(clientId){
+  const sel=document.getElementById('creditPackSelect_'+clientId);
+  const customInput=document.getElementById('creditCustomAmount_'+clientId);
+  if(sel.value==='custom'){customInput.style.display='block';customInput.focus();}
+  else{customInput.style.display='none';}
+}
+
+async function grantClientCredits(clientId){
+  const sel=document.getElementById('creditPackSelect_'+clientId);
+  let amount;
+  if(sel.value==='custom'){
+    const customInput=document.getElementById('creditCustomAmount_'+clientId);
+    amount=parseInt(customInput.value,10);
+    if(!amount||amount<=0){showToast('Enter a valid custom amount');return;}
+  }else{
+    amount=parseInt(sel.value.split(':')[0],10);
+  }
+  if(!confirm(`Grant ${amount} image credits to this client?`))return;
+  try{
+    const res=await fetch(`${API_URL}/api/clients/${clientId}/grant-credits`,{
+      method:'POST',
+      headers:{'Authorization':'Bearer '+session.access_token,'Content-Type':'application/json'},
+      body:JSON.stringify({amount})
+    });
+    const data=await res.json();
+    if(res.ok&&data.success){
+      showToast(`Granted ${data.granted} credits — new balance: ${data.newBalance}`);
+    }else{
+      showToast('Failed: '+(data.error||'unknown error'));
+    }
+  }catch(e){
+    showToast('Failed: network error');
+  }
 }
 
 function getFormData(){
