@@ -4922,7 +4922,9 @@ function showUpgradePopup(){
 }
 
 function showPricing(){
-  document.getElementById('mainContent').innerHTML=`
+  const mc=document.getElementById('mainContent');
+  mc.style.overflow='auto';
+  mc.innerHTML=`
     <div class="pricing-wrap">
       <a href="#" onclick="showView('chat');return false;" style="color:var(--nes-blue);text-decoration:none;display:inline-block;margin-bottom:22px;font-family:var(--mono);font-size:.8rem;">← Back</a>
       <div style="text-align:center;margin-bottom:8px;"><h1 style="font-size:1.7rem;font-weight:700;font-family:'Syne',sans-serif;">Choose Your Plan</h1></div>
