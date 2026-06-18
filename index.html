@@ -1451,8 +1451,7 @@ async function showCEODashboard(){
     const c=l.country||detectCountry(l.email||'Other');
     countries[c]=(countries[c]||0)+1;
   });
-  const valueMap={'Government':2500,'Ports & Customs':2500,'Aviation & Airports':2500,'Technology':1200,'Healthcare':800,'Finance & Banking':600};
-  const pipelineValue=leads.reduce((sum,l)=>sum+(valueMap[l.industry]||400),0);
+  const hotLeads=leads.filter(l=>['Government','Ports & Customs','Aviation & Airports'].includes(l.industry)).length;
   const fortyEightHrsAgo=new Date(Date.now()-48*60*60*1000).toISOString();
   const uncontacted=leads.filter(l=>l.created_at<fortyEightHrsAgo&&l.status!=='contacted').length;
   const colors=['var(--nes-blue)','#7f77dd','#3fb950','#d29922','#484f58'];
@@ -1487,9 +1486,9 @@ async function showCEODashboard(){
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
               <div style="display:flex;align-items:center;gap:8px;">
                 <div style="width:28px;height:28px;border-radius:7px;background:#0c1f35;display:flex;align-items:center;justify-content:center;"><i class="ti ti-trending-up" style="font-size:13px;color:var(--nes-blue);"></i></div>
-                <div><div style="font-size:.62rem;color:var(--muted);">${userRole==='nesadmin'?'Pipeline value':'Total leads'}</div><div style="font-size:1.05rem;font-weight:700;color:var(--nes-blue);">${userRole==='nesadmin'?'OMR '+Math.round(pipelineValue/3.85).toLocaleString():totalLeads}</div><div style="height:3px;background:var(--border);border-radius:2px;margin-top:3px;width:110px;"><div style="height:100%;width:72%;background:var(--nes-blue);border-radius:2px;"></div></div></div>
+                <div><div style="font-size:.62rem;color:var(--muted);">${userRole==='nesadmin'?'High value leads':'Total leads'}</div><div style="font-size:1.05rem;font-weight:700;color:var(--nes-blue);">${userRole==='nesadmin'?hotLeads+' leads':totalLeads}</div><div style="height:3px;background:var(--border);border-radius:2px;margin-top:3px;width:110px;"><div style="height:100%;width:72%;background:var(--nes-blue);border-radius:2px;"></div></div></div>
               </div>
-              <div style="font-size:.6rem;color:var(--muted);text-align:right;">${totalLeads} leads<br>Est. value</div>
+              <div style="font-size:.6rem;color:var(--muted);text-align:right;">${totalLeads} total<br>Gov · Ports · Aviation</div>
             </div>
             <div style="height:1px;background:var(--border);margin:6px 0;"></div>
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
