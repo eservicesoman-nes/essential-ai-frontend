@@ -3079,7 +3079,7 @@ async function sendMsg(){
 
   try{
     const useSearch=currentView==='chat';
-    const res=await fetch(API_URL+'/api/chat/stream',{
+    const res=await fetch(API_URL+'/api/chat',{
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
       body:JSON.stringify({message:text,mode:currentView,webSearch:useSearch,history:history.slice(-10)})
