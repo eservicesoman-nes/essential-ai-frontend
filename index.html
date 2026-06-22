@@ -5482,6 +5482,7 @@ async function loadInboxEmails(clientId){
 function renderEmailList(emails){
   const el=document.getElementById('emailList');
   if(!el)return;
+  window._renderedEmails=emails;
   const colors=window._inboxColors||['#409cff','#3fb950','#7f77dd','#d29922','#f85149'];
   const accounts=window._inboxAccounts||[];
   if(emails.length===0){el.innerHTML='<div style="padding:20px;text-align:center;color:var(--muted);font-family:var(--mono);font-size:.75rem;">No emails found</div>';return;}
@@ -5520,7 +5521,7 @@ async function fetchEmailBody(accountId, uid){
 }
 
 function showEmail(idx){
-  const emails=window._inboxEmails||[];
+  const emails=window._renderedEmails||window._inboxEmails||[];
   const e=emails[idx];if(!e)return;
   const accounts=window._inboxAccounts||[];
   const colors=window._inboxColors||['#409cff'];
@@ -5763,7 +5764,7 @@ window.showEmail=showEmail;
 const _origShowEmail = showEmail;
 window.showEmail = async function(idx){
   _origShowEmail(idx);
-  const e = window._inboxEmails && window._inboxEmails[idx];
+  const e = (window._renderedEmails || window._inboxEmails || [])[idx];
   if(!e) return;
   const clientId = window._inboxClientId;
   const {data:accs2} = await sb.from('email_accounts').select('id,email_address').eq('client_id',clientId);
