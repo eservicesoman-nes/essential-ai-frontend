@@ -5327,17 +5327,31 @@ async function loadEmailAccounts(clientId){
           <div style="font-size:.78rem;font-weight:600;color:var(--text);">${a.label||a.email_address}</div>
           <div style="font-size:.65rem;color:var(--muted);font-family:var(--mono);">${a.email_address} · ${a.provider} · ${a.is_active?'Active':'Inactive'}</div>
         </div>
-        <button onclick="deleteEmailAccount('${a.id}')" style="background:none;border:1px solid #2d0e0e;border-radius:6px;padding:3px 8px;color:#f85149;cursor:pointer;font-size:.65rem;"><i class="ti ti-trash"></i></button>
+        <button onclick="resaveEmailPassword('${a.id}','${a.email_address}','${clientId}')" style="background:none;border:1px solid #1a3a2a;border-radius:6px;padding:3px 8px;color:#3fb950;cursor:pointer;font-size:.65rem;margin-right:4px;"><i class="ti ti-key"></i> Re-auth</button>
+        <button onclick="deleteEmailAccount('${a.id}','${clientId}')" style="background:none;border:1px solid #2d0e0e;border-radius:6px;padding:3px 8px;color:#f85149;cursor:pointer;font-size:.65rem;"><i class="ti ti-trash"></i></button>
       </div>`).join('');
   }catch(e){if(el)el.innerHTML='<div style="color:#f85149;font-size:.72rem;">Error loading accounts</div>';}
 }
 
-async function deleteEmailAccount(id){
+async function deleteEmailAccount(id, clientId){
   if(!confirm('Remove this email account?'))return;
   try{
-    await fetch(API_URL+'/api/email/account/'+id,{method:'DELETE',headers:{'Authorization':'Bearer '+session.access_token}});
+    const r=await fetch(API_URL+'/api/email/account/'+id,{method:'DELETE',headers:{'Authorization':'Bearer '+session.access_token}});
+    if(!r.ok) throw new Error('Delete failed');
     showToast('Account removed');
-    loadEmailAccounts(window._activeClientId);
+    const cid = clientId || window._activeClientId || window._inboxClientId;
+    if(cid) loadEmailAccounts(cid);
+  }catch(e){showToast('Error: '+e.message);}
+}
+async function resaveEmailPassword(id, email, clientId){
+  const pwd = prompt('Re-enter password for '+email+':');
+  if(!pwd) return;
+  try{
+    const r=await fetch(API_URL+'/api/email/account/'+id+'/reauth',{method:'POST',headers:{'Authorization':'Bearer '+session.access_token,'Content-Type':'application/json'},body:JSON.stringify({password:pwd})});
+    if(!r.ok) throw new Error('Failed to update password');
+    showToast('Password updated — reconnecting...');
+    const cid = clientId || window._activeClientId || window._inboxClientId;
+    if(cid) loadEmailAccounts(cid);
   }catch(e){showToast('Error: '+e.message);}
 }
 
