@@ -5765,12 +5765,10 @@ window.showEmail = async function(idx){
   _origShowEmail(idx);
   const e = window._inboxEmails && window._inboxEmails[idx];
   if(!e) return;
-  if(!window._emailAccountIds){
-    const clientId = window._inboxClientId;
-    const {data:accs2} = await sb.from('email_accounts').select('id,email_address').eq('client_id',clientId);
-    window._emailAccountIds = {};
-    (accs2||[]).forEach(a => window._emailAccountIds[a.email_address] = a.id);
-  }
+  const clientId = window._inboxClientId;
+  const {data:accs2} = await sb.from('email_accounts').select('id,email_address').eq('client_id',clientId);
+  window._emailAccountIds = {};
+  (accs2||[]).forEach(a => window._emailAccountIds[a.email_address] = a.id);
   const accountId = window._emailAccountIds[e.account_email];
   if(!accountId) return;
   const bodyEl = document.getElementById('emailBodyPanel');
