@@ -3163,7 +3163,7 @@ async function processFile(file){
     const content=await extractText(file);if(!content.trim()){removeTyping();addAiMsg('Could not extract text.');setBusy(false);return;}
     const truncated=content.substring(0,7000);
     history.push({role:'user',content:'Analyze: "'+file.name+'":\n'+truncated});
-    const res=await fetch(API_URL+'/api/chat',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify({message:'Analyze and transcribe this document "'+file.name+'". Provide the full content, key information, and a summary. Do not introduce yourself.\n\nContent:\n'+truncated,mode:'docs',webSearch:false,history:history.slice(-4)})});
+    const res=await fetch(API_URL+'/api/chat/docs',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify({message:'Analyze and transcribe this document "'+file.name+'". Provide the full content, key information, and a summary. Do not introduce yourself.\n\nContent:\n'+truncated,mode:'docs',webSearch:false,history:history.slice(-4)})});
     removeTyping();
     if(res.ok){const data=await res.json();const reply=data.reply||'Document analyzed.';history.push({role:'assistant',content:reply});appendMsg(aiBubble(reply));docsUsed++;}
     else{addAiMsg('Could not analyze file.');}
