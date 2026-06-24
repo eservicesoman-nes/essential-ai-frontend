@@ -5509,14 +5509,14 @@ async function showInbox(){
   } catch(e) {}
   mc.innerHTML=`
     <div style="padding:11px 18px 11px 60px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;">
-      <div>
-        <div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;display:flex;align-items:center;gap:6px;"><i class="ti ti-mail"></i>INBOX</div>
-        <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">Unified email · All accounts · <span id="emailAccountLimit" style="color:#409cff;">${_inboxAccountText}</span></div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div>
+          <div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;display:flex;align-items:center;gap:6px;"><i class="ti ti-mail"></i>INBOX</div>
+          <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">Unified email · All accounts · <span id="emailAccountLimit" style="color:#409cff;">${_inboxAccountText}</span></div>
+        </div>
+        <button onclick="showComposeModal()" style="background:linear-gradient(135deg,#1a56db,#2563eb);border:none;border-radius:6px;padding:4px 10px;color:#fff;cursor:pointer;font-size:.72rem;font-family:var(--mono);white-space:nowrap;"><i class="ti ti-pencil"></i> Compose</button>
       </div>
-      <div style="display:flex;gap:6px;">
-        <button onclick="showComposeModal()" style="background:linear-gradient(135deg,#1a56db,#2563eb);border:none;border-radius:6px;padding:4px 10px;color:#fff;cursor:pointer;font-size:.72rem;font-family:var(--mono);"><i class="ti ti-pencil"></i> Compose</button>
-        <button onclick="if(window._inboxClientId)loadInboxEmails(window._inboxClientId, true);else showInbox();" id="inboxRefreshBtn" title="Click to refresh" style="background:none;border:1px solid var(--border);border-radius:6px;padding:4px 10px;color:var(--muted);cursor:pointer;font-size:.72rem;font-family:var(--mono);"><i class="ti ti-refresh"></i> Refresh</button>
-      </div>
+      <button onclick="if(window._inboxClientId)loadInboxEmails(window._inboxClientId, true);else showInbox();" id="inboxRefreshBtn" title="Click to refresh" style="background:none;border:1px solid var(--border);border-radius:6px;padding:4px 10px;color:var(--muted);cursor:pointer;font-size:.72rem;font-family:var(--mono);"><i class="ti ti-refresh"></i> Refresh</button>
     </div>
     <div class="inbox-panel-toggle" style="display:none;padding:6px 12px;border-bottom:1px solid var(--border);gap:6px;">
       <button id="inboxToggleList" onclick="toggleInboxPanel('list')" style="flex:1;padding:7px;border:none;border-radius:7px;background:var(--nes-blue);color:#fff;font-size:.75rem;font-weight:600;cursor:pointer;"><i class="ti ti-inbox"></i> Inbox</button>
