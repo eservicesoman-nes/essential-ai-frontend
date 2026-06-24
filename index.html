@@ -2234,6 +2234,7 @@ function renderClientDetail(c,colors,textColors,idx){
         <div class="cm-actions">
           <button class="cm-btn" onclick="showEditClientForm('${c.id}')"><i class="ti ti-edit" style="font-size:12px"></i> Edit</button>
           <button class="cm-btn" onclick="alert('Billing — Stripe integration coming soon')"><i class="ti ti-credit-card" style="font-size:12px"></i> Billing</button>
+          <button class="cm-btn" style="background:rgba(210,153,34,0.15);color:#d29922;border:1px solid rgba(210,153,34,0.3);" onclick="requestCancellation('${c.id}','${(c.name||'').replace(/'/g,'')}')"><i class="ti ti-x" style="font-size:12px"></i> Cancel Sub</button>
           <button class="cm-btn danger" onclick="deleteClient('${c.id}')"><i class="ti ti-trash" style="font-size:12px"></i> Delete</button>
           <button class="cm-btn primary" onclick="saveClientModules('${c.id}')"><i class="ti ti-device-floppy" style="font-size:12px"></i> Save</button>
           ${c.status==='onboarding'?`<button class="cm-btn" style="background:linear-gradient(135deg,#1a7f37,#3fb950);color:#fff;border:none;" onclick="onboardClient('${c.id}','${(c.name||'').replace(/'/g,'')}')" id="onboard-btn-${c.id}"><i class="ti ti-rocket" style="font-size:12px"></i> Onboard</button>`:''}
@@ -2789,6 +2790,25 @@ async function updateClient(clientId){
   const btn=document.querySelector('.form-submit');if(btn){btn.disabled=true;btn.textContent='Saving...';}
   try{const{error}=await sb.from('clients').update(data).eq('id',clientId);if(error)throw error;window._activeClientId=clientId;await showClientManager();showToast('Client updated');}
   catch(e){alert('Error: '+e.message);if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-device-floppy"></i> Save Changes';}}
+}
+
+async function requestCancellation(clientId, clientName) {
+  const reason = prompt(`Cancel subscription for "${clientName}"?\n\nEnter reason (optional):`);
+  if (reason === null) return; // user pressed Cancel on prompt
+  if (!confirm(`Confirm cancellation request for "${clientName}"?\n\nThis will:\n• Change status to cancellation_requested\n• Alert you via Telegram and Rocket.Chat\n• Start 30-day offboarding window`)) return;
+  try {
+    const r = await fetch(API_URL + '/api/cancellation/request', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token },
+      body: JSON.stringify({ clientId, reason: reason || '' })
+    });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error || 'Failed');
+    showToast('⚠️ Cancellation request sent — alerts fired');
+    setTimeout(() => location.reload(), 1500);
+  } catch(e) {
+    showToast('❌ ' + e.message);
+  }
 }
 
 async function deleteClient(clientId){
