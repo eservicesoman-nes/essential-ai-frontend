@@ -5509,12 +5509,9 @@ async function showInbox(){
   } catch(e) {}
   mc.innerHTML=`
     <div style="padding:11px 18px 11px 60px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;">
-      <div style="display:flex;align-items:center;gap:10px;">
-        <div>
-          <div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;display:flex;align-items:center;gap:6px;"><i class="ti ti-mail"></i>INBOX</div>
-          <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">Unified email · All accounts · <span id="emailAccountLimit" style="color:#409cff;">${_inboxAccountText}</span></div>
-        </div>
-        <button onclick="showComposeModal()" style="background:linear-gradient(135deg,#1a56db,#2563eb);border:none;border-radius:6px;padding:4px 10px;color:#fff;cursor:pointer;font-size:.72rem;font-family:var(--mono);white-space:nowrap;"><i class="ti ti-pencil"></i> Compose</button>
+      <div>
+        <div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;display:flex;align-items:center;gap:6px;"><i class="ti ti-mail"></i>INBOX</div>
+        <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">Unified email · All accounts · <span id="emailAccountLimit" style="color:#409cff;">${_inboxAccountText}</span></div>
       </div>
       <button onclick="if(window._inboxClientId)loadInboxEmails(window._inboxClientId, true);else showInbox();" id="inboxRefreshBtn" title="Click to refresh" style="background:none;border:1px solid var(--border);border-radius:6px;padding:4px 10px;color:var(--muted);cursor:pointer;font-size:.72rem;font-family:var(--mono);"><i class="ti ti-refresh"></i> Refresh</button>
     </div>
@@ -5560,7 +5557,7 @@ async function loadInboxEmails(clientId){
     const filters=document.getElementById('acctFilters');
     if(filters){
       const visibleAccounts = accounts.slice(0,10);
-      filters.innerHTML='<button onclick="filterInbox(&quot;all&quot;,this)" style="display:flex;align-items:center;gap:5px;font-size:.65rem;padding:4px 10px;border-radius:6px;border:none;background:var(--nes-blue);color:#fff;cursor:pointer;white-space:nowrap;flex-shrink:0;"><i class=\"ti ti-inbox\" style=\"font-size:11px;\"></i> All</button>'+
+      filters.innerHTML='<button onclick="showComposeModal()" style="display:flex;align-items:center;gap:5px;font-size:.65rem;padding:4px 10px;border-radius:6px;border:none;background:linear-gradient(135deg,#1a56db,#2563eb);color:#fff;cursor:pointer;white-space:nowrap;flex-shrink:0;"><i class=\"ti ti-pencil\" style=\"font-size:11px;\"></i> Compose</button><button onclick="filterInbox(&quot;all&quot;,this)" style="display:flex;align-items:center;gap:5px;font-size:.65rem;padding:4px 10px;border-radius:6px;border:none;background:var(--nes-blue);color:#fff;cursor:pointer;white-space:nowrap;flex-shrink:0;"><i class=\"ti ti-inbox\" style=\"font-size:11px;\"></i> All</button>'+
         visibleAccounts.map((a,i)=>{
           const label = accountLabels[a] || a.split('@')[0];
           const unreadCount = emails.filter(function(e){return e.account_email===a&&!e.is_read;}).length;
