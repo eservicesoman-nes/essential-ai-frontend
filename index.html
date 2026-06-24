@@ -2850,24 +2850,25 @@ office@essential-services.org`;
   const modal = document.createElement('div');
   modal.id = 'signoff-modal';
   modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;';
-  modal.innerHTML = \`<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;max-width:680px;width:100%;max-height:85vh;overflow-y:auto;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-      <div style="font-size:.9rem;font-weight:700;color:var(--nes-blue);">📋 Client Sign-off — \${clientName}</div>
-      <button onclick="document.getElementById('signoff-modal').remove()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.2rem;">✕</button>
-    </div>
-    <div style="font-size:.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">WhatsApp Message</div>
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;font-size:.78rem;white-space:pre-wrap;color:var(--text);margin-bottom:8px;font-family:var(--mono);">\${waMsg}</div>
-    <button onclick="navigator.clipboard.writeText(\\`\${waMsg.replace(/\\/g,'\\\\')}\\`);showToast('WhatsApp message copied')" style="font-size:.7rem;padding:4px 12px;border-radius:6px;background:rgba(63,185,80,0.1);color:#3fb950;border:1px solid rgba(63,185,80,0.3);cursor:pointer;margin-bottom:16px;"><i class='ti ti-copy'></i> Copy WhatsApp</button>
-    <div style="font-size:.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Email Message</div>
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;font-size:.78rem;white-space:pre-wrap;color:var(--text);margin-bottom:8px;font-family:var(--mono);">\${emailMsg}</div>
-    <button onclick="navigator.clipboard.writeText(\\`\${emailMsg.replace(/\\/g,'\\\\')}\\`);showToast('Email message copied')" style="font-size:.7rem;padding:4px 12px;border-radius:6px;background:rgba(64,156,255,0.1);color:#409cff;border:1px solid rgba(64,156,255,0.3);cursor:pointer;"><i class='ti ti-copy'></i> Copy Email</button>
-  </div>\`;
-  document.body.appendChild(modal);
+  modal.innerHTML = '<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;max-width:680px;width:100%;max-height:85vh;overflow-y:auto;">'
+    + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">'
+    + '<div style="font-size:.9rem;font-weight:700;color:var(--nes-blue);">Client Sign-off — ' + clientName + '</div>'
+    + '<button onclick="document.getElementById(\'signoff-modal\').remove()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.2rem;">&#x2715;</button>'
+    + '</div>'
+    + '<div style="font-size:.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">WhatsApp Message</div>'
+    + '<div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;font-size:.78rem;white-space:pre-wrap;color:var(--text);margin-bottom:8px;font-family:var(--mono);">' + waMsg + '</div>'
+    + '<button onclick="navigator.clipboard.writeText(window._waMsg||\'\')" style="font-size:.7rem;padding:4px 12px;border-radius:6px;background:rgba(63,185,80,0.1);color:#3fb950;border:1px solid rgba(63,185,80,0.3);cursor:pointer;margin-bottom:16px;">Copy WhatsApp</button>'
+    + '<div style="font-size:.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Email Message</div>'
+    + '<div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;font-size:.78rem;white-space:pre-wrap;color:var(--text);margin-bottom:8px;font-family:var(--mono);">' + emailMsg + '</div>'
+    + '<button onclick="navigator.clipboard.writeText(window._emailMsg||\'\')" style="font-size:.7rem;padding:4px 12px;border-radius:6px;background:rgba(64,156,255,0.1);color:#409cff;border:1px solid rgba(64,156,255,0.3);cursor:pointer;">Copy Email</button>'
+    + '</div>';
+  window._waMsg = waMsg;
+  window._emailMsg = emailMsg;
   modal.addEventListener('click', e => { if(e.target===modal) modal.remove(); });
 }
 
 async function requestCancellation(clientId, clientName) {
-  const reason = prompt(`Cancel subscription for "${clientName}"?\n\nEnter reason (optional):`);
+  const reason = prompt('Cancel subscription for "' + clientName + '"?\n\nEnter reason (optional):');
   if (reason === null) return; // user pressed Cancel on prompt
   if (!confirm(`Confirm cancellation request for "${clientName}"?\n\nThis will:\n• Change status to cancellation_requested\n• Alert you via Telegram and Rocket.Chat\n• Start 30-day offboarding window`)) return;
   try {
