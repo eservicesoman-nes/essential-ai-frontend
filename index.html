@@ -2582,10 +2582,12 @@ async function loadPaymentHistory(clientId){
     listEl.innerHTML=data.payments.map(p=>{
       const sign=p.type==='adjustment'?'-':'+';
       const color=p.type==='adjustment'?'#f85149':'#3fb950';
-      const date=new Date(p.created_at).toLocaleDateString();
-      return `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);">
-        <span>${date} · ${p.method}${p.source==='auto'?' (auto)':''}</span>
-        <span style="color:${color};font-weight:700;">${sign}OMR ${Math.abs(p.amount).toFixed(2)}</span>
+      const date=new Date(p.created_at).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+      const vatLine=p.vat_amount>0?`<span style="color:var(--muted);font-size:.7rem;"> (incl. VAT OMR ${parseFloat(p.vat_amount).toFixed(3)})</span>`:'';
+      const invoiceBtn=p.type==='payment'&&p.invoice_number?`<a href="${API_URL}/api/clients/${clientId}/payments/${p.id}/invoice?token=${session.access_token}" target="_blank" style="font-size:.65rem;padding:2px 8px;border-radius:4px;border:1px solid var(--border);color:var(--nes-blue);text-decoration:none;margin-left:8px;white-space:nowrap;"><i class='ti ti-file-invoice'></i> ${p.invoice_number}</a>`:'';
+      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);">
+        <span style="display:flex;align-items:center;gap:4px;">${date} · ${p.method}${p.source==='auto'?' (auto)':''}${invoiceBtn}</span>
+        <span style="color:${color};font-weight:700;white-space:nowrap;">${sign}OMR ${Math.abs(p.gross_amount||p.amount).toFixed(3)}${vatLine}</span>
       </div>${p.note?`<div style="color:var(--muted);font-size:.7rem;padding-bottom:6px;">${esc(p.note)}</div>`:''}`;
     }).join('');
   }catch(e){
