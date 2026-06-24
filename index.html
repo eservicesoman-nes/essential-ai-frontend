@@ -2234,6 +2234,7 @@ function renderClientDetail(c,colors,textColors,idx){
         <div class="cm-actions">
           <button class="cm-btn" onclick="showEditClientForm('${c.id}')"><i class="ti ti-edit" style="font-size:12px"></i> Edit</button>
           <button class="cm-btn" onclick="alert('Billing — Stripe integration coming soon')"><i class="ti ti-credit-card" style="font-size:12px"></i> Billing</button>
+          <button class="cm-btn" style="background:rgba(64,156,255,0.1);color:#409cff;border:1px solid rgba(64,156,255,0.3);" onclick="showSignoff('${c.id}','${(c.name||'').replace(/'/g,'')}','${c.plan||''}','${c.monthly_fee||''}','${c.trial_start||''}','${c.trial_duration_days||7}')"><i class="ti ti-file-text" style="font-size:12px"></i> Sign-off</button>
           <button class="cm-btn" style="background:rgba(210,153,34,0.15);color:#d29922;border:1px solid rgba(210,153,34,0.3);" onclick="requestCancellation('${c.id}','${(c.name||'').replace(/'/g,'')}')"><i class="ti ti-x" style="font-size:12px"></i> Cancel Sub</button>
           <button class="cm-btn danger" onclick="deleteClient('${c.id}')"><i class="ti ti-trash" style="font-size:12px"></i> Delete</button>
           <button class="cm-btn primary" onclick="saveClientModules('${c.id}')"><i class="ti ti-device-floppy" style="font-size:12px"></i> Save</button>
@@ -2790,6 +2791,79 @@ async function updateClient(clientId){
   const btn=document.querySelector('.form-submit');if(btn){btn.disabled=true;btn.textContent='Saving...';}
   try{const{error}=await sb.from('clients').update(data).eq('id',clientId);if(error)throw error;window._activeClientId=clientId;await showClientManager();showToast('Client updated');}
   catch(e){alert('Error: '+e.message);if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-device-floppy"></i> Save Changes';}}
+}
+
+function showSignoff(clientId, clientName, plan, monthlyFee, trialStart, trialDays) {
+  const planLabels = { presence: 'AI Presence', operations: 'AI Operations', workforce: 'AI Workforce', starter: 'AI Starter', growth: 'AI Growth', pro: 'AI Pro' };
+  const planLabel = planLabels[plan] || plan || 'NES AI Plan';
+  const fee = parseFloat(monthlyFee) || (plan==='workforce'||plan==='pro' ? 149 : plan==='operations'||plan==='growth' ? 79 : 29);
+  const vat = (fee * 0.05).toFixed(3);
+  const total = (fee + parseFloat(vat)).toFixed(3);
+
+  let trialEndStr = 'TBD';
+  let billingStartStr = 'TBD';
+  if (trialStart) {
+    const trialEnd = new Date(new Date(trialStart).getTime() + (parseInt(trialDays)||7) * 24*60*60*1000);
+    const billing = new Date(trialEnd.getTime() + 24*60*60*1000);
+    trialEndStr = trialEnd.toLocaleDateString('en-GB', {day:'numeric',month:'long',year:'numeric'});
+    billingStartStr = billing.toLocaleDateString('en-GB', {day:'numeric',month:'long',year:'numeric'});
+  }
+
+  const waMsg = `As-salamu alaykum ${clientName} 👋
+
+Your NES AI platform is ready!
+
+📦 Plan: ${planLabel}
+💰 Fee: OMR ${fee} + VAT (OMR ${vat}) = OMR ${total}/month
+🗓 Trial ends: ${trialEndStr}
+📅 First billing: ${billingStartStr}
+
+Please reply *CONFIRMED* to activate your account.
+
+Any questions? Call or WhatsApp us anytime.
+
+NES Office Team
++968 9584 9952`;
+
+  const emailMsg = `Subject: Your NES AI Platform is Ready — Action Required
+
+Dear ${clientName},
+
+Your NES AI platform setup is complete. Please confirm the details below to activate your account.
+
+Plan: ${planLabel}
+Monthly Fee: OMR ${fee} + 5% VAT (OMR ${vat}) = OMR ${total}/month
+Trial ends: ${trialEndStr}
+First Billing Date: ${billingStartStr}
+
+To confirm, simply reply to this email with the word CONFIRMED or WhatsApp us on +968 9584 9952.
+
+Warm regards,
+NES Office Team
+New Essential Services
+office@essential-services.org`;
+
+  // Remove existing modal if any
+  const existing = document.getElementById('signoff-modal');
+  if (existing) existing.remove();
+
+  const modal = document.createElement('div');
+  modal.id = 'signoff-modal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;';
+  modal.innerHTML = \`<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;max-width:680px;width:100%;max-height:85vh;overflow-y:auto;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <div style="font-size:.9rem;font-weight:700;color:var(--nes-blue);">📋 Client Sign-off — \${clientName}</div>
+      <button onclick="document.getElementById('signoff-modal').remove()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.2rem;">✕</button>
+    </div>
+    <div style="font-size:.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">WhatsApp Message</div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;font-size:.78rem;white-space:pre-wrap;color:var(--text);margin-bottom:8px;font-family:var(--mono);">\${waMsg}</div>
+    <button onclick="navigator.clipboard.writeText(\\`\${waMsg.replace(/\\/g,'\\\\')}\\`);showToast('WhatsApp message copied')" style="font-size:.7rem;padding:4px 12px;border-radius:6px;background:rgba(63,185,80,0.1);color:#3fb950;border:1px solid rgba(63,185,80,0.3);cursor:pointer;margin-bottom:16px;"><i class='ti ti-copy'></i> Copy WhatsApp</button>
+    <div style="font-size:.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Email Message</div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;font-size:.78rem;white-space:pre-wrap;color:var(--text);margin-bottom:8px;font-family:var(--mono);">\${emailMsg}</div>
+    <button onclick="navigator.clipboard.writeText(\\`\${emailMsg.replace(/\\/g,'\\\\')}\\`);showToast('Email message copied')" style="font-size:.7rem;padding:4px 12px;border-radius:6px;background:rgba(64,156,255,0.1);color:#409cff;border:1px solid rgba(64,156,255,0.3);cursor:pointer;"><i class='ti ti-copy'></i> Copy Email</button>
+  </div>\`;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', e => { if(e.target===modal) modal.remove(); });
 }
 
 async function requestCancellation(clientId, clientName) {
