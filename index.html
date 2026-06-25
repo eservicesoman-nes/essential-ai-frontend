@@ -5576,7 +5576,7 @@ async function loadInboxEmails(clientId){
       if (rsData.read && rsData.read.length > 0) {
         rsData.read.forEach(function(r) {
           const match = emails.find(function(e) {
-            return e.account_id === r.account_id && String(e.uid) === String(r.email_uid);
+            return e.account_email === r.account_email && String(e.uid) === String(r.email_uid);
           });
           if (match) match.is_read = true;
         });
