@@ -5552,17 +5552,6 @@ async function loadInboxEmails(clientId){
     }catch(e){}
     window._accountLabels = accountLabels;
 
-    const filters=document.getElementById('acctFilters');
-    if(filters){
-      const visibleAccounts = accounts.slice(0,10);
-      filters.innerHTML='<button onclick="showComposeModal()" style="display:flex;align-items:center;gap:5px;font-size:.65rem;padding:4px 10px;border-radius:6px;border:none;background:linear-gradient(135deg,#1a56db,#2563eb);color:#fff;cursor:pointer;white-space:nowrap;flex-shrink:0;"><i class=\"ti ti-pencil\" style=\"font-size:11px;\"></i> Compose</button><button onclick="filterInbox(&quot;all&quot;,this)" style="display:flex;align-items:center;gap:5px;font-size:.65rem;padding:4px 10px;border-radius:6px;border:none;background:var(--nes-blue);color:#fff;cursor:pointer;white-space:nowrap;flex-shrink:0;"><i class=\"ti ti-inbox\" style=\"font-size:11px;\"></i> All</button>'+
-        visibleAccounts.map((a,i)=>{
-          const label = accountLabels[a] || a.split('@')[0];
-          const unreadCount = emails.filter(function(e){return e.account_email===a&&!e.is_read;}).length;
-          const badge = unreadCount>0 ? '<span style="background:'+colors[i%5]+';color:#fff;border-radius:10px;padding:1px 5px;font-size:.55rem;font-weight:700;margin-left:3px;">'+unreadCount+'</span>' : '';
-          return '<button onclick="filterInbox(\'' + a + '\',this)" style="display:flex;align-items:center;gap:5px;font-size:.65rem;padding:4px 10px;border-radius:6px;border:0.5px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer;white-space:nowrap;flex-shrink:0;"><span style="display:inline-block;width:8px;height:14px;border-radius:8px 0 0 8px;border:2px solid ' + colors[i%5] + ';border-right:none;margin-right:4px;flex-shrink:0;"></span>' + label + badge + '</button>';
-        }).join('');
-    }
     window._inboxEmails=emails;
     window._inboxAccounts=accounts;
     window._inboxColors=colors;
