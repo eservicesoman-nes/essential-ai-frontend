@@ -5703,8 +5703,36 @@ function showEmail(idx){
   window._currentEmail = e;
   if (!e.is_read) {
     e.is_read = true;
-    if(window._inboxEmails) { const orig = window._inboxEmails.find(function(m){return m.uid===e.uid&&m.account_email===e.account_email;}); if(orig) orig.is_read=true; }
+    // Update in master array
+    if(window._inboxEmails) {
+      const orig = window._inboxEmails.find(function(m){return m.uid===e.uid&&m.account_email===e.account_email;});
+      if(orig) orig.is_read=true;
+    }
+    // Update in rendered array
+    if(window._renderedEmails) {
+      const orig2 = window._renderedEmails.find(function(m){return m.uid===e.uid&&m.account_email===e.account_email;});
+      if(orig2) orig2.is_read=true;
+    }
+    // Re-render list and rebuild badges
     renderEmailList(window._renderedEmails||window._inboxEmails||[]);
+    // Rebuild account tab badges
+    const accounts = window._inboxAccounts||[];
+    const colors = window._inboxColors||['#409cff'];
+    const labels = window._accountLabels||{};
+    const allEmails = window._inboxEmails||[];
+    const filters = document.getElementById('acctFilters');
+    if(filters) {
+      const activeBtn = filters.querySelector('button[style*="var(--nes-blue)"]');
+      const activeAcct = activeBtn ? activeBtn.getAttribute('data-acct') : 'all';
+      filters.innerHTML = '<button onclick="showComposeModal()" style="display:flex;align-items:center;gap:5px;font-size:.65rem;padding:4px 10px;border-radius:6px;border:none;background:linear-gradient(135deg,#1a56db,#2563eb);color:#fff;cursor:pointer;white-space:nowrap;flex-shrink:0;"><i class="ti ti-pencil" style="font-size:11px;"></i> Compose</button>'
+        + '<button onclick="filterInbox('all',this)" data-acct="all" style="display:flex;align-items:center;gap:5px;font-size:.65rem;padding:4px 10px;border-radius:6px;border:none;background:var(--nes-blue);color:#fff;cursor:pointer;white-space:nowrap;flex-shrink:0;"><i class="ti ti-inbox" style="font-size:11px;"></i> All</button>'
+        + accounts.map(function(a,i){
+            const label = labels[a]||a.split('@')[0];
+            const unread = allEmails.filter(function(m){return m.account_email===a&&!m.is_read;}).length;
+            const badge = unread>0 ? '<span style="background:'+colors[i%5]+';color:#fff;border-radius:10px;padding:1px 5px;font-size:.55rem;font-weight:700;margin-left:3px;">'+unread+'</span>' : '';
+            return '<button onclick="filterInbox(''+a+'',this)" data-acct="'+a+'" style="display:flex;align-items:center;gap:5px;font-size:.65rem;padding:4px 10px;border-radius:6px;border:0.5px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer;white-space:nowrap;flex-shrink:0;"><span style="display:inline-block;width:8px;height:14px;border-radius:8px 0 0 8px;border:2px solid '+colors[i%5]+';border-right:none;margin-right:4px;flex-shrink:0;"></span>'+label+badge+'</button>';
+          }).join('');
+    }
   }
   if(window.innerWidth <= 700) {
     const grid = document.getElementById('inboxGrid');
