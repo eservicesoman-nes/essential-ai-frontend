@@ -5566,6 +5566,23 @@ async function loadInboxEmails(clientId){
     window._inboxEmails=emails;
     window._inboxAccounts=accounts;
     window._inboxColors=colors;
+
+    // Fetch read status from Supabase and apply
+    try {
+      const rsRes = await fetch(API_URL + '/api/email/read-status/' + clientId, {
+        headers: { 'Authorization': 'Bearer ' + session.access_token }
+      });
+      const rsData = await rsRes.json();
+      if (rsData.read && rsData.read.length > 0) {
+        rsData.read.forEach(function(r) {
+          const match = emails.find(function(e) {
+            return e.account_id === r.account_id && String(e.uid) === String(r.email_uid);
+          });
+          if (match) match.is_read = true;
+        });
+      }
+    } catch(e) { /* non-critical */ }
+
     renderEmailList(emails);
   }catch(e){
     const el=document.getElementById('emailList');
