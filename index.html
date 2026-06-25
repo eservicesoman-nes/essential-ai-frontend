@@ -5569,7 +5569,7 @@ async function loadInboxEmails(clientId){
 
     // Fetch read status from Supabase and apply
     try {
-      const rsRes = await fetch(API_URL + '/api/email/read-status/' + clientId, {
+      const rsRes = await fetch(API_URL + '/api/email/read-status/' + clientId + '?t=' + Date.now(), {
         headers: { 'Authorization': 'Bearer ' + session.access_token }
       });
       const rsData = await rsRes.json();
