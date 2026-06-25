@@ -5730,6 +5730,12 @@ function showEmail(idx){
       const orig2 = window._renderedEmails.find(function(m){return m.uid===e.uid&&m.account_email===e.account_email;});
       if(orig2) orig2.is_read=true;
     }
+    // Save read status to backend
+    fetch(API_URL + '/api/email/mark-read', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token },
+      body: JSON.stringify({ account_email: e.account_email, email_uid: String(e.uid) })
+    }).catch(function(){});
     // Re-render list and rebuild badges
     renderEmailList(window._renderedEmails||window._inboxEmails||[]);
     // Rebuild account tab badges
