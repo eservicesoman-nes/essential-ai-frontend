@@ -5516,7 +5516,7 @@ async function showInbox(){
 
     </div>
 
-    <div style="padding:8px 12px;border-bottom:1px solid var(--border);display:flex;gap:6px;flex-wrap:wrap;" id="acctFilters">
+    <div style="padding:8px 12px;border-bottom:1px solid var(--border);display:flex;gap:6px;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;" id="acctFilters">
       <button onclick="filterInbox('all',this)" style="font-size:.65rem;padding:3px 10px;border-radius:20px;border:none;background:var(--nes-blue);color:#fff;cursor:pointer;white-space:nowrap;">All</button>
     </div>
     <div style="display:grid;grid-template-columns:280px 1fr;flex:1;overflow:hidden;height:calc(100% - 56px);" id="inboxGrid" class="inbox-grid-wrap">
@@ -5669,6 +5669,8 @@ function filterInbox(acct,btn){
   const emails=window._inboxEmails||[];
   const filtered=acct==='all'?emails:emails.filter(e=>e.account_email===acct);
   renderEmailList(filtered);
+  const el=document.getElementById('emailList');
+  if(el) el.scrollTop=0;
 }
 
 async function fetchEmailBody(accountId, uid){
