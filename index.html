@@ -5584,7 +5584,7 @@ function renderEmailList(emails){
     const acctIdx=accounts.indexOf(e.account_email);
     const color=colors[acctIdx%5]||'#409cff';
     const date=e.received_at?new Date(e.received_at).toLocaleDateString('en-GB',{day:'numeric',month:'short'}):'';
-    return`<div onclick="showEmail(${i})" style="padding:12px;border-bottom:1px solid rgba(26,35,50,.5);cursor:pointer;border-left:3px solid ${color};-webkit-tap-highlight-color:transparent;" class="email-row-${i}">
+    return`<div onclick="showEmail(${i})" style="padding:12px;border-bottom:1px solid rgba(26,35,50,.5);cursor:pointer;border-left:3px solid ${color};-webkit-tap-highlight-color:transparent;${!e.is_read?'background:rgba(64,156,255,0.05);':''}" class="email-row-${i}">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;">
         <div style="font-size:.75rem;font-weight:${e.is_read?'400':'600'};color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;">${e.from_name||e.from_address||'Unknown'}</div>
         <div style="font-size:.6rem;color:var(--muted);margin-left:8px;flex-shrink:0;">${date}</div>
@@ -5672,6 +5672,15 @@ function filterInbox(acct,btn){
   renderEmailList(filtered);
   const el=document.getElementById('emailList');
   if(el) el.scrollTop=0;
+  if(window.innerWidth <= 700) {
+    const grid = document.getElementById('inboxGrid');
+    if(grid) {
+      const listCol = grid.querySelector('div:first-child');
+      const readCol = document.getElementById('emailPanel');
+      if(listCol) listCol.style.display = 'flex';
+      if(readCol) readCol.style.display = 'none';
+    }
+  }
 }
 
 async function fetchEmailBody(accountId, uid){
@@ -5692,7 +5701,20 @@ function showEmail(idx){
   const panel=document.getElementById('emailPanel');
   if(!panel)return;
   window._currentEmail = e;
-  if(window.innerWidth <= 700) toggleInboxPanel('read');
+  if (!e.is_read) {
+    e.is_read = true;
+    if(window._inboxEmails) { const orig = window._inboxEmails.find(function(m){return m.uid===e.uid&&m.account_email===e.account_email;}); if(orig) orig.is_read=true; }
+    renderEmailList(window._renderedEmails||window._inboxEmails||[]);
+  }
+  if(window.innerWidth <= 700) {
+    const grid = document.getElementById('inboxGrid');
+    if(grid) {
+      const listCol = grid.querySelector('div:first-child');
+      const readCol = document.getElementById('emailPanel');
+      if(listCol) listCol.style.display = 'none';
+      if(readCol) { readCol.style.display = 'flex'; readCol.style.flexDirection = 'column'; }
+    }
+  }
   panel.innerHTML=`
     <div style="padding:14px 18px;border-bottom:1px solid var(--border);">
       <div style="font-size:.9rem;font-weight:600;color:var(--text);margin-bottom:6px;">${e.subject||'(no subject)'}</div>
