@@ -4502,26 +4502,32 @@ async function showAdminStatus(){
     const vd = await vr.json();
     const vel = document.getElementById('vpsStatsCard');
     if(vel && vd) {
-      const cpuColor = vd.cpu >= 80 ? '#f85149' : vd.cpu >= 60 ? '#f0883e' : '#3fb950';
-      const ramColor = vd.ramPct >= 85 ? '#f85149' : vd.ramPct >= 70 ? '#f0883e' : '#3fb950';
-      const diskPctNum = parseInt(vd.diskPct);
+      const cpuPct = vd.cpu?.percent ?? 0;
+      const ramPct = vd.ram?.percent ?? 0;
+      const diskPctNum = vd.disk?.percent ?? 0;
+      const ramUsed = vd.ram?.used ?? 0;
+      const ramTotal = vd.ram?.total ?? 0;
+      const diskUsedGB = Math.round((vd.disk?.used ?? 0) / (1024*1024*1024));
+      const diskTotalGB = Math.round((vd.disk?.total ?? 0) / (1024*1024*1024));
+      const cpuColor = cpuPct >= 80 ? '#f85149' : cpuPct >= 60 ? '#f0883e' : '#3fb950';
+      const ramColor = ramPct >= 85 ? '#f85149' : ramPct >= 70 ? '#f0883e' : '#3fb950';
       const diskColor = diskPctNum >= 85 ? '#f85149' : diskPctNum >= 70 ? '#f0883e' : '#3fb950';
       vel.innerHTML = `
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px;">
           <div style="background:#0d1117;border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center;">
             <div style="font-size:.62rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px;">CPU</div>
-            <div style="font-size:1.3rem;font-weight:700;color:${cpuColor};font-family:var(--mono);">${vd.cpu}%</div>
-            <div style="height:4px;background:var(--border);border-radius:2px;margin-top:6px;"><div style="height:4px;background:${cpuColor};border-radius:2px;width:${Math.min(vd.cpu,100)}%;"></div></div>
+            <div style="font-size:1.3rem;font-weight:700;color:${cpuColor};font-family:var(--mono);">${cpuPct}%</div>
+            <div style="height:4px;background:var(--border);border-radius:2px;margin-top:6px;"><div style="height:4px;background:${cpuColor};border-radius:2px;width:${Math.min(cpuPct,100)}%;"></div></div>
           </div>
           <div style="background:#0d1117;border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center;">
             <div style="font-size:.62rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px;">RAM</div>
-            <div style="font-size:1.3rem;font-weight:700;color:${ramColor};font-family:var(--mono);">${vd.ramPct}%</div>
-            <div style="font-size:.62rem;color:var(--muted);margin-top:2px;">${vd.ramUsed} / ${vd.ramTotal} MB</div>
+            <div style="font-size:1.3rem;font-weight:700;color:${ramColor};font-family:var(--mono);">${ramPct}%</div>
+            <div style="font-size:.62rem;color:var(--muted);margin-top:2px;">${ramUsed} / ${ramTotal} MB</div>
           </div>
           <div style="background:#0d1117;border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center;">
             <div style="font-size:.62rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px;">DISK</div>
-            <div style="font-size:1.3rem;font-weight:700;color:${diskColor};font-family:var(--mono);">${vd.diskPct}</div>
-            <div style="font-size:.62rem;color:var(--muted);margin-top:2px;">${vd.diskUsed} / ${vd.diskTotal}</div>
+            <div style="font-size:1.3rem;font-weight:700;color:${diskColor};font-family:var(--mono);">${diskPctNum}%</div>
+            <div style="font-size:.62rem;color:var(--muted);margin-top:2px;">${diskUsedGB} / ${diskTotalGB} GB</div>
           </div>
         </div>
         <div style="font-family:var(--mono);font-size:.62rem;color:#7f77dd;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;">PM2 PROCESSES</div>
