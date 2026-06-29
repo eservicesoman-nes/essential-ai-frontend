@@ -620,7 +620,7 @@
       <button class="top-btn danger" id="clearBtn" onclick="clearChat()" title="Clear Chat"><i class="ti ti-trash"></i></button>
       <button class="top-btn" onclick="toggleTheme()" title="Toggle Theme"><i class="ti ti-sun"></i></button>
       <div style="width:1px;height:20px;background:var(--border);margin:0 4px;flex-shrink:0;"></div>
-      <button class="top-btn" onclick="showView('deen')" title="Deen دين" style="width:auto;border-radius:20px;padding:0 10px;gap:5px;display:flex;align-items:center;font-size:.72rem;font-weight:600;flex-shrink:0;white-space:nowrap;"><i class="ti ti-moon-stars" style="font-size:14px;"></i><span>Deen</span></button>
+      <button class="top-btn" onclick="showView('deen')" title="Deen دين" style="width:auto;border-radius:20px;padding:0 10px;gap:5px;display:flex;align-items:center;font-size:.72rem;font-weight:600;flex-shrink:0;white-space:nowrap;"><img src="https://deen.nes-ai.com/deen-icon.png" style="width:16px;height:16px;border-radius:3px;object-fit:cover;"><span>Deen</span></button>
     </div>
     <div id="mainContent" style="display:flex;flex-direction:column;height:100%;overflow:hidden;"></div>
   </main>
@@ -2222,7 +2222,7 @@ function renderClientDetail(c,colors,textColors,idx){
     ['ti-mail','email_notifications','Email Notifications','Lead emails to team'],
     ['ti-phone-call','adam_consultant','Apex Advisory','Enterprise voice consultant'],
     ['ti-headset','layla_advisor','Apex Outreach','3-day follow-up calls'],
-    ['ti-moon-stars','islam360','Deen دين','Islamic companion · Quran · Hadith'],
+    ['deen-custom','islam360','Deen دين','Islamic companion · Quran · Hadith'],
   ];
   return`
     <div class="cm-detail">
