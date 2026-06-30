@@ -663,6 +663,15 @@ async function showApp(user){
   document.getElementById('app').style.display='flex';
   document.getElementById('userEmail').textContent=user.email;
   document.getElementById('userInitial').textContent=user.email[0].toUpperCase();
+  // Handle Thawani payment redirect
+  const urlParams=new URLSearchParams(window.location.search);
+  if(urlParams.get('payment')==='success'){
+    setTimeout(()=>showToast('✅ Payment successful! Your account has been updated.'),1000);
+    window.history.replaceState({},document.title,window.location.pathname);
+  } else if(urlParams.get('payment')==='cancelled'){
+    setTimeout(()=>showToast('Payment cancelled.'),1000);
+    window.history.replaceState({},document.title,window.location.pathname);
+  }
   loadLocal();
   loadRecentChats();
   await loadUserRole(user);
