@@ -530,7 +530,7 @@
       </div>
     </div>
 
-    <button class="sb-upgrade" onclick="showPricing()">✦ Upgrade to Pro</button>
+    <button class="sb-upgrade" onclick="showPricing()">✦ Upgrade Plan</button>
 
     <div class="nav-section">
       <div class="nav-label">Workspace</div>
@@ -4886,7 +4886,7 @@ function renderMyCredsForm(creds, client){
     html+='<div style="margin-top:10px;padding:10px 12px;background:#0c1f35;border:1px solid #1a3a6e;border-radius:8px;display:flex;align-items:center;justify-content:space-between;">';
     html+='<div><div style="font-family:var(--mono);font-size:.68rem;color:var(--nes-blue);font-weight:700;">+ 5 more sources</div>';
     html+='<div style="font-size:.68rem;color:var(--muted);">Add custom industry sources</div></div>';
-    html+='<button onclick="showUpgradePopup()" style="background:var(--nes-btn-grad);border:none;border-radius:6px;padding:5px 12px;color:#fff;font-size:.68rem;font-weight:700;cursor:pointer;">Upgrade to Pro</button>';
+    html+='<button onclick="showPricing()" style="background:var(--nes-btn-grad);border:none;border-radius:6px;padding:5px 12px;color:#fff;font-size:.68rem;font-weight:700;cursor:pointer;">Upgrade Plan</button>';
     html+='</div>';
   } else {
     for(var si2=5;si2<10;si2++){
@@ -5007,24 +5007,7 @@ async function saveFeedSources(){
   }catch(e){showToast('Error: '+e.message);}
 }
 
-function showUpgradePopup(){
-  var m=document.createElement('div');
-  m.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;z-index:9999;';
-  m.innerHTML='<div style="background:var(--bg);border:1px solid var(--border);border-radius:16px;padding:28px;width:360px;max-width:95vw;text-align:center;">'+
-    '<div style="font-size:1.8rem;margin-bottom:8px;">⚡</div>'+
-    '<div style="font-family:var(--mono);font-size:.7rem;color:var(--nes-blue);font-weight:800;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;">Upgrade to Pro</div>'+
-    '<div style="font-size:.85rem;color:var(--text);font-weight:600;margin-bottom:16px;">Unlock 10 custom feed sources</div>'+
-    '<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:16px;text-align:left;">'+
-    '<div style="font-size:.78rem;color:var(--muted);margin-bottom:8px;">Pro includes:</div>'+
-    '<div style="font-size:.78rem;color:var(--text);line-height:2;">✅ 10 custom feed sources<br>✅ Priority Intelligence Alerts every 4 hours<br>✅ 10 team users<br>✅ Daily social media posts<br>✅ Own Sara AI phone number<br>✅ 30 days lead history</div>'+
-    '</div>'+
-    '<div style="font-size:1.4rem;font-weight:800;color:var(--nes-blue);margin-bottom:4px;">OMR 35<span style="font-size:.75rem;font-weight:400;color:var(--muted);">/month</span></div>'+
-    '<div style="display:flex;gap:8px;margin-top:16px;">'+
-    '<button onclick="upgradeContact()" style="flex:1;background:var(--nes-btn-grad);border:none;border-radius:8px;padding:10px;color:#fff;font-weight:700;cursor:pointer;font-size:.82rem;">Contact Us \u2192</button>'+
-    '<button onclick="closeUpgradePopup()" style="flex:1;background:none;border:1px solid var(--border);border-radius:8px;padding:10px;color:var(--muted);cursor:pointer;font-size:.82rem;">Maybe later</button>'+
-    '</div></div>';
-  document.body.appendChild(m);
-}
+function showUpgradePopup(){ showPricing(); }
 
 function showPricing(){
   const mc=document.getElementById('mainContent');
@@ -6063,7 +6046,7 @@ window.showEmail = async function(idx){
   }
 };
 window.sendReply=sendReply;
-window.upgradeContact=function(){document.querySelectorAll('div[style*="position:fixed"]').forEach(function(el){if(el.querySelector('.ti-check'))el.remove();});window.location.href='mailto:office@essential-services.org?subject=Upgrade to Pro';};
+window.upgradeContact=function(){document.querySelectorAll('div[style*="position:fixed"]').forEach(function(el){if(el.querySelector('.ti-check'))el.remove();});window.location.href='mailto:office@essential-services.org?subject=Upgrade Plan Request';};
 window.closeUpgradePopup=function(){document.querySelectorAll('div[style*="position:fixed"]').forEach(function(el){if(el.style.zIndex==='9999')el.remove();});};
 window.loadClientUsers=loadClientUsers;window.showInviteUserForm=showInviteUserForm;window.sendClientInvite=sendClientInvite;window.removeClientUser=removeClientUser;
 
