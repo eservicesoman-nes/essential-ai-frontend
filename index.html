@@ -2109,7 +2109,7 @@ async function onboardClient(clientId, clientName){
     const payload={
       client_id:clientId,
       client_name:clientName,
-      plan:client.plan||'starter',
+      plan:client.plan||'presence',
       industry:client.industry||'General Business',
       region:client.region||'Oman',
       email:client.email||'',
@@ -2231,7 +2231,7 @@ function renderClientDetail(c,colors,textColors,idx){
           <div class="cm-av" style="background:${colors[idx%5]};color:${textColors[idx%5]};">${(c.name||'?').substring(0,2).toUpperCase()}</div>
           <div>
             <div class="cm-name">${c.name}</div>
-            <span class="cm-plan ${c.plan==='growth'?'plan-g':c.plan==='enterprise'?'plan-e':'plan-s'}">${c.plan==='growth'?'Pro':c.plan||'starter'}</span>
+            <span class="cm-plan ${c.plan==='operations'?'plan-g':c.plan==='workforce'?'plan-e':'plan-s'}">${c.plan||'presence'}</span>
           </div>
         </div>
         <div class="cm-actions">
@@ -2246,7 +2246,7 @@ function renderClientDetail(c,colors,textColors,idx){
         </div>
       </div>
       <div class="cm-stats">
-        <div class="cm-stat"><div class="cs-lbl">Plan</div><div class="cs-val" style="font-size:.85rem;text-transform:capitalize;">${c.plan||'starter'}</div></div>
+        <div class="cm-stat"><div class="cs-lbl">Plan</div><div class="cs-val" style="font-size:.85rem;text-transform:capitalize;">${c.plan||'presence'}</div></div>
         <div class="cm-stat"><div class="cs-lbl">Status</div><div class="cs-val" style="font-size:.85rem;color:${c.status==='active'?'#3fb950':'#d29922'}">${c.status||'active'}</div></div>
         <div class="cm-stat"><div class="cs-lbl">Industry</div><div class="cs-val" style="font-size:.85rem;">${c.industry||'—'}</div></div>
         <div class="cm-stat"><div class="cs-lbl">Region</div><div class="cs-val" style="font-size:.85rem;">${c.region||'—'}</div></div>
@@ -2699,9 +2699,10 @@ function clientFormFields(c={}){
     <div class="form-grid">
       <div class="form-field"><label class="form-label">Plan</label>
         <select id="field_plan" class="form-select">
-          <option value="starter" ${c.plan==='starter'?'selected':''}>Starter</option>
-          <option value="growth" ${c.plan==='growth'?'selected':''}>Pro</option>
-          <option value="enterprise" ${c.plan==='enterprise'?'selected':''}>Enterprise</option>
+          <option value="presence" ${c.plan==='presence'?'selected':''}>AI Presence</option>
+          <option value="operations" ${c.plan==='operations'?'selected':''}>AI Operations</option>
+          <option value="workforce" ${c.plan==='workforce'?'selected':''}>AI Workforce</option>
+          <option value="infrastructure" ${c.plan==='infrastructure'?'selected':''}>AI Infrastructure</option>
         </select>
       </div>
       <div class="form-field"><label class="form-label">Status</label>
@@ -2797,9 +2798,9 @@ async function updateClient(clientId){
 }
 
 function showSignoff(clientId, clientName, plan, monthlyFee, trialStart, trialDays) {
-  const planLabels = { presence: 'AI Presence', operations: 'AI Operations', workforce: 'AI Workforce', starter: 'AI Starter', growth: 'AI Growth', pro: 'AI Pro' };
+  const planLabels = { presence: 'AI Presence', operations: 'AI Operations', workforce: 'AI Workforce', infrastructure: 'AI Infrastructure' };
   const planLabel = planLabels[plan] || plan || 'NES AI Plan';
-  const fee = parseFloat(monthlyFee) || (plan==='workforce'||plan==='pro' ? 149 : plan==='operations'||plan==='growth' ? 79 : 29);
+  const fee = parseFloat(monthlyFee) || (plan==='workforce' ? 149 : plan==='operations' ? 79 : plan==='infrastructure' ? 299 : 29);
   const vat = (fee * 0.05).toFixed(3);
   const total = (fee + parseFloat(vat)).toFixed(3);
 
@@ -3357,7 +3358,7 @@ async function loadAnalytics(days){
       const p = (c.plan||'').toLowerCase();
       if(p.includes('operations')) planCounts.operations++;
       else if(p.includes('workforce')) planCounts.workforce++;
-      else if(p.includes('infrastructure')||p.includes('enterprise')) planCounts.infrastructure++;
+      else if(p.includes('infrastructure')) planCounts.infrastructure++;
       else planCounts.presence++;
     });
 
@@ -3373,7 +3374,7 @@ async function loadAnalytics(days){
       const p=(c.plan||'').toLowerCase();
       if(p.includes('operations')) return s+79;
       if(p.includes('workforce')) return s+149;
-      if(p.includes('infrastructure')||p.includes('enterprise')) return s+299;
+      if(p.includes('infrastructure')) return s+299;
       return s+29;
     }, 0);
 
@@ -3480,7 +3481,7 @@ async function loadAnalytics(days){
         ${clients.length === 0 ? '<div style="color:var(--muted);font-size:.72rem;">No clients yet</div>' :
           clients.map(cl => {
             const p=(cl.plan||'').toLowerCase();
-            const val=p.includes('operations')?79:p.includes('workforce')?149:p.includes('infrastructure')||p.includes('enterprise')?299:29;
+            const val=p.includes('operations')?79:p.includes('workforce')?149:p.includes('infrastructure')?299:29;
             const color=cl.status==='active'?'#3fb950':'#d29922';
             const clientLeads = leads.filter(l=>l.client_id===cl.id).length;
             const initials=(cl.name||'?').split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
@@ -3488,7 +3489,7 @@ async function loadAnalytics(days){
               <div style="width:30px;height:30px;border-radius:7px;background:var(--blue-dim);display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;color:var(--nes-blue);flex-shrink:0;">${initials}</div>
               <div style="flex:1;">
                 <div style="font-size:.78rem;font-weight:600;">${cl.name}</div>
-                <div style="font-size:.62rem;color:var(--muted);">${cl.plan||'starter'} · ${cl.status}</div>
+                <div style="font-size:.62rem;color:var(--muted);">${cl.plan||'presence'} · ${cl.status}</div>
               </div>
               <div style="text-align:right;">
                 <div style="font-size:.75rem;font-weight:600;color:var(--nes-blue);">OMR ${val}/mo</div>
@@ -3639,7 +3640,7 @@ async function loadTeam(){
                 onmouseover="this.style.borderColor='#409cff'" onmouseout="this.style.borderColor='var(--border)'">
                 <div>
                   <div style="font-size:.82rem;color:#e6edf3;font-weight:600;">${c.name}</div>
-                  <div style="font-size:.68rem;color:var(--muted);margin-top:2px;">${c.plan||'starter'} · ${c.status||'active'}</div>
+                  <div style="font-size:.68rem;color:var(--muted);margin-top:2px;">${c.plan||'presence'} · ${c.status||'active'}</div>
                 </div>
                 <i class="ti ti-chevron-right" style="color:var(--muted);font-size:14px;"></i>
               </div>`).join('')}
@@ -3892,7 +3893,7 @@ async function renderPartnerHub(){
     const p = (plan||'').toLowerCase();
     if(p.includes('workforce')) return 149;
     if(p.includes('operations')) return 79;
-    if(p.includes('presence')||p.includes('starter')) return 29;
+    if(p.includes('presence')) return 29;
     return 79;
   };
 
@@ -4866,8 +4867,8 @@ function renderMyCredsForm(creds, client){
       html+='</div></div>';
     });
   });
-  const isPro=(client.plan==='pro'||client.plan==='enterprise'||client.plan==='growth');
-  const isEnterprise=client.plan==='enterprise';
+  const isPro=(client.plan==='operations'||client.plan==='workforce'||client.plan==='infrastructure');
+  const isEnterprise=client.plan==='infrastructure';
   const maxSources=isEnterprise?10:isPro?10:5;
   const savedSources=client.feed_urls&&client.feed_urls.length?client.feed_urls:[];
   const defaultSources=['https://timesofoman.com/rss','https://omanobserver.om/feed','https://www.arabianbusiness.com/rss','https://www.zawya.com/rss/technology','https://gulfnews.com/rss/technology'];
@@ -5835,7 +5836,7 @@ async function sendReply(to, originalSubject){
 
 function addEmailForm(){
   const clientId = window._activeClientId;
-  const planLimits = {presence:2, operations:5, workforce:10, infrastructure:99, starter:2, growth:5, enterprise:99};
+  const planLimits = {presence:2, operations:5, workforce:10, infrastructure:99};
   const client = (window._clients||[]).find(c=>c.id===clientId);
   const plan = (client?.plan||'presence').toLowerCase();
   const limit = planLimits[plan]||2;
@@ -5885,7 +5886,7 @@ function addEmailForm(){
 
 function updateAddBtn(){
   const clientId = window._activeClientId;
-  const planLimits = {presence:2, operations:5, workforce:10, infrastructure:99, starter:2, growth:5, enterprise:99};
+  const planLimits = {presence:2, operations:5, workforce:10, infrastructure:99};
   const client = (window._clients||[]).find(c=>c.id===clientId);
   const plan = (client?.plan||'presence').toLowerCase();
   const limit = planLimits[plan]||2;
