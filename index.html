@@ -538,6 +538,7 @@
         <div class="nav-item active" data-view="chat"><i class="ti ti-message-2"></i><span>Ask <span style="color:#409cff;">NES</span><span style="color:#fff;">AI</span></span></div>
         <div class="nav-item" data-view="docs"><i class="ti ti-notes"></i><span>Documents</span></div>
         <div class="nav-item" data-view="image"><i class="ti ti-photo"></i><span>Image Gen</span><span class="nav-badge nb-blue" style="cursor:pointer;" onclick="event.stopPropagation();showView('image');setTimeout(openCreditsModal,50);">PAYG</span></div>
+        <div class="nav-item" onclick="openVoiceTopupModal()"><i class="ti ti-phone-call"></i><span>Sara Top-up</span><span class="nav-badge nb-green" style="cursor:pointer;">PAYG</span></div>
       </div>
     </div>
 
@@ -5191,11 +5192,57 @@ function showModal(title,bodyHtml){
   </div>`;
   document.body.appendChild(overlay);
 }
-function openCreditsModal(){
-  const packs=[{n:50,p:5},{n:200,p:18},{n:500,p:40}];
+function openVoiceTopupModal(){
+  const packs=[
+    {min:50,p:18,label:'Starter Bundle'},
+    {min:150,p:45,label:'Standard Bundle'},
+    {min:400,p:99,label:'Power Bundle'}
+  ];
   const packsHtml=packs.map(pk=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px;">
-    <span><b>${pk.n}</b> credits</span><span style="color:var(--muted);">OMR ${pk.p}</span>
-    <button class="act-btn" style="opacity:.5;cursor:not-allowed;" disabled>Coming soon</button>
+    <div><div style="font-weight:700;font-size:.85rem;">${pk.label}</div><div style="font-size:.75rem;color:var(--muted);">${pk.min} minutes · never expire</div></div>
+    <span style="font-weight:700;color:var(--nes-blue);">OMR ${pk.p}</span>
+    <button class="act-btn" onclick="buyVoiceTopup(${pk.min},${pk.p},'${pk.label}')">Buy Now</button>
+  </div>`).join('');
+  const html=`<div style="padding:4px 0;">
+    <p style="color:var(--muted);font-size:.85rem;margin-bottom:14px;">Top up Sara's call allowance when your monthly limit runs low. Minutes are added instantly and never expire.</p>
+    ${packsHtml}
+    <p style="color:var(--muted);font-size:.75rem;margin-top:10px;">Payments processed securely via Thawani. Minutes added to your account automatically after payment.</p>
+  </div>`;
+  showModal('Sara Voice Top-up',html);
+}
+async function buyVoiceTopup(minutes,price,label){
+  const btn=event.target;
+  btn.disabled=true;btn.textContent='Processing...';
+  try{
+    const res=await fetch(API_URL+'/api/thawani/create-session',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+window._token},
+      body:JSON.stringify({
+        amount:price,
+        clientName:window.clientName||'Client',
+        clientId:window.userClientId,
+        description:`NES AI Sara Voice Top-up — ${label} (${minutes} minutes)`,
+        metadata:{type:'voice_topup',minutes,clientId:window.userClientId}
+      })
+    });
+    const data=await res.json();
+    if(data.checkout_url){
+      window.location.href=data.checkout_url;
+    } else {
+      alert('Payment error: '+(data.error||'Unknown error'));
+      btn.disabled=false;btn.textContent='Buy Now';
+    }
+  }catch(e){
+    alert('Connection error. Please try again.');
+    btn.disabled=false;btn.textContent='Buy Now';
+  }
+}
+function openCreditsModal(){
+  const packs=[{n:50,p:5,label:'Starter'},{n:200,p:18,label:'Standard'},{n:500,p:40,label:'Value'}];
+  const packsHtml=packs.map(pk=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px;">
+    <div><div style="font-weight:700;font-size:.85rem;">${pk.label}</div><div style="font-size:.75rem;color:var(--muted);">${pk.n} credits · never expire</div></div>
+    <span style="font-weight:700;color:var(--nes-blue);">OMR ${pk.p}</span>
+    <button class="act-btn" onclick="buyImageCredits(${pk.n},${pk.p},'${pk.label}')">Buy Now</button>
   </div>`).join('');
   const trialEnded=imageCredits.freeAllowanceActive===false;
   const statusHtml=trialEnded
@@ -5205,9 +5252,36 @@ function openCreditsModal(){
     <p style="color:var(--muted);font-size:.85rem;margin-bottom:14px;">Every plan includes 3 free images per day during your trial. Need more? Top up with a credit pack — each credit generates one extra image, and credits never expire.</p>
     ${statusHtml}
     ${packsHtml}
-    <p style="color:var(--muted);font-size:.75rem;margin-top:10px;">Credit pack purchases are launching soon. Contact us if you'd like early access.</p>
+    <p style="color:var(--muted);font-size:.75rem;margin-top:10px;">Payments processed securely via Thawani. Credits added to your account automatically after payment.</p>
   </div>`;
   showModal('Image Credits',html);
+}
+async function buyImageCredits(credits,price,label){
+  const btn=event.target;
+  btn.disabled=true;btn.textContent='Processing...';
+  try{
+    const res=await fetch('/api/thawani/create-session',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+window._token},
+      body:JSON.stringify({
+        amount:price,
+        clientName:window.clientName||'Client',
+        clientId:window.userClientId,
+        description:`NES AI Image Credits — ${label} Pack (${credits} credits)`,
+        metadata:{type:'image_credits',credits,clientId:window.userClientId}
+      })
+    });
+    const data=await res.json();
+    if(data.checkout_url){
+      window.location.href=data.checkout_url;
+    } else {
+      alert('Payment error: '+(data.error||'Unknown error'));
+      btn.disabled=false;btn.textContent='Buy Now';
+    }
+  }catch(e){
+    alert('Connection error. Please try again.');
+    btn.disabled=false;btn.textContent='Buy Now';
+  }
 }
 (function(){
   let startY=0, startTime=0, pulling=false;
