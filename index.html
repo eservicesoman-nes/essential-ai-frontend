@@ -5230,7 +5230,7 @@ async function buyVoiceTopup(minutes,price,label){
         amount:price,
         clientName:document.getElementById('userEmail')?.textContent||'Client',
         clientId:userClientId,
-        description:`NES AI Sara Voice Top-up — ${label} (${minutes} minutes)`,
+        description:`Sara Top-up ${minutes}min`,
         metadata:{type:'voice_topup',minutes,clientId:userClientId}
       })
     });
@@ -5276,7 +5276,7 @@ async function buyImageCredits(credits,price,label){
         amount:price,
         clientName:document.getElementById('userEmail')?.textContent||'Client',
         clientId:userClientId,
-        description:`NES AI Image Credits — ${label} Pack (${credits} credits)`,
+        description:`Image Credits ${credits}cr`,
         metadata:{type:'image_credits',credits,clientId:userClientId}
       })
     });
