@@ -5225,7 +5225,7 @@ async function buyVoiceTopup(minutes,price,label){
   try{
     const res=await fetch(API_URL+'/api/thawani/create-session',{
       method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':'Bearer '+window._token},
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
       body:JSON.stringify({
         amount:price,
         clientName:window.clientName||'Client',
@@ -5269,9 +5269,9 @@ async function buyImageCredits(credits,price,label){
   const btn=event.target;
   btn.disabled=true;btn.textContent='Processing...';
   try{
-    const res=await fetch('/api/thawani/create-session',{
+    const res=await fetch(API_URL+'/api/thawani/create-session',{
       method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':'Bearer '+window._token},
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
       body:JSON.stringify({
         amount:price,
         clientName:window.clientName||'Client',
