@@ -5228,10 +5228,10 @@ async function buyVoiceTopup(minutes,price,label){
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
       body:JSON.stringify({
         amount:price,
-        clientName:window.clientName||'Client',
-        clientId:window.userClientId,
+        clientName:document.getElementById('userEmail')?.textContent||'Client',
+        clientId:userClientId,
         description:`NES AI Sara Voice Top-up — ${label} (${minutes} minutes)`,
-        metadata:{type:'voice_topup',minutes,clientId:window.userClientId}
+        metadata:{type:'voice_topup',minutes,clientId:userClientId}
       })
     });
     const data=await res.json();
@@ -5274,10 +5274,10 @@ async function buyImageCredits(credits,price,label){
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
       body:JSON.stringify({
         amount:price,
-        clientName:window.clientName||'Client',
-        clientId:window.userClientId,
+        clientName:document.getElementById('userEmail')?.textContent||'Client',
+        clientId:userClientId,
         description:`NES AI Image Credits — ${label} Pack (${credits} credits)`,
-        metadata:{type:'image_credits',credits,clientId:window.userClientId}
+        metadata:{type:'image_credits',credits,clientId:userClientId}
       })
     });
     const data=await res.json();
