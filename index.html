@@ -859,10 +859,20 @@ function setupNavForRole(){
       if(myCredsNav)myCredsNav.style.display='flex';
     }
     const deenNavEl = document.getElementById('deenNav');
-    if(deenNavEl) deenNavEl.style.display='flex';
     const inboxNavEl = document.getElementById('inboxNav');
     if(inboxNavEl) inboxNavEl.style.display='flex';
-    showClientBrandingChip();
+    showClientBrandingChip().then(()=>{
+      const mods = window.clientModules || {};
+      const ceoNavEl = document.querySelector('[data-view="ceo"]');
+      const commandNavEl = document.querySelector('[data-view="command"]');
+      const intelNavEl = document.querySelector('[data-view="intel"]');
+      const imageNavEl = document.querySelector('[data-view="image"]');
+      if(ceoNavEl && mods.ceo_dashboard === false) ceoNavEl.style.display='none';
+      if(commandNavEl && mods.nes_command === false) commandNavEl.style.display='none';
+      if(intelNavEl && mods.intel_feed === false) intelNavEl.style.display='none';
+      if(imageNavEl && mods.image_gen === false) imageNavEl.style.display='none';
+      if(deenNavEl) deenNavEl.style.display = mods.islam360 !== false ? 'flex' : 'none';
+    });
   } else {
     if(['nesadmin','ceo','manager'].includes(userRole))intel.style.display='block';
     if(!['nesadmin','ceo'].includes(userRole)&&ceoNav)ceoNav.style.display='none';
@@ -888,11 +898,12 @@ function setupNavForRole(){
 
 async function showClientBrandingChip(){
   try{
-    const{data}=await sb.from('clients').select('name,primary_color,logo_url,plan').eq('id',userClientId).single();
+    const{data}=await sb.from('clients').select('name,primary_color,logo_url,plan,modules').eq('id',userClientId).single();
     if(!data)return;
     const chip=document.getElementById('roleChip');
     if(chip&&data.name)chip.textContent=data.name;
     if(data.plan)window.clientPlan=data.plan;
+    window.clientModules = data.modules || {};
     if(data.primary_color){
       document.documentElement.style.setProperty('--nes-blue',data.primary_color);
       window.userPlan = data.plan || '';
@@ -1132,6 +1143,20 @@ function bindNav(){
 }
 
 function showView(view){
+  // Module access enforcement
+  if(userClientId && window.clientModules){
+    const mods = window.clientModules;
+    const blocked = {
+      'ceo': mods.ceo_dashboard === false,
+      'command': mods.nes_command === false,
+      'intel': mods.intel_feed === false,
+      'image': mods.image_gen === false,
+    };
+    if(blocked[view]){
+      showToast('This module is not included in your current plan. Contact NES AI to upgrade.');
+      return;
+    }
+  }
   // Always hide sidebar overlay on any view change
   const _ov=document.getElementById('sidebarOverlay');
   if(_ov){_ov.style.display='none';_ov.style.pointerEvents='none';_ov.style.opacity='0';}
