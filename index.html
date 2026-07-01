@@ -5208,8 +5208,7 @@ function openVoiceTopupModal(){
     {min:400,p:99,label:'Power Bundle'}
   ];
   const packsHtml=packs.map(pk=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px;">
-    <div><div style="font-weight:700;font-size:.85rem;">${pk.label}</div><div style="font-size:.75rem;color:var(--muted);">${pk.min} minutes · never expire</div></div>
-    <span style="font-weight:700;color:var(--nes-blue);">OMR ${pk.p}</span>
+    <div><div style="font-weight:700;font-size:.85rem;">${pk.label}</div><div style="font-size:.75rem;color:var(--muted);">${pk.min} minutes · never expire</div><div style="font-size:.7rem;color:var(--muted);">OMR ${pk.p} + 5% VAT = OMR ${(pk.p*1.05).toFixed(3)}</div></div>
     <button class="act-btn" onclick="buyVoiceTopup(${pk.min},${pk.p},'${pk.label}')">Buy Now</button>
   </div>`).join('');
   const html=`<div style="padding:4px 0;">
@@ -5222,12 +5221,14 @@ function openVoiceTopupModal(){
 async function buyVoiceTopup(minutes,price,label){
   const btn=event.target;
   btn.disabled=true;btn.textContent='Processing...';
+  const vatAmount=Math.round(price*0.05*100)/100;
+  const totalAmount=Math.round((price+vatAmount)*100)/100;
   try{
     const res=await fetch(API_URL+'/api/thawani/create-session',{
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
       body:JSON.stringify({
-        amount:price,
+        amount:totalAmount,
         clientName:document.getElementById('userEmail')?.textContent||'Client',
         clientId:userClientId,
         description:`Sara Top-up ${minutes}min`,
@@ -5249,8 +5250,7 @@ async function buyVoiceTopup(minutes,price,label){
 function openCreditsModal(){
   const packs=[{n:50,p:5,label:'Starter'},{n:200,p:18,label:'Standard'},{n:500,p:40,label:'Value'}];
   const packsHtml=packs.map(pk=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px;">
-    <div><div style="font-weight:700;font-size:.85rem;">${pk.label}</div><div style="font-size:.75rem;color:var(--muted);">${pk.n} credits · never expire</div></div>
-    <span style="font-weight:700;color:var(--nes-blue);">OMR ${pk.p}</span>
+    <div><div style="font-weight:700;font-size:.85rem;">${pk.label}</div><div style="font-size:.75rem;color:var(--muted);">${pk.n} credits · never expire</div><div style="font-size:.7rem;color:var(--muted);">OMR ${pk.p} + 5% VAT = OMR ${(pk.p*1.05).toFixed(3)}</div></div>
     <button class="act-btn" onclick="buyImageCredits(${pk.n},${pk.p},'${pk.label}')">Buy Now</button>
   </div>`).join('');
   const trialEnded=imageCredits.freeAllowanceActive===false;
@@ -5268,12 +5268,14 @@ function openCreditsModal(){
 async function buyImageCredits(credits,price,label){
   const btn=event.target;
   btn.disabled=true;btn.textContent='Processing...';
+  const vatAmount=Math.round(price*0.05*100)/100;
+  const totalAmount=Math.round((price+vatAmount)*100)/100;
   try{
     const res=await fetch(API_URL+'/api/thawani/create-session',{
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
       body:JSON.stringify({
-        amount:price,
+        amount:totalAmount,
         clientName:document.getElementById('userEmail')?.textContent||'Client',
         clientId:userClientId,
         description:`Image Credits ${credits}cr`,
