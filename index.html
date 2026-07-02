@@ -2271,7 +2271,7 @@ function renderClientDetail(c,colors,textColors,idx){
         </div>
         <div class="cm-actions">
           <button class="cm-btn" onclick="showEditClientForm('${c.id}')"><i class="ti ti-edit" style="font-size:12px"></i> Edit</button>
-          <button class="cm-btn" onclick="alert('Billing — Stripe integration coming soon')"><i class="ti ti-credit-card" style="font-size:12px"></i> Billing</button>
+          <button class="cm-btn" onclick="window._activeClientId='${c.id}';window._activeTab='billing';showClientManager()"><i class="ti ti-credit-card" style="font-size:12px"></i> Billing</button>
           <button class="cm-btn" style="background:rgba(64,156,255,0.1);color:#409cff;border:1px solid rgba(64,156,255,0.3);" onclick="showSignoff('${c.id}','${(c.name||'').replace(/'/g,'')}','${c.plan||''}','${c.monthly_fee||''}','${c.trial_start||''}','${c.trial_duration_days||7}')"><i class="ti ti-file-text" style="font-size:12px"></i> Sign-off</button>
           <button class="cm-btn" style="background:rgba(210,153,34,0.15);color:#d29922;border:1px solid rgba(210,153,34,0.3);" onclick="requestCancellation('${c.id}','${(c.name||'').replace(/'/g,'')}')"><i class="ti ti-x" style="font-size:12px"></i> Cancel Sub</button>
           <button class="cm-btn danger" onclick="deleteClient('${c.id}')"><i class="ti ti-trash" style="font-size:12px"></i> Delete</button>
