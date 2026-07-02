@@ -2116,11 +2116,8 @@ async function onboardClient(clientId, clientName){
     const{data:client,error:ce}=await sb.from('clients').select('*').eq('id',clientId).single();
     if(ce||!client)throw new Error('Client not found');
 
-    const{error:se}=await sb.from('clients').update({
-      status:'active',
-      trial_start:new Date().toISOString()
-    }).eq('id',clientId);
-    if(se)throw new Error('Status update failed: '+se.message);
+    const r_so=await fetch(API_URL+'/api/admin/update-client/'+clientId,{method:'PATCH',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify({status:'active',trial_start:new Date().toISOString()})});
+    if(!r_so.ok)throw new Error('Status update failed');
 
     let loginInfo='';
     if(!client.user_id){
@@ -2545,7 +2542,7 @@ async function saveClientCreds(id){
 async function saveClientBranding(id){
   const data={};
   document.querySelectorAll('#cm-branding [data-field]').forEach(el=>{data[el.dataset.field]=el.value.trim();});
-  try{await sb.from('clients').update(data).eq('id',id);showToast('Branding saved');}catch(e){alert('Error: '+e.message);}
+  try{const r=await fetch(API_URL+'/api/admin/client/'+id+'/branding',{method:'PATCH',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify(data)});if(!r.ok)throw new Error((await r.json()).error);showToast('Branding saved');}catch(e){alert('Error: '+e.message);}
 }
 async function saveClientAgents(id){
   const settings={};
@@ -2567,7 +2564,7 @@ async function saveClientAgents(id){
 async function saveClientBilling(id){
   const data={};
   document.querySelectorAll('#cm-billing [data-field]').forEach(el=>{data[el.dataset.field]=el.value.trim();});
-  try{await sb.from('clients').update(data).eq('id',id);showToast('Billing saved');}catch(e){alert('Error: '+e.message);}
+  try{const r=await fetch(API_URL+'/api/admin/client/'+id+'/billing',{method:'PATCH',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify(data)});if(!r.ok)throw new Error((await r.json()).error);showToast('Billing saved');}catch(e){alert('Error: '+e.message);}
 }
 
 async function recordClientPayment(clientId){
@@ -2638,7 +2635,7 @@ async function loadPaymentHistory(clientId){
 async function saveClientModules(clientId){
   const toggles=document.querySelectorAll('.toggle[data-module]');
   const modules={};toggles.forEach(t=>{modules[t.dataset.module]=t.classList.contains('on');});
-  try{await sb.from('clients').update({modules}).eq('id',clientId);showToast('Modules saved');}catch(e){alert('Error: '+e.message);}
+  try{const r=await fetch(API_URL+'/api/admin/client/'+clientId+'/modules',{method:'PATCH',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify({modules})});if(!r.ok)throw new Error((await r.json()).error);showToast('Modules saved');}catch(e){alert('Error: '+e.message);}
 }
 
 async function selectClientDB(id){
@@ -3935,7 +3932,7 @@ async function removeTeamMember(userId, clientId){
 function showAddDeptModal(){
   const name = prompt('Department name:');
   if(!name||!name.trim()) return;
-  sb.from('departments').insert({client_id:window.userClientId,name:name.trim(),permissions:[],is_default:false})
+  fetch(API_URL+'/api/admin/client/'+window.userClientId+'/department',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify({name:name.trim()})})
     .then(({error})=>{ if(!error){ showToast('Department added ✓'); loadTeam(); } else showToast('Failed: '+error.message); });
 }
 
@@ -4386,15 +4383,9 @@ async function approvePendingPartner(id, name, email) {
   const rand = Math.random().toString(36).slice(-4).toUpperCase();
   const ref_code = tier.toUpperCase().slice(0,4) + '-' + refInitials + '-' + rand;
 
-  const { error } = await sb.from('partners').update({
-    tier,
-    status: 'agreement_pending',
-    ref_code,
-    agreement_token: token,
-    agreement_sent_at: new Date().toISOString()
-  }).eq('id', id);
-
-  if (error) { showToast('Error: ' + error.message); return; }
+  const { error } = {error:null};
+  const r_upd = await fetch(API_URL+'/api/admin/partner/'+id,{method:'PATCH',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify({tier,status:'agreement_pending',ref_code,agreement_token:token,agreement_sent_at:new Date().toISOString()})});
+  if (!r_upd.ok) { showToast('Error updating partner'); return; }
 
   // Send agreement email via n8n
   try {
@@ -4425,7 +4416,7 @@ async function approvePendingPartner(id, name, email) {
 async function rejectPendingPartner(id, name) {
   const reason = prompt('Reason for rejection (optional — will be included in email):');
   if (reason === null) return;
-  const { error } = await sb.from('partners').update({ status: 'rejected' }).eq('id', id);
+  const r_rej=await fetch(API_URL+'/api/admin/partner/'+id,{method:'PATCH',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify({status:'rejected'})});const { error } = r_rej.ok?{}:{message:'Failed'};
   if (error) { showToast('Error: ' + error.message); return; }
 
   try {
@@ -4458,16 +4449,8 @@ async function addPartner(){
   const rand = Math.random().toString(36).slice(-4).toUpperCase();
   const ref_code = `${tier.toUpperCase().slice(0,4)}-${initials}-${rand}`;
 
-  const { error } = await sb.from('partners').insert({
-    name, email, phone, tier, ref_code,
-    custom_rate: customRate ? parseFloat(customRate) : null,
-    custom_type: customType || null,
-    custom_duration_months: customMonths ? parseInt(customMonths) : null,
-    custom_notes: customNotes || null,
-    status: 'active'
-  });
-
-  if(error){ err.textContent = error.message; err.style.display='block'; return; }
+  const r_ins = await fetch(API_URL+'/api/admin/partner',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify({name,email,phone,tier,ref_code,custom_rate:customRate?parseFloat(customRate):null,custom_type:customType||null,custom_duration_months:customMonths?parseInt(customMonths):null,custom_notes:customNotes||null,status:'active'})});
+  if(!r_ins.ok){ const ed=await r_ins.json();err.textContent=ed.error||'Failed';err.style.display='block'; return; }
   // Send agreement email via n8n
   try {
     await fetch('https://n8n.essential-services.org/webhook/partner-agreement', {
@@ -4483,12 +4466,12 @@ async function addPartner(){
 }
 
 async function updateCommissionStatus(id, status){
-  const { error } = await sb.from('partner_commissions').update({status, payment_date: status==='paid'?new Date().toISOString().split('T')[0]:null}).eq('id',id);
-  if(!error){ showToast('Commission '+status+' ✓'); await renderPartnerHub(); switchPhTab('commissions', null); }
+  const r_cs=await fetch(API_URL+'/api/admin/commission/'+id,{method:'PATCH',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify({status,payment_date:status==='paid'?new Date().toISOString().split('T')[0]:null})});
+  if(r_cs.ok){ showToast('Commission '+status+' ✓'); await renderPartnerHub(); switchPhTab('commissions', null); }
 }
 
 async function approveCommissions(partnerId){
-  const { error } = await sb.from('partner_commissions').update({status:'approved'}).eq('partner_id',partnerId).eq('status','pending');
+  const r_app=await fetch(API_URL+'/api/admin/commissions/approve/'+partnerId,{method:'PATCH',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token}});const { error } = r_app.ok?{}:{message:'Failed'};
   if(!error){ showToast('All pending commissions approved ✓'); await renderPartnerHub(); switchPhTab('commissions',null); }
 }
 
@@ -4499,11 +4482,8 @@ async function editPartner(id){
   if(newRate === null) return;
   const newNotes = prompt(`Notes/terms (current: ${p.custom_notes||'none'})`);
   if(newNotes === null) return;
-  const { error } = await sb.from('partners').update({
-    custom_rate: newRate ? parseFloat(newRate) : null,
-    custom_notes: newNotes || null
-  }).eq('id',id);
-  if(!error){ showToast('Partner updated ✓'); await renderPartnerHub(); }
+  const r_pr=await fetch(API_URL+'/api/admin/partner/'+id,{method:'PATCH',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify({custom_rate:newRate?parseFloat(newRate):null,custom_notes:newNotes||null})});
+  if(r_pr.ok){ showToast('Partner updated ✓'); await renderPartnerHub(); }
 }
 
 function filterCommissions(){
@@ -5089,7 +5069,7 @@ async function saveFeedSources(){
     if(el&&el.value.trim())sources.push(el.value.trim());
   }
   try{
-    const{error}=await sb.from('clients').update({feed_urls:sources}).eq('id',userClientId);
+    const r=await fetch(API_URL+'/api/admin/client/'+userClientId+'/feed-urls',{method:'PATCH',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify({feed_urls:sources})});const{error}=r.ok?{}:{message:(await r.json()).error};
     if(error)throw error;
     showToast('Feed sources saved ✓');
   }catch(e){showToast('Error: '+e.message);}
