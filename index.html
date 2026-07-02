@@ -2821,7 +2821,18 @@ async function saveNewClient(){
   const data=getFormData();if(!data.name){alert('Company name is required');return;}
   if(!data.modules)data.modules={islam360:true};
   const btn=document.querySelector('.form-submit');if(btn){btn.disabled=true;btn.textContent='Creating...';}
-  try{const{error}=await sb.from('clients').insert([data]);if(error)throw error;window._activeClientId=null;await showClientManager();showToast('Client created');}
+  try{
+    const r=await fetch(API_URL+'/api/admin/create-client',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
+      body:JSON.stringify(data)
+    });
+    const res=await r.json();
+    if(!r.ok)throw new Error(res.error||'Failed to create');
+    window._activeClientId=null;
+    await showClientManager();
+    showToast('Client created');
+  }
   catch(e){alert('Error: '+e.message);if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-plus"></i> Create Client';}}
 }
 
