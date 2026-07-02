@@ -2907,14 +2907,34 @@ office@essential-services.org`;
 }
 
 async function requestCancellation(clientId, clientName) {
-  const reason = prompt('Cancel subscription for "' + clientName + '"?\n\nEnter reason (optional):');
-  if (reason === null) return; // user pressed Cancel on prompt
-  if (!confirm(`Confirm cancellation request for "${clientName}"?\n\nThis will:\n• Change status to cancellation_requested\n• Alert you via Telegram and Rocket.Chat\n• Start 30-day offboarding window`)) return;
+  // Show proper modal instead of browser prompt
+  const existing = document.getElementById('cancelModal');
+  if(existing) existing.remove();
+  const modal = document.createElement('div');
+  modal.id = 'cancelModal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;display:flex;align-items:center;justify-content:center;';
+  modal.innerHTML = `
+    <div style="background:#161b22;border:1px solid #f85149;border-radius:14px;padding:28px;max-width:440px;width:90%;box-shadow:0 0 40px rgba(248,81,73,.2);">
+      <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:#f85149;margin-bottom:8px;"><i class="ti ti-alert-triangle"></i> Cancel Subscription</div>
+      <div style="font-size:13px;color:#8b949e;margin-bottom:16px;">You are requesting cancellation for <strong style="color:#e6edf3;">${clientName}</strong>. This will start a 30-day offboarding window and alert you via Telegram and Rocket.Chat.</div>
+      <div style="font-size:11px;color:#8b949e;margin-bottom:6px;font-family:var(--mono);">Reason (optional):</div>
+      <textarea id="cancelReason" style="width:100%;background:#0d1117;border:1px solid #1a2332;border-radius:8px;padding:10px;color:#e6edf3;font-size:13px;resize:vertical;min-height:80px;font-family:'Inter',sans-serif;" placeholder="Enter reason for cancellation..."></textarea>
+      <div style="display:flex;gap:10px;margin-top:16px;justify-content:flex-end;">
+        <button onclick="document.getElementById('cancelModal').remove()" style="background:rgba(255,255,255,.06);border:1px solid #1a2332;border-radius:8px;padding:9px 20px;color:#8b949e;cursor:pointer;font-size:13px;">Keep Subscription</button>
+        <button onclick="confirmCancellation('${clientId}','${clientName}')" style="background:rgba(248,81,73,.15);border:1px solid rgba(248,81,73,.4);border-radius:8px;padding:9px 20px;color:#f85149;cursor:pointer;font-size:13px;font-weight:700;">Confirm Cancellation</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+}
+
+async function confirmCancellation(clientId, clientName) {
+  const reason = document.getElementById('cancelReason')?.value || '';
+  document.getElementById('cancelModal')?.remove();
   try {
     const r = await fetch(API_URL + '/api/cancellation/request', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token },
-      body: JSON.stringify({ clientId, reason: reason || '' })
+      body: JSON.stringify({ clientId, reason })
     });
     const data = await r.json();
     if (!r.ok) throw new Error(data.error || 'Failed');
@@ -2928,7 +2948,18 @@ async function requestCancellation(clientId, clientName) {
 async function deleteClient(clientId){
   const client=(window._clients||[]).find(c=>c.id===clientId);
   if(!confirm(`Delete "${client?.name||'this client'}"? This cannot be undone.`))return;
-  try{const{error}=await sb.from('clients').delete().eq('id',clientId);if(error)throw error;window._activeClientId=null;await showClientManager();showToast('Client deleted');}
+  if(!confirm(`FINAL CONFIRMATION: Permanently delete "${client?.name||'this client'}" and all their data?`))return;
+  try{
+    const r=await fetch(API_URL+'/api/admin/delete-client/'+clientId,{
+      method:'DELETE',
+      headers:{'Authorization':'Bearer '+session.access_token}
+    });
+    const data=await r.json();
+    if(!r.ok)throw new Error(data.error||'Failed to delete');
+    window._activeClientId=null;
+    await showClientManager();
+    showToast('Client deleted');
+  }
   catch(e){alert('Error: '+e.message);}
 }
 
