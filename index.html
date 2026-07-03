@@ -2034,22 +2034,43 @@ async function showLeadsPage(){
 
 async function showBriefcasePage(){
   const mc=document.getElementById('mainContent');
-  mc.style.overflow='auto';
+  mc.style.overflow='hidden';
+  window._briefcaseChatHistory=[];
+  window._briefcaseDocContext='';
+  window._briefcaseDocContextReady=false;
   mc.innerHTML=`
     <div style="padding:11px 170px 11px 60px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;">
       <div><div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;">BRIEFCASE</div><div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);" id="briefcaseSubtitle">Loading...</div></div>
-      <div style="display:flex;align-items:center;gap:6px;">
-        <button onclick="askAiAboutAllVaultFiles()" style="font-size:.7rem;padding:4px 9px;border-radius:6px;border:1px solid rgba(63,185,80,0.3);background:rgba(63,185,80,0.1);color:#3fb950;cursor:pointer;font-family:var(--mono);display:flex;align-items:center;gap:5px;white-space:nowrap;">
-          <i class="ti ti-message-circle" style="font-size:13px"></i> Ask NES AI about Briefcase
-        </button>
-        <label style="font-size:.7rem;padding:4px 9px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:var(--mono);display:flex;align-items:center;gap:5px;">
-          <i class="ti ti-upload" style="font-size:13px"></i> Upload
-          <input type="file" id="vaultUploadInput" style="display:none;" onchange="uploadVaultFile(this.files[0])" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.jpg,.jpeg,.png,.webp">
-        </label>
-      </div>
+      <label style="font-size:.7rem;padding:4px 9px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:var(--mono);display:flex;align-items:center;gap:5px;">
+        <i class="ti ti-upload" style="font-size:13px"></i> Upload
+        <input type="file" id="vaultUploadInput" style="display:none;" onchange="uploadVaultFile(this.files[0])" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.jpg,.jpeg,.png,.webp">
+      </label>
     </div>
-    <div class="page scrollable" id="briefcaseContent"><div style="text-align:center;padding:40px;color:var(--muted);font-family:var(--mono);font-size:.8rem;">Loading files...</div></div>`;
+    <div style="flex:1;display:flex;overflow:hidden;min-height:0;">
+      <div style="width:190px;flex-shrink:0;overflow-y:auto;padding:12px 10px;border-right:1px solid var(--border);" id="briefcaseFileList">
+        <div style="text-align:center;padding:20px 0;color:var(--muted);font-family:var(--mono);font-size:.7rem;">Loading...</div>
+      </div>
+      <div style="flex:1;display:flex;flex-direction:column;min-width:0;">
+        <div style="padding:10px 16px;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;flex-shrink:0;">Ask NES AI</div>
+        <div id="briefcaseChatMessages" style="flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:10px;"></div>
+        <div style="padding:12px 16px;border-top:1px solid var(--border);flex-shrink:0;">
+          <div style="display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:22px;padding:6px 8px 6px 14px;">
+            <div style="position:relative;width:22px;height:22px;flex-shrink:0;">
+              <div style="width:22px;height:22px;border-radius:50%;border:2px solid #1a56db;background:#0a0f1e;display:flex;align-items:center;justify-content:center;">
+                <div style="width:7px;height:7px;border-radius:50%;background:#409cff;position:relative;">
+                  <div style="position:absolute;inset:-5px;border-radius:50%;border:1.5px solid #409cff;animation:ping 2s ease-out infinite;"></div>
+                </div>
+              </div>
+            </div>
+            <input type="text" id="briefcaseChatInput" placeholder="Ask about your documents..." style="flex:1;background:none;border:none;outline:none;color:var(--text);font-family:var(--ui);font-size:.82rem;">
+            <button onclick="sendBriefcaseChatMessage()" style="background:var(--nes-btn-grad);border:none;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;color:#fff;cursor:pointer;flex-shrink:0;"><i class="ti ti-arrow-up" style="font-size:14px"></i></button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  document.getElementById('briefcaseChatInput').addEventListener('keypress', e=>{ if(e.key==='Enter') sendBriefcaseChatMessage(); });
   await loadVaultFiles();
+  loadBriefcaseDocContext();
 }
 
 async function loadVaultFiles(){
@@ -2064,22 +2085,13 @@ async function loadVaultFiles(){
 
     const usedGB=(quota.usedBytes/1073741824).toFixed(2);
     const totalGB=(quota.totalBytes/1073741824).toFixed(1);
-    const pct=quota.totalBytes?Math.min(100,Math.round(quota.usedBytes/quota.totalBytes*100)):0;
 
     document.getElementById('briefcaseSubtitle').textContent=`${files?.length||0} files · ${usedGB}GB of ${totalGB}GB used`;
-    document.getElementById('briefcaseContent').innerHTML=`
-      <div class="leads-stats">
-        <div class="kcard hot"><div class="klbl" style="display:flex;align-items:center;gap:4px;"><i class="ti ti-files" style="font-size:11px;color:var(--nes-blue);filter:drop-shadow(0 0 3px var(--nes-blue))"></i>Total files</div><div class="kval" style="color:var(--nes-blue)">${files?.length||0}</div></div>
-        <div class="kcard"><div class="klbl" style="display:flex;align-items:center;gap:4px;"><i class="ti ti-database" style="font-size:11px;color:#3fb950;filter:drop-shadow(0 0 3px #3fb950)"></i>Storage used</div><div class="kval" style="color:#3fb950">${usedGB}GB</div><div class="kdelta kneu">of ${totalGB}GB</div></div>
-        <div class="kcard"><div class="klbl" style="display:flex;align-items:center;gap:4px;"><i class="ti ti-chart-bar" style="font-size:11px;color:#7f77dd;filter:drop-shadow(0 0 3px #7f77dd)"></i>Used</div><div class="kval">${pct}%</div><div class="kdelta ${pct>=80?'kdown':'kneu'}">${pct>=80?'Nearing limit':'Healthy'}</div></div>
-      </div>
-      <div class="tabs-bar" style="font-family:var(--mono);font-size:.65rem;color:var(--muted);padding:0 0 8px;">${pct>=80?'⚠️ Approaching storage limit — top-up bundles available on request.':''}</div>
-      <div class="leads-table">
-        <div class="lt-header"><div>File</div><div>Type</div><div>Size</div><div>Uploaded</div><div>Actions</div></div>
-        <div id="vaultRows">${renderVaultRows(files||[])}</div>
-      </div>`;
+    const listEl=document.getElementById('briefcaseFileList');
+    if(listEl)listEl.innerHTML=renderVaultRows(files||[]);
   }catch(e){
-    document.getElementById('briefcaseContent').innerHTML=`<div style="text-align:center;padding:40px;color:#f85149;font-family:var(--mono);">Error: ${e.message}</div>`;
+    const listEl=document.getElementById('briefcaseFileList');
+    if(listEl)listEl.innerHTML=`<div style="text-align:center;padding:20px 0;color:#f85149;font-family:var(--mono);font-size:.7rem;">Error loading files</div>`;
   }
 }
 
@@ -2091,18 +2103,25 @@ function formatBytes(bytes){
 }
 
 function renderVaultRows(files){
-  if(!files.length)return'<div style="padding:20px;text-align:center;color:var(--muted);font-family:var(--mono);font-size:.8rem;">No files yet — upload your first document</div>';
+  if(!files.length)return'<div style="text-align:center;padding:20px 0;color:var(--muted);font-family:var(--mono);font-size:.7rem;">No files yet</div>';
   return files.map(f=>{
-    const date=new Date(f.created_at);const timeAgo=getTimeAgo(date);
-    return`<div class="lt-row" id="vault-row-${f.id}"><div><i class="ti ti-file" style="margin-right:5px;color:var(--muted);"></i>${f.file_name}</div><div class="lead-industry">${(f.file_type||'').toUpperCase()}</div><div class="lead-email">${formatBytes(f.file_size_bytes)}</div><div class="lead-time">${timeAgo}</div><div style="display:flex;align-items:center;gap:6px;"><button onclick="askAiAboutVaultFile('${f.id}','${(f.file_name||'').replace(/'/g,'')}')" title="Ask NES AI about this file" style="font-size:.6rem;padding:2px 8px;border-radius:5px;background:rgba(63,185,80,0.1);color:#3fb950;border:1px solid rgba(63,185,80,0.3);cursor:pointer;white-space:nowrap;"><i class="ti ti-message-circle"></i></button><button onclick="downloadVaultFile('${f.id}')" style="font-size:.6rem;padding:2px 8px;border-radius:5px;background:rgba(64,156,255,0.1);color:var(--nes-blue);border:1px solid rgba(64,156,255,0.3);cursor:pointer;white-space:nowrap;"><i class="ti ti-download"></i></button><button onclick="deleteVaultFile('${f.id}','${(f.file_name||'this file').replace(/'/g,'')}')" title="Delete permanently" style="font-size:.6rem;padding:2px 7px;border-radius:5px;background:rgba(248,81,73,0.1);color:#f85149;border:1px solid rgba(248,81,73,0.3);cursor:pointer;"><i class="ti ti-trash"></i></button></div></div>`;
+    return`<div id="vault-row-${f.id}" style="background:var(--card);border:1px solid var(--border);border-radius:7px;padding:8px 9px;margin-bottom:6px;">
+      <i class="ti ti-file" style="color:var(--muted);font-size:13px;"></i>
+      <div style="font-size:.66rem;color:var(--text);margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${f.file_name}">${f.file_name}</div>
+      <div style="font-size:.58rem;color:var(--muted);margin-bottom:6px;">${formatBytes(f.file_size_bytes)}</div>
+      <div style="display:flex;gap:4px;">
+        <button onclick="downloadVaultFile('${f.id}')" title="Download" style="flex:1;font-size:.58rem;padding:3px 0;border-radius:4px;background:rgba(64,156,255,0.1);color:var(--nes-blue);border:1px solid rgba(64,156,255,0.3);cursor:pointer;"><i class="ti ti-download"></i></button>
+        <button onclick="deleteVaultFile('${f.id}','${(f.file_name||'this file').replace(/'/g,'')}')" title="Delete" style="flex:1;font-size:.58rem;padding:3px 0;border-radius:4px;background:rgba(248,81,73,0.1);color:#f85149;border:1px solid rgba(248,81,73,0.3);cursor:pointer;"><i class="ti ti-trash"></i></button>
+      </div>
+    </div>`;
   }).join('');
 }
 
-async function askAiAboutAllVaultFiles(){
+async function loadBriefcaseDocContext(){
   const files = window._vaultFiles || [];
-  if(!files.length){ showToast('No files in Briefcase yet — upload some first'); return; }
+  window._briefcaseDocContextReady=false;
+  if(!files.length){ window._briefcaseDocContext=''; window._briefcaseDocContextReady=true; return; }
 
-  showToast('Loading '+files.length+' document(s)...');
   let combined = '';
   let loadedCount = 0;
 
@@ -2128,69 +2147,68 @@ async function askAiAboutAllVaultFiles(){
     }
   }
 
-  if(!loadedCount){ showToast('❌ Could not extract text from any files'); return; }
-
-  showView('docs');
-  setTimeout(()=>{
-    history.push({role:'user', content:'Briefcase documents loaded for reference ('+loadedCount+' file(s)):'+combined});
-    appendMsg(aiBubble('📁 '+loadedCount+' document(s) loaded from your Briefcase. Ask me anything about them.'));
-    saveHistory();
-    showToast('✅ '+loadedCount+' document(s) ready — ask your question below');
-  }, 200);
+  window._briefcaseDocContext = combined;
+  window._briefcaseDocContextReady = true;
 }
 
-async function askAiAboutVaultFile(fileId, fileName){
-  showToast('Fetching '+fileName+'...');
-  try{
-    const urlRes = await fetch(`${API_URL}/api/vault/download-url/${fileId}`, {
-      headers:{'Authorization':'Bearer '+session.access_token}
+function appendBriefcaseChatMsg(role, text){
+  const el = document.getElementById('briefcaseChatMessages');
+  if(!el) return;
+  const isUser = role==='user';
+  const bubble = document.createElement('div');
+  bubble.style.cssText = `max-width:85%;padding:9px 13px;border-radius:12px;font-size:.8rem;line-height:1.5;${isUser?'align-self:flex-end;background:var(--nes-btn-grad);color:#fff;border-bottom-right-radius:4px;':'align-self:flex-start;background:var(--card);border:1px solid var(--border);color:var(--text);border-bottom-left-radius:4px;'}`;
+  bubble.textContent = text;
+  el.appendChild(bubble);
+  el.scrollTop = el.scrollHeight;
+  return bubble;
+}
+
+async function sendBriefcaseChatMessage(){
+  const input = document.getElementById('briefcaseChatInput');
+  const text = input.value.trim();
+  if(!text) return;
+  input.value = '';
+
+  if(!window._vaultFiles || !window._vaultFiles.length){
+    appendBriefcaseChatMsg('user', text);
+    appendBriefcaseChatMsg('ai', 'No documents in Briefcase yet — upload a file first.');
+    return;
+  }
+
+  appendBriefcaseChatMsg('user', text);
+  const typingBubble = appendBriefcaseChatMsg('ai', 'Thinking...');
+
+  if(!window._briefcaseDocContextReady){
+    typingBubble.textContent = 'Still preparing your documents, one moment...';
+    await new Promise(resolve=>{
+      const check = setInterval(()=>{
+        if(window._briefcaseDocContextReady){ clearInterval(check); resolve(); }
+      }, 400);
     });
-    const urlData = await urlRes.json();
-    if(!urlData.url){ showToast('❌ Could not fetch file'); return; }
+    typingBubble.textContent = 'Thinking...';
+  }
 
-    const fileRes = await fetch(urlData.url);
-    const blob = await fileRes.blob();
-    const file = new File([blob], fileName);
+  window._briefcaseChatHistory.push({role:'user', content:text});
 
-    showToast('Reading document...');
-    const content = await extractText(file);
-    if(!content.trim()){ showToast('❌ Could not extract text from this file'); return; }
-
-    const truncated = content.substring(0, 7000);
-    showView('docs');
-    setTimeout(async ()=>{
-      appendMsg(userBubble('Attached from Briefcase: '+fileName+' — analyzing…'));
-      setBusy(true); addTyping();
-      history.push({role:'user', content:'Analyze: "'+fileName+'" (from Briefcase):\n'+truncated});
-      try{
-        const res = await fetch(API_URL+'/api/chat/docs', {
-          method:'POST',
-          headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
-          body: JSON.stringify({
-            message: 'Analyze and transcribe this Briefcase document "'+fileName+'". Provide the full content, key information, and a summary. Do not introduce yourself.\n\nContent:\n'+truncated,
-            mode:'docs', webSearch:false, history: history.slice(-4)
-          })
-        });
-        removeTyping();
-        if(res.ok){
-          const data = await res.json();
-          const reply = data.reply || 'Document analyzed.';
-          history.push({role:'assistant', content:reply});
-          appendMsg(aiBubble(reply));
-          docsUsed++;
-        } else {
-          addAiMsg('Could not analyze file.');
-        }
-        saveHistory(); saveUsage(); updateStats();
-      }catch(err){
-        removeTyping();
-        addAiMsg('Error: '+err.message);
-      }
-      setBusy(false);
-    }, 300);
-
+  try{
+    const contextPrefix = window._briefcaseChatHistory.length===1
+      ? `Briefcase documents:${window._briefcaseDocContext}\n\nQuestion: `
+      : '';
+    const res = await fetch(API_URL+'/api/chat/docs', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
+      body: JSON.stringify({
+        message: contextPrefix + text,
+        mode:'docs', webSearch:false,
+        history: window._briefcaseChatHistory.slice(-6)
+      })
+    });
+    const data = await res.json();
+    const reply = res.ok ? (data.reply || 'No response.') : ('Error: '+(data.error||'Failed'));
+    typingBubble.textContent = reply;
+    window._briefcaseChatHistory.push({role:'assistant', content:reply});
   }catch(e){
-    showToast('❌ Failed: '+e.message);
+    typingBubble.textContent = 'Error: '+e.message;
   }
 }
 
@@ -2210,6 +2228,7 @@ async function uploadVaultFile(file){
     if(data.success){
       showToast(`✅ ${file.name} uploaded`);
       await loadVaultFiles();
+      loadBriefcaseDocContext();
     }else{
       showToast('❌ Upload failed: '+(data.error||'Unknown error'));
     }
@@ -2250,6 +2269,7 @@ async function deleteVaultFile(fileId, fileName){
       if(row)row.remove();
       showToast('File deleted');
       await loadVaultFiles();
+      loadBriefcaseDocContext();
     }else{
       showToast('❌ Delete failed: '+(data.error||'Unknown error'));
     }
