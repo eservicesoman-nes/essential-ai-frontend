@@ -549,6 +549,7 @@
         <div class="nav-item" data-view="inbox" id="inboxNav" style="display:none;"><i class="ti ti-mail"></i><span>Inbox</span><span class="nav-badge nb-blue" id="inboxBadge" style="display:none;">0</span></div>
         <div class="nav-item" data-view="command"><i class="ti ti-terminal-2"></i><span>Team Hub</span><span class="nav-badge nb-orange" id="commandBadge" style="display:none;">5</span></div>
         <div class="nav-item" data-view="leads"><i class="ti ti-user-check"></i><span>Leads</span><span class="nav-badge nb-red" id="leadsBadge">—</span></div>
+        <div class="nav-item" data-view="briefcase"><i class="ti ti-briefcase"></i><span>Briefcase</span><span class="nav-badge nb-blue" id="briefcaseBadge" style="display:none;"></span></div>
         <div class="nav-item" id="teamNav" data-view="team" style="display:none;"><i class="ti ti-users"></i><span>Team</span></div>
         <div class="nav-item" id="myCredsNav" data-view="mycredentials" style="display:none;"><i class="ti ti-checklist"></i><span>IT Setup</span></div>
       <div class="nav-item" id="partnerDashNav" data-view="partner_dashboard" style="display:none;"><i class="ti ti-layout-dashboard" style="color:#7f77dd;"></i><span>My Dashboard</span></div>
@@ -1176,6 +1177,7 @@ function showView(view){
   else if(view==='partner_dashboard'){showPartnerDashboard();}
   else if(view==='command'){showCommandCentre();}
   else if(view==='leads'){showLeadsPage();}
+  else if(view==='briefcase'){showBriefcasePage();}
   else if(view==='clientmgr'){showClientManager();}
   else if(view==='sales'){showSalesPortal();}
   else if(view==='mycredentials'){showMyCredentials();}
@@ -2028,6 +2030,131 @@ async function showLeadsPage(){
       </div>`;
     window._allLeads=leads||[];
   }catch(e){document.getElementById('leadsContent').innerHTML=`<div style="text-align:center;padding:40px;color:#f85149;font-family:var(--mono);">Error: ${e.message}</div>`;}
+}
+
+async function showBriefcasePage(){
+  const mc=document.getElementById('mainContent');
+  mc.style.overflow='auto';
+  mc.innerHTML=`
+    <div style="padding:11px 18px 11px 60px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;">
+      <div><div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;">BRIEFCASE</div><div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);" id="briefcaseSubtitle">Loading...</div></div>
+      <label style="font-size:.7rem;padding:4px 9px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:var(--mono);display:flex;align-items:center;gap:5px;">
+        <i class="ti ti-upload" style="font-size:13px"></i> Upload
+        <input type="file" id="vaultUploadInput" style="display:none;" onchange="uploadVaultFile(this.files[0])" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.jpg,.jpeg,.png,.webp">
+      </label>
+    </div>
+    <div class="page scrollable" id="briefcaseContent"><div style="text-align:center;padding:40px;color:var(--muted);font-family:var(--mono);font-size:.8rem;">Loading files...</div></div>`;
+  await loadVaultFiles();
+}
+
+async function loadVaultFiles(){
+  try{
+    const[filesRes,quotaRes]=await Promise.all([
+      fetch(`${API_URL}/api/vault/list`,{headers:{'Authorization':'Bearer '+userToken}}),
+      fetch(`${API_URL}/api/vault/quota`,{headers:{'Authorization':'Bearer '+userToken}}),
+    ]);
+    const{files}=await filesRes.json();
+    const quota=await quotaRes.json();
+    window._vaultFiles=files||[];
+
+    const usedGB=(quota.usedBytes/1073741824).toFixed(2);
+    const totalGB=(quota.totalBytes/1073741824).toFixed(1);
+    const pct=quota.totalBytes?Math.min(100,Math.round(quota.usedBytes/quota.totalBytes*100)):0;
+
+    document.getElementById('briefcaseSubtitle').textContent=`${files?.length||0} files · ${usedGB}GB of ${totalGB}GB used`;
+    document.getElementById('briefcaseContent').innerHTML=`
+      <div class="leads-stats">
+        <div class="kcard hot"><div class="klbl" style="display:flex;align-items:center;gap:4px;"><i class="ti ti-files" style="font-size:11px;color:var(--nes-blue);filter:drop-shadow(0 0 3px var(--nes-blue))"></i>Total files</div><div class="kval" style="color:var(--nes-blue)">${files?.length||0}</div></div>
+        <div class="kcard"><div class="klbl" style="display:flex;align-items:center;gap:4px;"><i class="ti ti-database" style="font-size:11px;color:#3fb950;filter:drop-shadow(0 0 3px #3fb950)"></i>Storage used</div><div class="kval" style="color:#3fb950">${usedGB}GB</div><div class="kdelta kneu">of ${totalGB}GB</div></div>
+        <div class="kcard"><div class="klbl" style="display:flex;align-items:center;gap:4px;"><i class="ti ti-chart-bar" style="font-size:11px;color:#7f77dd;filter:drop-shadow(0 0 3px #7f77dd)"></i>Used</div><div class="kval">${pct}%</div><div class="kdelta ${pct>=80?'kdown':'kneu'}">${pct>=80?'Nearing limit':'Healthy'}</div></div>
+      </div>
+      <div class="tabs-bar" style="font-family:var(--mono);font-size:.65rem;color:var(--muted);padding:0 0 8px;">${pct>=80?'⚠️ Approaching storage limit — top-up bundles available on request.':''}</div>
+      <div class="leads-table">
+        <div class="lt-header"><div>File</div><div>Type</div><div>Size</div><div>Uploaded</div><div>Actions</div></div>
+        <div id="vaultRows">${renderVaultRows(files||[])}</div>
+      </div>`;
+  }catch(e){
+    document.getElementById('briefcaseContent').innerHTML=`<div style="text-align:center;padding:40px;color:#f85149;font-family:var(--mono);">Error: ${e.message}</div>`;
+  }
+}
+
+function formatBytes(bytes){
+  if(!bytes)return'0 B';
+  const units=['B','KB','MB','GB'];let i=0;let n=bytes;
+  while(n>=1024&&i<units.length-1){n/=1024;i++;}
+  return`${n.toFixed(i===0?0:1)} ${units[i]}`;
+}
+
+function renderVaultRows(files){
+  if(!files.length)return'<div style="padding:20px;text-align:center;color:var(--muted);font-family:var(--mono);font-size:.8rem;">No files yet — upload your first document</div>';
+  return files.map(f=>{
+    const date=new Date(f.created_at);const timeAgo=getTimeAgo(date);
+    return`<div class="lt-row" id="vault-row-${f.id}"><div><i class="ti ti-file" style="margin-right:5px;color:var(--muted);"></i>${f.file_name}</div><div class="lead-industry">${(f.file_type||'').toUpperCase()}</div><div class="lead-email">${formatBytes(f.file_size_bytes)}</div><div class="lead-time">${timeAgo}</div><div style="display:flex;align-items:center;gap:6px;"><button onclick="downloadVaultFile('${f.id}')" style="font-size:.6rem;padding:2px 8px;border-radius:5px;background:rgba(64,156,255,0.1);color:var(--nes-blue);border:1px solid rgba(64,156,255,0.3);cursor:pointer;white-space:nowrap;"><i class="ti ti-download"></i></button><button onclick="deleteVaultFile('${f.id}','${(f.file_name||'this file').replace(/'/g,'')}')" title="Delete permanently" style="font-size:.6rem;padding:2px 7px;border-radius:5px;background:rgba(248,81,73,0.1);color:#f85149;border:1px solid rgba(248,81,73,0.3);cursor:pointer;"><i class="ti ti-trash"></i></button></div></div>`;
+  }).join('');
+}
+
+async function uploadVaultFile(file){
+  if(!file)return;
+  if(file.size>25*1024*1024){showToast('❌ File exceeds 25MB limit');return;}
+  showToast(`Uploading ${file.name}...`);
+  try{
+    const fd=new FormData();
+    fd.append('file',file);
+    const res=await fetch(`${API_URL}/api/vault/upload`,{
+      method:'POST',
+      headers:{'Authorization':'Bearer '+userToken},
+      body:fd
+    });
+    const data=await res.json();
+    if(data.success){
+      showToast(`✅ ${file.name} uploaded`);
+      await loadVaultFiles();
+    }else{
+      showToast('❌ Upload failed: '+(data.error||'Unknown error'));
+    }
+  }catch(e){
+    showToast('❌ Upload failed: '+e.message);
+  }
+  const inp=document.getElementById('vaultUploadInput');
+  if(inp)inp.value='';
+}
+
+async function downloadVaultFile(fileId){
+  try{
+    const res=await fetch(`${API_URL}/api/vault/download-url/${fileId}`,{
+      headers:{'Authorization':'Bearer '+userToken}
+    });
+    const data=await res.json();
+    if(data.url){
+      window.open(data.url,'_blank');
+    }else{
+      showToast('❌ Could not generate download link');
+    }
+  }catch(e){
+    showToast('❌ Download failed: '+e.message);
+  }
+}
+
+async function deleteVaultFile(fileId, fileName){
+  if(!confirm(`Permanently delete "${fileName}"?\n\nThis cannot be undone.`))return;
+  try{
+    const res=await fetch(`${API_URL}/api/vault/${fileId}`,{
+      method:'DELETE',
+      headers:{'Authorization':'Bearer '+userToken}
+    });
+    const data=await res.json();
+    if(data.success){
+      window._vaultFiles=(window._vaultFiles||[]).filter(f=>f.id!==fileId);
+      const row=document.getElementById('vault-row-'+fileId);
+      if(row)row.remove();
+      showToast('File deleted');
+      await loadVaultFiles();
+    }else{
+      showToast('❌ Delete failed: '+(data.error||'Unknown error'));
+    }
+  }catch(e){
+    showToast('❌ Delete failed: '+e.message);
+  }
 }
 
 function renderLeadRows(leads){
@@ -3661,12 +3788,12 @@ async function loadAnalytics(days){
 function showDeptAccessModal(){
   const depts = ['Management','Sales','IT','Finance','HR','Operations'];
   const accessMap = {
-    Management: ['CEO Dashboard','Team','Intelligence Feed','Email','Social Media','Leads'],
-    Sales: ['Leads','Email','Social Media'],
+    Management: ['CEO Dashboard','Team','Intelligence Feed','Email','Social Media','Leads','Briefcase'],
+    Sales: ['Leads','Email','Social Media','Briefcase'],
     IT: ['System Logs','Team','Email'],
     Finance: ['CEO Dashboard','Email'],
     HR: ['Team','Email'],
-    Operations: ['Email','Social Media']
+    Operations: ['Email','Social Media','Briefcase']
   };
   const rows = depts.map(d => `
     <div style="padding:8px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;">
