@@ -2089,8 +2089,63 @@ function renderVaultRows(files){
   if(!files.length)return'<div style="padding:20px;text-align:center;color:var(--muted);font-family:var(--mono);font-size:.8rem;">No files yet — upload your first document</div>';
   return files.map(f=>{
     const date=new Date(f.created_at);const timeAgo=getTimeAgo(date);
-    return`<div class="lt-row" id="vault-row-${f.id}"><div><i class="ti ti-file" style="margin-right:5px;color:var(--muted);"></i>${f.file_name}</div><div class="lead-industry">${(f.file_type||'').toUpperCase()}</div><div class="lead-email">${formatBytes(f.file_size_bytes)}</div><div class="lead-time">${timeAgo}</div><div style="display:flex;align-items:center;gap:6px;"><button onclick="downloadVaultFile('${f.id}')" style="font-size:.6rem;padding:2px 8px;border-radius:5px;background:rgba(64,156,255,0.1);color:var(--nes-blue);border:1px solid rgba(64,156,255,0.3);cursor:pointer;white-space:nowrap;"><i class="ti ti-download"></i></button><button onclick="deleteVaultFile('${f.id}','${(f.file_name||'this file').replace(/'/g,'')}')" title="Delete permanently" style="font-size:.6rem;padding:2px 7px;border-radius:5px;background:rgba(248,81,73,0.1);color:#f85149;border:1px solid rgba(248,81,73,0.3);cursor:pointer;"><i class="ti ti-trash"></i></button></div></div>`;
+    return`<div class="lt-row" id="vault-row-${f.id}"><div><i class="ti ti-file" style="margin-right:5px;color:var(--muted);"></i>${f.file_name}</div><div class="lead-industry">${(f.file_type||'').toUpperCase()}</div><div class="lead-email">${formatBytes(f.file_size_bytes)}</div><div class="lead-time">${timeAgo}</div><div style="display:flex;align-items:center;gap:6px;"><button onclick="askAiAboutVaultFile('${f.id}','${(f.file_name||'').replace(/'/g,'')}')" title="Ask NES AI about this file" style="font-size:.6rem;padding:2px 8px;border-radius:5px;background:rgba(63,185,80,0.1);color:#3fb950;border:1px solid rgba(63,185,80,0.3);cursor:pointer;white-space:nowrap;"><i class="ti ti-message-circle"></i></button><button onclick="downloadVaultFile('${f.id}')" style="font-size:.6rem;padding:2px 8px;border-radius:5px;background:rgba(64,156,255,0.1);color:var(--nes-blue);border:1px solid rgba(64,156,255,0.3);cursor:pointer;white-space:nowrap;"><i class="ti ti-download"></i></button><button onclick="deleteVaultFile('${f.id}','${(f.file_name||'this file').replace(/'/g,'')}')" title="Delete permanently" style="font-size:.6rem;padding:2px 7px;border-radius:5px;background:rgba(248,81,73,0.1);color:#f85149;border:1px solid rgba(248,81,73,0.3);cursor:pointer;"><i class="ti ti-trash"></i></button></div></div>`;
   }).join('');
+}
+
+async function askAiAboutVaultFile(fileId, fileName){
+  showToast('Fetching '+fileName+'...');
+  try{
+    const urlRes = await fetch(`${API_URL}/api/vault/download-url/${fileId}`, {
+      headers:{'Authorization':'Bearer '+session.access_token}
+    });
+    const urlData = await urlRes.json();
+    if(!urlData.url){ showToast('❌ Could not fetch file'); return; }
+
+    const fileRes = await fetch(urlData.url);
+    const blob = await fileRes.blob();
+    const file = new File([blob], fileName);
+
+    showToast('Reading document...');
+    const content = await extractText(file);
+    if(!content.trim()){ showToast('❌ Could not extract text from this file'); return; }
+
+    const truncated = content.substring(0, 7000);
+    showView('docs');
+    setTimeout(async ()=>{
+      appendMsg(userBubble('Attached from Briefcase: '+fileName+' — analyzing…'));
+      setBusy(true); addTyping();
+      history.push({role:'user', content:'Analyze: "'+fileName+'" (from Briefcase):\n'+truncated});
+      try{
+        const res = await fetch(API_URL+'/api/chat/docs', {
+          method:'POST',
+          headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
+          body: JSON.stringify({
+            message: 'Analyze and transcribe this Briefcase document "'+fileName+'". Provide the full content, key information, and a summary. Do not introduce yourself.\n\nContent:\n'+truncated,
+            mode:'docs', webSearch:false, history: history.slice(-4)
+          })
+        });
+        removeTyping();
+        if(res.ok){
+          const data = await res.json();
+          const reply = data.reply || 'Document analyzed.';
+          history.push({role:'assistant', content:reply});
+          appendMsg(aiBubble(reply));
+          docsUsed++;
+        } else {
+          addAiMsg('Could not analyze file.');
+        }
+        saveHistory(); saveUsage(); updateStats();
+      }catch(err){
+        removeTyping();
+        addAiMsg('Error: '+err.message);
+      }
+      setBusy(false);
+    }, 300);
+
+  }catch(e){
+    showToast('❌ Failed: '+e.message);
+  }
 }
 
 async function uploadVaultFile(file){
