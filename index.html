@@ -3285,7 +3285,7 @@ async function sendClientInvite(clientId){
   try{
     const res=await fetch(API_URL+'/api/client/'+clientId+'/invite',{
       method:'POST',
-      headers:{'Content-Type':'application/json'},
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
       body:JSON.stringify({email,role})
     });
     const json=await res.json();
