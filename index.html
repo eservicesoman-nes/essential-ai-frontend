@@ -537,8 +537,7 @@
       <div class="nav nav-workspace">
         <div class="nav-item active" data-view="chat"><i class="ti ti-message-2"></i><span>Ask <span style="color:#409cff;">NES</span><span style="color:#fff;">AI</span></span></div>
         <div class="nav-item" data-view="docs"><i class="ti ti-notes"></i><span>Documents</span></div>
-        <div class="nav-item" data-view="image"><i class="ti ti-photo"></i><span>Image Gen</span><span class="nav-badge nb-blue" style="cursor:pointer;" onclick="event.stopPropagation();showView('image');setTimeout(openCreditsModal,50);">PAYG</span></div>
-        <div class="nav-item" onclick="openVoiceTopupModal()"><i class="ti ti-phone-call"></i><span>Sara Top-up</span><span class="nav-badge nb-green" style="cursor:pointer;">PAYG</span></div>
+        <div class="nav-item" id="briefcaseWorkspaceNav" data-view="briefcase" style="display:none;"><i class="ti ti-briefcase"></i><span>Briefcase</span><span class="nav-badge nb-blue" id="briefcaseBadge" style="display:none;"></span></div>
       </div>
     </div>
 
@@ -549,7 +548,6 @@
         <div class="nav-item" data-view="inbox" id="inboxNav" style="display:none;"><i class="ti ti-mail"></i><span>Inbox</span><span class="nav-badge nb-blue" id="inboxBadge" style="display:none;">0</span></div>
         <div class="nav-item" data-view="command"><i class="ti ti-terminal-2"></i><span>Team Hub</span><span class="nav-badge nb-orange" id="commandBadge" style="display:none;">5</span></div>
         <div class="nav-item" data-view="leads"><i class="ti ti-user-check"></i><span>Leads</span><span class="nav-badge nb-red" id="leadsBadge">—</span></div>
-        <div class="nav-item" data-view="briefcase"><i class="ti ti-briefcase"></i><span>Briefcase</span><span class="nav-badge nb-blue" id="briefcaseBadge" style="display:none;"></span></div>
         <div class="nav-item" id="teamNav" data-view="team" style="display:none;"><i class="ti ti-users"></i><span>Team</span></div>
         <div class="nav-item" id="myCredsNav" data-view="mycredentials" style="display:none;"><i class="ti ti-checklist"></i><span>IT Setup</span></div>
       <div class="nav-item" id="partnerDashNav" data-view="partner_dashboard" style="display:none;"><i class="ti ti-layout-dashboard" style="color:#7f77dd;"></i><span>My Dashboard</span></div>
@@ -563,6 +561,14 @@
       <div id="recentChats"></div>
     </div>
 
+    <div class="sb-divider"></div>
+    <div class="nav-section">
+      <div class="nav-label">Usage &amp; Billing</div>
+      <div class="nav">
+        <div class="nav-item" data-view="image"><i class="ti ti-photo"></i><span>Image Gen</span><span class="nav-badge nb-blue" style="cursor:pointer;" onclick="event.stopPropagation();showView('image');setTimeout(openCreditsModal,50);">PAYG</span></div>
+        <div class="nav-item" onclick="openVoiceTopupModal()"><i class="ti ti-phone-call"></i><span>Sara Top-up</span><span class="nav-badge nb-green" style="cursor:pointer;">PAYG</span></div>
+      </div>
+    </div>
     <div class="sb-divider"></div>
 
     <div id="partnerHubNav" style="display:none;padding:0 8px 4px;">
@@ -862,6 +868,8 @@ function setupNavForRole(){
     const deenNavEl = document.getElementById('deenNav');
     const inboxNavEl = document.getElementById('inboxNav');
     if(inboxNavEl) inboxNavEl.style.display='flex';
+    const briefcaseWorkspaceNavEl = document.getElementById('briefcaseWorkspaceNav');
+    if(briefcaseWorkspaceNavEl) briefcaseWorkspaceNavEl.style.display='flex';
     showClientBrandingChip().then(()=>{
       const mods = window.clientModules || {};
       const ceoNavEl = document.querySelector('[data-view="ceo"]');
