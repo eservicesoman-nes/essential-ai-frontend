@@ -4043,10 +4043,6 @@ async function showTeam(){
       <button onclick="showInviteModal()" style="background:linear-gradient(135deg,#1a56db,#2563eb);border:none;border-radius:8px;padding:7px 14px;color:#fff;font-size:.75rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;">
         <i class="ti ti-user-plus"></i> Invite Staff
       </button>
-      ${userRole==='nesadmin'||userRole==='ceo'?`
-      <button onclick="showDeptAccessModal()" style="background:none;border:1px solid var(--border);border-radius:8px;padding:8px 14px;color:var(--muted);cursor:pointer;font-size:.78rem;margin-left:8px;">
-        <i class="ti ti-lock-access"></i> Access
-      </button>`:''}
     </div>
     <div class="page scrollable" id="teamContent" style="padding:14px 18px;">
       <div style="text-align:center;padding:40px;color:var(--muted);font-family:var(--mono);font-size:.8rem;">Loading team...</div>
