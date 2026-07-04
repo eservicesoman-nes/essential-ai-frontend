@@ -2136,7 +2136,7 @@ function renderVaultRows(files){
       <div style="font-size:.66rem;color:var(--text);margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${f.file_name}">${f.file_name}</div>
       <div style="font-size:.58rem;color:var(--muted);margin-bottom:6px;">${formatBytes(f.file_size_bytes)}</div>
       <div style="display:flex;gap:3px;">
-        <button onclick="openShareModal('${f.id}','${(f.file_name||'').replace(/'/g,'')}','${(f.shared_with_roles||[]).join(',')}')" title="Share" style="flex:1;font-size:.55rem;padding:3px 0;border-radius:4px;background:rgba(127,119,221,0.1);color:#7f77dd;border:1px solid rgba(127,119,221,0.3);cursor:pointer;"><i class="ti ti-share-2"></i></button>
+        <button onclick="openShareModal('${f.id}','${(f.file_name||'').replace(/'/g,'')}','${(f.shared_with_roles||[]).join(',')}','${(f.shared_with_users||[]).join(',')}')" title="Share" style="flex:1;font-size:.55rem;padding:3px 0;border-radius:4px;background:rgba(127,119,221,0.1);color:#7f77dd;border:1px solid rgba(127,119,221,0.3);cursor:pointer;"><i class="ti ti-share-2"></i></button>
         <button onclick="downloadVaultFile('${f.id}')" title="Download" style="flex:1;font-size:.55rem;padding:3px 0;border-radius:4px;background:rgba(64,156,255,0.1);color:var(--nes-blue);border:1px solid rgba(64,156,255,0.3);cursor:pointer;"><i class="ti ti-download"></i></button>
         <button onclick="deleteVaultFile('${f.id}','${(f.file_name||'this file').replace(/'/g,'')}')" title="Delete" style="flex:1;font-size:.55rem;padding:3px 0;border-radius:4px;background:rgba(248,81,73,0.1);color:#f85149;border:1px solid rgba(248,81,73,0.3);cursor:pointer;"><i class="ti ti-trash"></i></button>
       </div>
@@ -2144,10 +2144,14 @@ function renderVaultRows(files){
   }).join('');
 }
 
-function openShareModal(fileId, fileName, currentRolesStr){
+async function openShareModal(fileId, fileName, currentRolesStr, currentUsersStr){
   const currentRoles = currentRolesStr ? currentRolesStr.split(',') : [];
-  const html = `
+  const currentUsers = currentUsersStr ? currentUsersStr.split(',') : [];
+
+  let peopleHtml = '<p style="color:var(--muted);font-size:.7rem;padding:8px 0;">Loading team members...</p>';
+  showModal('Share Document', `
     <p style="color:var(--muted);font-size:.85rem;margin-bottom:14px;">Choose which roles can see "${esc(fileName)}". CEO always has full access; the uploader always sees their own files.</p>
+    <div style="font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">Roles</div>
     <label style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--card);border:1px solid var(--border);border-radius:8px;margin-bottom:8px;cursor:pointer;">
       <input type="checkbox" id="shareRoleManager" ${currentRoles.includes('manager')?'checked':''} style="width:16px;height:16px;">
       <span>Manager</span>
@@ -2156,20 +2160,47 @@ function openShareModal(fileId, fileName, currentRolesStr){
       <input type="checkbox" id="shareRoleStaff" ${currentRoles.includes('staff')?'checked':''} style="width:16px;height:16px;">
       <span>Staff</span>
     </label>
-    <button onclick="saveFileShare('${fileId}')" class="form-submit"><i class="ti ti-check"></i> Save Sharing</button>
-  `;
-  showModal('Share Document', html);
+    <div style="border-top:1px solid var(--border);margin-bottom:14px;"></div>
+    <div style="font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">Specific people (confidential — bypasses roles)</div>
+    <div id="sharePeopleList">${peopleHtml}</div>
+    <button onclick="saveFileShare('${fileId}')" class="form-submit" style="margin-top:14px;"><i class="ti ti-check"></i> Save Sharing</button>
+  `);
+
+  try{
+    const res = await fetch(`${API_URL}/api/client/${userClientId}/users`, {
+      headers:{'Authorization':'Bearer '+session.access_token}
+    });
+    const data = await res.json();
+    const members = (data.users||[]).filter(u => u.role !== 'ceo');
+    const listEl = document.getElementById('sharePeopleList');
+    if(!listEl) return;
+    if(!members.length){
+      listEl.innerHTML = '<p style="color:var(--muted);font-size:.75rem;">No other team members yet.</p>';
+      return;
+    }
+    listEl.innerHTML = members.map(m => `
+      <label style="display:flex;align-items:center;gap:10px;padding:9px 10px;background:var(--card);border:1px solid var(--border);border-radius:8px;margin-bottom:6px;cursor:pointer;">
+        <input type="checkbox" class="sharePersonCheck" value="${m.id}" ${currentUsers.includes(m.id)?'checked':''} style="width:16px;height:16px;">
+        <span style="flex:1;font-size:.8rem;">${esc(m.email||'—')}</span>
+        <span style="font-size:.62rem;padding:2px 7px;border-radius:4px;background:rgba(64,156,255,0.1);color:var(--nes-blue);text-transform:capitalize;">${m.role||''}</span>
+      </label>
+    `).join('');
+  }catch(e){
+    const listEl = document.getElementById('sharePeopleList');
+    if(listEl) listEl.innerHTML = '<p style="color:#f85149;font-size:.75rem;">Could not load team members.</p>';
+  }
 }
 
 async function saveFileShare(fileId){
   const roles=[];
   if(document.getElementById('shareRoleManager')?.checked) roles.push('manager');
   if(document.getElementById('shareRoleStaff')?.checked) roles.push('staff');
+  const userIds = Array.from(document.querySelectorAll('.sharePersonCheck:checked')).map(el => el.value);
   try{
     const res=await fetch(`${API_URL}/api/vault/${fileId}/share`,{
       method:'PATCH',
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
-      body:JSON.stringify({roles})
+      body:JSON.stringify({roles, userIds})
     });
     const data=await res.json();
     if(data.success){
