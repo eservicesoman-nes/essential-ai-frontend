@@ -2138,6 +2138,16 @@ function renderVaultRows(files){
   }).join('');
 }
 
+async function saveExtractedText(fileId, text){
+  try{
+    await fetch(`${API_URL}/api/vault/${fileId}/extracted-text`, {
+      method:'PATCH',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
+      body: JSON.stringify({ text })
+    });
+  }catch(e){ console.warn('Could not save extracted text', e.message); }
+}
+
 async function loadBriefcaseDocContext(){
   const files = window._vaultFiles || [];
   window._briefcaseDocContextReady=false;
@@ -2148,18 +2158,22 @@ async function loadBriefcaseDocContext(){
 
   for(const f of files){
     try{
-      const urlRes = await fetch(`${API_URL}/api/vault/download-url/${f.id}`, {
-        headers:{'Authorization':'Bearer '+session.access_token}
-      });
-      const urlData = await urlRes.json();
-      if(!urlData.url) continue;
+      let text = f.extracted_text;
+      if(!text){
+        const urlRes = await fetch(`${API_URL}/api/vault/download-url/${f.id}`, {
+          headers:{'Authorization':'Bearer '+session.access_token}
+        });
+        const urlData = await urlRes.json();
+        if(!urlData.url) continue;
 
-      const fileRes = await fetch(urlData.url);
-      const blob = await fileRes.blob();
-      const file = new File([blob], f.file_name);
+        const fileRes = await fetch(urlData.url);
+        const blob = await fileRes.blob();
+        const file = new File([blob], f.file_name);
 
-      const text = await extractText(file);
-      if(text.trim()){
+        text = await extractText(file);
+        if(text.trim()) saveExtractedText(f.id, text);
+      }
+      if(text && text.trim()){
         combined += `\n\n[File: ${f.file_name}]\n${text.substring(0, 4000)}`;
         loadedCount++;
       }
@@ -2248,6 +2262,12 @@ async function uploadVaultFile(file){
     const data=await res.json();
     if(data.success){
       showToast(`✅ ${file.name} uploaded`);
+      try{
+        const text = await extractText(file);
+        if(text.trim() && data.file && data.file.id){
+          await saveExtractedText(data.file.id, text);
+        }
+      }catch(e){ console.warn('Text extraction failed for', file.name, e.message); }
       await loadVaultFiles();
       loadBriefcaseDocContext();
     }else{
