@@ -866,6 +866,10 @@ function setupNavForRole(){
       const myCredsNav=document.getElementById('myCredsNav');
       if(myCredsNav)myCredsNav.style.display='flex';
     }
+    if(['ceo','manager'].includes(userRole)){
+      const teamNavForClientRole=document.getElementById('teamNav');
+      if(teamNavForClientRole)teamNavForClientRole.style.display='flex';
+    }
     const deenNavEl = document.getElementById('deenNav');
     const inboxNavEl = document.getElementById('inboxNav');
     if(inboxNavEl) inboxNavEl.style.display='flex';
