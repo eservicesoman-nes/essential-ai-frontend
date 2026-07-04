@@ -2130,12 +2130,53 @@ function renderVaultRows(files){
       <i class="ti ti-file" style="color:var(--muted);font-size:13px;"></i>
       <div style="font-size:.66rem;color:var(--text);margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${f.file_name}">${f.file_name}</div>
       <div style="font-size:.58rem;color:var(--muted);margin-bottom:6px;">${formatBytes(f.file_size_bytes)}</div>
-      <div style="display:flex;gap:4px;">
-        <button onclick="downloadVaultFile('${f.id}')" title="Download" style="flex:1;font-size:.58rem;padding:3px 0;border-radius:4px;background:rgba(64,156,255,0.1);color:var(--nes-blue);border:1px solid rgba(64,156,255,0.3);cursor:pointer;"><i class="ti ti-download"></i></button>
-        <button onclick="deleteVaultFile('${f.id}','${(f.file_name||'this file').replace(/'/g,'')}')" title="Delete" style="flex:1;font-size:.58rem;padding:3px 0;border-radius:4px;background:rgba(248,81,73,0.1);color:#f85149;border:1px solid rgba(248,81,73,0.3);cursor:pointer;"><i class="ti ti-trash"></i></button>
+      <div style="display:flex;gap:3px;">
+        <button onclick="openShareModal('${f.id}','${(f.file_name||'').replace(/'/g,'')}','${(f.shared_with_roles||[]).join(',')}')" title="Share" style="flex:1;font-size:.55rem;padding:3px 0;border-radius:4px;background:rgba(127,119,221,0.1);color:#7f77dd;border:1px solid rgba(127,119,221,0.3);cursor:pointer;"><i class="ti ti-share-2"></i></button>
+        <button onclick="downloadVaultFile('${f.id}')" title="Download" style="flex:1;font-size:.55rem;padding:3px 0;border-radius:4px;background:rgba(64,156,255,0.1);color:var(--nes-blue);border:1px solid rgba(64,156,255,0.3);cursor:pointer;"><i class="ti ti-download"></i></button>
+        <button onclick="deleteVaultFile('${f.id}','${(f.file_name||'this file').replace(/'/g,'')}')" title="Delete" style="flex:1;font-size:.55rem;padding:3px 0;border-radius:4px;background:rgba(248,81,73,0.1);color:#f85149;border:1px solid rgba(248,81,73,0.3);cursor:pointer;"><i class="ti ti-trash"></i></button>
       </div>
     </div>`;
   }).join('');
+}
+
+function openShareModal(fileId, fileName, currentRolesStr){
+  const currentRoles = currentRolesStr ? currentRolesStr.split(',') : [];
+  const html = `
+    <p style="color:var(--muted);font-size:.85rem;margin-bottom:14px;">Choose which roles can see "${esc(fileName)}". CEO always has full access; the uploader always sees their own files.</p>
+    <label style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--card);border:1px solid var(--border);border-radius:8px;margin-bottom:8px;cursor:pointer;">
+      <input type="checkbox" id="shareRoleManager" ${currentRoles.includes('manager')?'checked':''} style="width:16px;height:16px;">
+      <span>Manager</span>
+    </label>
+    <label style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--card);border:1px solid var(--border);border-radius:8px;margin-bottom:16px;cursor:pointer;">
+      <input type="checkbox" id="shareRoleStaff" ${currentRoles.includes('staff')?'checked':''} style="width:16px;height:16px;">
+      <span>Staff</span>
+    </label>
+    <button onclick="saveFileShare('${fileId}')" class="form-submit"><i class="ti ti-check"></i> Save Sharing</button>
+  `;
+  showModal('Share Document', html);
+}
+
+async function saveFileShare(fileId){
+  const roles=[];
+  if(document.getElementById('shareRoleManager')?.checked) roles.push('manager');
+  if(document.getElementById('shareRoleStaff')?.checked) roles.push('staff');
+  try{
+    const res=await fetch(`${API_URL}/api/vault/${fileId}/share`,{
+      method:'PATCH',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
+      body:JSON.stringify({roles})
+    });
+    const data=await res.json();
+    if(data.success){
+      showToast('Sharing updated ✓');
+      document.getElementById('genericModalOverlay')?.remove();
+      await loadVaultFiles();
+    }else{
+      showToast('❌ '+(data.error||'Failed to update sharing'));
+    }
+  }catch(e){
+    showToast('❌ '+e.message);
+  }
 }
 
 async function saveExtractedText(fileId, text){
