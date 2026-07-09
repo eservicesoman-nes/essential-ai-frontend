@@ -2901,6 +2901,9 @@ async function saveClientCreds(id){
     });
     if(!res.ok){const e=await res.json();throw new Error(e.error||'Save failed');}
     showToast('Credentials saved ✓');
+    if(window._clientCreds && window._clientCreds[id]) {
+      window._clientCreds[id] = {...window._clientCreds[id], ...creds};
+    }
     await loadClientsFromDB();
   }catch(e){alert('Error saving credentials: '+e.message);}
   finally{if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-device-floppy"></i> Save Credentials';}}
