@@ -2414,7 +2414,7 @@ async function showWhatsAppPage(){
 
 async function loadWhatsAppMessages(){
   try{
-    const res=await fetch(`${API_URL}/api/client/${userClientId}/whatsapp-messages`,{headers:{'Authorization':'Bearer '+userToken}});
+    const res=await fetch(`${API_URL}/api/client/${userClientId}/whatsapp-messages`,{headers:{'Authorization':'Bearer '+session.access_token}});
     const data=await res.json();
     const messages=data.messages||[];
     document.getElementById('whatsappSubtitle').textContent=`${messages.length} messages received`;
