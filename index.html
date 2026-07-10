@@ -876,6 +876,8 @@ function setupNavForRole(){
     if(inboxNavEl) inboxNavEl.style.display='flex';
     const briefcaseWorkspaceNavEl = document.getElementById('briefcaseWorkspaceNav');
     if(briefcaseWorkspaceNavEl) briefcaseWorkspaceNavEl.style.display='flex';
+    const whatsappWorkspaceNavEl = document.getElementById('whatsappWorkspaceNav');
+    if(whatsappWorkspaceNavEl) whatsappWorkspaceNavEl.style.display='flex';
     showClientBrandingChip().then(()=>{
       const mods = window.clientModules || {};
       const ceoNavEl = document.querySelector('[data-view="ceo"]');
