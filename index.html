@@ -538,6 +538,7 @@
         <div class="nav-item active" data-view="chat"><i class="ti ti-message-2"></i><span>Ask <span style="color:#409cff;">NES</span><span style="color:#fff;">AI</span></span></div>
         <div class="nav-item" data-view="docs"><i class="ti ti-notes"></i><span>Documents</span></div>
         <div class="nav-item" id="briefcaseWorkspaceNav" data-view="briefcase" style="display:none;"><i class="ti ti-briefcase"></i><span>Briefcase</span><span class="nav-badge nb-blue" id="briefcaseBadge" style="display:none;"></span></div>
+        <div class="nav-item" id="whatsappWorkspaceNav" data-view="whatsapp" style="display:none;"><i class="ti ti-brand-whatsapp"></i><span>WhatsApp Auto-Reply</span></div>
       </div>
     </div>
 
@@ -1191,6 +1192,7 @@ function showView(view){
   else if(view==='command'){showCommandCentre();}
   else if(view==='leads'){showLeadsPage();}
   else if(view==='briefcase'){showBriefcasePage();}
+  else if(view==='whatsapp'){showWhatsAppPage();}
   else if(view==='clientmgr'){showClientManager();}
   else if(view==='sales'){showSalesPortal();}
   else if(view==='mycredentials'){showMyCredentials();}
@@ -2394,6 +2396,42 @@ async function deleteVaultFile(fileId, fileName){
   }catch(e){
     showToast('❌ Delete failed: '+e.message);
   }
+}
+
+async function showWhatsAppPage(){
+  const mc=document.getElementById('mainContent');
+  mc.style.overflow='auto';
+  mc.innerHTML=`
+    <div style="padding:11px 18px 11px 60px;border-bottom:1px solid var(--border);flex-shrink:0;">
+      <div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;">WHATSAPP AUTO-REPLY</div>
+      <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);" id="whatsappSubtitle">Loading...</div>
+    </div>
+    <div class="page scrollable" id="whatsappContent"><div style="text-align:center;padding:40px;color:var(--muted);font-family:var(--mono);font-size:.8rem;">Loading messages...</div></div>`;
+  await loadWhatsAppMessages();
+}
+
+async function loadWhatsAppMessages(){
+  try{
+    const res=await fetch(`${API_URL}/api/client/${userClientId}/whatsapp-messages`,{headers:{'Authorization':'Bearer '+userToken}});
+    const data=await res.json();
+    const messages=data.messages||[];
+    document.getElementById('whatsappSubtitle').textContent=`${messages.length} messages received`;
+    document.getElementById('whatsappContent').innerHTML=`
+      <div class="leads-table">
+        <div class="lt-header"><div>Contact</div><div>Phone</div><div>Message</div><div>Received</div></div>
+        <div id="whatsappRows">${renderWhatsAppRows(messages)}</div>
+      </div>`;
+  }catch(e){
+    document.getElementById('whatsappContent').innerHTML=`<div style="text-align:center;padding:40px;color:#f85149;font-family:var(--mono);">Error: ${e.message}</div>`;
+  }
+}
+
+function renderWhatsAppRows(messages){
+  if(!messages.length)return'<div style="padding:20px;text-align:center;color:var(--muted);font-family:var(--mono);font-size:.8rem;">No WhatsApp messages yet</div>';
+  return messages.map(m=>{
+    const date=new Date(m.received_at);const timeAgo=getTimeAgo(date);
+    return`<div class="lt-row"><div>${m.contact_name||'Unknown'}</div><div class="lead-email">${m.from_number}</div><div>${(m.message_text||'').substring(0,80)}</div><div class="lead-time">${timeAgo}</div></div>`;
+  }).join('');
 }
 
 function renderLeadRows(leads){
@@ -4042,8 +4080,8 @@ async function loadAnalytics(days){
 function showDeptAccessModal(){
   const depts = ['Management','Sales','IT','Finance','HR','Operations'];
   const accessMap = {
-    Management: ['CEO Dashboard','Team','Intelligence Feed','Email','Social Media','Leads','Briefcase'],
-    Sales: ['Leads','Email','Social Media','Briefcase'],
+    Management: ['CEO Dashboard','Team','Intelligence Feed','Email','Social Media','Leads','Briefcase','WhatsApp Auto-Reply'],
+    Sales: ['Leads','Email','Social Media','Briefcase','WhatsApp Auto-Reply'],
     IT: ['System Logs','Team','Email'],
     Finance: ['CEO Dashboard','Email'],
     HR: ['Team','Email'],
