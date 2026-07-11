@@ -5383,7 +5383,8 @@ async function showMyCredentials(){
     ]);
     const credsJson=await credsRes.json();
     const clientJson=await clientRes.json();
-    renderMyCredsForm(credsJson.credentials||{}, clientJson.client||{});
+    window._itClientCache=clientJson.client||{};
+    renderMyCredsForm(credsJson.credentials||{}, window._itClientCache);
   }catch(e){
     const el=document.getElementById('myCredsContent');
     if(el)el.innerHTML='<div style="color:var(--red);font-family:var(--mono);font-size:.8rem;">Error: '+e.message+'</div>';
