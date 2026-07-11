@@ -10,7 +10,26 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/tabler-icons.min.css">
+  <link id="tablerIconsCdn" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+  <script>
+    (function(){
+      var cdnLoaded = false;
+      var link = document.getElementById('tablerIconsCdn');
+      link.onload = function(){ cdnLoaded = true; };
+      link.onerror = function(){ fallbackIcons(); };
+      setTimeout(function(){
+        if(!cdnLoaded) fallbackIcons();
+      }, 3000);
+      function fallbackIcons(){
+        if(document.getElementById('tablerIconsFallback')) return;
+        var fb = document.createElement('link');
+        fb.id = 'tablerIconsFallback';
+        fb.rel = 'stylesheet';
+        fb.href = '/tabler-icons.min.css';
+        document.head.appendChild(fb);
+      }
+    })();
+  </script>
   <style>
     *{margin:0;padding:0;box-sizing:border-box;}
     :root{
@@ -639,7 +658,23 @@
   </main>
 </div>
 
-<script src="/supabase.min.js"></script>
+<script>
+  window._supabaseCdnLoaded = false;
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"
+  onload="window._supabaseCdnLoaded = true;"
+  onerror="loadSupabaseFallback();"></script>
+<script>
+  function loadSupabaseFallback(){
+    if(window.supabase) return;
+    var s = document.createElement('script');
+    s.src = '/supabase.min.js';
+    document.head.appendChild(s);
+  }
+  setTimeout(function(){
+    if(!window._supabaseCdnLoaded && !window.supabase) loadSupabaseFallback();
+  }, 3000);
+</script>
 <script>
 // ============================================================
 // ⚙️  NES AI — CONFIGURATION (UPDATE THESE VALUES)
