@@ -605,6 +605,9 @@
         <i class="ti ti-terminal"></i>
         <span style="flex:1;">System Logs</span>
         <div id="sysLogsDot" style="width:6px;height:6px;border-radius:50%;background:#f85149;"></div>
+      <div class="client-mgr-btn" id="incidentsNav" onclick="showView('incidents')" style="display:none;margin-top:4px;background:rgba(63,185,80,.08);border-color:rgba(63,185,80,.2);color:#3fb950;">
+        <i class="ti ti-activity-heartbeat"></i> Incidents
+      </div>
       </div>
     </div>
 
@@ -859,6 +862,7 @@ function setupNavForRole(){
       const statusNav=document.getElementById('adminStatusNav');if(statusNav)statusNav.style.display='flex';
       const apiNav=document.getElementById('apiCreditsNav');if(apiNav)apiNav.style.display='flex';
       const logsNav=document.getElementById('sysLogsNav');if(logsNav)logsNav.style.display='flex';
+      const incNav=document.getElementById('incidentsNav');if(incNav)incNav.style.display='flex';
       const teamNavEl=document.getElementById('teamNav');if(teamNavEl)teamNavEl.style.display='flex';
       const myCredsNavEl=document.getElementById('myCredsNav');if(myCredsNavEl)myCredsNavEl.style.display='flex';
     } else {
@@ -1202,12 +1206,80 @@ function showView(view){
   else if(view==='adminstatus'){showAdminStatus();}
   else if(view==='apicredits'){showApiCredits();}
   else if(view==='syslogs'){showSysLogs();}
+  else if(view==='incidents'){showIncidents();}
   else if(view==='pricing'){showPricing();}
   else if(view==='deen'){showDeen();}
   else if(view==='inbox'){showInbox();}
   else if(view==='team'){showTeam();}
 }
 // ── System Logs ──────────────────────────────────────────────────
+async function showIncidents(){
+  const mc = document.getElementById('mainContent');
+  mc.innerHTML = `
+    <div class="page scrollable" id="incidentsContent" style="padding:14px 18px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+        <div>
+          <div style="font-family:var(--mono);font-size:.8rem;color:#3fb950;letter-spacing:1px;text-transform:uppercase;">Incidents</div>
+          <div style="font-size:.7rem;color:var(--muted);margin-top:2px;">Backend uptime and auto-heal history · NES Admin only</div>
+        </div>
+        <button onclick="showIncidents()" style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:5px 12px;color:var(--text);font-size:.72rem;cursor:pointer;display:flex;align-items:center;gap:5px;">
+          <i class="ti ti-refresh"></i> Refresh
+        </button>
+      </div>
+      <div id="incidentsSummary" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:20px;">
+        <div style="text-align:center;padding:40px;color:var(--muted);font-family:var(--mono);font-size:.8rem;grid-column:1/-1;">Loading...</div>
+      </div>
+      <div style="font-family:var(--mono);font-size:.72rem;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;">Recent Incidents</div>
+      <div id="incidentsTimeline" style="background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;">
+        <div style="padding:20px;text-align:center;color:var(--muted);font-family:var(--mono);font-size:.8rem;">Loading...</div>
+      </div>
+    </div>`;
+  await loadIncidents();
+}
+
+async function loadIncidents(){
+  try{
+    const res = await fetch(`${API_URL}/api/admin/incidents`, { headers: { 'Authorization': 'Bearer ' + session.access_token } });
+    const data = await res.json();
+    if(!data.success){ document.getElementById('incidentsTimeline').innerHTML = `<div style="padding:20px;color:#f85149;font-family:var(--mono);">Error: ${data.error||'unknown'}</div>`; return; }
+
+    const s = data.summary;
+    const cards = [
+      { label: 'Uptime (7 days)', value: s.uptimePercentLast7Days + '%', color: '#3fb950' },
+      { label: 'Incidents (7 days)', value: s.incidentsLast7Days, color: '#409cff' },
+      { label: 'Total Incidents', value: s.totalIncidents, color: 'var(--text)' },
+      { label: 'Auto-Resolved', value: s.autoResolved, color: '#3fb950' },
+      { label: 'Escalated', value: s.escalated, color: s.escalated > 0 ? '#f85149' : 'var(--muted)' },
+      { label: 'Avg Duration', value: s.avgDurationSeconds + 's', color: 'var(--text)' }
+    ];
+    document.getElementById('incidentsSummary').innerHTML = cards.map(c => `
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;">
+        <div style="font-size:1.5rem;font-weight:700;color:${c.color};font-family:var(--mono);">${c.value}</div>
+        <div style="font-size:.68rem;color:var(--muted);margin-top:4px;text-transform:uppercase;letter-spacing:.5px;">${c.label}</div>
+      </div>`).join('');
+
+    const rows = data.incidents || [];
+    if(!rows.length){
+      document.getElementById('incidentsTimeline').innerHTML = `<div style="padding:30px;text-align:center;color:var(--muted);font-family:var(--mono);font-size:.8rem;">No incidents logged - system healthy</div>`;
+      return;
+    }
+    document.getElementById('incidentsTimeline').innerHTML = rows.map(i => {
+      const isAuto = i.resolution === 'auto-recovered';
+      const dot = isAuto ? '#3fb950' : '#f85149';
+      const started = new Date(i.started_at).toLocaleString();
+      return `<div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border);">
+        <div style="width:8px;height:8px;border-radius:50%;background:${dot};flex-shrink:0;"></div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:.78rem;color:var(--text);">${i.service} - ${i.resolution}</div>
+          <div style="font-size:.68rem;color:var(--muted);font-family:var(--mono);">${started} - duration ${i.duration_seconds||0}s</div>
+        </div>
+      </div>`;
+    }).join('');
+  }catch(e){
+    document.getElementById('incidentsTimeline').innerHTML = `<div style="padding:20px;color:#f85149;font-family:var(--mono);">Error: ${e.message}</div>`;
+  }
+}
+
 async function showSysLogs(){
   const mainContent = document.getElementById('mainContent');
   mainContent.innerHTML = `
