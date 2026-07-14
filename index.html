@@ -5382,8 +5382,8 @@ async function showMyCredentials(){
     </div></div>`;
   try{
     const [credsRes, clientRes] = await Promise.all([
-      fetch(API_URL+'/api/client/'+userClientId+'/credentials'),
-      fetch(API_URL+'/api/client/'+userClientId)
+      fetch(API_URL+'/api/client/'+userClientId+'/credentials', {headers:{'Authorization':'Bearer '+session.access_token}}),
+      fetch(API_URL+'/api/client/'+userClientId, {headers:{'Authorization':'Bearer '+session.access_token}})
     ]);
     const credsJson=await credsRes.json();
     const clientJson=await clientRes.json();
