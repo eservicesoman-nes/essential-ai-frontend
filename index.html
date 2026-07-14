@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
-  <link id="tablerIconsCdn" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+  <link id="tablerIconsCdn" rel="stylesheet" href="/tabler-icons.min.css">
   <script>
     (function(){
       var cdnLoaded = false;
@@ -687,7 +687,7 @@ let userClientId=null;
 const STORAGE_KEYS={h:'nesai_h',m:'nesai_m',u:'nesai_u',rc:'nesai_rc'};
 const MODE_LABELS={chat:'ASK NESAI',docs:'DOCUMENTS MODE',image:'IMAGE GEN MODE'};
 
-sb.auth.onAuthStateChange((_e,s)=>{session=s;if(s){const uid=s.user?.id;if(!window._appLoaded||window._loadedUid!==uid){window._loadedUid=uid;showApp(s.user);}}else{window._appLoaded=false;window._loadedUid=null;showAuthScreen();}});
+sb.auth.onAuthStateChange((_e,s)=>{session=s;if(s){const uid=s.user?.id;if(!window._appLoading&&(!window._appLoaded||window._loadedUid!==uid)){window._appLoading=true;window._loadedUid=uid;showApp(s.user).finally(()=>{window._appLoading=false;});}}else{window._appLoaded=false;window._loadedUid=null;window._appLoading=false;showAuthScreen();}});
 
 async function showApp(user){
   document.getElementById('authScreen').style.display='none';
@@ -5218,11 +5218,15 @@ async function checkPlatformStatus(){
     Promise.all(services.map(async function(s){
       const start=Date.now();
       try{
-        const opts={method:'GET',signal:AbortSignal.timeout(5000)};
+        const opts={method:'GET',signal:AbortSignal.timeout(10000)};
         if(s.authHeader)opts.headers={'Authorization':s.authHeader,'User-Agent':'NES-AI'};
         const r=await fetch(s.url,opts);const ms=Date.now()-start;return{...s,ok:r.ok||r.status===401,ms,status:r.ok||r.status===401?'online':'error'};
       }
-      catch(e){return{...s,ok:false,ms:Date.now()-start,status:'offline'};}
+      catch(e){
+        const ms=Date.now()-start;
+        const isTimeout = e.name==='TimeoutError' || e.name==='AbortError';
+        return{...s,ok:false,ms,status:isTimeout?'slow':'offline'};
+      }
     })),
     Promise.all([
       fetch(API_URL+'/api/admin/ping/pm2',{headers:{'Authorization':'Bearer '+session.access_token}}).then(r=>r.json()).catch(()=>({online:false,ms:0})),
@@ -5284,13 +5288,13 @@ async function checkPlatformStatus(){
   html+='</div>';
   // ping dot helper with pulse effects
   function pingDot(status, slowPulse){
-    const color=status==='online'?'#3fb950':status==='error'?'#d29922':'#f85149';
+    const color=status==='online'?'#3fb950':(status==='error'||status==='slow')?'#d29922':'#f85149';
     const anim=status!=='online'?(slowPulse?'animation:pulse-slow 2s infinite;':'animation:pulse-fast .7s infinite;'):(status==='online'?'':'');
     return '<div style="width:8px;height:8px;border-radius:50%;background:'+color+';flex-shrink:0;'+anim+'"></div>';
   }
   results.forEach(function(r){
-    const color=r.status==='online'?'#3fb950':r.status==='error'?'#d29922':'#f85149';
-    const bg=r.status==='online'?'#0d2818':r.status==='error'?'#2d1f00':'#2d0e0e';
+    const color=r.status==='online'?'#3fb950':(r.status==='error'||r.status==='slow')?'#d29922':'#f85149';
+    const bg=r.status==='online'?'#0d2818':(r.status==='error'||r.status==='slow')?'#2d1f00':'#2d0e0e';
     html+='<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid rgba(26,35,50,.4);">';
     html+=pingDot(r.status, false);
     html+='<div style="flex:1;min-width:0;"><div style="font-size:.78rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+r.label+'</div><div style="font-size:.6rem;color:var(--muted);font-family:var(--mono);">'+r.ms+'ms</div></div>';
