@@ -4289,6 +4289,7 @@ async function loadTeam(){
             <i class="ti ti-building" style="color:#409cff;font-size:13px;"></i>
             <span style="font-size:.78rem;color:#e6edf3;font-weight:500;">${d.name}</span>
             <span style="font-size:.65rem;color:var(--muted);">${users.filter(u=>u.department_id===d.id).length} staff</span>
+            <i onclick="deleteDept('${d.id}','${d.name.replace(/'/g,"\\'")}')" class="ti ti-x" style="color:var(--muted);font-size:13px;cursor:pointer;margin-left:4px;" title="Delete department"></i>
           </div>`).join('')}
         <div onclick="showAddDeptModal()" style="background:rgba(64,156,255,0.05);border:1px dashed rgba(64,156,255,0.3);border-radius:8px;padding:8px 14px;display:flex;align-items:center;gap:6px;cursor:pointer;color:#409cff;font-size:.75rem;">
           <i class="ti ti-plus"></i> Add Department
@@ -4445,6 +4446,17 @@ function showAddDeptModal(){
     .then(async r=>{
       const data = await r.json().catch(()=>({}));
       if(r.ok && !data.error){ showToast('Department added ✓'); loadTeam(); }
+      else showToast('Failed: '+(data.error||'Unknown error'));
+    })
+    .catch(e=>showToast('Failed: '+e.message));
+}
+function deleteDept(deptId, deptName){
+  if(!confirm('Delete department \'' + deptName + '\'? This cannot be undone.')) return;
+  if(!confirm('Are you absolutely sure? Staff assigned to \'' + deptName + '\' will be unassigned.')) return;
+  fetch(API_URL+'/api/admin/client/'+window.userClientId+'/department/'+deptId,{method:'DELETE',headers:{'Authorization':'Bearer '+session.access_token}})
+    .then(async r=>{
+      const data = await r.json().catch(()=>({}));
+      if(r.ok && !data.error){ showToast('Department deleted ✓'); loadTeam(); }
       else showToast('Failed: '+(data.error||'Unknown error'));
     })
     .catch(e=>showToast('Failed: '+e.message));
