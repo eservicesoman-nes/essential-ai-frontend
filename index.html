@@ -4399,8 +4399,6 @@ async function loadTeamForClient(clientId){
   const el = document.getElementById('teamContent');
   if(!el) return;
   el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);font-family:var(--mono);font-size:.8rem;">Loading...</div>';
-  // Temporarily set clientId for loadTeam
-  const orig = window.userClientId;
   window.userClientId = clientId;
   await loadTeam();
   // Add back button
@@ -4409,7 +4407,6 @@ async function loadTeamForClient(clientId){
   backBtn.innerHTML = `<button onclick="window.userClientId=null;loadTeam()" style="background:none;border:1px solid var(--border);border-radius:7px;padding:6px 12px;color:var(--muted);font-size:.75rem;cursor:pointer;display:flex;align-items:center;gap:6px;"><i class='ti ti-arrow-left'></i> Back to clients</button>`;
   const teamContent = document.getElementById('teamContent');
   if(teamContent) teamContent.insertBefore(backBtn, teamContent.firstChild);
-  window.userClientId = orig;
 }
 
 async function updateUserRole(userId, clientId, role){
@@ -4445,7 +4442,12 @@ function showAddDeptModal(){
   const name = prompt('Department name:');
   if(!name||!name.trim()) return;
   fetch(API_URL+'/api/admin/client/'+window.userClientId+'/department',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify({name:name.trim()})})
-    .then(({error})=>{ if(!error){ showToast('Department added ✓'); loadTeam(); } else showToast('Failed: '+error.message); });
+    .then(async r=>{
+      const data = await r.json().catch(()=>({}));
+      if(r.ok && !data.error){ showToast('Department added ✓'); loadTeam(); }
+      else showToast('Failed: '+(data.error||'Unknown error'));
+    })
+    .catch(e=>showToast('Failed: '+e.message));
 }
 
 async function showSalesPortal(){
