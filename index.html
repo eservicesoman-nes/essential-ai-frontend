@@ -5956,9 +5956,14 @@ async function buyImageCredits(credits,price,label){
   document.body.appendChild(indicator);
 
   document.addEventListener('touchstart', (e)=>{
-    const mc = document.getElementById('mainContent');
-    if(!mc) return;
-    if(mc.scrollTop === 0){
+    let el = e.target;
+    let scrollable = null;
+    while(el && el !== document.body){
+      if(el.scrollHeight > el.clientHeight){ scrollable = el; break; }
+      el = el.parentElement;
+    }
+    const atTop = scrollable ? scrollable.scrollTop === 0 : true;
+    if(atTop){
       startY = e.touches[0].clientY;
       startTime = Date.now();
       pulling = true;
