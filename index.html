@@ -3740,8 +3740,26 @@ function showChatInterface(mode='chat'){
   document.getElementById('msgInput').addEventListener('keypress',e=>{if(e.key==='Enter')sendMsg();});
   const msgsEl=document.getElementById('messages');
   if(allMsgsHTML&&allMsgsHTML.trim()){msgsEl.innerHTML=allMsgsHTML;msgsEl.scrollTop=msgsEl.scrollHeight;}
-  else if(history.length===0){addAiMsg('Welcome to NES AI. How can I help you today?');}
+  else if(history.length===0){loadServerChatHistory(msgsEl);}
   else{history.forEach(h=>{if(h.role==='user')appendMsg(userBubble(h.content));else appendMsg(aiBubble(h.content,h.sources||[]));});msgsEl.scrollTop=msgsEl.scrollHeight;}
+}
+async function loadServerChatHistory(msgsEl){
+  if(!session){addAiMsg('Welcome to NES AI. How can I help you today?');return;}
+  try{
+    const res=await fetch(API_URL+'/api/chat/history',{headers:{'Authorization':'Bearer '+session.access_token}});
+    if(res.ok){
+      const data=await res.json();
+      if(data.messages&&data.messages.length>0){
+        data.messages.forEach(m=>{
+          if(m.role==='user'){appendMsg(userBubble(m.content));history.push({role:'user',content:m.content});}
+          else{appendMsg(aiBubble(m.content));history.push({role:'assistant',content:m.content});}
+        });
+        msgsEl.scrollTop=msgsEl.scrollHeight;
+        return;
+      }
+    }
+  }catch(e){}
+  addAiMsg('Welcome to NES AI. How can I help you today?');
 }
 
 async function sendMsg(){
