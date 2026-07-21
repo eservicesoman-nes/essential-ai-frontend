@@ -523,6 +523,14 @@
       <input class="auth-input" id="loginPassword" type="password" placeholder="Password">
       <div class="auth-err" id="loginErr"></div>
       <button class="auth-btn" onclick="doLogin()">Sign In →</button>
+      <div style="text-align:center;margin-top:10px;"><a href="#" onclick="showForgotPanel();return false;" style="color:#409cff;font-size:.8rem;text-decoration:none;">Forgot password?</a></div>
+    </div>
+    <div id="forgotPanel" class="auth-panel">
+      <input class="auth-input" id="forgotEmail" type="email" placeholder="Email address">
+      <div class="auth-err" id="forgotErr"></div>
+      <div class="auth-err" id="forgotMsg" style="color:#3fb950;"></div>
+      <button class="auth-btn" onclick="doForgotPassword()">Send Reset Link</button>
+      <div style="text-align:center;margin-top:10px;"><a href="#" onclick="showLoginPanel();return false;" style="color:#409cff;font-size:.8rem;text-decoration:none;">Back to Sign In</a></div>
     </div>
     <div id="signupPanel" class="auth-panel">
       <input class="auth-input" id="signupEmail" type="email" placeholder="Email address">
@@ -986,6 +994,36 @@ async function doLogin(){
   const{error}=await sb.auth.signInWithPassword({email,password:pass});
   if(error)err.textContent=error.message;
 }
+function showForgotPanel(){
+  document.getElementById('loginPanel').classList.remove('active');
+  document.getElementById('signupPanel').classList.remove('active');
+  document.getElementById('forgotPanel').classList.add('active');
+}
+function showLoginPanel(){
+  document.getElementById('forgotPanel').classList.remove('active');
+  document.getElementById('loginPanel').classList.add('active');
+}
+async function doForgotPassword(){
+  const email=document.getElementById('forgotEmail').value.trim();
+  const err=document.getElementById('forgotErr');const msg=document.getElementById('forgotMsg');
+  err.textContent='';msg.textContent='';
+  if(!email){err.textContent='Email required.';return;}
+  const{error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin+window.location.pathname});
+  if(error){err.textContent=error.message;return;}
+  msg.textContent='Check your email for a password reset link.';
+}
+async function checkRecoveryMode(){
+  const hash=window.location.hash;
+  if(hash&&hash.includes('type=recovery')){
+    const newPass=prompt('Enter your new password (min 6 characters):');
+  if(newPass&&newPass.length>=6){
+      const{error}=await sb.auth.updateUser({password:newPass});
+      if(error){alert('Failed to update password: '+error.message);}
+      else{alert('Password updated successfully. Please sign in with your new password.');window.location.hash='';window.location.reload();}
+    }
+  }
+}
+checkRecoveryMode();
 
 async function doSignup(){
   const email=document.getElementById('signupEmail').value.trim();
