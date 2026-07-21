@@ -6013,11 +6013,14 @@ function toggleSidebar(){
     sb.classList.toggle('collapsed');
   }
 }
-function clearChat(){
+async function clearChat(){
   if(!confirm('Clear all messages?'))return;
   history=[];allMsgsHTML='';
   localStorage.removeItem(STORAGE_KEYS.h);localStorage.removeItem(STORAGE_KEYS.m);
   const msgs=document.getElementById('messages');if(msgs)msgs.innerHTML='';
+  if(session){
+    try{await fetch(API_URL+'/api/chat/history',{method:'DELETE',headers:{'Authorization':'Bearer '+session.access_token}});}catch(e){}
+  }
   addAiMsg('Cleared. How can I help you?');
 }
 function toggleTheme(){
