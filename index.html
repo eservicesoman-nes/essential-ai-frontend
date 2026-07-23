@@ -1973,7 +1973,13 @@ async function loadUsageSummary(){
     else if(u.sara&&u.sara.limit===-1)rows.push(`<div style="display:flex;align-items:center;justify-content:space-between;"><span style="font-size:.72rem;color:var(--text);">Sara AI calls</span><span style="font-size:.7rem;color:var(--muted);">${u.sara.used} · Unlimited</span></div>`);
     if(u.adam&&u.adam.enabled)rows.push(bar('Adam consultations',u.adam.used,u.adam.included));
     if(u.chat)rows.push(bar('Ask NES AI messages',u.chat.used,u.chat.limit));
-    if(u.image)rows.push(bar('Image gen (daily)',u.image.dailyUsed,u.image.dailyLimit));
+    if(u.image){
+      if(u.image.freeAllowanceActive){
+        rows.push(bar('Image gen (daily, trial)',u.image.dailyUsed,u.image.dailyLimit));
+      }else{
+        rows.push(`<div style="display:flex;align-items:center;justify-content:space-between;"><span style="font-size:.72rem;color:var(--text);">Image gen</span><span style="font-size:.7rem;color:var(--muted);">${u.image.creditBalance} credits remaining · PAYG</span></div>`);
+      }
+    }
     if(u.storage)rows.push(bar('Briefcase storage',u.storage.usedBytes,u.storage.quotaBytes,'GB'));
     const el=document.getElementById('usageSummaryContent');
     if(el)el.innerHTML=rows.length?rows.join(''):'<div style="color:var(--muted);font-family:var(--mono);font-size:.7rem;">No usage data available</div>';
