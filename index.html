@@ -953,13 +953,18 @@ function hasTierModule(planKeys){
 }
 async function showClientBrandingChip(){
   try{
-    const{data}=await sb.from('clients').select('name,primary_color,logo_url,plan,modules,full_access_override').eq('id',userClientId).single();
+    const{data}=await sb.from('clients').select('name,primary_color,logo_url,plan,modules,full_access_override,apex_connect_paid_until,apex_outreach_paid_until,apex_advisory_paid_until').eq('id',userClientId).single();
     if(!data)return;
     const chip=document.getElementById('roleChip');
     if(chip&&data.name)chip.textContent=data.name;
     if(data.plan)window.clientPlan=data.plan;
     window.clientModules = data.modules || {};
     window.clientFullAccessOverride = data.full_access_override === true;
+    window.clientApexPaidUntil = {
+      apex_connect: data.apex_connect_paid_until || null,
+      apex_outreach: data.apex_outreach_paid_until || null,
+      apex_advisory: data.apex_advisory_paid_until || null
+    };
     if(data.primary_color){
       document.documentElement.style.setProperty('--nes-blue',data.primary_color);
       window.userPlan = data.plan || '';
@@ -1769,6 +1774,34 @@ async function showCEODashboard(){
             <div style="font-size:.75rem;flex:1;">Platform running 24/7 — all systems normal</div>
             <div style="font-size:.58rem;font-family:var(--mono);padding:2px 7px;border-radius:7px;background:#0d2818;color:#3fb950;">OK</div>
           </div>
+          ${(function(){
+            const paidMap = window.clientApexPaidUntil || {};
+            const mods = window.clientModules || {};
+            const labels = {apex_connect:'Apex Connect',apex_outreach:'Apex Outreach',apex_advisory:'Apex Advisory'};
+            const today = new Date(); today.setHours(0,0,0,0);
+            let rows = '';
+            Object.keys(labels).forEach(k=>{
+              if(!mods[k]) return;
+              const dateStr = paidMap[k];
+              let status='ok', label='', badge='';
+              if(!dateStr){ status='warn'; label=labels[k]+' — renewal date not set'; badge='SET DATE'; }
+              else{
+                const paidUntil = new Date(dateStr); paidUntil.setHours(0,0,0,0);
+                const diffDays = Math.round((paidUntil - today) / (1000*60*60*24));
+                if(diffDays < 0){ status='overdue'; label=labels[k]+' — renewal overdue'; badge='OVERDUE'; }
+                else if(diffDays <= 7){ status='warn'; label=labels[k]+' — renews in '+diffDays+'d'; badge='DUE SOON'; }
+                else { return; }
+              }
+              const color = status==='overdue' ? '#f85149' : '#d29922';
+              const bg = status==='overdue' ? '#2d1300' : '#2d1f00';
+              rows += `<div style="display:flex;align-items:center;gap:8px;padding:8px 11px;background:var(--card);border:1px solid var(--border);border-radius:7px;">
+            <div style="width:7px;height:7px;border-radius:50%;background:${color};flex-shrink:0;"></div>
+            <div style="font-size:.75rem;flex:1;">${label}</div>
+            <div style="font-size:.58rem;font-family:var(--mono);padding:2px 7px;border-radius:7px;background:${bg};color:${color};">${badge}</div>
+          </div>`;
+            });
+            return rows;
+          })()}
         </div>
         ${userRole==='nesadmin'?`
         <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:7px;margin-top:14px;">PARTNER OVERVIEW</div>
