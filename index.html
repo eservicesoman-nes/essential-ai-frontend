@@ -916,9 +916,10 @@ function setupNavForRole(){
       const commandNavEl = document.querySelector('[data-view="command"]');
       const intelNavEl = document.querySelector('[data-view="intel"]');
       const imageNavEl = document.querySelector('[data-view="image"]');
-      if(ceoNavEl && mods.ceo_dashboard === false) ceoNavEl.style.display='none';
+      const tierOk=hasTierModule(['operations','workforce','infrastructure']);
+      if(ceoNavEl && !tierOk) ceoNavEl.style.display='none';
       if(commandNavEl && mods.nes_command === false) commandNavEl.style.display='none';
-      if(intelNavEl && mods.intel_feed === false) intelNavEl.style.display='none';
+      if(intelNavEl && !tierOk) intelNavEl.style.display='none';
       if(imageNavEl && mods.image_gen === false) imageNavEl.style.display='none';
       if(deenNavEl) deenNavEl.style.display = mods.islam360 !== false ? 'flex' : 'none';
     });
@@ -945,14 +946,20 @@ function setupNavForRole(){
   loadLeadCount();
 }
 
+function hasTierModule(planKeys){
+  if(window.clientFullAccessOverride===true)return true;
+  const plan=(window.clientPlan||'').toLowerCase();
+  return planKeys.includes(plan);
+}
 async function showClientBrandingChip(){
   try{
-    const{data}=await sb.from('clients').select('name,primary_color,logo_url,plan,modules').eq('id',userClientId).single();
+    const{data}=await sb.from('clients').select('name,primary_color,logo_url,plan,modules,full_access_override').eq('id',userClientId).single();
     if(!data)return;
     const chip=document.getElementById('roleChip');
     if(chip&&data.name)chip.textContent=data.name;
     if(data.plan)window.clientPlan=data.plan;
     window.clientModules = data.modules || {};
+    window.clientFullAccessOverride = data.full_access_override === true;
     if(data.primary_color){
       document.documentElement.style.setProperty('--nes-blue',data.primary_color);
       window.userPlan = data.plan || '';
@@ -1225,10 +1232,11 @@ function showView(view){
   // Module access enforcement
   if(userClientId && window.clientModules){
     const mods = window.clientModules;
+    const tierOk=hasTierModule(['operations','workforce','infrastructure']);
     const blocked = {
-      'ceo': mods.ceo_dashboard === false,
+      'ceo': !tierOk,
       'command': mods.nes_command === false,
-      'intel': mods.intel_feed === false,
+      'intel': !tierOk,
       'image': mods.image_gen === false,
     };
     if(blocked[view]){
@@ -2835,11 +2843,11 @@ function renderClientDetail(c,colors,textColors,idx){
     ['ti-chart-bar','ceo_dashboard','CEO Dashboard','KPIs · pipeline · intel'],
     ['ti-terminal-2','nes_command','Team Hub','Team communications'],
     ['ti-news','intel_feed','NES Pulse','Daily market briefing'],
-    ['ti-phone','sara_receptionist','Apex Connect','60-sec callback on new lead'],
+    ['ti-phone','apex_connect','Apex Connect','60-sec callback on new lead'],
     ['ti-brand-whatsapp','whatsapp_alerts','WhatsApp Alerts','Lead + team alerts'],
     ['ti-mail','email_notifications','Email Notifications','Lead emails to team'],
-    ['ti-phone-call','adam_consultant','Apex Advisory','Enterprise voice consultant'],
-    ['ti-headset','layla_advisor','Apex Outreach','3-day follow-up calls'],
+    ['ti-phone-call','apex_advisory','Apex Advisory','Enterprise voice consultant'],
+    ['ti-headset','apex_outreach','Apex Outreach','3-day follow-up calls'],
     ['deen-custom','islam360','Deen دين','Islamic companion · Quran · Hadith'],
   ];
   return`
