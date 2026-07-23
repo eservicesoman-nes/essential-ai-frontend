@@ -2890,12 +2890,26 @@ function renderClientDetail(c,colors,textColors,idx){
 
         <div id="cm-modules">
           <div class="modules-grid">
-            ${moduleList.map(([icon,key,name,desc])=>`
+            ${moduleList.map(([icon,key,name,desc])=>{
+              const tierDerived = key==='ceo_dashboard' || key==='intel_feed';
+              if(!tierDerived){
+                return `
               <div class="mod">
                 <i class="ti ${icon} mod-icon"></i>
                 <div style="flex:1;"><div class="mod-name">${name}</div><div class="mod-desc">${desc}</div></div>
                 <button class="toggle ${modules[key]?'on':'off'}" data-module="${key}" onclick="this.classList.toggle('on');this.classList.toggle('off')"><div class="toggle-knob"></div></button>
-              </div>`).join('')}
+              </div>`;
+              }
+              const tierOk = c.full_access_override===true || ['operations','workforce','infrastructure'].includes((c.plan||'').toLowerCase());
+              const statusLabel = c.full_access_override===true ? 'Enabled — Custom access override' : (tierOk ? 'Included — Operations plan or higher' : 'Not included — upgrade to Operations+');
+              const statusColor = tierOk ? '#3fb950' : '#8b949e';
+              return `
+              <div class="mod">
+                <i class="ti ${icon} mod-icon"></i>
+                <div style="flex:1;"><div class="mod-name">${name}</div><div class="mod-desc" style="color:${statusColor};">${statusLabel}</div></div>
+                <button class="toggle ${tierOk?'on':'off'}" disabled style="opacity:0.5;cursor:not-allowed;" title="Auto-set by plan tier — not manually editable"><div class="toggle-knob"></div></button>
+              </div>`;
+            }).join('')}
           </div>
         </div>
 
