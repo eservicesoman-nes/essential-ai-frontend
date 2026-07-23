@@ -2924,7 +2924,7 @@ function renderClientDetail(c,colors,textColors,idx){
         <div id="cm-modules">
           <div class="modules-grid">
             ${moduleList.map(([icon,key,name,desc])=>{
-              const tierDerived = key==='ceo_dashboard' || key==='intel_feed';
+              const tierDerived = key==='ceo_dashboard' || key==='intel_feed' || key==='social_media';
               const apexPaidUntilMap = {'apex_connect':'apex_connect_paid_until','apex_outreach':'apex_outreach_paid_until','apex_advisory':'apex_advisory_paid_until'};
               if(!tierDerived){
                 const paidField = apexPaidUntilMap[key];
