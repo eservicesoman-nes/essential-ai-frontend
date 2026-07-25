@@ -4357,10 +4357,46 @@ async function loadAnalytics(days){
           </table>
         </div>
       </div>
+      <div class="an-sec"><i class="ti ti-flame"></i>Client Usage Ranking — Highest Usage First</div>
+      <div id="fleetUsageRanking" style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px;">
+        <div style="color:var(--muted);font-family:var(--mono);font-size:.75rem;">Loading usage ranking...</div>
+      </div>
     `;
 
+    loadFleetUsageRanking();
   }catch(e){
     if(el) el.innerHTML = `<div style="color:var(--red);font-family:var(--mono);font-size:.75rem;padding:20px;">Error loading analytics: ${e.message}</div>`;
+  }
+}
+async function loadFleetUsageRanking(){
+  const el=document.getElementById('fleetUsageRanking');
+  if(!el)return;
+  try{
+    const res=await fetch(`${API_URL}/api/admin/usage-summary-all`,{
+      headers:{'Authorization':'Bearer '+session.access_token}
+    });
+    if(!res.ok){el.innerHTML='<div style="color:var(--muted);font-family:var(--mono);font-size:.75rem;">Could not load usage ranking.</div>';return;}
+    const data=await res.json();
+    const clients=data.clients||[];
+    if(!clients.length){el.innerHTML='<div style="color:var(--muted);font-family:var(--mono);font-size:.75rem;">No active clients with usage data.</div>';return;}
+    el.innerHTML=clients.map(c=>{
+      const pctColor=c.maxUsagePct>=100?'#f85149':c.maxUsagePct>=80?'#d29922':'#3fb950';
+      const storagePct=c.storage.quotaBytes>0?Math.round((c.storage.usedBytes/c.storage.quotaBytes)*100):0;
+      return `<div style="padding:10px 0;border-bottom:1px solid var(--border);">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+          <div style="font-size:.8rem;font-weight:700;">${esc(c.clientName)} <span style="font-size:.65rem;color:var(--muted);font-weight:400;text-transform:capitalize;">· ${c.plan}</span></div>
+          <div style="font-size:.72rem;font-weight:700;color:${pctColor};">${c.maxUsagePct}% peak usage</div>
+        </div>
+        <div style="display:flex;gap:14px;font-size:.65rem;color:var(--muted);font-family:var(--mono);flex-wrap:wrap;">
+          <span>Sara: ${c.sara.used}/${c.sara.limit===-1?'∞':c.sara.limit}</span>
+          ${c.adam.enabled?`<span>Adam: ${c.adam.used}/${c.adam.included} (${c.adam.creditBalance} credits)</span>`:''}
+          <span>Chat: ${c.chat.used}/${c.chat.limit}</span>
+          <span>Storage: ${storagePct}%</span>
+        </div>
+      </div>`;
+    }).join('');
+  }catch(e){
+    el.innerHTML='<div style="color:var(--muted);font-family:var(--mono);font-size:.75rem;">Could not load usage ranking.</div>';
   }
 }
 
