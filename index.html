@@ -3070,7 +3070,7 @@ function renderClientDetail(c,colors,textColors,idx){
             <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:14px;">
               <div style="font-size:.75rem;font-weight:700;margin-bottom:8px;">Record a payment or adjustment</div>
               <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px;">
-                <select id="payType_${c.id}" class="form-select">
+                <select id="payType_${c.id}" class="form-select" onchange="togglePayReverses('${c.id}')">
                   <option value="payment">Payment</option>
                   <option value="adjustment">Rebate / credit</option>
                 </select>
@@ -3082,6 +3082,9 @@ function renderClientDetail(c,colors,textColors,idx){
                 </select>
                 <input id="payAmount_${c.id}" type="number" placeholder="Amount OMR" class="form-input">
               </div>
+              <select id="payReverses_${c.id}" class="form-select" style="display:none;margin-bottom:8px;width:100%;">
+                <option value="">Reverses which payment? (optional)</option>
+              </select>
               <input id="payNote_${c.id}" type="text" placeholder="Note (required) — e.g. received in person, receipt #102" class="form-input" style="margin-bottom:8px;">
               <button class="act-btn" onclick="recordClientPayment('${c.id}')" style="width:100%;"><i class="ti ti-check"></i> Record entry</button>
             </div>
@@ -3216,11 +3219,18 @@ async function saveClientBilling(id){
   try{const r=await fetch(API_URL+'/api/admin/client/'+id+'/billing',{method:'PATCH',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify(data)});if(!r.ok)throw new Error((await r.json()).error);showToast('Billing saved');}catch(e){alert('Error: '+e.message);}
 }
 
+function togglePayReverses(clientId){
+  const type=document.getElementById('payType_'+clientId).value;
+  const el=document.getElementById('payReverses_'+clientId);
+  if(el)el.style.display=type==='adjustment'?'block':'none';
+}
 async function recordClientPayment(clientId){
   const type=document.getElementById('payType_'+clientId).value;
   const method=document.getElementById('payMethod_'+clientId).value;
   const amount=document.getElementById('payAmount_'+clientId).value;
   const note=document.getElementById('payNote_'+clientId).value.trim();
+  const reversesEl=document.getElementById('payReverses_'+clientId);
+  const reverses_payment_id=(type==='adjustment'&&reversesEl&&reversesEl.value)?reversesEl.value:undefined;
 
   if(!amount||parseFloat(amount)<=0){showToast('Enter a valid amount');return;}
   if(!note){showToast('A note is required for manual entries');return;}
@@ -3232,7 +3242,7 @@ async function recordClientPayment(clientId){
     const res=await fetch(`${API_URL}/api/clients/${clientId}/payments`,{
       method:'POST',
       headers:{'Authorization':'Bearer '+session.access_token,'Content-Type':'application/json'},
-      body:JSON.stringify({type,method,amount,note})
+      body:JSON.stringify({type,method,amount,note,reverses_payment_id})
     });
     const data=await res.json();
     if(res.ok&&data.success){
@@ -3261,20 +3271,33 @@ async function loadPaymentHistory(clientId){
 
     totalEl.innerHTML=`<b style="color:var(--text);font-size:1rem;">OMR ${data.lifetimeTotalOMR.toFixed(2)}</b> lifetime plan payments`+(data.creditPurchases.length?` · ${data.creditPurchases.length} image credit purchase(s) (tracked separately, not included in OMR total)`:'');
 
+    const reversesEl=document.getElementById('payReverses_'+clientId);
+    if(reversesEl){
+      const paymentEntries=(data.payments||[]).filter(p=>p.type==='payment');
+      reversesEl.innerHTML='<option value="">Reverses which payment? (optional)</option>'+paymentEntries.map(p=>{
+        const d=new Date(p.created_at).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+        return `<option value="${p.id}">${d} · OMR ${parseFloat(p.gross_amount||p.amount).toFixed(3)}${p.invoice_number?' · '+p.invoice_number:''}</option>`;
+      }).join('');
+    }
+
     if(!data.payments.length){
       listEl.textContent='No payments recorded yet.';
       return;
     }
+    const reversalMap={};
+    (data.payments||[]).forEach(p=>{ if(p.reverses_payment_id) reversalMap[p.reverses_payment_id]=p; });
     listEl.innerHTML=data.payments.map(p=>{
       const sign=p.type==='adjustment'?'-':'+';
       const color=p.type==='adjustment'?'#f85149':'#3fb950';
       const date=new Date(p.created_at).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
       const vatLine=p.vat_amount>0?`<span style="color:var(--muted);font-size:.7rem;"> (incl. VAT OMR ${parseFloat(p.vat_amount).toFixed(3)})</span>`:'';
       const invoiceBtn=p.type==='payment'&&p.invoice_number?`<a href="${API_URL}/api/clients/${clientId}/payments/${p.id}/invoice?token=${session.access_token}" target="_blank" style="font-size:.65rem;padding:2px 8px;border-radius:4px;border:1px solid var(--border);color:var(--nes-blue);text-decoration:none;margin-left:8px;white-space:nowrap;"><i class='ti ti-file-invoice'></i> ${p.invoice_number}</a>`:'';
+      const reversedBadge=(p.type==='payment'&&reversalMap[p.id])?`<span style="font-size:.6rem;padding:2px 6px;border-radius:4px;background:#2d1300;color:#f85149;margin-left:6px;">REVERSED</span>`:'';
+      const reversesNote=(p.type==='adjustment'&&p.reverses_payment_id)?`<div style="color:#f85149;font-size:.68rem;padding-bottom:2px;">↩ Reverses payment from ${(data.payments.find(x=>x.id===p.reverses_payment_id)||{}).invoice_number||'earlier entry'}</div>`:'';
       return `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);">
-        <span style="display:flex;align-items:center;gap:4px;">${date} · ${p.method}${p.source==='auto'?' (auto)':''}${invoiceBtn}</span>
+        <span style="display:flex;align-items:center;gap:4px;">${date} · ${p.method}${p.source==='auto'?' (auto)':''}${invoiceBtn}${reversedBadge}</span>
         <span style="color:${color};font-weight:700;white-space:nowrap;">${sign}OMR ${Math.abs(p.gross_amount||p.amount).toFixed(3)}${vatLine}</span>
-      </div>${p.note?`<div style="color:var(--muted);font-size:.7rem;padding-bottom:6px;">${esc(p.note)}</div>`:''}`;
+      </div>${reversesNote}${p.note?`<div style="color:var(--muted);font-size:.7rem;padding-bottom:6px;">${esc(p.note)}</div>`:''}`;
     }).join('');
   }catch(e){
     totalEl.textContent='Could not load payment history';
