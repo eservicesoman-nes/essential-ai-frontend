@@ -3051,15 +3051,36 @@ function renderClientDetail(c,colors,textColors,idx){
               ['Contract End','contract_end'],
               ['Trial Start Date','trial_start'],
               ['Trial Duration (days)','trial_duration_days'],
+              ['Founder Discount Expires','founder_discount_expires_at'],
+              ['Custom Discount % (SME deals)','discount_percent'],
+              ['Custom Discount Expires','discount_expires_at'],
             ].map(([lbl,key])=>`
               <div class="cred-field">
                 <div class="cf-lbl">${lbl}</div>
                 <input class="cf-input" type="text" value="${esc(String(c[key]||'')||'')}" placeholder="Not set" data-field="${key}">
               </div>`).join('')}
+            <div class="cred-field">
+              <div class="cf-lbl">Billing Cycle</div>
+              <select class="cf-input" data-field="billing_cycle" id="billingCycle_${c.id}">
+                <option value="monthly" ${(c.billing_cycle||'monthly')==='monthly'?'selected':''}>Monthly</option>
+                <option value="annual" ${c.billing_cycle==='annual'?'selected':''}>Annual (15% off)</option>
+              </select>
+            </div>
+            <div class="cred-field" style="display:flex;align-items:center;gap:8px;padding-top:18px;">
+              <input type="checkbox" data-field="annual_discount_eligible" id="annualEligible_${c.id}" ${c.annual_discount_eligible!==false?'checked':''} style="width:16px;height:16px;">
+              <label for="annualEligible_${c.id}" class="cf-lbl" style="margin:0;">Annual discount applies to custom rate</label>
+            </div>
             <div class="cred-field" style="grid-column:1/-1;">
               <div class="cf-lbl">Billing Notes</div>
               <textarea class="cf-input" rows="2" placeholder="Notes..." data-field="billing_notes" style="resize:vertical;">${esc(c.billing_notes||'')} </textarea>
             </div>
+          </div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;margin:10px 0;">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div class="cf-lbl" style="margin:0;">Effective Rate Preview</div>
+              <button class="act-btn" style="padding:4px 10px;font-size:.68rem;" onclick="previewEffectiveRate('${c.id}','${c.plan}')"><i class="ti ti-calculator"></i> Preview</button>
+            </div>
+            <div id="effectiveRatePreview_${c.id}" style="font-size:.8rem;margin-top:8px;color:var(--muted);">Click Preview to calculate based on current field values.</div>
           </div>
           <button class="form-submit" style="margin-top:10px;" onclick="saveClientBilling('${c.id}')"><i class="ti ti-device-floppy"></i> Save Billing</button>
 
@@ -3213,9 +3234,36 @@ async function saveClientAgents(id){
   }catch(e){alert('Error: '+e.message);}
   finally{if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-device-floppy"></i> Save Agent Settings';}}
 }
+function previewEffectiveRate(id,plan){
+  const el=document.getElementById('effectiveRatePreview_'+id);
+  if(!el)return;
+  el.textContent='Calculating...';
+  const data={plan};
+  document.querySelectorAll('#cm-billing [data-field]').forEach(f=>{
+    data[f.dataset.field]=(f.type==='checkbox')?f.checked:f.value.trim();
+  });
+  fetch(API_URL+'/api/admin/billing/preview-rate',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
+    body:JSON.stringify(data)
+  }).then(r=>r.json()).then(res=>{
+    if(res.error){el.innerHTML='<span style="color:#f85149;">'+res.error+'</span>';return;}
+    const basisLabels={
+      monthly:'Monthly billing — current fee, no annual discount',
+      standard_annual:'Annual — 15% off standard rate',
+      founder_bypassed_standard_annual:'Annual — founder discount bypassed, 15% off standard rate',
+      sme_discount_with_annual:'Annual — 15% off negotiated rate (stacked, as enabled)',
+      sme_discount_no_annual:'Annual — negotiated rate, no extra discount (not enabled for this client)',
+      infrastructure_custom_no_discount:'Annual — custom plan, no fixed standard price to discount against'
+    };
+    el.innerHTML='<b style="color:var(--text);font-size:1rem;">OMR '+res.rate.toFixed(3)+'</b><div style="font-size:.68rem;color:var(--muted);margin-top:2px;">'+(basisLabels[res.basis]||res.basis)+'</div>';
+  }).catch(()=>{el.innerHTML='<span style="color:#f85149;">Could not calculate.</span>';});
+}
 async function saveClientBilling(id){
   const data={};
-  document.querySelectorAll('#cm-billing [data-field]').forEach(el=>{data[el.dataset.field]=el.value.trim();});
+  document.querySelectorAll('#cm-billing [data-field]').forEach(el=>{
+    data[el.dataset.field]=(el.type==='checkbox')?el.checked:el.value.trim();
+  });
   try{const r=await fetch(API_URL+'/api/admin/client/'+id+'/billing',{method:'PATCH',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify(data)});if(!r.ok)throw new Error((await r.json()).error);showToast('Billing saved');}catch(e){alert('Error: '+e.message);}
 }
 
