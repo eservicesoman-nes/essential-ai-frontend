@@ -3087,7 +3087,10 @@ function renderClientDetail(c,colors,textColors,idx){
           <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;margin:10px 0;">
             <div style="display:flex;justify-content:space-between;align-items:center;">
               <div class="cf-lbl" style="margin:0;">Effective Rate Preview</div>
-              <button class="act-btn" style="padding:4px 10px;font-size:.68rem;" onclick="previewEffectiveRate('${c.id}','${c.plan}')"><i class="ti ti-calculator"></i> Preview</button>
+              <div style="display:flex;gap:6px;">
+                <button class="act-btn" style="padding:4px 10px;font-size:.68rem;" onclick="previewEffectiveRate('${c.id}','${c.plan}')"><i class="ti ti-calculator"></i> Preview</button>
+                <button class="act-btn" style="padding:4px 10px;font-size:.68rem;background:rgba(63,185,80,.1);color:#3fb950;border-color:rgba(63,185,80,.3);" onclick="generatePaymentLink('${c.id}','${(c.name||'').replace(/\x27/g,'')}','${c.plan}')"><i class="ti ti-link"></i> Generate Payment Link</button>
+              </div>
             </div>
             <div id="effectiveRatePreview_${c.id}" style="font-size:.8rem;margin-top:8px;color:var(--muted);">Click Preview to calculate based on current field values.</div>
           </div>
@@ -3267,6 +3270,46 @@ function previewEffectiveRate(id,plan){
     };
     el.innerHTML='<b style="color:var(--text);font-size:1rem;">OMR '+res.rate.toFixed(3)+'</b><div style="font-size:.68rem;color:var(--muted);margin-top:2px;">'+(basisLabels[res.basis]||res.basis)+'</div>';
   }).catch(()=>{el.innerHTML='<span style="color:#f85149;">Could not calculate.</span>';});
+}
+async function generatePaymentLink(clientId,clientName,plan){
+  const el=document.getElementById('effectiveRatePreview_'+clientId);
+  if(!el)return;
+  el.textContent='Calculating amount...';
+  const data={plan};
+  document.querySelectorAll('#cm-billing [data-field]').forEach(f=>{
+    data[f.dataset.field]=(f.type==='checkbox')?f.checked:f.value.trim();
+  });
+  try{
+    const rateRes=await fetch(API_URL+'/api/admin/billing/preview-rate',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
+      body:JSON.stringify(data)
+    });
+    const rateData=await rateRes.json();
+    if(rateData.error||!rateData.rate){el.innerHTML='<span style="color:#f85149;">Could not calculate amount.</span>';return;}
+    const netAmount=rateData.rate;
+    const vatAmount=parseFloat((netAmount*0.05).toFixed(3));
+    const grossAmount=parseFloat((netAmount+vatAmount).toFixed(3));
+    el.textContent='Generating payment link...';
+    const linkRes=await fetch(API_URL+'/api/thawani/create-session',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
+      body:JSON.stringify({
+        amount:grossAmount,
+        clientName,
+        clientId,
+        description:`NES AI Platform — ${plan} (${data.billing_cycle||'monthly'})`,
+        metadata:{type:'plan_payment',clientId,net_amount:netAmount,vat_amount:vatAmount,gross_amount:grossAmount,billing_cycle:data.billing_cycle||'monthly'}
+      })
+    });
+    const linkData=await linkRes.json();
+    if(!linkData.success||!linkData.checkout_url){el.innerHTML='<span style="color:#f85149;">'+(linkData.error||'Could not generate link')+'</span>';return;}
+    el.innerHTML='<div style="margin-bottom:6px;"><b style="color:var(--text);">OMR '+grossAmount.toFixed(3)+'</b> <span style="color:var(--muted);font-size:.68rem;">(incl. VAT OMR '+vatAmount.toFixed(3)+')</span></div>'+
+      '<div style="background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:8px;font-size:.7rem;word-break:break-all;margin-bottom:6px;font-family:var(--mono);">'+linkData.checkout_url+'</div>'+
+      '<button class="act-btn" style="padding:4px 10px;font-size:.68rem;" onclick="navigator.clipboard.writeText(\''+linkData.checkout_url+'\');showToast(\'Link copied\')"><i class="ti ti-copy"></i> Copy Link</button>';
+  }catch(e){
+    el.innerHTML='<span style="color:#f85149;">Error: '+e.message+'</span>';
+  }
 }
 async function saveClientBilling(id){
   const data={};
