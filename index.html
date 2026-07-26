@@ -3051,14 +3051,23 @@ function renderClientDetail(c,colors,textColors,idx){
               ['Contract End','contract_end'],
               ['Trial Start Date','trial_start'],
               ['Trial Duration (days)','trial_duration_days'],
-              ['Founder Discount Expires','founder_discount_expires_at'],
               ['Custom Discount % (SME deals)','discount_percent'],
-              ['Custom Discount Expires','discount_expires_at'],
             ].map(([lbl,key])=>`
               <div class="cred-field">
                 <div class="cf-lbl">${lbl}</div>
                 <input class="cf-input" type="text" value="${esc(String(c[key]||'')||'')}" placeholder="Not set" data-field="${key}">
               </div>`).join('')}
+            ${(()=>{
+              const today=new Date();
+              const minDate=today.toISOString().split('T')[0];
+              const maxD=new Date(today);maxD.setFullYear(maxD.getFullYear()+50);
+              const maxDate=maxD.toISOString().split('T')[0];
+              return [['Founder Discount Expires','founder_discount_expires_at'],['Custom Discount Expires','discount_expires_at']].map(([lbl,key])=>`
+              <div class="cred-field">
+                <div class="cf-lbl">${lbl}</div>
+                <input class="cf-input" type="date" value="${esc(String(c[key]||'')||'')}" min="${minDate}" max="${maxDate}" data-field="${key}">
+              </div>`).join('');
+            })()}
             <div class="cred-field">
               <div class="cf-lbl">Billing Cycle</div>
               <select class="cf-input" data-field="billing_cycle" id="billingCycle_${c.id}">
