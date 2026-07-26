@@ -357,8 +357,9 @@
     .creds-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
     .cred-field{background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:8px 10px;}
     .cf-lbl{font-size:.62rem;color:var(--muted);margin-bottom:3px;font-family:var(--mono);}
-    .cf-input{background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:5px 8px;color:var(--text);font-family:var(--mono);font-size:.72rem;outline:none;width:100%;}
+    .cf-input{background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:5px 8px;color:var(--text);font-family:var(--mono);font-size:.72rem;outline:none;width:100%;color-scheme:dark;}
     .cf-input:focus{border-color:var(--nes-blue);}
+    input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(48%) sepia(79%) saturate(2476%) hue-rotate(190deg) brightness(101%) contrast(101%);cursor:pointer;}
     .cf-val{font-size:.72rem;color:var(--nes-blue);font-family:var(--mono);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
     .cf-empty{font-size:.72rem;color:#484f58;font-style:italic;font-family:var(--mono);}
 
