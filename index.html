@@ -1665,6 +1665,12 @@ async function showCEODashboard(){
     else if(s==='won'||s==='lost')stageCounts.closed++;
     else stageCounts.new++;
   });
+  const stagePcts={
+    new:Math.round(stageCounts.new/totalLeads*100)||0,
+    contacted:Math.round(stageCounts.contacted/totalLeads*100)||0,
+    qualified:Math.round(stageCounts.qualified/totalLeads*100)||0,
+    closed:Math.round(stageCounts.closed/totalLeads*100)||0
+  };
   if(window._weatherCache){setTimeout(()=>{const w=window._weatherCache;const wi=document.getElementById('weatherIcon');const wd=document.getElementById('weatherDesc');const wt=document.getElementById('weatherTemp');const wf=document.getElementById('weatherFeels');if(wi){wi.className='ti '+w.icon;wi.style.cssText='font-size:22px;color:var(--nes-blue);filter:drop-shadow(0 0 4px var(--nes-blue))';}if(wd)wd.textContent=w.desc;if(wt)wt.textContent=w.temp;if(wf)wf.textContent=w.feels;},50);}else{setTimeout(()=>{fetch('https://wttr.in/Muscat?format=j1').then(r=>r.json()).then(w=>{const c=w.current_condition[0];const desc=c.weatherDesc[0].value;const temp=c.temp_C;const feels=c.FeelsLikeC;const humidity=c.humidity;const icons={'Sunny':'ti-sun','Clear':'ti-moon-stars','Partly cloudy':'ti-cloud-sun','Cloudy':'ti-cloud','Overcast':'ti-cloud','Mist':'ti-mist','Fog':'ti-mist','Rain':'ti-cloud-rain','Drizzle':'ti-cloud-drizzle','Thunderstorm':'ti-storm','Snow':'ti-snowflake','Blizzard':'ti-snowflake'};const iconKey=Object.keys(icons).find(k=>desc.includes(k))||'Sunny';const icon=icons[iconKey]||'ti-sun';const descTxt=desc+' · Humidity '+humidity+'%';const tempTxt=temp+'°C';const feelsTxt='Feels like '+feels+'°C';window._weatherCache={icon,desc:descTxt,temp:tempTxt,feels:feelsTxt};const wi=document.getElementById('weatherIcon');const wd=document.getElementById('weatherDesc');const wt=document.getElementById('weatherTemp');const wf=document.getElementById('weatherFeels');if(wi){wi.className='ti '+icon;wi.style.cssText='font-size:22px;color:var(--nes-blue);filter:drop-shadow(0 0 4px var(--nes-blue))';}if(wd)wd.textContent=descTxt;if(wt)wt.textContent=tempTxt;if(wf)wf.textContent=feelsTxt;}).catch(()=>{const wd=document.getElementById('weatherDesc');if(wd)wd.textContent='Weather unavailable';});},100);}
 
   document.getElementById('ceoDashContent').innerHTML=`
