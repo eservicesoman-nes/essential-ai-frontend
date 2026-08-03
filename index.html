@@ -2986,6 +2986,14 @@ function renderClientDetail(c,colors,textColors,idx){
             <button class="form-submit" style="flex:1;" onclick="saveClientCreds('${c.id}')"><i class="ti ti-device-floppy"></i> Save Credentials</button>
             <button onclick="addCustomCredField('${c.id}')" style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--muted);cursor:pointer;font-size:.8rem;white-space:nowrap;"><i class="ti ti-plus"></i> Add Field</button>
           </div>
+          <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;margin-top:20px;">Website Chat Widget</div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;">
+            <div style="font-size:.75rem;color:var(--muted);margin-bottom:10px;">Embed snippet for this client's website widget - pull this anytime without needing the client to log in.</div>
+            <div style="display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-family:var(--mono);font-size:.68rem;color:#409cff;word-break:break-all;">
+              <span id="cm-widget-snippet-${c.id}">&lt;script src=\"https://api.essential-services.org/widget.js?client_id=${c.id}\"&gt;&lt;/script&gt;</span>
+              <button onclick="copyWidgetSnippet(this, '${c.id}')" style="background:var(--nes-btn-grad);border:none;border-radius:6px;padding:4px 12px;color:#fff;font-size:.68rem;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;">Copy</button>
+            </div>
+          </div>
         </div>
 
         <div id="cm-branding" style="display:none;">
