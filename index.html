@@ -907,7 +907,7 @@ function setupNavForRole(){
     }
     const deenNavEl = document.getElementById('deenNav');
     const inboxNavEl = document.getElementById('inboxNav');
-    if(inboxNavEl) inboxNavEl.style.display='flex';
+    if(inboxNavEl) inboxNavEl.style.display = ['ceo','nesadmin'].includes(userRole) ? 'flex' : 'none';
     const briefcaseWorkspaceNavEl = document.getElementById('briefcaseWorkspaceNav');
     if(briefcaseWorkspaceNavEl) briefcaseWorkspaceNavEl.style.display='flex';
     const whatsappWorkspaceNavEl = document.getElementById('whatsappWorkspaceNav');
