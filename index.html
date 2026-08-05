@@ -4711,6 +4711,12 @@ function showInviteModal(){
         <option value="manager">Manager</option>
         <option value="staff" selected>Staff</option>
       </select>
+      <label style="font-size:11px;color:#8b949e;font-weight:600;display:block;margin-bottom:5px;">GRANT ACCESS TO (OPTIONAL)</label>
+      <div style="margin-bottom:20px;">
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#e6edf3;margin-bottom:8px;cursor:pointer;"><input type="checkbox" id="grantItSetup" style="width:16px;height:16px;"> IT Setup</label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#e6edf3;margin-bottom:8px;cursor:pointer;"><input type="checkbox" id="grantBriefcase" style="width:16px;height:16px;"> Briefcase</label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#e6edf3;cursor:pointer;"><input type="checkbox" id="grantWhatsapp" style="width:16px;height:16px;"> WhatsApp Auto-Reply</label>
+      </div>
       <div id="inviteErr" style="font-size:12px;color:#f85149;margin-bottom:10px;display:none;"></div>
       <div style="display:flex;gap:8px;">
         <button onclick="document.getElementById('inviteModal').remove()" style="flex:1;background:none;border:1px solid #1a2332;border-radius:8px;padding:10px;color:#8b949e;cursor:pointer;font-size:13px;">Cancel</button>
@@ -4727,13 +4733,17 @@ async function sendTeamInvite(){
   const err = document.getElementById('inviteErr');
   err.style.display='none';
   if(!email){ err.textContent='Email is required.'; err.style.display='block'; return; }
+  const granted_modules = [];
+  if(document.getElementById('grantItSetup')?.checked) granted_modules.push('it_setup');
+  if(document.getElementById('grantBriefcase')?.checked) granted_modules.push('briefcase');
+  if(document.getElementById('grantWhatsapp')?.checked) granted_modules.push('whatsapp_autoreply');
   const btn = document.querySelector('#inviteModal button:last-child');
   btn.textContent='Sending...'; btn.disabled=true;
   try{
     const res = await fetch(API_URL+'/api/client/'+window.userClientId+'/invite',{
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
-      body:JSON.stringify({email,role})
+      body:JSON.stringify({email,role,granted_modules})
     });
     const data = await res.json();
     if(!res.ok) throw new Error(data.error||'Failed');
