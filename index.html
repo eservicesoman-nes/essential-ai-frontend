@@ -4681,6 +4681,7 @@ async function loadTeam(){
                 <option value="manager" ${u.role==='manager'?'selected':''}>Manager</option>
                 <option value="staff" ${u.role==='staff'?'selected':''}>Staff</option>
               </select>
+              <button onclick='showEditAccessModal(${JSON.stringify(u.id)},${JSON.stringify(clientId)},${JSON.stringify(u.granted_modules||[])})' style="background:none;border:1px solid rgba(64,156,255,0.3);border-radius:6px;padding:4px 8px;color:#409cff;cursor:pointer;font-size:.7rem;">Access</button>
               <button onclick="removeTeamMember('${u.id}','${clientId}')" style="background:none;border:1px solid rgba(248,81,73,0.3);border-radius:6px;padding:4px 8px;color:#f85149;cursor:pointer;font-size:.7rem;">Remove</button>
             </div>
           </div>`;
@@ -4691,6 +4692,53 @@ async function loadTeam(){
     el.innerHTML = html;
   }catch(e){
     if(el) el.innerHTML=`<div style="color:var(--red);padding:20px;font-size:.8rem;">Error loading team: ${e.message}</div>`;
+  }
+}
+
+function showEditAccessModal(userId, clientId, currentModules){
+  const existing = document.getElementById('accessModal');
+  if(existing) existing.remove();
+  const modal = document.createElement('div');
+  modal.id = 'accessModal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;display:flex;align-items:center;justify-content:center;';
+  modal.innerHTML = `
+    <div style="background:#161b22;border:1px solid #1a2332;border-radius:14px;padding:28px;width:320px;max-width:90vw;">
+      <div style="font-size:16px;font-weight:700;margin-bottom:6px;color:#e6edf3;">Edit Access</div>
+      <div style="font-size:12px;color:#8b949e;margin-bottom:20px;">Grant or remove access to specific features</div>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#e6edf3;margin-bottom:8px;cursor:pointer;"><input type="checkbox" id="editGrantItSetup" ${currentModules.includes('it_setup')?'checked':''} style="width:16px;height:16px;"> IT Setup</label>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#e6edf3;margin-bottom:8px;cursor:pointer;"><input type="checkbox" id="editGrantBriefcase" ${currentModules.includes('briefcase')?'checked':''} style="width:16px;height:16px;"> Briefcase</label>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#e6edf3;margin-bottom:20px;cursor:pointer;"><input type="checkbox" id="editGrantWhatsapp" ${currentModules.includes('whatsapp_autoreply')?'checked':''} style="width:16px;height:16px;"> WhatsApp Auto-Reply</label>
+      <div id="accessErr" style="font-size:12px;color:#f85149;margin-bottom:10px;display:none;"></div>
+      <div style="display:flex;gap:8px;">
+        <button onclick="document.getElementById('accessModal').remove()" style="flex:1;background:none;border:1px solid #1a2332;border-radius:8px;padding:10px;color:#8b949e;cursor:pointer;font-size:13px;">Cancel</button>
+        <button onclick="saveUserAccess('${userId}','${clientId}')" style="flex:1;background:linear-gradient(135deg,#1a56db,#2563eb);border:none;border-radius:8px;padding:10px;color:#fff;cursor:pointer;font-size:13px;font-weight:600;">Save</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+}
+
+async function saveUserAccess(userId, clientId){
+  const granted_modules = [];
+  if(document.getElementById('editGrantItSetup')?.checked) granted_modules.push('it_setup');
+  if(document.getElementById('editGrantBriefcase')?.checked) granted_modules.push('briefcase');
+  if(document.getElementById('editGrantWhatsapp')?.checked) granted_modules.push('whatsapp_autoreply');
+  const err = document.getElementById('accessErr');
+  const btn = document.querySelector('#accessModal button:last-child');
+  btn.textContent='Saving...'; btn.disabled=true;
+  try{
+    const res = await fetch(API_URL+'/api/client/'+clientId+'/user/'+userId+'/modules',{
+      method:'PATCH',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
+      body:JSON.stringify({granted_modules})
+    });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error||'Failed');
+    document.getElementById('accessModal').remove();
+    showToast('Access updated ✓');
+    loadTeam();
+  }catch(e){
+    err.textContent=e.message; err.style.display='block';
+    btn.textContent='Save'; btn.disabled=false;
   }
 }
 
