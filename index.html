@@ -852,10 +852,11 @@ async function submitAgreement(userId){
 
 async function loadUserRole(user){
   try{
-    const{data}=await sb.from('profiles').select('role,client_id').eq('id',user.id).single();
+    const{data}=await sb.from('profiles').select('role,client_id,granted_modules').eq('id',user.id).single();
     userRole=data?.role||'staff';
     userClientId=data?.client_id||null;
-  }catch(e){userRole='staff';userClientId=null;}
+    window.userGrantedModules=data?.granted_modules||[];
+  }catch(e){userRole='staff';userClientId=null;window.userGrantedModules=[];}
   document.getElementById('roleChip').textContent=userRole;
 }
 
@@ -899,7 +900,7 @@ function setupNavForRole(){
       clientMgr.style.display='none';
       if(salesNav)salesNav.style.display='none';
       const myCredsNav=document.getElementById('myCredsNav');
-      if(myCredsNav)myCredsNav.style.display='flex';
+      if(myCredsNav)myCredsNav.style.display = (userRole==='ceo' || (window.userGrantedModules||[]).includes('it_setup')) ? 'flex' : 'none';
     }
     if(['ceo','manager'].includes(userRole)){
       const teamNavForClientRole=document.getElementById('teamNav');
@@ -909,9 +910,9 @@ function setupNavForRole(){
     const inboxNavEl = document.getElementById('inboxNav');
     if(inboxNavEl) inboxNavEl.style.display = ['ceo','nesadmin'].includes(userRole) ? 'flex' : 'none';
     const briefcaseWorkspaceNavEl = document.getElementById('briefcaseWorkspaceNav');
-    if(briefcaseWorkspaceNavEl) briefcaseWorkspaceNavEl.style.display='flex';
+    if(briefcaseWorkspaceNavEl) briefcaseWorkspaceNavEl.style.display = (userRole==='ceo' || (window.userGrantedModules||[]).includes('briefcase')) ? 'flex' : 'none';
     const whatsappWorkspaceNavEl = document.getElementById('whatsappWorkspaceNav');
-    if(whatsappWorkspaceNavEl) whatsappWorkspaceNavEl.style.display='flex';
+    if(whatsappWorkspaceNavEl) whatsappWorkspaceNavEl.style.display = (userRole==='ceo' || (window.userGrantedModules||[]).includes('whatsapp_autoreply')) ? 'flex' : 'none';
     showClientBrandingChip().then(()=>{
       const mods = window.clientModules || {};
       const ceoNavEl = document.querySelector('[data-view="ceo"]');
