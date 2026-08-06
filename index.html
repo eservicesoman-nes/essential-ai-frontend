@@ -4608,6 +4608,7 @@ async function loadTeam(){
 
     const roleColors = {nesadmin:'#f85149',ceo:'#d29922',manager:'#409cff',staff:'#8b949e',nes_partner:'#7f77dd'};
     const deptOptions = depts.map(d=>`<option value="${d.id}">${d.name}</option>`).join('');
+    window._deptOptions = deptOptions;
 
     // Stats row
     const planLimits = {presence:3,operations:10,workforce:999,infrastructure:999};
@@ -4755,9 +4756,14 @@ function showInviteModal(){
       <label style="font-size:11px;color:#8b949e;font-weight:600;display:block;margin-bottom:5px;">WORK EMAIL</label>
       <input id="inviteEmail" type="email" placeholder="ahmed@company.com" style="width:100%;background:#0a0f1e;border:1px solid #1a2332;border-radius:8px;padding:10px 12px;color:#e6edf3;font-size:13px;margin-bottom:12px;outline:none;box-sizing:border-box;">
       <label style="font-size:11px;color:#8b949e;font-weight:600;display:block;margin-bottom:5px;">ROLE</label>
-      <select id="inviteRole" style="width:100%;background:#0a0f1e;border:1px solid #1a2332;border-radius:8px;padding:10px 12px;color:#e6edf3;font-size:13px;margin-bottom:20px;outline:none;box-sizing:border-box;">
+      <select id="inviteRole" style="width:100%;background:#0a0f1e;border:1px solid #1a2332;border-radius:8px;padding:10px 12px;color:#e6edf3;font-size:13px;margin-bottom:12px;outline:none;box-sizing:border-box;">
         <option value="manager">Manager</option>
         <option value="staff" selected>Staff</option>
+      </select>
+      <label style="font-size:11px;color:#8b949e;font-weight:600;display:block;margin-bottom:5px;">DEPARTMENT (OPTIONAL)</label>
+      <select id="inviteDept" style="width:100%;background:#0a0f1e;border:1px solid #1a2332;border-radius:8px;padding:10px 12px;color:#e6edf3;font-size:13px;margin-bottom:20px;outline:none;box-sizing:border-box;">
+        <option value="">No department</option>
+        ${window._deptOptions || ''}
       </select>
       <label style="font-size:11px;color:#8b949e;font-weight:600;display:block;margin-bottom:5px;">GRANT ACCESS TO (OPTIONAL)</label>
       <div style="margin-bottom:20px;">
@@ -4785,13 +4791,14 @@ async function sendTeamInvite(){
   if(document.getElementById('grantItSetup')?.checked) granted_modules.push('it_setup');
   if(document.getElementById('grantBriefcase')?.checked) granted_modules.push('briefcase');
   if(document.getElementById('grantWhatsapp')?.checked) granted_modules.push('whatsapp_autoreply');
+  const department_id = document.getElementById('inviteDept')?.value || null;
   const btn = document.querySelector('#inviteModal button:last-child');
   btn.textContent='Sending...'; btn.disabled=true;
   try{
     const res = await fetch(API_URL+'/api/client/'+window.userClientId+'/invite',{
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
-      body:JSON.stringify({email,role,granted_modules})
+      body:JSON.stringify({email,role,granted_modules,department_id})
     });
     const data = await res.json();
     if(!res.ok) throw new Error(data.error||'Failed');
