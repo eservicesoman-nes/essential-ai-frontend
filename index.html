@@ -3643,6 +3643,7 @@ async function updateClient(clientId){
     if(!r.ok)throw new Error(res.error||'Failed to update');
     window._activeClientId=clientId;
     await showClientManager();
+    if(res.seat_warning){ alert(res.seat_warning); }
     showToast('Client updated');
   }
   catch(e){alert('Error: '+e.message);if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-device-floppy"></i> Save Changes';}}
