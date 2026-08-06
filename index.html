@@ -4831,8 +4831,14 @@ async function updateUserRole(userId, clientId, role){
 
 async function updateUserDept(userId, clientId, deptId){
   try{
-    const { error } = await sb.from('profiles').update({department_id: deptId||null}).eq('id',userId).eq('client_id',clientId);
-    if(!error) showToast('Department updated ✓');
+    const res = await fetch(API_URL+'/api/client/'+clientId+'/user/'+userId+'/department',{
+      method:'PATCH',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
+      body:JSON.stringify({department_id: deptId||null})
+    });
+    const data = await res.json();
+    if(res.ok) showToast('Department updated ✓');
+    else showToast('Failed: '+(data.error||'Unknown error'));
   }catch(e){ showToast('Failed: '+e.message); }
 }
 
