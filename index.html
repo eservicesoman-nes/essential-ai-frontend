@@ -4637,14 +4637,17 @@ async function loadTeam(){
       <div style="font-family:var(--mono);font-size:.72rem;color:var(--muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em;">Departments</div>
       <div style="display:flex;flex-wrap:wrap;gap:8px;">
         ${depts.map(d=>`
-          <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 14px;display:flex;align-items:center;gap:8px;">
+          <div onclick="filterByDept('${d.id}')" data-dept-badge="${d.id}" style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 14px;display:flex;align-items:center;gap:8px;cursor:pointer;">
             <i class="ti ti-building" style="color:#409cff;font-size:13px;"></i>
             <span style="font-size:.78rem;color:#e6edf3;font-weight:500;">${d.name}</span>
             <span style="font-size:.65rem;color:var(--muted);">${users.filter(u=>u.department_id===d.id).length} staff</span>
-            <i onclick="deleteDept('${d.id}','${d.name.replace(/'/g,"\\'")}')" class="ti ti-x" style="color:var(--muted);font-size:13px;cursor:pointer;margin-left:4px;" title="Delete department"></i>
+            <i onclick="event.stopPropagation();deleteDept('${d.id}','${d.name.replace(/'/g,"\\'")}')" class="ti ti-x" style="color:var(--muted);font-size:13px;cursor:pointer;margin-left:4px;" title="Delete department"></i>
           </div>`).join('')}
         <div onclick="showAddDeptModal()" style="background:rgba(64,156,255,0.05);border:1px dashed rgba(64,156,255,0.3);border-radius:8px;padding:8px 14px;display:flex;align-items:center;gap:6px;cursor:pointer;color:#409cff;font-size:.75rem;">
           <i class="ti ti-plus"></i> Add Department
+        </div>
+        <div id="deptFilterClear" onclick="filterByDept(null)" style="display:none;background:rgba(248,81,73,0.08);border:1px solid rgba(248,81,73,0.25);border-radius:8px;padding:8px 14px;align-items:center;gap:6px;cursor:pointer;color:#f85149;font-size:.75rem;">
+          <i class="ti ti-x"></i> Clear filter
         </div>
       </div>
     </div>`;
@@ -4662,7 +4665,7 @@ async function loadTeam(){
       users.forEach((u,i) => {
         const roleColor = roleColors[u.role] || '#8b949e';
         html += `
-          <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;${i<users.length-1?'border-bottom:1px solid var(--border);':''}">
+          <div data-user-dept="${u.department_id||''}" style="display:flex;align-items:center;gap:12px;padding:12px 16px;${i<users.length-1?'border-bottom:1px solid var(--border);':''}">
             <div style="width:34px;height:34px;border-radius:50%;background:rgba(64,156,255,0.1);border:1px solid rgba(64,156,255,0.2);display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:700;color:#409cff;flex-shrink:0;">
               ${(u.email||'?')[0].toUpperCase()}
             </div>
@@ -4872,6 +4875,19 @@ function showAddDeptModal(){
     })
     .catch(e=>showToast('Failed: '+e.message));
 }
+function filterByDept(deptId){
+  const rows = document.querySelectorAll('[data-user-dept]');
+  const badges = document.querySelectorAll('[data-dept-badge]');
+  const clearBtn = document.getElementById('deptFilterClear');
+  rows.forEach(r => {
+    r.style.display = (deptId === null || r.getAttribute('data-user-dept') === deptId) ? 'flex' : 'none';
+  });
+  badges.forEach(b => {
+    b.style.borderColor = (deptId !== null && b.getAttribute('data-dept-badge') === deptId) ? '#409cff' : 'var(--border)';
+  });
+  if(clearBtn) clearBtn.style.display = deptId === null ? 'none' : 'flex';
+}
+
 function deleteDept(deptId, deptName){
   if(!confirm('Delete department \'' + deptName + '\'? This cannot be undone.')) return;
   if(!confirm('Are you absolutely sure? Staff assigned to \'' + deptName + '\' will be unassigned.')) return;
