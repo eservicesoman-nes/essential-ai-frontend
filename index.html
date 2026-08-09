@@ -4225,6 +4225,23 @@ async function extractText(file){
     }
     return slideTexts.join('\n\n');
   }
+  if(['jpg','jpeg','png','webp'].includes(ext)){
+    if(typeof Tesseract==='undefined')await loadScript('https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js');
+    const result=await Tesseract.recognize(file,'eng');
+    return result.data.text;
+  }
+  if(ext==='doc'){
+    const fd=new FormData();
+    fd.append('file',file);
+    const res=await fetch(`${API_URL}/api/vault/extract-legacy-doc`,{
+      method:'POST',
+      headers:{'Authorization':'Bearer '+session.access_token},
+      body:fd
+    });
+    const data=await res.json();
+    if(!res.ok||!data.text)throw new Error(data.error||'Could not extract .doc file');
+    return data.text;
+  }
   throw new Error('Unsupported file type');
 }
 const _scriptLoadPromises={};
