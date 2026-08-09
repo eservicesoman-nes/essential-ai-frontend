@@ -2516,7 +2516,7 @@ function appendBriefcaseChatMsg(role, text){
   const isUser = role==='user';
   const bubble = document.createElement('div');
   bubble.style.cssText = `max-width:85%;padding:9px 13px;border-radius:12px;font-size:.8rem;line-height:1.5;${isUser?'align-self:flex-end;background:var(--nes-btn-grad);color:#fff;border-bottom-right-radius:4px;':'align-self:flex-start;background:var(--card);border:1px solid var(--border);color:var(--text);border-bottom-left-radius:4px;'}`;
-  bubble.textContent = text;
+  bubble.innerHTML = isUser ? esc(text) : md(text);
   el.appendChild(bubble);
   el.scrollTop = el.scrollHeight;
   return bubble;
