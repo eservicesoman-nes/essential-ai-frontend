@@ -2335,6 +2335,23 @@ async function showBriefcasePage(){
   document.getElementById('briefcaseChatInput').addEventListener('keypress', e=>{ if(e.key==='Enter') sendBriefcaseChatMessage(); });
   await loadVaultFiles();
   loadBriefcaseDocContext();
+  loadBriefcaseChatHistory();
+}
+
+async function loadBriefcaseChatHistory(){
+  try{
+    const res = await fetch(`${API_URL}/api/chat/docs/history`, {
+      headers:{'Authorization':'Bearer '+session.access_token}
+    });
+    const data = await res.json();
+    const msgs = data.messages || [];
+    window._briefcaseChatHistory = msgs.map(m => ({ role: m.role, content: m.content }));
+    for(const m of msgs){
+      appendBriefcaseChatMsg(m.role === 'user' ? 'user' : 'ai', m.content);
+    }
+  }catch(e){
+    console.warn('Could not load Briefcase chat history', e.message);
+  }
 }
 
 async function loadVaultFiles(){
