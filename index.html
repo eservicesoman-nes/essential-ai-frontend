@@ -2500,7 +2500,7 @@ async function loadBriefcaseDocContext(){
   for(const f of files){
     try{
       let text = f.extracted_text;
-      if(!text){
+      if(!text || text.length <= 4000){
         const urlRes = await fetch(`${API_URL}/api/vault/download-url/${f.id}`, {
           headers:{'Authorization':'Bearer '+session.access_token}
         });
