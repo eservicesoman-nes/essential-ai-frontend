@@ -435,8 +435,8 @@
     }
     /* Briefcase mobile */
     @media(max-width:700px){
-      .briefcase-two-col{flex-direction:column!important;}
-      .briefcase-filelist{width:100%!important;border-right:none!important;border-bottom:1px solid var(--border);max-height:160px!important;flex-shrink:0!important;}
+      .briefcase-filelist{position:absolute!important;top:0;left:0;bottom:0;width:110px!important;z-index:5;background:var(--bg);box-shadow:2px 0 10px rgba(0,0,0,.4);min-height:0!important;}
+      #briefcaseFileList{min-height:0!important;}
       .briefcase-panel-toggle{display:none!important;}
     }
     @media(max-width:700px){
