@@ -7031,8 +7031,8 @@ async function fetchEmailBody(accountId, uid){
   try{
     const res = await fetch(API_URL+'/api/email/body/'+accountId+'/'+uid, {headers:{'Authorization':'Bearer '+session.access_token}});
     const data = await res.json();
-    return data.body || '';
-  }catch(e){ return ''; }
+    return { body: data.body || '', isHtml: !!data.isHtml };
+  }catch(e){ return { body: '', isHtml: false }; }
 }
 
 function showEmail(idx){
@@ -7336,8 +7336,22 @@ window.showEmail = async function(idx){
   if(!accountId) return;
   const bodyEl = document.getElementById('emailBodyPanel');
   if(!bodyEl) return;
-  const body = await fetchEmailBody(accountId, e.uid);
+  const { body, isHtml } = await fetchEmailBody(accountId, e.uid);
   if(bodyEl){
+    if(isHtml){
+      if(typeof DOMPurify==='undefined')await loadScript('https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js');
+      const safeHtml = DOMPurify.sanitize(body, {
+        FORBID_TAGS: ['script','style','iframe','object','embed','form','input','link','meta','img'],
+        ADD_ATTR: ['target']
+      });
+      DOMPurify.addHook('afterSanitizeAttributes', (node) => {
+        if(node.tagName==='A'){ node.setAttribute('target','_blank'); node.setAttribute('rel','noopener noreferrer'); }
+      });
+      bodyEl.innerHTML = safeHtml && safeHtml.trim().length > 10
+        ? '<div style="line-height:1.6;font-size:.82rem;color:var(--text);padding-bottom:20px;word-break:break-word;">'+safeHtml+'</div>'
+        : '<div style="color:var(--muted);font-family:var(--mono);font-size:.72rem;text-align:center;padding:20px;">No readable content</div>';
+      DOMPurify.removeHook('afterSanitizeAttributes');
+    } else {
     let cleaned = body || '';
     cleaned = cleaned.replace(/(https?:\/\/[^\s<>"{}|\\^`[\]]+)/g, (url) => {
       const clean = url.replace(/[.,;:!?)]+$/, '');
@@ -7374,6 +7388,7 @@ window.showEmail = async function(idx){
     bodyEl.innerHTML = cleaned && cleaned.length > 10
       ? '<div style="line-height:1.6;font-size:.82rem;color:var(--text);padding-bottom:20px;word-break:break-word;">'+htmlBody+'</div>'
       : '<div style="color:var(--muted);font-family:var(--mono);font-size:.72rem;text-align:center;padding:20px;">No readable content</div>';
+    }
   }
 };
 window.sendReply=sendReply;
