@@ -435,9 +435,9 @@
     }
     /* Briefcase mobile */
     @media(max-width:700px){
-      .briefcase-filelist{display:none!important;}
-      .briefcase-filelist.open{display:flex!important;position:fixed;top:0;left:0;bottom:0;width:78vw;max-width:320px;z-index:999;background:var(--bg);box-shadow:4px 0 20px rgba(0,0,0,.5);}
-      .briefcase-panel-toggle{display:flex!important;}
+      .briefcase-two-col{flex-direction:column!important;}
+      .briefcase-filelist{width:100%!important;border-right:none!important;border-bottom:1px solid var(--border);max-height:160px!important;flex-shrink:0!important;}
+      .briefcase-panel-toggle{display:none!important;}
     }
     @media(max-width:700px){
       .welcome-card,.messages,.input-area{padding-left:12px;padding-right:12px;}
@@ -2302,7 +2302,7 @@ async function showBriefcasePage(){
         <input type="file" id="vaultUploadInput" style="display:none;" onchange="uploadVaultFile(this.files[0])" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.jpg,.jpeg,.png,.webp">
       </label>
     </div>
-    <div style="flex:1;display:flex;overflow:hidden;min-height:0;position:relative;">
+    <div class="briefcase-two-col" style="flex:1;display:flex;overflow:hidden;min-height:0;position:relative;">
       <div class="briefcase-filelist" id="briefcaseFileListPanel" style="width:190px;flex-shrink:0;display:flex;flex-direction:column;border-right:1px solid var(--border);">
         <div style="padding:10px 10px 8px;flex-shrink:0;">
           <input type="text" id="briefcaseSearchInput" placeholder="Search docs..." oninput="filterBriefcaseFiles(this.value)" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:6px 10px;color:var(--text);font-family:var(--ui);font-size:.7rem;outline:none;box-sizing:border-box;">
