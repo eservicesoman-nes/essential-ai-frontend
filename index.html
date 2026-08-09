@@ -6585,12 +6585,14 @@ function md(s){
   let src=esc(s);
   const codeBlocks=[];
   src=src.replace(/```(\w*)\n?([\s\S]*?)```/g,(m,lang,code)=>{codeBlocks.push('<pre style="background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:10px 14px;overflow-x:auto;font-family:var(--mono);font-size:.8rem;margin:8px 0"><code>'+code+'</code></pre>');return '\u0000CB'+(codeBlocks.length-1)+'\u0000';});
+  src=src.replace(/\s+([•▪])\s+/g,'\n$1 ');
+  src=src.replace(/^([•▪])\s+/,'$1 ');
   const lines=src.split('\n');
   const out=[];
   let i=0;
   const isTableRow=l=>/^\s*\|.*\|\s*$/.test(l);
   const isTableSep=l=>/^\s*\|?[\s:|-]+\|?\s*$/.test(l)&&l.includes('-');
-  const isBullet=l=>/^\s*[-*•]\s+/.test(l);
+  const isBullet=l=>/^\s*[-*•▪]\s+/.test(l);
   const isNumbered=l=>/^\s*\d+[\.\)]\s+/.test(l);
   const splitRow=l=>l.split('|').map(c=>c.trim()).filter((c,idx,arr)=>!(idx===0&&c==='')&&!(idx===arr.length-1&&c===''));
   while(i<lines.length){
@@ -6608,7 +6610,7 @@ function md(s){
     if(isBullet(line)){
       const items=[];
       let j=i;
-      while(j<lines.length&&isBullet(lines[j])){items.push(lines[j].replace(/^\s*[-*•]\s+/,''));j++;}
+      while(j<lines.length&&isBullet(lines[j])){items.push(lines[j].replace(/^\s*[-*•▪]\s+/,''));j++;}
       out.push('<ul style="margin:6px 0;padding-left:20px;">'+items.map(it=>'<li style="margin-bottom:3px;">'+it+'</li>').join('')+'</ul>');
       i=j;
       continue;
