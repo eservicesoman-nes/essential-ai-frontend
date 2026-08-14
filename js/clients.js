@@ -76,7 +76,7 @@ async function showClientManager(){
   mc.style.overflow='hidden';
   mc.innerHTML=`
     <div style="padding:11px 18px 11px 60px;border-bottom:1px solid var(--border);flex-shrink:0;">
-      <div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;">CLIENT MANAGER</div>
+      <div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;">${t('sectionTitle.clientManager')}</div>
       <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">NES Admin only · Manage all clients</div>
     </div>
     <div class="page" id="cmContent"><div style="text-align:center;padding:40px;color:var(--muted);font-family:var(--mono);font-size:.8rem;">${t('loading.clients')}</div></div>`;
@@ -736,7 +736,7 @@ function showAddClientForm(){
   document.getElementById('mainContent').innerHTML=`
     <div style="padding:11px 18px 11px 60px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;gap:10px;">
       <button onclick="showClientManager()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.1rem;"><i class="ti ti-arrow-left"></i></button>
-      <div><div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;">ADD NEW CLIENT</div><div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">Fill in the details below</div></div>
+      <div><div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;">${t('sectionTitle.addNewClient')}</div><div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">Fill in the details below</div></div>
     </div>
     <div class="page scrollable"><div style="max-width:640px;padding-bottom:40px;">${clientFormFields()}<button class="form-submit" onclick="saveNewClient()"><i class="ti ti-plus"></i> Create Client</button></div></div>`;
 }
