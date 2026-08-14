@@ -4,7 +4,7 @@
 async function loadClientUsers(clientId){
   const el=document.getElementById('cm-users-list-'+clientId);
   if(!el)return;
-  el.innerHTML='<div style="color:var(--muted);font-family:var(--mono);font-size:.75rem;">Loading...</div>';
+  el.innerHTML=`<div style="color:var(--muted);font-family:var(--mono);font-size:.75rem;">${t('common.loading')}</div>`;
   try{
     const res=await fetch(API_URL+'/api/client/'+clientId+'/users');
     const json=await res.json();
@@ -402,7 +402,7 @@ async function sendTeamInvite(){
 async function loadTeamForClient(clientId){
   const el = document.getElementById('teamContent');
   if(!el) return;
-  el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);font-family:var(--mono);font-size:.8rem;">Loading...</div>';
+  el.innerHTML = `<div style="text-align:center;padding:40px;color:var(--muted);font-family:var(--mono);font-size:.8rem;">${t('common.loading')}</div>`;
   window.userClientId = clientId;
   await loadTeam();
   // Add back button
