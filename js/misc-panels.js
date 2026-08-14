@@ -11,5 +11,5 @@ function addCustomCredField(clientId){
   div.className='cred-field';
   div.innerHTML=`<div class="cf-lbl">${label.trim()}</div><input class="cf-input" type="text" placeholder="Value" data-field="${key}">`;
   grid.appendChild(div);
-  showToast('Field added — save to store it');
+  showToast(t('toast.fieldAddedSave'));
 }
