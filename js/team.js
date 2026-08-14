@@ -87,7 +87,7 @@ async function removeClientUser(clientId,userId){
     const res=await fetch(API_URL+'/api/client/'+clientId+'/user/'+userId,{method:'DELETE'});
     const json=await res.json();
     if(!res.ok)throw new Error(json.error||'Failed');
-    showToast('User removed ✓');
+    showToast(t('toast.userRemoved'));
     loadClientUsers(clientId);
   }catch(e){alert('Error: '+e.message);}
 }
@@ -323,7 +323,7 @@ async function saveUserAccess(userId, clientId){
     const data = await res.json();
     if(!res.ok) throw new Error(data.error||'Failed');
     document.getElementById('accessModal').remove();
-    showToast('Access updated ✓');
+    showToast(t('toast.accessUpdated'));
     loadTeam();
   }catch(e){
     err.textContent=e.message; err.style.display='block';
@@ -420,7 +420,7 @@ async function updateUserRole(userId, clientId, role){
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
       body:JSON.stringify({role})
     });
-    if(res.ok) showToast('Role updated ✓');
+    if(res.ok) showToast(t('toast.roleUpdated'));
   }catch(e){ showToast('Failed: '+e.message); }
 }
 
@@ -432,7 +432,7 @@ async function updateUserDept(userId, clientId, deptId){
       body:JSON.stringify({department_id: deptId||null})
     });
     const data = await res.json();
-    if(res.ok) showToast('Department updated ✓');
+    if(res.ok) showToast(t('toast.departmentUpdated'));
     else showToast('Failed: '+(data.error||'Unknown error'));
   }catch(e){ showToast('Failed: '+e.message); }
 }
@@ -444,7 +444,7 @@ async function removeTeamMember(userId, clientId){
       method:'DELETE',
       headers:{'Authorization':'Bearer '+session.access_token}
     });
-    if(res.ok){ showToast('Member removed ✓'); loadTeam(); }
+    if(res.ok){ showToast(t('toast.memberRemoved')); loadTeam(); }
   }catch(e){ showToast('Failed: '+e.message); }
 }
 
@@ -454,7 +454,7 @@ function showAddDeptModal(){
   fetch(API_URL+'/api/admin/client/'+window.userClientId+'/department',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify({name:name.trim()})})
     .then(async r=>{
       const data = await r.json().catch(()=>({}));
-      if(r.ok && !data.error){ showToast('Department added ✓'); loadTeam(); }
+      if(r.ok && !data.error){ showToast(t('toast.departmentAdded')); loadTeam(); }
       else showToast('Failed: '+(data.error||'Unknown error'));
     })
     .catch(e=>showToast('Failed: '+e.message));
@@ -479,7 +479,7 @@ function deleteDept(deptId, deptName){
   fetch(API_URL+'/api/admin/client/'+window.userClientId+'/department/'+deptId,{method:'DELETE',headers:{'Authorization':'Bearer '+session.access_token}})
     .then(async r=>{
       const data = await r.json().catch(()=>({}));
-      if(r.ok && !data.error){ showToast('Department deleted ✓'); loadTeam(); }
+      if(r.ok && !data.error){ showToast(t('toast.departmentDeleted')); loadTeam(); }
       else showToast('Failed: '+(data.error||'Unknown error'));
     })
     .catch(e=>showToast('Failed: '+e.message));
