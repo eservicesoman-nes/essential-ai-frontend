@@ -478,7 +478,7 @@ async function doChangePassword(){
 }
 
 async function doLogout(){
-  if(!confirm('Sign out?'))return;
+  if(!confirm(t('confirm.signOut')))return;
   history=[];allMsgsHTML='';
   localStorage.removeItem(STORAGE_KEYS.h);localStorage.removeItem(STORAGE_KEYS.m);
   await sb.auth.signOut();
