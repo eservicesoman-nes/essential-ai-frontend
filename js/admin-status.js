@@ -140,7 +140,7 @@ function showAddServiceModal(){
     <input id="svcUrl" placeholder="https://n8n.essential-services.org/healthz" style="width:100%;box-sizing:border-box;background:#0d1117;border:1px solid var(--border);border-radius:6px;padding:7px 10px;color:var(--text);font-family:var(--mono);font-size:.75rem;margin-bottom:16px;">
     <div style="display:flex;gap:8px;">
       <button onclick="saveNewService()" style="flex:1;background:linear-gradient(135deg,#1a56db,#2563eb);border:none;border-radius:6px;padding:8px;color:#fff;font-family:var(--mono);font-size:.72rem;cursor:pointer;font-weight:700;">Add Service</button>
-      <button onclick="document.getElementById('addServiceModal').remove()" style="flex:1;background:none;border:1px solid var(--border);border-radius:6px;padding:8px;color:var(--muted);font-family:var(--mono);font-size:.72rem;cursor:pointer;">Cancel</button>
+      <button onclick="document.getElementById('addServiceModal').remove()" style="flex:1;background:none;border:1px solid var(--border);border-radius:6px;padding:8px;color:var(--muted);font-family:var(--mono);font-size:.72rem;cursor:pointer;">${t('common.cancel')}</button>
     </div>
   </div>`;
   document.body.appendChild(modal);
@@ -176,7 +176,7 @@ function showAddApiModalQuick(){
     <input id="qapiThreshold" type="number" placeholder="5" style="width:100%;box-sizing:border-box;background:#0d1117;border:1px solid var(--border);border-radius:6px;padding:7px 10px;color:var(--text);font-family:var(--mono);font-size:.75rem;margin-bottom:16px;">
     <div style="display:flex;gap:8px;">
       <button onclick="saveApiQuick()" style="flex:1;background:linear-gradient(135deg,#1a56db,#2563eb);border:none;border-radius:6px;padding:8px;color:#fff;font-family:var(--mono);font-size:.72rem;cursor:pointer;font-weight:700;">Add API</button>
-      <button onclick="document.getElementById('addApiModalQuick').remove()" style="flex:1;background:none;border:1px solid var(--border);border-radius:6px;padding:8px;color:var(--muted);font-family:var(--mono);font-size:.72rem;cursor:pointer;">Cancel</button>
+      <button onclick="document.getElementById('addApiModalQuick').remove()" style="flex:1;background:none;border:1px solid var(--border);border-radius:6px;padding:8px;color:var(--muted);font-family:var(--mono);font-size:.72rem;cursor:pointer;">${t('common.cancel')}</button>
     </div>
   </div>`;
   document.body.appendChild(modal);
