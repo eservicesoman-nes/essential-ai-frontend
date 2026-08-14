@@ -202,7 +202,7 @@ async function renderPartnerHub(){
                   <div style="font-size:.72rem;color:var(--muted);">Ref: <span style="color:#409cff;font-family:monospace;">${p.ref_code}</span></div>
                 </div>
                 <div style="display:flex;gap:6px;flex-shrink:0;">
-                  <button class="ph-btn" onclick="editPartner('${p.id}')" style="background:rgba(64,156,255,0.1);color:#409cff;">Edit</button>
+                  <button class="ph-btn" onclick="editPartner('${p.id}')" style="background:rgba(64,156,255,0.1);color:#409cff;">${t('common.edit')}</button>
                   <button class="ph-btn" onclick="approveCommissions('${p.id}')" style="background:rgba(63,185,80,0.1);color:#3fb950;">Approve</button>
                 </div>
               </div>
@@ -405,7 +405,7 @@ async function renderPartnerHub(){
 
         <div id="np-err" style="font-size:.72rem;color:#f85149;margin-bottom:10px;display:none;"></div>
         <div style="display:flex;gap:8px;">
-          <button onclick="switchPhTab('partners',document.querySelector('.ph-tab'))" style="flex:1;background:none;border:1px solid var(--border);border-radius:8px;padding:10px;color:var(--muted);cursor:pointer;font-size:.78rem;">Cancel</button>
+          <button onclick="switchPhTab('partners',document.querySelector('.ph-tab'))" style="flex:1;background:none;border:1px solid var(--border);border-radius:8px;padding:10px;color:var(--muted);cursor:pointer;font-size:.78rem;">${t('common.cancel')}</button>
           <button onclick="addPartner()" style="flex:1;background:linear-gradient(135deg,#1a56db,#2563eb);border:none;border-radius:8px;padding:10px;color:#fff;cursor:pointer;font-size:.78rem;font-weight:600;">Add Partner</button>
         </div>
       </div>
