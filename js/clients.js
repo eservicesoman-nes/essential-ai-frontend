@@ -408,7 +408,7 @@ function renderClientDetail(c,colors,textColors,idx){
               <i class="ti ti-mail" style="margin-right:5px;"></i>IMAP EMAIL ACCOUNTS
             </div>
             <div id="cm-email-accounts" style="margin-bottom:12px;">
-              <div style="color:var(--muted);font-family:var(--mono);font-size:.75rem;">No email accounts connected yet.</div>
+              <div style="color:var(--muted);font-family:var(--mono);font-size:.75rem;">${t('empty.noEmailAccounts')}</div>
             </div>
             <div style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:12px;">
               <div style="font-family:var(--mono);font-size:.68rem;color:var(--nes-blue);margin-bottom:10px;font-weight:700;">+ Connect Email Account</div>
@@ -663,7 +663,7 @@ async function loadPaymentHistory(clientId){
     }
 
     if(!data.payments.length){
-      listEl.textContent='No payments recorded yet.';
+      listEl.textContent=t('empty.noPayments');
       return;
     }
     const reversalMap={};
