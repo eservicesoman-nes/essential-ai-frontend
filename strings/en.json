@@ -1,0 +1,42 @@
+{
+  "auth": {
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "emailAddress": "Email address",
+    "password": "Password",
+    "forgotPassword": "Forgot password?",
+    "signInButton": "Sign In →",
+    "changePassword": "Change Password",
+    "logout": "Log Out"
+  },
+  "nav": {
+    "askNesai": "Ask NESAI",
+    "documents": "Documents",
+    "briefcase": "Briefcase",
+    "ceoDashboard": "CEO Dashboard",
+    "inbox": "Inbox",
+    "teamHub": "Team Hub",
+    "leads": "Leads",
+    "team": "Team",
+    "itSetup": "IT Setup",
+    "whatsapp": "WhatsApp",
+    "partnerHub": "Partner Hub",
+    "clientManager": "Client Manager",
+    "usageAnalytics": "Usage Analytics",
+    "platformStatus": "Platform Status",
+    "apiCredits": "API Credits",
+    "systemLogs": "System Logs",
+    "incidents": "Incidents"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "search": "Search",
+    "loading": "Loading…",
+    "ready": "Ready",
+    "noIssuesFound": "No issues found"
+  }
+}
