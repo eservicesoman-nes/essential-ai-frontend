@@ -38,11 +38,11 @@ function showInviteUserForm(clientId){
     <div style="background:var(--bg);border:1px solid var(--border);border-radius:14px;padding:24px;width:340px;max-width:95vw;">
       <div style="font-family:var(--mono);font-size:.85rem;font-weight:700;color:var(--nes-blue);margin-bottom:16px;"><i class="ti ti-user-plus" style="margin-right:6px;"></i>Invite User</div>
       <div class="form-field">
-        <label class="form-label">Email Address</label>
+        <label class="form-label">${t('formLabel.emailAddress')}</label>
         <input id="inviteEmail" type="email" class="form-input" placeholder="user@company.com">
       </div>
       <div class="form-field" style="margin-top:10px;">
-        <label class="form-label">Role</label>
+        <label class="form-label">${t('formLabel.role')}</label>
         <select id="inviteRole" class="form-select">
           <option value="ceo">CEO</option>
           <option value="manager" selected>Manager</option>
