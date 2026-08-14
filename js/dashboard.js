@@ -15,11 +15,11 @@ async function showIncidents(){
         </button>
       </div>
       <div id="incidentsSummary" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:20px;">
-        <div style="text-align:center;padding:40px;color:var(--muted);font-family:var(--mono);font-size:.8rem;grid-column:1/-1;">Loading...</div>
+        <div style="text-align:center;padding:40px;color:var(--muted);font-family:var(--mono);font-size:.8rem;grid-column:1/-1;">${t('common.loading')}</div>
       </div>
       <div style="font-family:var(--mono);font-size:.72rem;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;">Recent Incidents</div>
       <div id="incidentsTimeline" style="background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;">
-        <div style="padding:20px;text-align:center;color:var(--muted);font-family:var(--mono);font-size:.8rem;">Loading...</div>
+        <div style="padding:20px;text-align:center;color:var(--muted);font-family:var(--mono);font-size:.8rem;">${t('common.loading')}</div>
       </div>
     </div>`;
   await loadIncidents();
@@ -185,7 +185,7 @@ async function showPartnerDashboard(){
           <i class="ti ti-sun" style="font-size:1.6rem;color:var(--amber);"></i>
           <div>
             <div style="font-family:var(--mono);font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:2px;"><i class="ti ti-map-pin" style="font-size:10px"></i> WEATHER — MUSCAT</div>
-            <div id="partnerWeatherDesc" style="font-size:.78rem;color:var(--text);">Loading...</div>
+            <div id="partnerWeatherDesc" style="font-size:.78rem;color:var(--text);">${t('common.loading')}</div>
           </div>
         </div>
         <div style="text-align:right;">
@@ -242,7 +242,7 @@ async function showPartnerDashboard(){
       </div>
       <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 16px;">
         <div style="font-family:var(--mono);font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;display:flex;align-items:center;gap:4px;"><i class="ti ti-building"></i> MY CLIENTS</div>
-        <div id="partnerClientList" style="font-size:.72rem;color:var(--muted);text-align:center;padding:12px 0;">Loading...</div>
+        <div id="partnerClientList" style="font-size:.72rem;color:var(--muted);text-align:center;padding:12px 0;">${t('common.loading')}</div>
       </div>
     </div>
     <div style="width:320px;border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;" id="partnerFeedPanel">
@@ -394,7 +394,7 @@ async function showCEODashboard(){
           <i class="ti ti-cloud" style="font-size:22px;color:var(--nes-blue);filter:drop-shadow(0 0 4px var(--nes-blue))" id="weatherIcon"></i>
           <div style="flex:1">
             <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px;display:flex;align-items:center;gap:4px;"><i class="ti ti-map-pin" style="font-size:10px"></i>WEATHER — <span id="weatherLocLabel">MUSCAT</span></div>
-            <div id="weatherDesc" style="font-size:.85rem;font-weight:600;color:var(--text)">Loading...</div>
+            <div id="weatherDesc" style="font-size:.85rem;font-weight:600;color:var(--text)">${t('common.loading')}</div>
           </div>
           <div style="text-align:right">
             <div id="weatherTemp" style="font-size:1.4rem;font-weight:700;color:var(--nes-blue)">—</div>
@@ -437,7 +437,7 @@ async function showCEODashboard(){
                 <div style="width:28px;height:28px;border-radius:7px;background:#0d2818;display:flex;align-items:center;justify-content:center;"><i class="ti ti-shield-check" style="font-size:13px;color:#3fb950;"></i></div>
                 <div><div style="font-size:.62rem;color:var(--muted);">API health</div><div style="font-size:1.05rem;font-weight:700;color:#3fb950;" id="apiHealthVal">—</div><div style="height:3px;background:var(--border);border-radius:2px;margin-top:3px;width:110px;"><div id="apiHealthBar" style="height:100%;width:0%;background:#3fb950;border-radius:2px;"></div></div></div>
               </div>
-              <div style="font-size:.6rem;color:var(--muted);text-align:right;" id="apiHealthDelta">Loading...</div>
+              <div style="font-size:.6rem;color:var(--muted);text-align:right;" id="apiHealthDelta">${t('common.loading')}</div>
             </div>
             <div style="height:1px;background:var(--border);margin:6px 0;"></div>
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
@@ -445,7 +445,7 @@ async function showCEODashboard(){
                 <div style="width:28px;height:28px;border-radius:7px;background:#1a1040;display:flex;align-items:center;justify-content:center;"><i class="ti ti-credit-card" style="font-size:13px;color:#7f77dd;"></i></div>
                 <div><div style="font-size:.62rem;color:var(--muted);">API credits</div><div style="font-size:1.05rem;font-weight:700;color:#7f77dd;" id="creditVal">—</div><div style="height:3px;background:var(--border);border-radius:2px;margin-top:3px;width:110px;"><div id="creditBar" style="height:100%;width:0%;background:#7f77dd;border-radius:2px;"></div></div></div>
               </div>
-              <div style="font-size:.6rem;color:var(--muted);text-align:right;" id="creditDelta">Loading...</div>
+              <div style="font-size:.6rem;color:var(--muted);text-align:right;" id="creditDelta">${t('common.loading')}</div>
             </div>
             <div style="height:1px;background:var(--border);margin:6px 0;"></div>
             <div style="display:flex;align-items:center;justify-content:space-between;">
@@ -537,7 +537,7 @@ async function showCEODashboard(){
         </div>
         <div id="partnerRows" style="margin-bottom:10px;"></div>
         <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:7px;margin-top:14px;">FOUNDER EXPIRY ALERTS</div>
-        <div id="founderAlerts" style="margin-bottom:10px;"><div style="font-size:.7rem;color:var(--muted);">Loading...</div></div>
+        <div id="founderAlerts" style="margin-bottom:10px;"><div style="font-size:.7rem;color:var(--muted);">${t('common.loading')}</div></div>
         `:''}\n      </div>
       </div>
     </div>
