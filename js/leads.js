@@ -6,7 +6,7 @@ async function showLeadsPage(){
   mc.style.overflow='auto';
   mc.innerHTML=`
     <div style="padding:11px 18px 11px 60px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;">
-      <div><div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;">LEADS</div><div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);" id="leadsSubtitle">Loading...</div></div>
+      <div><div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;">LEADS</div><div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);" id="leadsSubtitle">${t('common.loading')}</div></div>
       <button onclick="exportLeads()" style="font-size:.7rem;padding:4px 9px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:var(--mono);display:flex;align-items:center;gap:5px;"><i class="ti ti-download" style="font-size:13px"></i> Export CSV</button>
     </div>
     <div class="page scrollable" id="leadsContent"><div style="text-align:center;padding:40px;color:var(--muted);font-family:var(--mono);font-size:.8rem;">Loading leads...</div></div>`;
