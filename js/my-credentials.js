@@ -124,7 +124,7 @@ function renderMyCredsForm(creds, client){
   html+='<div id="it-cred-fields"></div>';
   html+='<div style="display:flex;gap:8px;margin-top:12px;">';
   html+='<button onclick="saveItCred()" class="form-submit" style="flex:1;"><i class="ti ti-device-floppy"></i> Save</button>';
-  html+='<button onclick="document.getElementById(\'it-cred-form\').style.display=\'none\'" style="background:none;border:1px solid var(--border);border-radius:8px;padding:8px 14px;color:var(--muted);cursor:pointer;font-size:.8rem;">Cancel</button>';
+  html+=`<button onclick="document.getElementById('it-cred-form').style.display='none'" style="background:none;border:1px solid var(--border);border-radius:8px;padding:8px 14px;color:var(--muted);cursor:pointer;font-size:.8rem;">${t('common.cancel')}</button>`;
   html+='</div></div>';
 
   html+='<div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;margin-top:20px;">Website Chat Widget</div>';
