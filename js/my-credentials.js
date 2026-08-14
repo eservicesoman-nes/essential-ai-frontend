@@ -14,7 +14,7 @@ async function showMyCredentials(){
       <button onclick="showView('chat')" style="background:none;border:1px solid var(--border);border-radius:6px;padding:5px 12px;color:var(--muted);cursor:pointer;font-size:.72rem;font-family:var(--mono);margin-right:12px;"><i class="ti ti-arrow-left"></i> Back</button>
     </div>
     <div class="page" style="overflow-y:auto;flex:1;"><div style="max-width:640px;padding-bottom:40px;" id="myCredsContent">
-      <div style="color:var(--muted);font-family:var(--mono);font-size:.8rem;padding:20px 0;">Loading...</div>
+      <div style="color:var(--muted);font-family:var(--mono);font-size:.8rem;padding:20px 0;">${t('common.loading')}</div>
     </div></div>`;
   try{
     const [credsRes, clientRes] = await Promise.all([
