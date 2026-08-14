@@ -219,3 +219,36 @@ window.loadClientUsers=loadClientUsers;window.showInviteUserForm=showInviteUserF
 
 window.buildCountryOptions=buildCountryOptions;window.selectClientDB=selectClientDB;window.restoreChat=restoreChat;
 window.addCustomCredField=addCustomCredField;
+// ── i18n (NES Locale Phase 2 scaffold) ──────────────────────────────
+let _nesStrings = { en: {} };
+let _nesLocale = 'en';
+
+async function loadNesStrings(locale) {
+  _nesLocale = locale || 'en';
+  try {
+    const promises = [fetch('strings/en.json').then(r => r.json())];
+    if (_nesLocale !== 'en') promises.push(fetch('strings/' + _nesLocale + '.json').then(r => r.json()).catch(() => ({})));
+    const results = await Promise.all(promises);
+    _nesStrings = { en: results[0] || {}, [_nesLocale]: results[1] || {} };
+  } catch (e) {
+    _nesStrings = { en: {} };
+  }
+}
+
+function t(keyPath, fallback) {
+  const parts = keyPath.split('.');
+  function dig(obj) {
+    let cur = obj;
+    for (const p of parts) { if (!cur) return undefined; cur = cur[p]; }
+    return cur;
+  }
+  const localeVal = _nesStrings[_nesLocale] ? dig(_nesStrings[_nesLocale]) : undefined;
+  if (localeVal !== undefined) return localeVal;
+  const enVal = _nesStrings.en ? dig(_nesStrings.en) : undefined;
+  if (enVal !== undefined) return enVal;
+  return fallback || keyPath;
+}
+
+loadNesStrings('en');
+window.t = t;
+window.loadNesStrings = loadNesStrings;
