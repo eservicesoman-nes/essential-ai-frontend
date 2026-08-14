@@ -82,7 +82,7 @@ async function sendClientInvite(clientId){
 }
 
 async function removeClientUser(clientId,userId){
-  if(!confirm('Remove this user from the client?'))return;
+  if(!confirm(t('confirm.removeUserFromClient')))return;
   try{
     const res=await fetch(API_URL+'/api/client/'+clientId+'/user/'+userId,{method:'DELETE'});
     const json=await res.json();
@@ -94,7 +94,7 @@ async function removeClientUser(clientId,userId){
 
 function cmTab(name,el){
   if(window._activeTab && window._activeTab!==name && window._cmUnsaved){
-    if(!confirm('You have unsaved changes. Switch tab anyway?'))return;
+    if(!confirm(t('confirm.unsavedChangesSwitchTab')))return;
     window._cmUnsaved=false;
   }
   window._activeTab=name;
@@ -438,7 +438,7 @@ async function updateUserDept(userId, clientId, deptId){
 }
 
 async function removeTeamMember(userId, clientId){
-  if(!confirm('Remove this team member?')) return;
+  if(!confirm(t('confirm.removeTeamMember'))) return;
   try{
     const res = await fetch(API_URL+'/api/client/'+clientId+'/user/'+userId,{
       method:'DELETE',
