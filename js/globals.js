@@ -229,7 +229,11 @@ async function loadNesStrings(locale) {
     const promises = [fetch('strings/en.json').then(r => r.json())];
     if (_nesLocale !== 'en') promises.push(fetch('strings/' + _nesLocale + '.json').then(r => r.json()).catch(() => ({})));
     const results = await Promise.all(promises);
-    _nesStrings = { en: results[0] || {}, [_nesLocale]: results[1] || {} };
+    if (_nesLocale === 'en') {
+      _nesStrings = { en: results[0] || {} };
+    } else {
+      _nesStrings = { en: results[0] || {}, [_nesLocale]: results[1] || {} };
+    }
   } catch (e) {
     _nesStrings = { en: {} };
   }
