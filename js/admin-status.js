@@ -149,13 +149,13 @@ function showAddServiceModal(){
 async function saveNewService(){
   const label=document.getElementById('svcLabel').value.trim();
   const url=document.getElementById('svcUrl').value.trim();
-  if(!label||!url){showToast('Fill in both fields');return;}
+  if(!label||!url){showToast(t('toast.fillBothFields'));return;}
   try{
     const existing=JSON.parse(localStorage.getItem('nes_custom_services')||'[]');
     existing.push({label,url,name:url});
     localStorage.setItem('nes_custom_services',JSON.stringify(existing));
     document.getElementById('addServiceModal').remove();
-    showToast('Service added');
+    showToast(t('toast.serviceAdded'));
     await checkPlatformStatus();
   }catch(e){showToast('Error: '+e.message);}
 }
@@ -186,11 +186,11 @@ async function saveApiQuick(){
   const name=document.getElementById('qapiName').value.trim();
   const balance=parseFloat(document.getElementById('qapiBalance').value)||0;
   const threshold=parseFloat(document.getElementById('qapiThreshold').value)||5;
-  if(!name){showToast('Enter API name');return;}
+  if(!name){showToast(t('toast.enterApiName'));return;}
   try{
     await sb.from('api_credits').insert([{service_name:name,current_balance:balance,alert_threshold:threshold,status:balance<threshold?'low':'healthy'}]);
     document.getElementById('addApiModalQuick').remove();
-    showToast('API added');
+    showToast(t('toast.apiAdded'));
     await checkPlatformStatus();
   }catch(e){showToast('Error: '+e.message);}
 }
