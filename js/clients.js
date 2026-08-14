@@ -109,7 +109,7 @@ function renderClientManagerFull(clients,activeId=null){
   const textColors=['#409cff','#d29922','#3fb950','#f85149','#8b949e'];
   document.getElementById('cmContent').innerHTML=`
     <div style="margin-bottom:9px;">
-      <input type="text" id="clientSearch" placeholder="Search clients..." onkeyup="searchClients(this.value)"
+      <input type="text" id="clientSearch" placeholder="${t('placeholder.searchClients')}" onkeyup="searchClients(this.value)"
         style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:7px 12px;color:var(--text);font-family:var(--mono);font-size:.78rem;outline:none;">
     </div>
     <div class="cm-layout">
@@ -389,12 +389,12 @@ function renderClientDetail(c,colors,textColors,idx){
                   <option value="rebate">Rebate</option>
                   <option value="other">Other</option>
                 </select>
-                <input id="payAmount_${c.id}" type="number" placeholder="Amount OMR" class="form-input">
+                <input id="payAmount_${c.id}" type="number" placeholder="${t('placeholder.amountOmr')}" class="form-input">
               </div>
               <select id="payReverses_${c.id}" class="form-select" style="display:none;margin-bottom:8px;width:100%;">
                 <option value="">Reverses which payment? (optional)</option>
               </select>
-              <input id="payNote_${c.id}" type="text" placeholder="Note (required) — e.g. received in person, receipt #102" class="form-input" style="margin-bottom:8px;">
+              <input id="payNote_${c.id}" type="text" placeholder="${t('placeholder.paymentNote')}" class="form-input" style="margin-bottom:8px;">
               <button class="act-btn" onclick="recordClientPayment('${c.id}')" style="width:100%;"><i class="ti ti-check"></i> Record entry</button>
             </div>
 
@@ -419,7 +419,7 @@ function renderClientDetail(c,colors,textColors,idx){
                 </div>
                 <div class="cred-field">
                   <div class="cf-lbl">App Password</div>
-                  <input class="cf-input" type="password" id="em_password" placeholder="App password (not main password)">
+                  <input class="cf-input" type="password" id="em_password" placeholder="${t('placeholder.appPassword')}">
                 </div>
                 <div class="cred-field">
                   <div class="cf-lbl">Provider</div>
@@ -433,7 +433,7 @@ function renderClientDetail(c,colors,textColors,idx){
                 </div>
                 <div class="cred-field">
                   <div class="cf-lbl">Label (friendly name)</div>
-                  <input class="cf-input" type="text" id="em_label" placeholder="Sales inbox">
+                  <input class="cf-input" type="text" id="em_label" placeholder="${t('placeholder.salesInbox')}">
                 </div>
                 <div class="cred-field">
                   <div class="cf-lbl">IMAP Server</div>
@@ -761,8 +761,8 @@ function clientFormFields(c={}){
   return`
     <div class="form-section">Basic Information</div>
     <div class="form-grid">
-      <div class="form-field"><label class="form-label">Company name *</label><input id="field_name" type="text" value="${esc(c.name||'')} " class="form-input" placeholder="Company name"></div>
-      <div class="form-field"><label class="form-label">Email</label><input id="field_email" type="email" value="${esc(c.email||'')} " class="form-input" placeholder="Email"></div>
+      <div class="form-field"><label class="form-label">Company name *</label><input id="field_name" type="text" value="${esc(c.name||'')} " class="form-input" placeholder="${t('placeholder.companyName')}"></div>
+      <div class="form-field"><label class="form-label">Email</label><input id="field_email" type="email" value="${esc(c.email||'')} " class="form-input" placeholder="${t('placeholder.emailLabel')}"></div>
       <div class="form-field"><label class="form-label">Website</label><input id="field_website" type="text" value="${esc(c.website||'')} " class="form-input" placeholder="https://..."></div>
       <div class="form-field"><label class="form-label">Industry</label><input id="field_industry" type="text" value="${esc(c.industry||'')} " class="form-input" placeholder="Industry"></div>
       <div class="form-field"><label class="form-label">Region</label><input id="field_region" type="text" value="${esc(c.region||'Oman')} " class="form-input" placeholder="Oman"></div>
