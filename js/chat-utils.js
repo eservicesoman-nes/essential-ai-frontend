@@ -75,7 +75,7 @@ function toggleSidebar(){
 }
 
 async function clearChat(){
-  if(!confirm('Clear all messages?'))return;
+  if(!confirm(t('confirm.clearAllMessages')))return;
   history=[];allMsgsHTML='';
   localStorage.removeItem(STORAGE_KEYS.h);localStorage.removeItem(STORAGE_KEYS.m);
   const msgs=document.getElementById('messages');if(msgs)msgs.innerHTML='';
