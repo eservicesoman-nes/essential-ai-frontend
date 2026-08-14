@@ -221,10 +221,14 @@ async function checkPlatformStatus(){
         return{...s,ok:false,ms,status:isTimeout?'slow':'offline'};
       }
     })),
-    Promise.all([
-      fetch(API_URL+'/api/admin/ping/pm2',{headers:{'Authorization':'Bearer '+session.access_token}}).then(r=>r.json()).catch(()=>({online:false,ms:0})),
-      fetch(API_URL+'/api/admin/ping/backblaze',{headers:{'Authorization':'Bearer '+session.access_token}}).then(r=>r.json()).catch(()=>({online:false,ms:0})),
-    ]),
+    (async()=>{
+      const {data:freshSessionData}=await sb.auth.getSession();
+      const freshToken=freshSessionData?.session?.access_token||session.access_token;
+      return Promise.all([
+        fetch(API_URL+'/api/admin/ping/pm2',{headers:{'Authorization':'Bearer '+freshToken}}).then(r=>r.json()).catch(()=>({online:false,ms:0})),
+        fetch(API_URL+'/api/admin/ping/backblaze',{headers:{'Authorization':'Bearer '+freshToken}}).then(r=>r.json()).catch(()=>({online:false,ms:0})),
+      ]);
+    })(),
     sb.from('api_credits').select('*').order('service_name'),
     Promise.all([
       sb.from('clients').select('*',{count:'exact',head:true}),
