@@ -57,7 +57,7 @@ async function loadEmailAccounts(clientId){
     const accounts=data.accounts||[];
     const colors=['#409cff','#3fb950','#7f77dd','#d29922','#f85149'];
     if(accounts.length===0){
-      el.innerHTML='<div style="color:var(--muted);font-family:var(--mono);font-size:.75rem;">No email accounts connected yet.</div>';
+      el.innerHTML=`<div style="color:var(--muted);font-family:var(--mono);font-size:.75rem;">${t('empty.noEmailAccounts')}</div>`;
       return;
     }
     el.innerHTML=accounts.map((a,i)=>`
