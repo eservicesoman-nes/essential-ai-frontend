@@ -147,5 +147,19 @@
     "grantImageCredits": "Grant Image Credits",
     "emailAddress": "Email Address",
     "role": "Role"
+  },
+  "tableHeader": {
+    "client": "Client",
+    "month": "Month",
+    "gemini": "Gemini",
+    "claude": "Claude",
+    "deepseek": "DeepSeek",
+    "stream": "Stream",
+    "costUsd": "Cost USD",
+    "costOmr": "Cost OMR",
+    "partner": "Partner",
+    "type": "Type",
+    "rate": "Rate",
+    "amount": "Amount"
   }
 }
