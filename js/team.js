@@ -146,7 +146,7 @@ async function showTeam(){
       </button>
     </div>
     <div class="page scrollable" id="teamContent" style="padding:14px 18px;">
-      <div style="text-align:center;padding:40px;color:var(--muted);font-family:var(--mono);font-size:.8rem;">Loading team...</div>
+      <div style="text-align:center;padding:40px;color:var(--muted);font-family:var(--mono);font-size:.8rem;">${t('loading.team')}</div>
     </div>`;
   await loadTeam();
 }
