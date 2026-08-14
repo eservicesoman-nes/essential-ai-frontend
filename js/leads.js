@@ -39,7 +39,7 @@ async function showLeadsPage(){
 }
 
 function renderLeadRows(leads){
-  if(!leads.length)return'<div style="padding:20px;text-align:center;color:var(--muted);font-family:var(--mono);font-size:.8rem;">No leads found</div>';
+  if(!leads.length)return`<div style="padding:20px;text-align:center;color:var(--muted);font-family:var(--mono);font-size:.8rem;">${t('empty.noLeadsFound')}</div>`;
   return leads.map(l=>{
     const date=new Date(l.created_at);const timeAgo=getTimeAgo(date);const badge=getBadge(l,date);
     const _msg=(l.message||'').trim();const _msgId='msg-'+l.id;
