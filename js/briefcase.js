@@ -18,7 +18,7 @@ async function showBriefcasePage(){
     <div class="briefcase-two-col" style="flex:1;display:flex;overflow:hidden;min-height:0;position:relative;">
       <div class="briefcase-filelist" id="briefcaseFileListPanel" style="width:190px;flex-shrink:0;display:flex;flex-direction:column;border-right:1px solid var(--border);">
         <div style="padding:10px 10px 8px;flex-shrink:0;">
-          <input type="text" id="briefcaseSearchInput" placeholder="Search docs..." oninput="filterBriefcaseFiles(this.value)" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:6px 10px;color:var(--text);font-family:var(--ui);font-size:.7rem;outline:none;box-sizing:border-box;">
+          <input type="text" id="briefcaseSearchInput" placeholder="${t('placeholder.searchDocs')}" oninput="filterBriefcaseFiles(this.value)" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:6px 10px;color:var(--text);font-family:var(--ui);font-size:.7rem;outline:none;box-sizing:border-box;">
         </div>
         <div style="flex:1;overflow-y:auto;padding:0 10px 12px;" id="briefcaseFileList">
           <div style="text-align:center;padding:20px 0;color:var(--muted);font-family:var(--mono);font-size:.7rem;">${t('common.loading')}</div>
@@ -39,7 +39,7 @@ async function showBriefcasePage(){
                 </div>
               </div>
             </div>
-            <input type="text" id="briefcaseChatInput" placeholder="Ask about your documents..." style="flex:1;background:none;border:none;outline:none;color:var(--text);font-family:var(--ui);font-size:.82rem;">
+            <input type="text" id="briefcaseChatInput" placeholder="${t('placeholder.askAboutDocuments')}" style="flex:1;background:none;border:none;outline:none;color:var(--text);font-family:var(--ui);font-size:.82rem;">
             <button onclick="sendBriefcaseChatMessage()" style="background:var(--nes-btn-grad);border:none;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;color:#fff;cursor:pointer;flex-shrink:0;"><i class="ti ti-arrow-up" style="font-size:14px"></i></button>
           </div>
         </div>
