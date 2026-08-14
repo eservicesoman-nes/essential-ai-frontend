@@ -9,7 +9,7 @@ async function showBriefcasePage(){
   window._briefcaseDocContextReady=false;
   mc.innerHTML=`
     <div style="padding:11px 170px 11px 60px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;">
-      <div><div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;">BRIEFCASE</div><div style="font-family:var(--mono);font-size:.7rem;color:#3fb950;font-weight:700;" id="briefcaseSubtitle">Loading...</div></div>
+      <div><div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;">BRIEFCASE</div><div style="font-family:var(--mono);font-size:.7rem;color:#3fb950;font-weight:700;" id="briefcaseSubtitle">${t('common.loading')}</div></div>
       <label style="font-size:.7rem;padding:5px 11px;border-radius:6px;border:1px solid rgba(64,156,255,0.4);background:rgba(64,156,255,0.15);color:var(--nes-blue);cursor:pointer;font-family:var(--mono);font-weight:700;display:flex;align-items:center;gap:5px;">
         <i class="ti ti-upload" style="font-size:13px"></i> Upload
         <input type="file" id="vaultUploadInput" style="display:none;" onchange="uploadVaultFile(this.files[0])" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.jpg,.jpeg,.png,.webp">
@@ -21,7 +21,7 @@ async function showBriefcasePage(){
           <input type="text" id="briefcaseSearchInput" placeholder="Search docs..." oninput="filterBriefcaseFiles(this.value)" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:6px 10px;color:var(--text);font-family:var(--ui);font-size:.7rem;outline:none;box-sizing:border-box;">
         </div>
         <div style="flex:1;overflow-y:auto;padding:0 10px 12px;" id="briefcaseFileList">
-          <div style="text-align:center;padding:20px 0;color:var(--muted);font-family:var(--mono);font-size:.7rem;">Loading...</div>
+          <div style="text-align:center;padding:20px 0;color:var(--muted);font-family:var(--mono);font-size:.7rem;">${t('common.loading')}</div>
         </div>
       </div>
       <div style="flex:1;display:flex;flex-direction:column;min-width:0;">
