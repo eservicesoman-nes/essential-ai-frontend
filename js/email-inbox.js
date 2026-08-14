@@ -74,7 +74,7 @@ async function loadEmailAccounts(clientId){
 }
 
 async function deleteEmailAccount(id, clientId){
-  if(!confirm('Remove this email account?'))return;
+  if(!confirm(t('confirm.removeEmailAccount')))return;
   try{
     const r=await fetch(API_URL+'/api/email/account/'+id,{method:'DELETE',headers:{'Authorization':'Bearer '+session.access_token}});
     if(!r.ok) throw new Error('Delete failed');
@@ -244,7 +244,7 @@ async function deleteEmail(idx) {
   const emails = window._renderedEmails || window._inboxEmails || [];
   const e = emails[idx];
   if (!e) return;
-  if (!confirm('Delete this email from inbox view?')) return;
+  if (!confirm(t('confirm.deleteEmailFromInbox'))) return;
   window._inboxEmails = (window._inboxEmails||[]).filter(function(_,i){return i!==idx;});
   window._renderedEmails = (window._renderedEmails||[]).filter(function(_,i){return i!==idx;});
   renderEmailList(window._renderedEmails);
