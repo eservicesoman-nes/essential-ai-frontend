@@ -257,12 +257,12 @@ async function renderPartnerHub(){
         <table style="width:100%;border-collapse:collapse;font-size:.72rem;" id="commTable">
           <thead>
             <tr style="background:rgba(64,156,255,0.05);">
-              <th style="padding:8px 12px;text-align:left;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border);">Partner</th>
-              <th style="padding:8px 12px;text-align:left;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border);">Client</th>
-              <th style="padding:8px 12px;text-align:left;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border);">Type</th>
-              <th style="padding:8px 12px;text-align:left;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border);">Month</th>
-              <th style="padding:8px 12px;text-align:right;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border);">Rate</th>
-              <th style="padding:8px 12px;text-align:right;color:#d29922;font-weight:600;border-bottom:1px solid var(--border);">Amount</th>
+              <th style="padding:8px 12px;text-align:left;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border);">${t('tableHeader.partner')}</th>
+              <th style="padding:8px 12px;text-align:left;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border);">${t('tableHeader.client')}</th>
+              <th style="padding:8px 12px;text-align:left;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border);">${t('tableHeader.type')}</th>
+              <th style="padding:8px 12px;text-align:left;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border);">${t('tableHeader.month')}</th>
+              <th style="padding:8px 12px;text-align:right;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border);">${t('tableHeader.rate')}</th>
+              <th style="padding:8px 12px;text-align:right;color:#d29922;font-weight:600;border-bottom:1px solid var(--border);">${t('tableHeader.amount')}</th>
               <th style="padding:8px 12px;text-align:center;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border);">Status</th>
               <th style="padding:8px 12px;text-align:center;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border);">Action</th>
             </tr>
