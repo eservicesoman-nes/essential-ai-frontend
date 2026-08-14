@@ -449,7 +449,7 @@ async function approvePendingPartner(id, name, email) {
 
   const { error } = {error:null};
   const r_upd = await fetch(API_URL+'/api/admin/partner/'+id,{method:'PATCH',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify({tier,status:'agreement_pending',ref_code,agreement_token:token,agreement_sent_at:new Date().toISOString()})});
-  if (!r_upd.ok) { showToast('Error updating partner'); return; }
+  if (!r_upd.ok) { showToast(t('toast.errorUpdatingPartner')); return; }
 
   // Send agreement email via n8n
   try {
@@ -536,7 +536,7 @@ async function updateCommissionStatus(id, status){
 
 async function approveCommissions(partnerId){
   const r_app=await fetch(API_URL+'/api/admin/commissions/approve/'+partnerId,{method:'PATCH',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token}});const { error } = r_app.ok?{}:{message:'Failed'};
-  if(!error){ showToast('All pending commissions approved ✓'); await renderPartnerHub(); switchPhTab('commissions',null); }
+  if(!error){ showToast(t('toast.allCommissionsApproved')); await renderPartnerHub(); switchPhTab('commissions',null); }
 }
 
 async function editPartner(id){
@@ -547,7 +547,7 @@ async function editPartner(id){
   const newNotes = prompt(`Notes/terms (current: ${p.custom_notes||'none'})`);
   if(newNotes === null) return;
   const r_pr=await fetch(API_URL+'/api/admin/partner/'+id,{method:'PATCH',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify({custom_rate:newRate?parseFloat(newRate):null,custom_notes:newNotes||null})});
-  if(r_pr.ok){ showToast('Partner updated ✓'); await renderPartnerHub(); }
+  if(r_pr.ok){ showToast(t('toast.partnerUpdated')); await renderPartnerHub(); }
 }
 
 function filterCommissions(){
