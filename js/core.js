@@ -216,7 +216,7 @@ function setupNavForRole(){
     const briefcaseWorkspaceNavEl = document.getElementById('briefcaseWorkspaceNav');
     if(briefcaseWorkspaceNavEl) briefcaseWorkspaceNavEl.style.display = (userRole==='ceo' || userRole==='nesadmin' || (window.userGrantedModules||[]).includes('briefcase')) ? 'flex' : 'none';
     const whatsappWorkspaceNavEl = document.getElementById('whatsappWorkspaceNav');
-    if(whatsappWorkspaceNavEl) whatsappWorkspaceNavEl.style.display = (userRole==='ceo' || (window.userGrantedModules||[]).includes('whatsapp_autoreply')) ? 'flex' : 'none';
+    if(whatsappWorkspaceNavEl) whatsappWorkspaceNavEl.style.display = (userRole==='ceo' || userRole==='nesadmin' || (window.userGrantedModules||[]).includes('whatsapp_autoreply')) ? 'flex' : 'none';
     showClientBrandingChip().then(()=>{
       const mods = window.clientModules || {};
       const ceoNavEl = document.querySelector('[data-view="ceo"]');
