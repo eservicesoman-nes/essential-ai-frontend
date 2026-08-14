@@ -17,7 +17,7 @@ async function showAnalytics(){
       </div>
     </div>
     <div class="page scrollable" id="analyticsContent" style="padding:14px 18px;">
-      <div style="text-align:center;padding:40px;color:var(--muted);font-family:var(--mono);font-size:.8rem;">Loading analytics...</div>
+      <div style="text-align:center;padding:40px;color:var(--muted);font-family:var(--mono);font-size:.8rem;">${t('loading.analytics')}</div>
     </div>`;
   await loadAnalytics('7');
 }
