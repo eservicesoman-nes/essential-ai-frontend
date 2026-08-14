@@ -372,7 +372,7 @@ function renderClientDetail(c,colors,textColors,idx){
 
           <div style="border-top:1px solid var(--border);margin-top:20px;padding-top:16px;">
             <div style="font-family:var(--mono);font-size:.65rem;color:var(--nes-blue);font-weight:800;margin-bottom:10px;">PAYMENT HISTORY</div>
-            <div id="paymentLifetimeTotal_${c.id}" style="font-size:.8rem;color:var(--muted);margin-bottom:12px;">Loading...</div>
+            <div id="paymentLifetimeTotal_${c.id}" style="font-size:.8rem;color:var(--muted);margin-bottom:12px;">${t('common.loading')}</div>
 
             <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:14px;">
               <div style="font-size:.75rem;font-weight:700;margin-bottom:8px;">Record a payment or adjustment</div>
