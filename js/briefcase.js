@@ -107,7 +107,7 @@ function formatBytes(bytes){
 }
 
 function renderVaultRows(files){
-  if(!files.length)return'<div style="text-align:center;padding:20px 0;color:var(--muted);font-family:var(--mono);font-size:.7rem;">No files yet</div>';
+  if(!files.length)return`<div style="text-align:center;padding:20px 0;color:var(--muted);font-family:var(--mono);font-size:.7rem;">${t('empty.noFiles')}</div>`;
   return files.map(f=>{
     return`<div id="vault-row-${f.id}" style="background:var(--card);border:1px solid var(--border);border-radius:7px;padding:8px 9px;margin-bottom:6px;">
       <i class="ti ti-file" style="color:var(--muted);font-size:13px;"></i>
@@ -153,7 +153,7 @@ async function openShareModal(fileId, fileName, currentRolesStr, currentUsersStr
     const listEl = document.getElementById('sharePeopleList');
     if(!listEl) return;
     if(!members.length){
-      listEl.innerHTML = '<p style="color:var(--muted);font-size:.75rem;">No other team members yet.</p>';
+      listEl.innerHTML = `<p style="color:var(--muted);font-size:.75rem;">${t('empty.noTeamMembers')}</p>`;
       return;
     }
     listEl.innerHTML = members.map(m => `
