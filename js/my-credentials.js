@@ -189,7 +189,7 @@ async function saveItCred(){
       body:JSON.stringify({credentials:creds})
     });
     if(!res.ok)throw new Error(await res.text());
-    showToast('Saved ✓');
+    showToast(t('toast.saved'));
     document.getElementById('it-cred-form').style.display='none';
     renderMyCredsForm(creds, window._itClientCache||{});
   }catch(e){alert('Error: '+e.message);}
@@ -209,7 +209,7 @@ async function saveMyCredentials(){
       body:JSON.stringify({credentials:creds})
     });
     if(!res.ok)throw new Error(await res.text());
-    showToast('Credentials saved securely ✓');
+    showToast(t('toast.credentialsSavedSecurely'));
   }catch(e){
     alert('Error saving credentials: '+e.message);
   }
@@ -224,6 +224,6 @@ async function saveFeedSources(){
   try{
     const r=await fetch(API_URL+'/api/admin/client/'+userClientId+'/feed-urls',{method:'PATCH',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify({feed_urls:sources})});const{error}=r.ok?{}:{message:(await r.json()).error};
     if(error)throw error;
-    showToast('Feed sources saved ✓');
+    showToast(t('toast.feedSourcesSaved'));
   }catch(e){showToast('Error: '+e.message);}
 }
