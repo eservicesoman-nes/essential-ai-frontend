@@ -9,7 +9,7 @@ async function showAdminStatus(){
   mc.style.flexDirection='column';
   mc.innerHTML=`
     <div style="padding:11px 18px 11px 60px;border-bottom:1px solid var(--border);flex-shrink:0;">
-      <div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;">PLATFORM STATUS</div>
+      <div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;">${t('sectionTitle.platformStatus')}</div>
       <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">NES AI — Unified Business Platform · Live health check</div>
     </div>
     <div style="flex:1;overflow-y:auto;padding:14px 18px;">
