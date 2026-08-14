@@ -254,14 +254,14 @@ async function loadAnalytics(days){
           <table style="width:100%;border-collapse:collapse;font-size:.72rem;">
             <thead>
               <tr style="background:rgba(210,153,34,0.08);">
-                <th style="padding:8px 12px;text-align:left;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border);">Client</th>
-                <th style="padding:8px 12px;text-align:left;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border);">Month</th>
-                <th style="padding:8px 12px;text-align:right;color:#409cff;font-weight:600;border-bottom:1px solid var(--border);">Gemini</th>
-                <th style="padding:8px 12px;text-align:right;color:#7f77dd;font-weight:600;border-bottom:1px solid var(--border);">Claude</th>
-                <th style="padding:8px 12px;text-align:right;color:#3fb950;font-weight:600;border-bottom:1px solid var(--border);">DeepSeek</th>
-                <th style="padding:8px 12px;text-align:right;color:#f85149;font-weight:600;border-bottom:1px solid var(--border);">Stream</th>
-                <th style="padding:8px 12px;text-align:right;color:#d29922;font-weight:600;border-bottom:1px solid var(--border);">Cost USD</th>
-                <th style="padding:8px 12px;text-align:right;color:#d29922;font-weight:600;border-bottom:1px solid var(--border);">Cost OMR</th>
+                <th style="padding:8px 12px;text-align:left;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border);">${t('tableHeader.client')}</th>
+                <th style="padding:8px 12px;text-align:left;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border);">${t('tableHeader.month')}</th>
+                <th style="padding:8px 12px;text-align:right;color:#409cff;font-weight:600;border-bottom:1px solid var(--border);">${t('tableHeader.gemini')}</th>
+                <th style="padding:8px 12px;text-align:right;color:#7f77dd;font-weight:600;border-bottom:1px solid var(--border);">${t('tableHeader.claude')}</th>
+                <th style="padding:8px 12px;text-align:right;color:#3fb950;font-weight:600;border-bottom:1px solid var(--border);">${t('tableHeader.deepseek')}</th>
+                <th style="padding:8px 12px;text-align:right;color:#f85149;font-weight:600;border-bottom:1px solid var(--border);">${t('tableHeader.stream')}</th>
+                <th style="padding:8px 12px;text-align:right;color:#d29922;font-weight:600;border-bottom:1px solid var(--border);">${t('tableHeader.costUsd')}</th>
+                <th style="padding:8px 12px;text-align:right;color:#d29922;font-weight:600;border-bottom:1px solid var(--border);">${t('tableHeader.costOmr')}</th>
               </tr>
             </thead>
             <tbody>
