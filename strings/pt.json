@@ -173,5 +173,15 @@
     "teamHubSubtitle": "Internal team communications",
     "leads": "LEADS",
     "itSetup": "IT SETUP"
+  },
+  "confirm": {
+    "clearAllMessages": "Clear all messages?",
+    "signOut": "Sign out?",
+    "removeEmailAccount": "Remove this email account?",
+    "deleteEmailFromInbox": "Delete this email from inbox view?",
+    "removeUserFromClient": "Remove this user from the client?",
+    "unsavedChangesSwitchTab": "You have unsaved changes. Switch tab anyway?",
+    "removeTeamMember": "Remove this team member?",
+    "absolutelySureStaffUnassigned": "Are you absolutely sure? Staff assigned to"
   }
 }
