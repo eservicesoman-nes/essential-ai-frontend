@@ -52,5 +52,19 @@
     "leads": "Loading leads...",
     "team": "Loading team...",
     "messages": "Loading messages..."
+  },
+  "empty": {
+    "noLeadData": "No lead data yet",
+    "noClientsAnalytics": "No clients yet",
+    "noUsageData": "No usage data yet",
+    "noFiles": "No files yet",
+    "noTeamMembers": "No other team members yet.",
+    "noEmailAccounts": "No email accounts connected yet.",
+    "noPayments": "No payments recorded yet.",
+    "noRecentChats": "No recent chats",
+    "noFeedItems": "No feed items yet",
+    "noLeadsDashboard": "No leads yet",
+    "noActivePartnersDashboard": "No active partners yet",
+    "noLeadsFound": "No leads found"
   }
 }
