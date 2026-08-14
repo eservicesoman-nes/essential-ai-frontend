@@ -80,7 +80,7 @@ async function saveNewApiService(){
   const balance=parseFloat(document.getElementById('new_api_balance')?.value)||0;
   const threshold=parseFloat(document.getElementById('new_api_threshold')?.value)||5;
   const notes=document.getElementById('new_api_notes')?.value.trim();
-  if(!name){showToast('Service name required');return;}
+  if(!name){showToast(t('toast.serviceNameRequired'));return;}
   try{await sb.from('api_credits').insert([{service_name:name,current_balance:balance,alert_threshold:threshold,notes,status:balance<threshold?'low':'healthy'}]);showToast('API added');document.getElementById('addApiForm').style.display='none';await loadApiCredits();}catch(e){showToast('Error: '+e.message);}
 }
 
@@ -101,7 +101,7 @@ async function saveAllThresholds(){
       const rechargeAmt=parseFloat(document.getElementById('ram_'+api.id)?.value)||20;
       await sb.from('api_credits').upsert({service_name:api.id,current_balance:balance,alert_threshold:threshold,recharge_at:rechargeAt,recharge_amount:rechargeAmt,status:balance===0?'unknown':balance<threshold?'low':'healthy'},{onConflict:'service_name'});
     }
-    showToast('Thresholds saved');await loadApiCredits();
+    showToast(t('toast.thresholdsSaved'));await loadApiCredits();
   }catch(e){showToast('Error: '+e.message);}
   finally{if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-device-floppy"></i> Save Thresholds';}}
 }
