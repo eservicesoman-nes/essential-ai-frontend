@@ -9,7 +9,7 @@ async function showLeadsPage(){
       <div><div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;">LEADS</div><div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);" id="leadsSubtitle">${t('common.loading')}</div></div>
       <button onclick="exportLeads()" style="font-size:.7rem;padding:4px 9px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:var(--mono);display:flex;align-items:center;gap:5px;"><i class="ti ti-download" style="font-size:13px"></i> Export CSV</button>
     </div>
-    <div class="page scrollable" id="leadsContent"><div style="text-align:center;padding:40px;color:var(--muted);font-family:var(--mono);font-size:.8rem;">Loading leads...</div></div>`;
+    <div class="page scrollable" id="leadsContent"><div style="text-align:center;padding:40px;color:var(--muted);font-family:var(--mono);font-size:.8rem;">${t('loading.leads')}</div></div>`;
   try{
     let leadsQ=sb.from('leads').select('*').order('created_at',{ascending:false}).limit(100);
     if(userClientId)leadsQ=leadsQ.eq('client_id',userClientId);
