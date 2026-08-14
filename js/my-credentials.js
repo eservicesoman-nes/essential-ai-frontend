@@ -9,7 +9,7 @@ async function showMyCredentials(){
     <div style="padding:11px 18px 11px 60px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;">
       <div>
         <div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;">${t('sectionTitle.itSetup')}</div>
-        <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">Integration checklist · Connect your services</div>
+        <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">${t('pageSubtitle.itSetup')}</div>
       </div>
       <button onclick="showView('chat')" style="background:none;border:1px solid var(--border);border-radius:6px;padding:5px 12px;color:var(--muted);cursor:pointer;font-size:.72rem;font-family:var(--mono);margin-right:12px;"><i class="ti ti-arrow-left"></i> Back</button>
     </div>
