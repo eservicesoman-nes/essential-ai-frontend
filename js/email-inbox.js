@@ -17,7 +17,7 @@ function autoFillImapSettings(provider){
 
 async function connectEmailAccount(){
   const clientId=window._activeClientId;
-  if(!clientId){showToast('Select a client first');return;}
+  if(!clientId){showToast(t('toast.selectClientFirst'));return;}
   const address=document.getElementById('em_address')?.value.trim();
   const password=document.getElementById('em_password')?.value.trim();
   const provider=document.getElementById('em_provider')?.value;
@@ -26,7 +26,7 @@ async function connectEmailAccount(){
   const imap_port=parseInt(document.getElementById('em_imap_port')?.value)||993;
   const smtp_server=document.getElementById('em_smtp')?.value.trim();
   const smtp_port=parseInt(document.getElementById('em_smtp_port')?.value)||587;
-  if(!address||!password){showToast('Email and app password required');return;}
+  if(!address||!password){showToast(t('toast.emailPasswordRequired'));return;}
   const status=document.getElementById('em_status');
   if(status){status.style.color='#d29922';status.textContent='Testing connection...';}
   try{
@@ -38,7 +38,7 @@ async function connectEmailAccount(){
     const data=await res.json();
     if(!res.ok)throw new Error(data.error||'Connection failed');
     if(status){status.style.color='#3fb950';status.textContent='Connected successfully ✓';}
-    showToast('Email account connected ✓');
+    showToast(t('toast.emailAccountConnected'));
     loadEmailAccounts(clientId);
     document.getElementById('em_address').value='';
     document.getElementById('em_password').value='';
@@ -78,7 +78,7 @@ async function deleteEmailAccount(id, clientId){
   try{
     const r=await fetch(API_URL+'/api/email/account/'+id,{method:'DELETE',headers:{'Authorization':'Bearer '+session.access_token}});
     if(!r.ok) throw new Error('Delete failed');
-    showToast('Account removed');
+    showToast(t('toast.accountRemoved'));
     const cid = clientId || window._activeClientId || window._inboxClientId;
     if(cid) loadEmailAccounts(cid);
   }catch(e){showToast('Error: '+e.message);}
@@ -90,7 +90,7 @@ async function resaveEmailPassword(id, email, clientId){
   try{
     const r=await fetch(API_URL+'/api/email/account/'+id+'/reauth',{method:'POST',headers:{'Authorization':'Bearer '+session.access_token,'Content-Type':'application/json'},body:JSON.stringify({password:pwd})});
     if(!r.ok) throw new Error('Failed to update password');
-    showToast('Password updated — reconnecting...');
+    showToast(t('toast.passwordUpdatedReconnecting'));
     const cid = clientId || window._activeClientId || window._inboxClientId;
     if(cid) loadEmailAccounts(cid);
   }catch(e){showToast('Error: '+e.message);}
@@ -248,7 +248,7 @@ async function deleteEmail(idx) {
   window._inboxEmails = (window._inboxEmails||[]).filter(function(_,i){return i!==idx;});
   window._renderedEmails = (window._renderedEmails||[]).filter(function(_,i){return i!==idx;});
   renderEmailList(window._renderedEmails);
-  showToast('Email removed from view');
+  showToast(t('toast.emailRemovedFromView'));
 }
 
 function showComposeModal() {
@@ -284,10 +284,10 @@ async function sendComposedEmail() {
   const to = document.getElementById('composeTo') ? document.getElementById('composeTo').value.trim() : '';
   const subject = document.getElementById('composeSubject') ? document.getElementById('composeSubject').value.trim() : '';
   const body = document.getElementById('composeBody') ? document.getElementById('composeBody').value.trim() : '';
-  if (!to || !subject || !body) { showToast('Please fill in all fields'); return; }
+  if (!to || !subject || !body) { showToast(t('toast.fillAllFields')); return; }
   const accountObjs = window._inboxAccountObjects || [];
   const account = accountObjs.find(function(a){ return a.email_address===fromEmail; });
-  if (!account) { showToast('Account not found'); return; }
+  if (!account) { showToast(t('toast.accountNotFound')); return; }
   try {
     const r = await fetch(API_URL + '/api/email/send', {
       method: 'POST',
@@ -297,7 +297,7 @@ async function sendComposedEmail() {
     if (!r.ok) throw new Error('Send failed');
     const m = document.getElementById('compose-modal');
     if(m) m.remove();
-    showToast('Email sent successfully');
+    showToast(t('toast.emailSentSuccessfully'));
   } catch(e) {
     showToast('Failed to send: ' + e.message);
   }
@@ -424,7 +424,7 @@ function showEmail(idx){
 async function sendReply(to, originalSubject){
   const fromAccount=document.getElementById('replyFrom')?.value;
   const body=document.getElementById('replyBody')?.value.trim();
-  if(!body){showToast('Write a reply first');return;}
+  if(!body){showToast(t('toast.writeReplyFirst'));return;}
   let clientId = userClientId;
   if(!clientId && window._clients && window._clients.length){
     const nesClient = window._clients.find(c => c.name && c.name.toLowerCase().includes('essential'));
@@ -440,7 +440,7 @@ async function sendReply(to, originalSubject){
       body:JSON.stringify({account_id:accounts.id,to,subject:'Re: '+originalSubject,body})
     });
     if(!res.ok){const e=await res.json();throw new Error(e.error||'Send failed');}
-    showToast('Reply sent ✓');
+    showToast(t('toast.replySent'));
     document.getElementById('replyBody').value='';
   }catch(e){showToast('Error: '+e.message);}
 }
@@ -522,7 +522,7 @@ function autoFillImapSettings2(provider, idx){
 
 async function connectEmailAccountExtra(idx){
   const clientId=window._activeClientId;
-  if(!clientId){showToast('Select a client first');return;}
+  if(!clientId){showToast(t('toast.selectClientFirst'));return;}
   const address=document.getElementById('em_address_'+idx)?.value.trim();
   const password=document.getElementById('em_password_'+idx)?.value.trim();
   const provider=document.getElementById('em_provider_'+idx)?.value;
@@ -531,7 +531,7 @@ async function connectEmailAccountExtra(idx){
   const imap_port=parseInt(document.getElementById('em_imap_port_'+idx)?.value)||993;
   const smtp_server=document.getElementById('em_smtp_'+idx)?.value.trim();
   const smtp_port=parseInt(document.getElementById('em_smtp_port_'+idx)?.value)||587;
-  if(!address||!password){showToast('Email and app password required');return;}
+  if(!address||!password){showToast(t('toast.emailPasswordRequired'));return;}
   const status=document.getElementById('em_status_'+idx);
   if(status){status.style.color='#d29922';status.textContent='Testing connection...';}
   try{
@@ -539,7 +539,7 @@ async function connectEmailAccountExtra(idx){
     const data=await res.json();
     if(!res.ok)throw new Error(data.error||'Connection failed');
     if(status){status.style.color='#3fb950';status.textContent='Connected successfully ✓';}
-    showToast('Email account connected ✓');
+    showToast(t('toast.emailAccountConnected'));
     loadEmailAccounts(clientId);
   }catch(e){if(status){status.style.color='#f85149';status.textContent='Error: '+e.message;}}
 }
