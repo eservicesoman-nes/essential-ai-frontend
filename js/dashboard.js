@@ -8,7 +8,7 @@ async function showIncidents(){
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
         <div>
           <div style="font-family:var(--mono);font-size:.8rem;color:#3fb950;letter-spacing:1px;text-transform:uppercase;">Incidents</div>
-          <div style="font-size:.7rem;color:var(--muted);margin-top:2px;">Backend uptime and auto-heal history · NES Admin only</div>
+          <div style="font-size:.7rem;color:var(--muted);margin-top:2px;">${t('pageSubtitle.incidents')}</div>
         </div>
         <button onclick="showIncidents()" style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:5px 12px;color:var(--text);font-size:.72rem;cursor:pointer;display:flex;align-items:center;gap:5px;">
           <i class="ti ti-refresh"></i> Refresh
