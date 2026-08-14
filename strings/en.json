@@ -127,5 +127,25 @@
     "memberRemoved": "Member removed ✓",
     "departmentAdded": "Department added ✓",
     "departmentDeleted": "Department deleted ✓"
+  },
+  "formLabel": {
+    "companyName": "Company name *",
+    "email": "Email",
+    "website": "Website",
+    "industry": "Industry",
+    "region": "Region",
+    "country": "Country",
+    "language": "Language",
+    "leadNotificationEmail": "Lead Notification Email",
+    "primaryColour": "Primary Colour",
+    "logoUrl": "Logo URL",
+    "plan": "Plan",
+    "status": "Status",
+    "trialStartDate": "Trial Start Date",
+    "trialDurationDays": "Trial Duration (days)",
+    "paygFullAccess": "PAYG Full Access (testing)",
+    "grantImageCredits": "Grant Image Credits",
+    "emailAddress": "Email Address",
+    "role": "Role"
   }
 }
