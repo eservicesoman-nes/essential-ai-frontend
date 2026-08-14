@@ -456,7 +456,7 @@ function showChangePassword(){
     <input id="newPwd2" type="password" placeholder="Confirm new password" style="width:100%;background:#0a0f1e;border:1px solid #1a2332;border-radius:8px;padding:10px 12px;color:#e6edf3;font-size:13px;margin-bottom:14px;outline:none;box-sizing:border-box;">
     <div id="pwdErr" style="font-size:12px;color:#f85149;margin-bottom:10px;display:none;"></div>
     <div style="display:flex;gap:8px;">
-      <button onclick="document.getElementById('changePwdModal').remove()" style="flex:1;background:none;border:1px solid #1a2332;border-radius:8px;padding:10px;color:#8b949e;cursor:pointer;font-size:13px;">Cancel</button>
+      <button onclick="document.getElementById('changePwdModal').remove()" style="flex:1;background:none;border:1px solid #1a2332;border-radius:8px;padding:10px;color:#8b949e;cursor:pointer;font-size:13px;">${t('common.cancel')}</button>
       <button onclick="doChangePassword()" style="flex:1;background:linear-gradient(135deg,#1a56db,#2563eb);border:none;border-radius:8px;padding:10px;color:#fff;cursor:pointer;font-size:13px;font-weight:600;">Update</button>
     </div>
   </div>`;
