@@ -522,25 +522,25 @@
     <div class="auth-logo"><span class="nes">NES</span><span class="ai">AI</span></div>
     <div class="auth-sub">// Unified Business Platform v3.0</div>
     <div class="auth-tabs">
-      <button class="auth-tab active" id="tabLogin" onclick="switchTab('login')">Sign In</button>
-      <button class="auth-tab" id="tabSignup" onclick="switchTab('signup')">Sign Up</button>
+      <button class="auth-tab active" id="tabLogin" data-i18n="auth.signIn" onclick="switchTab('login')">Sign In</button>
+      <button class="auth-tab" id="tabSignup" data-i18n="auth.signUp" onclick="switchTab('signup')">Sign Up</button>
     </div>
     <div id="loginPanel" class="auth-panel active">
-      <input class="auth-input" id="loginEmail" type="email" placeholder="Email address">
+      <input class="auth-input" id="loginEmail" type="email" placeholder="Email address" data-i18n-placeholder="auth.emailAddress">
       <input class="auth-input" id="loginPassword" type="password" placeholder="Password">
       <div class="auth-err" id="loginErr"></div>
-      <button class="auth-btn" onclick="doLogin()">Sign In →</button>
-      <div style="text-align:center;margin-top:10px;"><a href="#" onclick="showForgotPanel();return false;" style="color:#409cff;font-size:.8rem;text-decoration:none;">Forgot password?</a></div>
+      <button class="auth-btn" data-i18n="auth.signInButton" onclick="doLogin()">Sign In →</button>
+      <div style="text-align:center;margin-top:10px;"><a href="#" onclick="showForgotPanel();return false;" style="color:#409cff;font-size:.8rem;text-decoration:none;" data-i18n="auth.forgotPassword">Forgot password?</a></div>
     </div>
     <div id="forgotPanel" class="auth-panel">
-      <input class="auth-input" id="forgotEmail" type="email" placeholder="Email address">
+      <input class="auth-input" id="forgotEmail" type="email" placeholder="Email address" data-i18n-placeholder="auth.emailAddress">
       <div class="auth-err" id="forgotErr"></div>
       <div class="auth-err" id="forgotMsg" style="color:#3fb950;"></div>
       <button class="auth-btn" onclick="doForgotPassword()">Send Reset Link</button>
       <div style="text-align:center;margin-top:10px;"><a href="#" onclick="showLoginPanel();return false;" style="color:#409cff;font-size:.8rem;text-decoration:none;">Back to Sign In</a></div>
     </div>
     <div id="signupPanel" class="auth-panel">
-      <input class="auth-input" id="signupEmail" type="email" placeholder="Email address">
+      <input class="auth-input" id="signupEmail" type="email" placeholder="Email address" data-i18n-placeholder="auth.emailAddress">
       <input class="auth-input" id="signupPassword" type="password" placeholder="Password (min 6 chars)">
       <div class="auth-err" id="signupErr"></div>
       <button class="auth-btn" onclick="doSignup()">Create Account →</button>
