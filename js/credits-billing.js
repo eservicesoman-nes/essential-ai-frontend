@@ -9,7 +9,7 @@ async function showApiCredits(){
     <div style="padding:11px 160px 11px 60px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;" class="an-hdr">
       <div>
         <div style="font-family:var(--mono);font-size:.8rem;color:#7f77dd;font-weight:800;">API CREDITS</div>
-        <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">Balance · Usage · Auto-recharge thresholds</div>
+        <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">${t('pageSubtitle.apiCredits')}</div>
       </div>
     </div>
     <div class="page" id="apiCreditsContent" style="overflow-y:auto;flex:1;">
