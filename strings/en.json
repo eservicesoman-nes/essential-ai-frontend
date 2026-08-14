@@ -5,7 +5,7 @@
     "emailAddress": "Email address",
     "password": "Password",
     "forgotPassword": "Forgot password?",
-    "signInButton": "Sign In →",
+    "signInButton": "Sign In \u2192",
     "changePassword": "Change Password",
     "logout": "Log Out"
   },
@@ -35,8 +35,22 @@
     "edit": "Edit",
     "add": "Add",
     "search": "Search",
-    "loading": "Loading…",
+    "loading": "Loading\u2026",
     "ready": "Ready",
     "noIssuesFound": "No issues found"
+  },
+  "loading": {
+    "analytics": "Loading analytics...",
+    "clients": "Loading clients...",
+    "history": "Loading history...",
+    "users": "Loading users...",
+    "logs": "Loading logs...",
+    "feed": "Loading feed...",
+    "dashboard": "Loading dashboard...",
+    "usage": "Loading usage...",
+    "emails": "Loading emails...",
+    "leads": "Loading leads...",
+    "team": "Loading team...",
+    "messages": "Loading messages..."
   }
 }
