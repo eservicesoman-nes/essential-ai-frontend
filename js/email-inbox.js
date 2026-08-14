@@ -143,7 +143,7 @@ async function showInbox(){
     <div style="display:grid;grid-template-columns:280px 1fr;flex:1;overflow:hidden;height:calc(100% - 48px);" id="inboxGrid" class="inbox-grid-wrap">
       <div style="border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;background:var(--surface);">
         <div style="overflow-y:auto;flex:1;" id="emailList">
-          <div style="padding:20px;text-align:center;color:var(--muted);font-family:var(--mono);font-size:.75rem;">Loading emails...</div>
+          <div style="padding:20px;text-align:center;color:var(--muted);font-family:var(--mono);font-size:.75rem;">${t('loading.emails')}</div>
         </div>
       </div>
       <div style="display:flex;flex-direction:column;overflow:hidden;" id="emailPanel">
