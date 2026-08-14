@@ -492,7 +492,7 @@ async function saveClientCreds(id){
       body:JSON.stringify({credentials:creds})
     });
     if(!res.ok){const e=await res.json();throw new Error(e.error||'Save failed');}
-    showToast('Credentials saved ✓');
+    showToast(t('toast.credentialsSaved'));
     if(window._clientCreds && window._clientCreds[id]) {
       window._clientCreds[id] = {...window._clientCreds[id], ...creds};
     }
@@ -519,7 +519,7 @@ async function saveClientAgents(id){
       body:JSON.stringify({settings})
     });
     if(!res.ok){const e=await res.json();throw new Error(e.error||'Save failed');}
-    showToast('Agent settings saved ✓');
+    showToast(t('toast.agentSettingsSaved'));
     await loadClientsFromDB();
   }catch(e){alert('Error: '+e.message);}
   finally{if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-device-floppy"></i> Save Agent Settings';}}
@@ -614,8 +614,8 @@ async function recordClientPayment(clientId){
   const reversesEl=document.getElementById('payReverses_'+clientId);
   const reverses_payment_id=(type==='adjustment'&&reversesEl&&reversesEl.value)?reversesEl.value:undefined;
 
-  if(!amount||parseFloat(amount)<=0){showToast('Enter a valid amount');return;}
-  if(!note){showToast('A note is required for manual entries');return;}
+  if(!amount||parseFloat(amount)<=0){showToast(t('toast.enterValidAmount'));return;}
+  if(!note){showToast(t('toast.noteRequired'));return;}
 
   const label=type==='adjustment'?'rebate/credit of':'payment of';
   if(!confirm(`Record a ${label} OMR ${amount} (${method})?`))return;
@@ -636,7 +636,7 @@ async function recordClientPayment(clientId){
       showToast('Failed: '+(data.error||'unknown error'));
     }
   }catch(e){
-    showToast('Failed: network error');
+    showToast(t('toast.failedNetworkError'));
   }
 }
 
@@ -842,7 +842,7 @@ async function grantClientCredits(clientId){
   if(sel.value==='custom'){
     const customInput=document.getElementById('creditCustomAmount_'+clientId);
     amount=parseInt(customInput.value,10);
-    if(!amount||amount<=0){showToast('Enter a valid custom amount');return;}
+    if(!amount||amount<=0){showToast(t('toast.enterValidCustomAmount'));return;}
   }else{
     amount=parseInt(sel.value.split(':')[0],10);
   }
@@ -860,7 +860,7 @@ async function grantClientCredits(clientId){
       showToast('Failed: '+(data.error||'unknown error'));
     }
   }catch(e){
-    showToast('Failed: network error');
+    showToast(t('toast.failedNetworkError'));
   }
 }
 
@@ -887,7 +887,7 @@ async function saveNewClient(){
     if(!r.ok)throw new Error(res.error||'Failed to create');
     window._activeClientId=null;
     await showClientManager();
-    showToast('Client created');
+    showToast(t('toast.clientCreated'));
   }
   catch(e){alert('Error: '+e.message);if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-plus"></i> Create Client';}}
 }
@@ -906,7 +906,7 @@ async function updateClient(clientId){
     window._activeClientId=clientId;
     await showClientManager();
     if(res.seat_warning){ alert(res.seat_warning); }
-    showToast('Client updated');
+    showToast(t('toast.clientUpdated'));
   }
   catch(e){alert('Error: '+e.message);if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-device-floppy"></i> Save Changes';}}
 }
@@ -1017,7 +1017,7 @@ async function confirmCancellation(clientId, clientName) {
     });
     const data = await r.json();
     if (!r.ok) throw new Error(data.error || 'Failed');
-    showToast('⚠️ Cancellation request sent — alerts fired');
+    showToast(t('toast.cancellationRequestSent'));
     setTimeout(() => location.reload(), 1500);
   } catch(e) {
     showToast('❌ ' + e.message);
@@ -1037,7 +1037,7 @@ async function deleteClient(clientId){
     if(!r.ok)throw new Error(data.error||'Failed to delete');
     window._activeClientId=null;
     await showClientManager();
-    showToast('Client deleted');
+    showToast(t('toast.clientDeleted'));
   }
   catch(e){alert('Error: '+e.message);}
 }
