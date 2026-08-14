@@ -97,7 +97,7 @@ async function showSysLogs(){
         <button class="log-tab-btn" onclick="switchLogTab('nes_backend_out',this)" style="padding:5px 12px;border-radius:6px;font-size:.72rem;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--card);color:var(--muted);">Backend Output</button>
       </div>
       <div id="logDisplay" style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;font-family:var(--mono);font-size:.7rem;line-height:1.7;overflow-x:auto;min-height:400px;">
-        <div style="color:var(--muted);">Loading logs...</div>
+        <div style="color:var(--muted);">${t('loading.logs')}</div>
       </div>
     </div>`;
 
@@ -251,7 +251,7 @@ async function showPartnerDashboard(){
         <span id="partnerFeedBadge" style="font-size:.6rem;padding:1px 6px;border-radius:10px;background:rgba(64,156,255,.1);color:var(--nes-blue);display:none;">0 NEW</span>
       </div>
       <div style="flex:1;overflow-y:auto;padding:10px 14px;" id="partnerFeedItems">
-        <div style="text-align:center;color:var(--muted);font-size:.72rem;padding:20px;">Loading feed...</div>
+        <div style="text-align:center;color:var(--muted);font-size:.72rem;padding:20px;">${t('loading.feed')}</div>
       </div>
     </div>
   </div>`;
@@ -344,7 +344,7 @@ async function showCEODashboard(){
       <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">Live · ${new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</div>
     </div>
     <div class="page" id="ceoDashContent" style="opacity:0;transition:opacity .3s;display:grid;grid-template-columns:1fr 6px 380px;min-height:0;">
-      <div style="text-align:center;padding:40px;color:var(--muted);font-family:var(--mono);font-size:.8rem;">Loading dashboard...</div>
+      <div style="text-align:center;padding:40px;color:var(--muted);font-family:var(--mono);font-size:.8rem;">${t('loading.dashboard')}</div>
     </div>`;
   let leads=[],leadsToday=0,totalLeads=0;
   try{
@@ -482,7 +482,7 @@ async function showCEODashboard(){
         <div class="dash-card" style="margin-bottom:12px;">
           <div class="dc-title">Usage this month</div>
           <div id="usageSummaryContent" style="display:flex;flex-direction:column;gap:8px;">
-            <div style="color:var(--muted);font-family:var(--mono);font-size:.7rem;">Loading usage...</div>
+            <div style="color:var(--muted);font-family:var(--mono);font-size:.7rem;">${t('loading.usage')}</div>
           </div>
         </div>
         <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:7px;margin-top:4px;display:flex;align-items:center;gap:5px;"><i class="ti ti-shield-check" style="font-size:12px;color:#f85149;"></i>Risk & action</div>
