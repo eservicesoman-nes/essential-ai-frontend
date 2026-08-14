@@ -59,7 +59,7 @@ async function deleteLead(leadId, leadName){
     const todayLeads=window._allLeads.filter(l=>l.created_at?.startsWith(todayStr)).length;
     const subEl=document.getElementById('leadsSubtitle');
     if(subEl)subEl.textContent=`${window._allLeads.length} total · ${todayLeads} today`;
-    showToast('Lead deleted');
+    showToast(t('toast.leadDeleted'));
   }catch(e){
     showToast('❌ Delete failed: '+e.message);
   }
@@ -68,7 +68,7 @@ async function deleteLead(leadId, leadName){
 async function callWithSara(leadId, phone, name){
   const code = prompt(`Enter confirmation code to call ${name}:`);
   if(!code) return;
-  if(code !== '4321'){ showToast('Incorrect code — call cancelled'); return; }
+  if(code !== '4321'){ showToast(t('toast.incorrectCodeCallCancelled')); return; }
   const decoded = decodeURIComponent(phone);
   showToast(`Calling ${name}... Sara is dialing`);
   try {
