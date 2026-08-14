@@ -313,7 +313,7 @@ async function loadPartnerFeed(){
     const today=new Date().toDateString();
     const todayItems=(feed||[]).filter(f=>new Date(f.created_at).toDateString()===today);
     if(badge&&todayItems.length>0){badge.textContent=todayItems.length+' NEW';badge.style.display='inline';}
-    if(!feed||feed.length===0){feedEl.innerHTML='<div style="text-align:center;color:var(--muted);font-size:.72rem;padding:20px;">No feed items yet</div>';return;}
+    if(!feed||feed.length===0){feedEl.innerHTML=`<div style="text-align:center;color:var(--muted);font-size:.72rem;padding:20px;">${t('empty.noFeedItems')}</div>`;return;}
     let html='<div style="font-size:.65rem;color:var(--muted);margin-bottom:8px;">Today</div>';
     html+=feed.map(f=>{
       const isAlert=f.tag==='ALERT';
@@ -476,7 +476,7 @@ async function showCEODashboard(){
           </div>
           <div class="dash-card">
             <div class="dc-title">Lead geography</div>
-            ${geoRows||'<div style="color:var(--muted);font-family:var(--mono);font-size:.75rem;">No leads yet</div>'}
+            ${geoRows||`<div style="color:var(--muted);font-family:var(--mono);font-size:.75rem;">${t('empty.noLeadsDashboard')}</div>`}
           </div>
         </div>`:''}
         <div class="dash-card" style="margin-bottom:12px;">
@@ -609,7 +609,7 @@ async function loadPartnerMrr(){
           ${nextTier?`<div style="margin-top:5px;height:3px;background:var(--border);border-radius:2px;overflow:hidden;"><div style="height:100%;width:${prog}%;background:${color};border-radius:2px;"></div></div>
           <div style="font-size:.6rem;color:var(--muted);margin-top:2px;">${pClients.length}/${nextTier} to ${p.tier==='apex'?'Alliance':'Elite'}${prog>=100?' — eligible for upgrade!':''}</div>`:''}
         </div>`;
-      }).join('')||'<div style="font-size:.7rem;color:var(--muted);">No active partners yet</div>';
+      }).join('')||`<div style="font-size:.7rem;color:var(--muted);">${t('empty.noActivePartnersDashboard')}</div>`;
     }
     // Founder expiry alerts
     const alertsEl=document.getElementById('founderAlerts');
