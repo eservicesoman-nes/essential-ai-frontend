@@ -9,7 +9,7 @@ async function showWhatsAppPage(){
       <div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;">WHATSAPP AUTO-REPLY</div>
       <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);" id="whatsappSubtitle">${t('common.loading')}</div>
     </div>
-    <div class="page scrollable" id="whatsappContent"><div style="text-align:center;padding:40px;color:var(--muted);font-family:var(--mono);font-size:.8rem;">Loading messages...</div></div>`;
+    <div class="page scrollable" id="whatsappContent"><div style="text-align:center;padding:40px;color:var(--muted);font-family:var(--mono);font-size:.8rem;">${t('loading.messages')}</div></div>`;
   await loadWhatsAppMessages();
 }
 
