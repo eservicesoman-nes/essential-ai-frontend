@@ -182,7 +182,7 @@ async function saveFileShare(fileId){
     });
     const data=await res.json();
     if(data.success){
-      showToast('Sharing updated ✓');
+      showToast(t('toast.sharingUpdated'));
       document.getElementById('genericModalOverlay')?.remove();
       await loadVaultFiles();
     }else{
@@ -363,7 +363,7 @@ async function deleteVaultFile(fileId, fileName){
       window._vaultFiles=(window._vaultFiles||[]).filter(f=>f.id!==fileId);
       const row=document.getElementById('vault-row-'+fileId);
       if(row)row.remove();
-      showToast('File deleted');
+      showToast(t('toast.fileDeleted'));
       await loadVaultFiles();
       loadBriefcaseDocContext();
     }else{
