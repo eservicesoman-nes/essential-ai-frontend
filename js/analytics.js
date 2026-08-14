@@ -8,7 +8,7 @@ async function showAnalytics(){
     <div style="padding:11px 160px 11px 60px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;" class="an-hdr">
       <div>
         <div style="font-family:var(--mono);font-size:.8rem;color:#d29922;font-weight:800;display:flex;align-items:center;gap:6px;"><i class="ti ti-chart-dots"></i>USAGE ANALYTICS</div>
-        <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">Platform usage · All clients · Real-time</div>
+        <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">${t('pageSubtitle.analytics')}</div>
       </div>
       <div style="display:flex;gap:8px;">
         <button onclick="loadAnalytics('7')" id="anBtn7" style="font-family:var(--mono);font-size:.65rem;padding:4px 10px;border-radius:6px;border:1px solid var(--nes-blue);background:var(--nes-blue);color:#fff;cursor:pointer;">7 days</button>
