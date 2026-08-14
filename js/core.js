@@ -11,10 +11,10 @@ async function showApp(user){
   // Handle Thawani payment redirect
   const urlParams=new URLSearchParams(window.location.search);
   if(urlParams.get('payment')==='success'){
-    setTimeout(()=>showToast('✅ Payment successful! Your account has been updated.'),1000);
+    setTimeout(()=>showToast(t('toast.paymentSuccessful')),1000);
     window.history.replaceState({},document.title,window.location.pathname);
   } else if(urlParams.get('payment')==='cancelled'){
-    setTimeout(()=>showToast('Payment cancelled.'),1000);
+    setTimeout(()=>showToast(t('toast.paymentCancelled')),1000);
     window.history.replaceState({},document.title,window.location.pathname);
   }
   loadLocal();
@@ -566,7 +566,7 @@ function showView(view){
       'image': mods.image_gen === false,
     };
     if(blocked[view]){
-      showToast('This module is not included in your current plan. Contact NES AI to upgrade.');
+      showToast(t('toast.moduleNotIncluded'));
       return;
     }
   }
