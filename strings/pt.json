@@ -161,5 +161,17 @@
     "type": "Type",
     "rate": "Rate",
     "amount": "Amount"
+  },
+  "sectionTitle": {
+    "platformStatus": "PLATFORM STATUS",
+    "briefcase": "BRIEFCASE",
+    "clientManager": "CLIENT MANAGER",
+    "addNewClient": "ADD NEW CLIENT",
+    "addNewClientSubtitle": "Fill in the details below",
+    "ceoDashboard": "CEO DASHBOARD",
+    "teamHub": "TEAM HUB",
+    "teamHubSubtitle": "Internal team communications",
+    "leads": "LEADS",
+    "itSetup": "IT SETUP"
   }
 }
