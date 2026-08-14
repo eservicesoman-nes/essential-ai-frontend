@@ -761,15 +761,15 @@ function clientFormFields(c={}){
   return`
     <div class="form-section">Basic Information</div>
     <div class="form-grid">
-      <div class="form-field"><label class="form-label">Company name *</label><input id="field_name" type="text" value="${esc(c.name||'')} " class="form-input" placeholder="${t('placeholder.companyName')}"></div>
-      <div class="form-field"><label class="form-label">Email</label><input id="field_email" type="email" value="${esc(c.email||'')} " class="form-input" placeholder="${t('placeholder.emailLabel')}"></div>
-      <div class="form-field"><label class="form-label">Website</label><input id="field_website" type="text" value="${esc(c.website||'')} " class="form-input" placeholder="https://..."></div>
-      <div class="form-field"><label class="form-label">Industry</label><input id="field_industry" type="text" value="${esc(c.industry||'')} " class="form-input" placeholder="Industry"></div>
-      <div class="form-field"><label class="form-label">Region</label><input id="field_region" type="text" value="${esc(c.region||'Oman')} " class="form-input" placeholder="Oman"></div>
-      <div class="form-field"><label class="form-label">Country</label>
+      <div class="form-field"><label class="form-label">${t('formLabel.companyName')}</label><input id="field_name" type="text" value="${esc(c.name||'')} " class="form-input" placeholder="${t('placeholder.companyName')}"></div>
+      <div class="form-field"><label class="form-label">${t('formLabel.email')}</label><input id="field_email" type="email" value="${esc(c.email||'')} " class="form-input" placeholder="${t('placeholder.emailLabel')}"></div>
+      <div class="form-field"><label class="form-label">${t('formLabel.website')}</label><input id="field_website" type="text" value="${esc(c.website||'')} " class="form-input" placeholder="https://..."></div>
+      <div class="form-field"><label class="form-label">${t('formLabel.industry')}</label><input id="field_industry" type="text" value="${esc(c.industry||'')} " class="form-input" placeholder="Industry"></div>
+      <div class="form-field"><label class="form-label">${t('formLabel.region')}</label><input id="field_region" type="text" value="${esc(c.region||'Oman')} " class="form-input" placeholder="Oman"></div>
+      <div class="form-field"><label class="form-label">${t('formLabel.country')}</label>
         <select id="field_country" class="form-select">${buildCountryOptions(c.country||'Oman')}</select>
       </div>
-      <div class="form-field"><label class="form-label">Language</label>
+      <div class="form-field"><label class="form-label">${t('formLabel.language')}</label>
         <select id="field_language" class="form-select">
           <option value="English" ${c.language==='English'?'selected':''}>English</option>
           <option value="Arabic" ${c.language==='Arabic'?'selected':''}>Arabic</option>
@@ -779,16 +779,16 @@ function clientFormFields(c={}){
     </div>
     <div class="form-section">Branding & Contact</div>
     <div class="form-grid">
-      <div class="form-field"><label class="form-label">Lead Notification Email</label><input id="field_lead_email" type="email" value="${esc(c.lead_email||c.email||'')} " class="form-input" placeholder="leads@company.com"></div>
-      <div class="form-field"><label class="form-label">Primary Colour</label><input id="field_primary_color" type="text" value="${esc(c.primary_color||'#1a56db')} " class="form-input" placeholder="#1a56db"></div>
-      <div class="form-field"><label class="form-label">Logo URL</label><input id="field_logo_url" type="text" value="${esc(c.logo_url||'')} " class="form-input" placeholder="https://..."></div>
+      <div class="form-field"><label class="form-label">${t('formLabel.leadNotificationEmail')}</label><input id="field_lead_email" type="email" value="${esc(c.lead_email||c.email||'')} " class="form-input" placeholder="leads@company.com"></div>
+      <div class="form-field"><label class="form-label">${t('formLabel.primaryColour')}</label><input id="field_primary_color" type="text" value="${esc(c.primary_color||'#1a56db')} " class="form-input" placeholder="#1a56db"></div>
+      <div class="form-field"><label class="form-label">${t('formLabel.logoUrl')}</label><input id="field_logo_url" type="text" value="${esc(c.logo_url||'')} " class="form-input" placeholder="https://..."></div>
     </div>
     <div style="background:rgba(64,156,255,.08);border:1px solid rgba(64,156,255,.2);border-radius:8px;padding:10px 14px;margin:8px 0;font-family:var(--mono);font-size:.72rem;color:var(--nes-blue);">
       <i class="ti ti-info-circle"></i> Credentials (WhatsApp, Facebook, LinkedIn etc) are entered in the <strong>Credentials tab</strong> after creating the client.
     </div>
     <div class="form-section">Plan & Status</div>
     <div class="form-grid">
-      <div class="form-field"><label class="form-label">Plan</label>
+      <div class="form-field"><label class="form-label">${t('formLabel.plan')}</label>
         <select id="field_plan" class="form-select">
           <option value="presence" ${c.plan==='presence'?'selected':''}>AI Presence</option>
           <option value="operations" ${c.plan==='operations'?'selected':''}>AI Operations</option>
@@ -796,24 +796,24 @@ function clientFormFields(c={}){
           <option value="infrastructure" ${c.plan==='infrastructure'?'selected':''}>AI Infrastructure</option>
         </select>
       </div>
-      <div class="form-field"><label class="form-label">Status</label>
+      <div class="form-field"><label class="form-label">${t('formLabel.status')}</label>
         <select id="field_status" class="form-select">
           <option value="active" ${(c.status||'active')==='active'?'selected':''}>Active</option>
           <option value="onboarding" ${c.status==='onboarding'?'selected':''}>Onboarding</option>
           <option value="inactive" ${c.status==='inactive'?'selected':''}>Inactive</option>
         </select>
       </div>
-      <div class="form-field"><label class="form-label">Trial Start Date</label><input id="field_trial_start" type="date" value="${esc(c.trial_start||'')}" class="form-input"></div>
-      <div class="form-field"><label class="form-label">Trial Duration (days)</label><input id="field_trial_duration_days" type="number" value="${esc(String(c.trial_duration_days||7))}" class="form-input" placeholder="7"></div>
+      <div class="form-field"><label class="form-label">${t('formLabel.trialStartDate')}</label><input id="field_trial_start" type="date" value="${esc(c.trial_start||'')}" class="form-input"></div>
+      <div class="form-field"><label class="form-label">${t('formLabel.trialDurationDays')}</label><input id="field_trial_duration_days" type="number" value="${esc(String(c.trial_duration_days||7))}" class="form-input" placeholder="7"></div>
       <div class="form-field">
-        <label class="form-label">PAYG Full Access (testing)</label>
+        <label class="form-label">${t('formLabel.paygFullAccess')}</label>
         <label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:8px 0;">
           <input id="field_full_access_override" type="checkbox" ${c.full_access_override?'checked':''} style="width:36px;height:20px;cursor:pointer;">
           <span style="font-size:.8rem;color:var(--muted);">Bypass trial/PAYG limits entirely (unlimited free images, for testing)</span>
         </label>
       </div>
       <div class="form-field">
-        <label class="form-label">Grant Image Credits</label>
+        <label class="form-label">${t('formLabel.grantImageCredits')}</label>
         <div style="display:flex;gap:8px;align-items:center;">
           <select id="creditPackSelect_${c.id}" class="form-select" style="flex:1;" onchange="onCreditPackChange('${c.id}')">
             <option value="50:5">50 credits — OMR 5</option>
