@@ -51,7 +51,7 @@ function showInviteUserForm(clientId){
       </div>
       <div style="display:flex;gap:8px;margin-top:16px;">
         <button onclick="sendClientInvite('${clientId}')" class="form-submit" style="flex:1;"><i class="ti ti-send"></i> Send Invite</button>
-        <button onclick="document.getElementById('inviteModal').remove()" style="background:none;border:1px solid var(--border);border-radius:8px;padding:8px 14px;color:var(--muted);cursor:pointer;font-size:.8rem;">Cancel</button>
+        <button onclick="document.getElementById('inviteModal').remove()" style="background:none;border:1px solid var(--border);border-radius:8px;padding:8px 14px;color:var(--muted);cursor:pointer;font-size:.8rem;">${t('common.cancel')}</button>
       </div>
     </div>`;
   document.body.appendChild(modal);
@@ -299,8 +299,8 @@ function showEditAccessModal(userId, clientId, currentModules){
       <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#e6edf3;margin-bottom:20px;cursor:pointer;"><input type="checkbox" id="editGrantWhatsapp" ${currentModules.includes('whatsapp_autoreply')?'checked':''} style="width:16px;height:16px;"> WhatsApp Auto-Reply</label>
       <div id="accessErr" style="font-size:12px;color:#f85149;margin-bottom:10px;display:none;"></div>
       <div style="display:flex;gap:8px;">
-        <button onclick="document.getElementById('accessModal').remove()" style="flex:1;background:none;border:1px solid #1a2332;border-radius:8px;padding:10px;color:#8b949e;cursor:pointer;font-size:13px;">Cancel</button>
-        <button onclick="saveUserAccess('${userId}','${clientId}')" style="flex:1;background:linear-gradient(135deg,#1a56db,#2563eb);border:none;border-radius:8px;padding:10px;color:#fff;cursor:pointer;font-size:13px;font-weight:600;">Save</button>
+        <button onclick="document.getElementById('accessModal').remove()" style="flex:1;background:none;border:1px solid #1a2332;border-radius:8px;padding:10px;color:#8b949e;cursor:pointer;font-size:13px;">${t('common.cancel')}</button>
+        <button onclick="saveUserAccess('${userId}','${clientId}')" style="flex:1;background:linear-gradient(135deg,#1a56db,#2563eb);border:none;border-radius:8px;padding:10px;color:#fff;cursor:pointer;font-size:13px;font-weight:600;">${t('common.save')}</button>
       </div>
     </div>`;
   document.body.appendChild(modal);
@@ -361,7 +361,7 @@ function showInviteModal(){
       </div>
       <div id="inviteErr" style="font-size:12px;color:#f85149;margin-bottom:10px;display:none;"></div>
       <div style="display:flex;gap:8px;">
-        <button onclick="document.getElementById('inviteModal').remove()" style="flex:1;background:none;border:1px solid #1a2332;border-radius:8px;padding:10px;color:#8b949e;cursor:pointer;font-size:13px;">Cancel</button>
+        <button onclick="document.getElementById('inviteModal').remove()" style="flex:1;background:none;border:1px solid #1a2332;border-radius:8px;padding:10px;color:#8b949e;cursor:pointer;font-size:13px;">${t('common.cancel')}</button>
         <button onclick="sendTeamInvite()" style="flex:1;background:linear-gradient(135deg,#1a56db,#2563eb);border:none;border-radius:8px;padding:10px;color:#fff;cursor:pointer;font-size:13px;font-weight:600;">Send Invite</button>
       </div>
     </div>`;
