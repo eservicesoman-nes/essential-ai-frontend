@@ -79,7 +79,7 @@ async function showClientManager(){
       <div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;">CLIENT MANAGER</div>
       <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">NES Admin only · Manage all clients</div>
     </div>
-    <div class="page" id="cmContent"><div style="text-align:center;padding:40px;color:var(--muted);font-family:var(--mono);font-size:.8rem;">Loading clients...</div></div>`;
+    <div class="page" id="cmContent"><div style="text-align:center;padding:40px;color:var(--muted);font-family:var(--mono);font-size:.8rem;">${t('loading.clients')}</div></div>`;
   await loadClientsFromDB();
 }
 
@@ -398,7 +398,7 @@ function renderClientDetail(c,colors,textColors,idx){
               <button class="act-btn" onclick="recordClientPayment('${c.id}')" style="width:100%;"><i class="ti ti-check"></i> Record entry</button>
             </div>
 
-            <div id="paymentHistoryList_${c.id}" style="font-size:.75rem;color:var(--muted);">Loading history...</div>
+            <div id="paymentHistoryList_${c.id}" style="font-size:.75rem;color:var(--muted);">${t('loading.history')}</div>
           </div>
         </div>
 
@@ -470,7 +470,7 @@ function renderClientDetail(c,colors,textColors,idx){
             <button onclick="showInviteUserForm('${c.id}')" style="background:var(--nes-btn-grad);border:none;border-radius:7px;padding:5px 12px;color:#fff;font-size:.72rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;"><i class="ti ti-user-plus"></i> Invite User</button>
           </div>
           <div id="cm-users-list-${c.id}" style="min-height:40px;">
-            <div style="color:var(--muted);font-family:var(--mono);font-size:.75rem;">Loading users...</div>
+            <div style="color:var(--muted);font-family:var(--mono);font-size:.75rem;">${t('loading.users')}</div>
           </div>
         </div>
 
