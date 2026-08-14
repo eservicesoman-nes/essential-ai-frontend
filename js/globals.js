@@ -252,3 +252,14 @@ function t(keyPath, fallback) {
 loadNesStrings('en');
 window.t = t;
 window.loadNesStrings = loadNesStrings;
+
+function applyNesI18n() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    el.textContent = t(el.getAttribute('data-i18n'));
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    el.placeholder = t(el.getAttribute('data-i18n-placeholder'));
+  });
+}
+window.applyNesI18n = applyNesI18n;
+loadNesStrings('en').then(applyNesI18n);
