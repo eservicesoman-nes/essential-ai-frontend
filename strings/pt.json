@@ -66,5 +66,16 @@
     "noLeadsDashboard": "No leads yet",
     "noActivePartnersDashboard": "No active partners yet",
     "noLeadsFound": "No leads found"
+  },
+  "placeholder": {
+    "searchDocs": "Search docs...",
+    "askAboutDocuments": "Ask about your documents...",
+    "searchClients": "Search clients...",
+    "amountOmr": "Amount OMR",
+    "paymentNote": "Note (required) - e.g. received in person, receipt #102",
+    "appPassword": "App password (not main password)",
+    "salesInbox": "Sales inbox",
+    "companyName": "Company name",
+    "emailLabel": "Email"
   }
 }
