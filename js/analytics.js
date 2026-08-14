@@ -168,7 +168,7 @@ async function loadAnalytics(days){
                 <div class="geo-name">${cn}</div>
                 <div class="geo-track"><div class="geo-fill" style="width:${Math.round((n/totalLeads)*100)}%;"></div></div>
                 <div class="geo-n">${n}</div>
-              </div>`).join('') : '<div style="color:var(--muted);font-size:.72rem;">No lead data yet</div>'}
+              </div>`).join('') : `<div style="color:var(--muted);font-size:.72rem;">${t('empty.noLeadData')}</div>`}
           </div>
         </div>
 
@@ -194,7 +194,7 @@ async function loadAnalytics(days){
 
       <div class="an-sec"><i class="ti ti-building" style="font-size:11px;color:#d29922;"></i>Client overview</div>
       <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px;">
-        ${clients.length === 0 ? '<div style="color:var(--muted);font-size:.72rem;">No clients yet</div>' :
+        ${clients.length === 0 ? `<div style="color:var(--muted);font-size:.72rem;">${t('empty.noClientsAnalytics')}</div>` :
           clients.map(cl => {
             const p=(cl.plan||'').toLowerCase();
             const val=p.includes('operations')?79:p.includes('workforce')?149:p.includes('infrastructure')?299:29;
@@ -266,7 +266,7 @@ async function loadAnalytics(days){
             </thead>
             <tbody>
               ${noData
-                ? `<tr><td colspan="8" style="padding:20px;text-align:center;color:var(--muted);font-family:var(--mono);">No usage data yet</td></tr>`
+                ? `<tr><td colspan="8" style="padding:20px;text-align:center;color:var(--muted);font-family:var(--mono);">${t('empty.noUsageData')}</td></tr>`
                 : costTable.map((r,i) => `
                   <tr style="border-bottom:1px solid var(--border);background:${i%2===0?'transparent':'rgba(255,255,255,0.01)'};">
                     <td style="padding:8px 12px;color:var(--text);font-weight:500;">${r.client}</td>
