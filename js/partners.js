@@ -10,7 +10,7 @@ async function showSalesPortal(){
         <div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;display:flex;align-items:center;gap:6px;">
           <i class="ti ti-users-group" style="filter:drop-shadow(0 0 3px var(--nes-blue))"></i>PARTNER HUB
         </div>
-        <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">NES · Incentive structure · Direct & partner clients</div>
+        <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">${t('pageSubtitle.partnerHub')}</div>
       </div>
     </div>
     <div class="page scrollable" id="partnerContent" style="padding:14px 18px;">
