@@ -271,7 +271,7 @@ function showComposeModal() {
     + '<input id="composeSubject" placeholder="Subject" style="width:100%;padding:6px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:.75rem;margin-bottom:6px;outline:none;">'
     + '<textarea id="composeBody" placeholder="Write your message..." style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:.75rem;resize:none;height:120px;outline:none;font-family:var(--ui);"></textarea>'
     + '<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px;">'
-    + '<button onclick="document.getElementById(\'compose-modal\').remove()" style="padding:6px 16px;border-radius:6px;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer;font-size:.75rem;">Cancel</button>'
+    + `<button onclick="document.getElementById('compose-modal').remove()" style="padding:6px 16px;border-radius:6px;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer;font-size:.75rem;">${t('common.cancel')}</button>`
     + '<button onclick="sendComposedEmail()" style="padding:6px 16px;border-radius:6px;border:none;background:linear-gradient(135deg,#1a56db,#2563eb);color:#fff;cursor:pointer;font-size:.75rem;font-weight:600;"><i class="ti ti-send"></i> Send</button>'
     + '</div></div>';
   document.body.appendChild(modal);
