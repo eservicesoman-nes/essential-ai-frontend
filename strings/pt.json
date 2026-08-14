@@ -183,5 +183,14 @@
     "unsavedChangesSwitchTab": "You have unsaved changes. Switch tab anyway?",
     "removeTeamMember": "Remove this team member?",
     "absolutelySureStaffUnassigned": "Are you absolutely sure? Staff assigned to"
+  },
+  "pageSubtitle": {
+    "platformStatus": "NES AI — Unified Business Platform · Live health check",
+    "analytics": "Platform usage · All clients · Real-time",
+    "clientManager": "NES Admin only · Manage all clients",
+    "apiCredits": "Balance · Usage · Auto-recharge thresholds",
+    "incidents": "Backend uptime and auto-heal history · NES Admin only",
+    "itSetup": "Integration checklist · Connect your services",
+    "partnerHub": "NES · Incentive structure · Direct & partner clients"
   }
 }
