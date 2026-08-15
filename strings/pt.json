@@ -192,5 +192,12 @@
     "incidents": "Backend uptime and auto-heal history · NES Admin only",
     "itSetup": "Integration checklist · Connect your services",
     "partnerHub": "NES · Incentive structure · Direct & partner clients"
+  },
+  "button": {
+    "signOff": "Sign-off",
+    "cancelSub": "Cancel Sub",
+    "upgradePlan": "Upgrade Plan",
+    "addPartnerTab": "+ Add Partner",
+    "addPartner": "Add Partner"
   }
 }
