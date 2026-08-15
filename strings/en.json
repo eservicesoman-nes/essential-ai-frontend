@@ -203,5 +203,15 @@
   "deen": {
     "subtitle": "Islamic companion · Quran · Hadith · Prayer Times · Dhikr",
     "openFullPage": "Open full page"
+  },
+  "whatsapp": {
+    "title": "WHATSAPP AUTO-REPLY",
+    "messagesReceived": "messages received",
+    "contact": "Contact",
+    "phone": "Phone",
+    "message": "Message",
+    "received": "Received",
+    "noMessagesYet": "No WhatsApp messages yet",
+    "unknown": "Unknown"
   }
 }
