@@ -86,7 +86,7 @@ async function renderPartnerHub(){
       <button class="ph-tab" onclick="switchPhTab('partners',this)">Partners</button>
       <button class="ph-tab" onclick="switchPhTab('commissions',this)">Commissions</button>
       <button class="ph-tab" onclick="switchPhTab('tiers',this)">Programme</button>
-      <button class="ph-tab" onclick="switchPhTab('add-partner',this)">+ Add Partner</button>
+      <button class="ph-tab" onclick="switchPhTab('add-partner',this)">${t('button.addPartnerTab')}</button>
     </div>
 
     <!-- OVERVIEW -->
@@ -406,7 +406,7 @@ async function renderPartnerHub(){
         <div id="np-err" style="font-size:.72rem;color:#f85149;margin-bottom:10px;display:none;"></div>
         <div style="display:flex;gap:8px;">
           <button onclick="switchPhTab('partners',document.querySelector('.ph-tab'))" style="flex:1;background:none;border:1px solid var(--border);border-radius:8px;padding:10px;color:var(--muted);cursor:pointer;font-size:.78rem;">${t('common.cancel')}</button>
-          <button onclick="addPartner()" style="flex:1;background:linear-gradient(135deg,#1a56db,#2563eb);border:none;border-radius:8px;padding:10px;color:#fff;cursor:pointer;font-size:.78rem;font-weight:600;">Add Partner</button>
+          <button onclick="addPartner()" style="flex:1;background:linear-gradient(135deg,#1a56db,#2563eb);border:none;border-radius:8px;padding:10px;color:#fff;cursor:pointer;font-size:.78rem;font-weight:600;">${t('button.addPartner')}</button>
         </div>
       </div>
     </div>`;
