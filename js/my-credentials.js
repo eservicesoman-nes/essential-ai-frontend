@@ -107,7 +107,7 @@ function renderMyCredsForm(creds, client){
     html+='<div style="margin-top:10px;padding:10px 12px;background:#0c1f35;border:1px solid #1a3a6e;border-radius:8px;display:flex;align-items:center;justify-content:space-between;">';
     html+='<div><div style="font-family:var(--mono);font-size:.68rem;color:var(--nes-blue);font-weight:700;">+ 5 more sources</div>';
     html+='<div style="font-size:.68rem;color:var(--muted);">Add custom industry sources</div></div>';
-    html+='<button onclick="showPricing()" style="background:var(--nes-btn-grad);border:none;border-radius:6px;padding:5px 12px;color:#fff;font-size:.68rem;font-weight:700;cursor:pointer;">Upgrade Plan</button>';
+    html+=`<button onclick="showPricing()" style="background:var(--nes-btn-grad);border:none;border-radius:6px;padding:5px 12px;color:#fff;font-size:.68rem;font-weight:700;cursor:pointer;">${t('button.upgradePlan')}</button>`;
     html+='</div>';
   } else {
     for(var si2=5;si2<10;si2++){
