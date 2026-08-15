@@ -199,5 +199,9 @@
     "upgradePlan": "Upgrade Plan",
     "addPartnerTab": "+ Add Partner",
     "addPartner": "Add Partner"
+  },
+  "deen": {
+    "subtitle": "Islamic companion · Quran · Hadith · Prayer Times · Dhikr",
+    "openFullPage": "Open full page"
   }
 }
