@@ -248,7 +248,7 @@ function renderClientDetail(c,colors,textColors,idx){
             <div style="font-size:.75rem;color:var(--muted);margin-bottom:10px;">Embed snippet for this client's website widget - pull this anytime without needing the client to log in.</div>
             <div style="display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-family:var(--mono);font-size:.68rem;color:#409cff;word-break:break-all;">
               <span id="cm-widget-snippet-${c.id}">&lt;script src=\"https://api.essential-services.org/widget.js?client_id=${c.id}\"&gt;&lt;/script&gt;</span>
-              <button onclick="copyWidgetSnippet(this, '${c.id}')" style="background:var(--nes-btn-grad);border:none;border-radius:6px;padding:4px 12px;color:#fff;font-size:.68rem;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;">Copy</button>
+              <button onclick="copyWidgetSnippet(this, '${c.id}')" style="background:var(--nes-btn-grad);border:none;border-radius:6px;padding:4px 12px;color:#fff;font-size:.68rem;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;">${t('chatUi.copy')}</button>
             </div>
           </div>
         </div>
