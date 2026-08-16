@@ -107,7 +107,7 @@ function userBubble(text){return`<div class="msg user"><div class="user-av-msg">
 
 function aiBubble(text,sources=[]){
   const src=sources.length?'<div class="sources-block">Sources: '+sources.map(s=>'<a href="'+esc(s.url)+'" target="_blank">'+esc(s.title||s.url)+'</a>').join(' · ')+'</div>':''
-  return`<div class="msg ai"><div class="chat-av-wrap"><div class="chat-av-ring"><div class="chat-av-mid"><div class="chat-av-dot"></div></div></div><div class="chat-av-online"></div></div><div class="msg-body"><div class="msg-role">NES AI</div><div class="msg-bubble">${md(text)}${src}</div><button class="copy-btn" onclick="copyMsg(this)">Copy</button></div></div>`;
+  return`<div class="msg ai"><div class="chat-av-wrap"><div class="chat-av-ring"><div class="chat-av-mid"><div class="chat-av-dot"></div></div></div><div class="chat-av-online"></div></div><div class="msg-body"><div class="msg-role">NES AI</div><div class="msg-bubble">${md(text)}${src}</div><button class="copy-btn" onclick="copyMsg(this)">${t('chatUi.copy')}</button></div></div>`;
 }
 
 function imgBubble(url){return`<div class="msg ai"><div class="chat-av-wrap"><div class="chat-av-ring"><div class="chat-av-mid"><div class="chat-av-dot"></div></div></div><div class="chat-av-online"></div></div><div class="msg-body"><div class="msg-role">NES AI · Image Gen</div><div class="msg-bubble"><img src="${esc(url)}" style="max-width:100%;border-radius:10px;margin-top:4px;"></div></div></div>`;}
