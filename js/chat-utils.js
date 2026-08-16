@@ -36,7 +36,7 @@ function updateStats(){
   if(sm)sm.textContent=Math.max(0,limits.messages-chatUsed);
   if(sd)sd.textContent=Math.max(0,limits.docs-docsUsed);
   if(sc){
-    sc.textContent=imageCredits.freeAllowanceActive===false?(imageCredits.balance>0?imageCredits.balance+' credits':'Trial ended'):imageCredits.dailyFreeRemaining+' free'+(imageCredits.balance>0?' + '+imageCredits.balance+' credits':'');
+    sc.textContent=imageCredits.freeAllowanceActive===false?(imageCredits.balance>0?imageCredits.balance+' '+t('chatUtilsUi.credits'):t('chatUtilsUi.trialEnded')):imageCredits.dailyFreeRemaining+' '+t('chatUtilsUi.free')+(imageCredits.balance>0?' + '+imageCredits.balance+' '+t('chatUtilsUi.credits'):'');
   }
   document.getElementById('usageTxt').textContent=chatUsed+' / '+limits.messages;
   const fill=document.getElementById('usageFill');
@@ -82,7 +82,7 @@ async function clearChat(){
   if(session){
     try{await fetch(API_URL+'/api/chat/history',{method:'DELETE',headers:{'Authorization':'Bearer '+session.access_token}});}catch(e){}
   }
-  addAiMsg('Cleared. How can I help you?');
+  addAiMsg(t('chatUtilsUi.clearedHowCanIHelp'));
   localStorage.removeItem(STORAGE_KEYS.h);localStorage.removeItem(STORAGE_KEYS.m);
 }
 
@@ -127,12 +127,12 @@ function appendMsg(html){document.getElementById('messages')?.insertAdjacentHTML
 
 function scroll(){const c=document.getElementById('messages');if(c)c.scrollTop=c.scrollHeight;}
 
-function copyMsg(btn){const bubble=btn.closest('.msg-body').querySelector('.msg-bubble');navigator.clipboard.writeText(bubble.innerText||'').then(()=>{btn.textContent='Copied';setTimeout(()=>btn.textContent='Copy',2000);}).catch(()=>{});}
+function copyMsg(btn){const bubble=btn.closest('.msg-body').querySelector('.msg-bubble');navigator.clipboard.writeText(bubble.innerText||'').then(()=>{btn.textContent=t('chatUtilsUi.copied');setTimeout(()=>btn.textContent=t('chatUi.copy'),2000);}).catch(()=>{});}
 
 function setBusy(b){
   busy=b;
   const sb=document.getElementById('sendBtn');if(sb)sb.disabled=b;
-  setStatus(b?'busy':'ok',b?'Thinking…':'Ready');
+  setStatus(b?'busy':'ok',b?t('chatUtilsUi.thinking'):t('chatUi.ready'));
   const dot=document.getElementById('promptPingDot');
   const ring=document.getElementById('promptPingRing');
   const avatar=document.getElementById('promptPingAvatar');
