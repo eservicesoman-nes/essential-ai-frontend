@@ -362,5 +362,10 @@
     "upgradeToOperations": "Upgrade to Operations →",
     "upgradeToWorkforce": "Upgrade to Workforce →",
     "contactUs": "Contact Us →"
+  },
+  "teamInvite": {
+    "sendInvite": "Send Invite",
+    "addDepartment": "Add Department",
+    "departmentNamePrompt": "Department name:"
   }
 }
