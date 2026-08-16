@@ -347,5 +347,10 @@
     "addBtn": "+ Add",
     "noClientsYet": "No clients yet.",
     "clickToCreate": "to create one."
+  },
+  "modeLabel": {
+    "chat": "ASK NESAI",
+    "docs": "DOCUMENTS MODE",
+    "image": "IMAGE GEN MODE"
   }
 }
