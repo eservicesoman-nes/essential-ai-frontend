@@ -49,7 +49,7 @@ function showChatInterface(mode='chat'){
 }
 
 async function loadServerChatHistory(msgsEl){
-  if(!session){addAiMsg('Welcome to NES AI. How can I help you today?');return;}
+  if(!session){addAiMsg(t('welcomeUi.welcomeMessage'));return;}
   try{
     const res=await fetch(API_URL+'/api/chat/history',{headers:{'Authorization':'Bearer '+session.access_token}});
     if(res.ok){
@@ -64,7 +64,7 @@ async function loadServerChatHistory(msgsEl){
       }
     }
   }catch(e){}
-  addAiMsg('Welcome to NES AI. How can I help you today?');
+  addAiMsg(t('welcomeUi.welcomeMessage'));
 }
 
 async function sendMsg(){
