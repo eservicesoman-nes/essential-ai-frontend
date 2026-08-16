@@ -220,5 +220,12 @@
     "aiWorkforce": "AI Workforce",
     "aiInfrastructure": "AI Infrastructure",
     "totalMrr": "Total MRR"
+  },
+  "analyticsSection": {
+    "totalLeads": "Total leads",
+    "conversionRate": "Conversion rate",
+    "intelArticles": "Intel articles",
+    "leadGeography": "Lead geography",
+    "clientOverview": "Client overview"
   }
 }
