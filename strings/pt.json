@@ -295,5 +295,14 @@
     "title": "INBOX",
     "unifiedEmailPrefix": "Unified email · All accounts · ",
     "compose": "Compose"
+  },
+  "chatUi": {
+    "copy": "Copy",
+    "describeImage": "Describe the image you want…",
+    "askMeAnything": "Ask me anything...",
+    "ready": "Ready",
+    "attach": "Attach",
+    "voice": "Voice",
+    "disclaimer": "NES AI can make mistakes"
   }
 }
