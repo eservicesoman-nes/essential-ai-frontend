@@ -408,5 +408,20 @@
     "today": "Today",
     "yesterday": "Yesterday",
     "chat": "Chat"
+  },
+  "chatError": {
+    "webSearchOn": "Web Search ON",
+    "dailyLimitReached": "Daily limit reached. Come back tomorrow!",
+    "errorPrefix": "Error ",
+    "pleaseTryAgain": ". Please try again.",
+    "networkError": "Network error. Please check your connection.",
+    "sorryCouldNotGenerate": "Sorry, I could not generate a response.",
+    "fileAttachmentDocsMode": "File attachment is available in Documents mode.",
+    "fileTooLarge": "File too large. Max 10MB.",
+    "analyzing": "analyzing…",
+    "couldNotExtractText": "Could not extract text.",
+    "documentAnalyzed": "Document analyzed.",
+    "couldNotAnalyzeFile": "Could not analyze file.",
+    "errorColon": "Error: "
   }
 }
