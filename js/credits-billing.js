@@ -142,7 +142,7 @@ function showPricing(){
           <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);margin-bottom:8px;padding:6px 8px;background:var(--accent-lo);border-radius:6px;">
             + Apex Connect upgrade OMR 15/mo
           </div>
-          <button class="plan-action-btn" onclick="window.open('https://nes-ai.com/register.html?plan=presence','_blank')">Get Started →</button>
+          <button class="plan-action-btn" onclick="window.open('https://nes-ai.com/register.html?plan=presence','_blank')">${t('pricingCta.getStarted')}</button>
         </div>
 
         <div class="plan-card" style="border-color:var(--nes-blue);position:relative;">
@@ -166,7 +166,7 @@ function showPricing(){
           <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);margin-bottom:8px;padding:6px 8px;background:var(--accent-lo);border-radius:6px;">
             + Apex Outreach OMR 15/mo
           </div>
-          <button class="plan-action-btn" onclick="window.open('https://nes-ai.com/register.html?plan=operations','_blank')">Upgrade to Operations →</button>
+          <button class="plan-action-btn" onclick="window.open('https://nes-ai.com/register.html?plan=operations','_blank')">${t('pricingCta.upgradeToOperations')}</button>
         </div>
 
         <div class="plan-card" style="border-color:#3fb950;position:relative;">
@@ -187,7 +187,7 @@ function showPricing(){
           <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);margin-bottom:8px;padding:6px 8px;background:rgba(63,185,80,.08);border-radius:6px;">
             + Apex Advisory OMR 20/mo<br>+ Extra social posts OMR 8/mo
           </div>
-          <button class="plan-action-btn" style="background:linear-gradient(135deg,#1a7f37,#3fb950);" onclick="window.open('https://nes-ai.com/register.html?plan=workforce','_blank')">Upgrade to Workforce →</button>
+          <button class="plan-action-btn" style="background:linear-gradient(135deg,#1a7f37,#3fb950);" onclick="window.open('https://nes-ai.com/register.html?plan=workforce','_blank')">${t('pricingCta.upgradeToWorkforce')}</button>
         </div>
 
         <div class="plan-card" style="border-color:#d29922;position:relative;">
@@ -209,7 +209,7 @@ function showPricing(){
           <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);margin-bottom:8px;padding:6px 8px;background:rgba(210,153,34,.08);border-radius:6px;">
             Tailored to your requirements
           </div>
-          <button class="plan-action-btn" style="background:linear-gradient(135deg,#92610a,#d29922);" onclick="window.open('https://nes-ai.com/register.html?plan=infrastructure','_blank')">Contact Us →</button>
+          <button class="plan-action-btn" style="background:linear-gradient(135deg,#92610a,#d29922);" onclick="window.open('https://nes-ai.com/register.html?plan=infrastructure','_blank')">${t('pricingCta.contactUs')}</button>
         </div>
 
       </div>
