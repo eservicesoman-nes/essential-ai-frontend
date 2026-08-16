@@ -314,5 +314,11 @@
   "briefcaseUi": {
     "askNesAi": "Ask NES AI",
     "filesUsage": "files ·"
+  },
+  "adminStatusUi": {
+    "addApi": "Add API",
+    "lastChecked": "Last checked:",
+    "backupStatus": "BACKUP STATUS",
+    "refresh": "Refresh"
   }
 }
