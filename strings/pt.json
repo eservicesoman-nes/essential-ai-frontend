@@ -352,5 +352,9 @@
     "chat": "ASK NESAI",
     "docs": "DOCUMENTS MODE",
     "image": "IMAGE GEN MODE"
+  },
+  "coreUi": {
+    "companySettings": "Company Settings",
+    "passwordMinChars": "Password (min 6 chars)"
   }
 }
