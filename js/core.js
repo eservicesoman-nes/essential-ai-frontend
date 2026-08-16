@@ -412,7 +412,7 @@ function buildProfileMenu(){
   // CEO/Manager — company profile
   if(isCEO || isManager){
     html += `<div class="profile-menu-item" onclick="event.stopPropagation();toggleProfileMenu();showView('mycredentials')">
-      <i class="ti ti-building"></i><span>Company Settings</span>
+      <i class="ti ti-building"></i><span>${t('coreUi.companySettings')}</span>
     </div>`;
   }
 
