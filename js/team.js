@@ -50,7 +50,7 @@ function showInviteUserForm(clientId){
         </select>
       </div>
       <div style="display:flex;gap:8px;margin-top:16px;">
-        <button onclick="sendClientInvite('${clientId}')" class="form-submit" style="flex:1;"><i class="ti ti-send"></i> Send Invite</button>
+        <button onclick="sendClientInvite('${clientId}')" class="form-submit" style="flex:1;"><i class="ti ti-send"></i> ${t('teamInvite.sendInvite')}</button>
         <button onclick="document.getElementById('inviteModal').remove()" style="background:none;border:1px solid var(--border);border-radius:8px;padding:8px 14px;color:var(--muted);cursor:pointer;font-size:.8rem;">${t('common.cancel')}</button>
       </div>
     </div>`;
@@ -77,7 +77,7 @@ async function sendClientInvite(clientId){
     loadClientUsers(clientId);
   }catch(e){
     alert('Error: '+e.message);
-    if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-send"></i> Send Invite';}
+    if(btn){btn.disabled=false;btn.innerHTML=`<i class="ti ti-send"></i> ${t('teamInvite.sendInvite')}`;}
   }
 }
 
@@ -228,7 +228,7 @@ async function loadTeam(){
             <i onclick="event.stopPropagation();deleteDept('${d.id}','${d.name.replace(/'/g,"\\'")}')" class="ti ti-x" style="color:var(--muted);font-size:13px;cursor:pointer;margin-left:4px;" title="Delete department"></i>
           </div>`).join('')}
         <div onclick="showAddDeptModal()" style="background:rgba(64,156,255,0.05);border:1px dashed rgba(64,156,255,0.3);border-radius:8px;padding:8px 14px;display:flex;align-items:center;gap:6px;cursor:pointer;color:#409cff;font-size:.75rem;">
-          <i class="ti ti-plus"></i> Add Department
+          <i class="ti ti-plus"></i> ${t('teamInvite.addDepartment')}
         </div>
         <div id="deptFilterClear" onclick="filterByDept(null)" style="display:none;background:rgba(248,81,73,0.08);border:1px solid rgba(248,81,73,0.25);border-radius:8px;padding:8px 14px;align-items:center;gap:6px;cursor:pointer;color:#f85149;font-size:.75rem;">
           <i class="ti ti-x"></i> Clear filter
@@ -362,7 +362,7 @@ function showInviteModal(){
       <div id="inviteErr" style="font-size:12px;color:#f85149;margin-bottom:10px;display:none;"></div>
       <div style="display:flex;gap:8px;">
         <button onclick="document.getElementById('inviteModal').remove()" style="flex:1;background:none;border:1px solid #1a2332;border-radius:8px;padding:10px;color:#8b949e;cursor:pointer;font-size:13px;">${t('common.cancel')}</button>
-        <button onclick="sendTeamInvite()" style="flex:1;background:linear-gradient(135deg,#1a56db,#2563eb);border:none;border-radius:8px;padding:10px;color:#fff;cursor:pointer;font-size:13px;font-weight:600;">Send Invite</button>
+        <button onclick="sendTeamInvite()" style="flex:1;background:linear-gradient(135deg,#1a56db,#2563eb);border:none;border-radius:8px;padding:10px;color:#fff;cursor:pointer;font-size:13px;font-weight:600;">${t('teamInvite.sendInvite')}</button>
       </div>
     </div>`;
   document.body.appendChild(modal);
@@ -395,7 +395,7 @@ async function sendTeamInvite(){
     loadTeam();
   }catch(e){
     err.textContent=e.message; err.style.display='block';
-    btn.textContent='Send Invite'; btn.disabled=false;
+    btn.textContent=t('teamInvite.sendInvite'); btn.disabled=false;
   }
 }
 
@@ -449,7 +449,7 @@ async function removeTeamMember(userId, clientId){
 }
 
 function showAddDeptModal(){
-  const name = prompt('Department name:');
+  const name = prompt(t('teamInvite.departmentNamePrompt'));
   if(!name||!name.trim()) return;
   fetch(API_URL+'/api/admin/client/'+window.userClientId+'/department',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify({name:name.trim()})})
     .then(async r=>{
