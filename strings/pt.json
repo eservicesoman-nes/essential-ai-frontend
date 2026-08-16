@@ -371,5 +371,12 @@
   "welcomeUi": {
     "welcomeMessage": "Welcome to NES AI. How can I help you today?",
     "selectEmailToRead": "Select an email to read"
+  },
+  "leadsTableHeader": {
+    "nameEmail": "Name / Email",
+    "industry": "Industry",
+    "phone": "Phone",
+    "date": "Date",
+    "status": "Status"
   }
 }
