@@ -252,5 +252,16 @@
     "successRate": "Success Rate",
     "activePartners": "Active Partners",
     "pending": "Pending"
+  },
+  "clientTab": {
+    "modules": "Modules",
+    "credentials": "Credentials",
+    "branding": "Branding",
+    "aiAgents": "AI Agents",
+    "billing": "Billing",
+    "users": "Users",
+    "email": "Email",
+    "saveCredentials": "Save Credentials",
+    "saveBranding": "Save Branding"
   }
 }
