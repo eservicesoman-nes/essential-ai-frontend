@@ -290,5 +290,10 @@
     "estMonthly": "Est. monthly",
     "currentBalance": "Current balance",
     "usedThisMonth": "Used this month"
+  },
+  "inbox": {
+    "title": "INBOX",
+    "unifiedEmailPrefix": "Unified email · All accounts · ",
+    "compose": "Compose"
   }
 }
