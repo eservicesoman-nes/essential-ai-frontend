@@ -8,7 +8,7 @@ function showChatInterface(mode='chat'){
   document.getElementById('mainContent').innerHTML=`
     <div class="welcome-card">
       <div class="mode-label">${t('modeLabel.'+mode,MODE_LABELS[mode])}</div>
-      <div class="version-label">NES AI v3.0 · ${mode==='chat'?'Web Search ON':''}</div>
+      <div class="version-label">NES AI v3.0 · ${mode==='chat'?t('chatError.webSearchOn'):''}</div>
     </div>
     <div class="messages" id="messages"></div>
     <div class="input-area">
@@ -71,7 +71,7 @@ async function sendMsg(){
   if(busy||!session)return;
   const input=document.getElementById('msgInput');const text=input.value.trim();if(!text)return;
   const limits=getCurrentLimits();
-  if(chatUsed>=limits.messages&&limits.messages!==-1){addAiMsg('Daily limit reached. Come back tomorrow!');return;}
+  if(chatUsed>=limits.messages&&limits.messages!==-1){addAiMsg(t('chatError.dailyLimitReached'));return;}
   input.value='';setBusy(true);appendMsg(userBubble(text));history.push({role:'user',content:text});addTyping();
   saveRecentChat(text.substring(0,30));
 
@@ -81,9 +81,9 @@ async function sendMsg(){
       const res=await fetch(API_URL+'/api/image',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify({prompt:text}),signal:controller.signal});
       clearTimeout(timeout);removeTyping();
       if(res.ok){const data=await res.json();appendMsg(imgBubble(data.url,data.revisedPrompt||text));imagesUsed++;loadUsageFromServer();}
-      else{const err=await res.json().catch(()=>({}));addAiMsg('Error '+(err.error||res.status)+'. Please try again.');}
+      else{const err=await res.json().catch(()=>({}));addAiMsg(t('chatError.errorPrefix')+(err.error||res.status)+t('chatError.pleaseTryAgain'));}
       saveHistory();saveUsage();updateStats();
-    }catch(e){removeTyping();addAiMsg('Network error. Please check your connection.');}
+    }catch(e){removeTyping();addAiMsg(t('chatError.networkError'));}
     setBusy(false);return;
   }
 
@@ -98,7 +98,7 @@ async function sendMsg(){
     if(!res.ok){
       removeTyping();
       const err=await res.json().catch(()=>({}));
-      addAiMsg('Error '+(err.error||res.status)+'. Please try again.');
+      addAiMsg(t('chatError.errorPrefix')+(err.error||res.status)+t('chatError.pleaseTryAgain'));
       setBusy(false);return;
     }
 
@@ -156,30 +156,30 @@ async function sendMsg(){
       }
     }
 
-    if(!fullReply){addAiMsg('Sorry, I could not generate a response.');}
+    if(!fullReply){addAiMsg(t('chatError.sorryCouldNotGenerate'));}
 
-  }catch(e){removeTyping();addAiMsg('Network error. Please check your connection.');}
+  }catch(e){removeTyping();addAiMsg(t('chatError.networkError'));}
   setBusy(false);
 }
 
 function handleAttach(){
-  if(currentView!=='docs'){addAiMsg('File attachment is available in Documents mode.');return;}
+  if(currentView!=='docs'){addAiMsg(t('chatError.fileAttachmentDocsMode'));return;}
   const inp=document.createElement('input');inp.type='file';inp.accept='.txt,.md,.json,.csv,.pdf,.docx,.xlsx,.xls';inp.onchange=e=>processFile(e.target.files[0]);inp.click();
 }
 
 async function processFile(file){
-  if(!file)return;if(file.size>10*1024*1024){addAiMsg('File too large. Max 10MB.');return;}
-  appendMsg(userBubble('Attached: '+file.name+' ('+Math.round(file.size/1024)+' KB) — analyzing…'));setBusy(true);addTyping();
+  if(!file)return;if(file.size>10*1024*1024){addAiMsg(t('chatError.fileTooLarge'));return;}
+  appendMsg(userBubble('Attached: '+file.name+' ('+Math.round(file.size/1024)+' KB) — '+t('chatError.analyzing')));setBusy(true);addTyping();
   try{
-    const content=await extractText(file);if(!content.trim()){removeTyping();addAiMsg('Could not extract text.');setBusy(false);return;}
+    const content=await extractText(file);if(!content.trim()){removeTyping();addAiMsg(t('chatError.couldNotExtractText'));setBusy(false);return;}
     const truncated=content.substring(0,7000);
     history.push({role:'user',content:'Analyze: "'+file.name+'":\n'+truncated});
     const res=await fetch(API_URL+'/api/chat/docs',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify({message:'Analyze and transcribe this document "'+file.name+'". Provide the full content, key information, and a summary. Do not introduce yourself.\n\nContent:\n'+truncated,mode:'docs',webSearch:false,history:history.slice(-4)})});
     removeTyping();
-    if(res.ok){const data=await res.json();const reply=data.reply||'Document analyzed.';history.push({role:'assistant',content:reply});appendMsg(aiBubble(reply));docsUsed++;}
-    else{addAiMsg('Could not analyze file.');}
+    if(res.ok){const data=await res.json();const reply=data.reply||t('chatError.documentAnalyzed');history.push({role:'assistant',content:reply});appendMsg(aiBubble(reply));docsUsed++;}
+    else{addAiMsg(t('chatError.couldNotAnalyzeFile'));}
     saveHistory();saveUsage();updateStats();
-  }catch(err){removeTyping();addAiMsg('Error: '+err.message);}
+  }catch(err){removeTyping();addAiMsg(t('chatError.errorColon')+err.message);}
   setBusy(false);
 }
 
