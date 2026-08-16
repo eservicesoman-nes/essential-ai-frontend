@@ -7,7 +7,7 @@ function showChatInterface(mode='chat'){
   document.getElementById('mainContent').style.overflow='hidden';
   document.getElementById('mainContent').innerHTML=`
     <div class="welcome-card">
-      <div class="mode-label">${MODE_LABELS[mode]}</div>
+      <div class="mode-label">${t('modeLabel.'+mode,MODE_LABELS[mode])}</div>
       <div class="version-label">NES AI v3.0 · ${mode==='chat'?'Web Search ON':''}</div>
     </div>
     <div class="messages" id="messages"></div>
