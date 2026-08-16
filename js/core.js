@@ -270,6 +270,8 @@ async function showClientBrandingChip(){
     if(data.plan)window.clientPlan=data.plan;
     window.clientModules = data.modules || {};
     window.userRegion = (data.region || data.country || '').trim();
+    window.clientDeenEnabled = window.clientModules.islam360 !== false;
+    updateDeenIconVisibility();
     if(!window.userRegion){
       try{
         const{data:pData}=await sb.from('profiles').select('phone').eq('id',session.user.id).single();
