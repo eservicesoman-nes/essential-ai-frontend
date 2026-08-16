@@ -31,7 +31,7 @@ async function showLeadsPage(){
         <button class="tab-btn" onclick="filterLeads('week',this)">This week</button>
       </div>
       <div class="leads-table">
-        <div class="lt-header"><div>Name / Email</div><div>Industry</div><div>Phone</div><div>Date</div><div>Status</div></div>
+        <div class="lt-header"><div>${t('leadsTableHeader.nameEmail')}</div><div>${t('leadsTableHeader.industry')}</div><div>${t('leadsTableHeader.phone')}</div><div>${t('leadsTableHeader.date')}</div><div>${t('leadsTableHeader.status')}</div></div>
         <div id="leadsRows">${renderLeadRows(leads||[])}</div>
       </div>`;
     window._allLeads=leads||[];
