@@ -116,7 +116,7 @@ async function loadAnalytics(days){
 
       <div class="an-grid">
         <div class="an-card" style="border-color:#409cff33;">
-          <div class="an-lbl">Total MRR</div>
+          <div class="an-lbl">${t('plan.totalMrr')}</div>
           <div class="an-val" style="color:#409cff;">OMR ${mrr}</div>
           <div class="an-sub">${activeClients} active clients</div>
           <div class="an-bar"><div class="an-fill" style="width:100%;background:#409cff;"></div></div>
@@ -176,10 +176,10 @@ async function loadAnalytics(days){
           <div class="an-sec"><i class="ti ti-users" style="font-size:11px;color:#3fb950;"></i>Plan breakdown</div>
           <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px;">
             ${[
-              ['AI Presence','#409cff',planCounts.presence],
-              ['AI Operations','#3fb950',planCounts.operations],
-              ['AI Workforce','#7f77dd',planCounts.workforce],
-              ['Infrastructure','#d29922',planCounts.infrastructure]
+              [t('plan.aiPresence'),'#409cff',planCounts.presence],
+              [t('plan.aiOperations'),'#3fb950',planCounts.operations],
+              [t('plan.aiWorkforce'),'#7f77dd',planCounts.workforce],
+              [t('plan.aiInfrastructure'),'#d29922',planCounts.infrastructure]
             ].map(([name,color,count]) => `
               <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;">
                 <div style="display:flex;align-items:center;gap:5px;">
@@ -215,7 +215,7 @@ async function loadAnalytics(days){
             </div>`;
           }).join('')}
         <div style="border-top:1px solid var(--border);margin-top:8px;padding-top:8px;display:flex;justify-content:space-between;font-family:var(--mono);font-size:.65rem;">
-          <span style="color:var(--muted);">Total MRR</span>
+          <span style="color:var(--muted);">${t('plan.totalMrr')}</span>
           <span style="color:var(--nes-blue);font-weight:700;">OMR ${mrr}/mo</span>
         </div>
       </div>
