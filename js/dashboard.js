@@ -193,7 +193,7 @@ async function showPartnerDashboard(){
           <div id="partnerWeatherFeel" style="font-size:.65rem;color:var(--muted);"></div>
         </div>
       </div>
-      <div style="font-family:var(--mono);font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;display:flex;align-items:center;gap:4px;"><i class="ti ti-chart-bar"></i> PERFORMANCE</div>
+      <div style="font-family:var(--mono);font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;display:flex;align-items:center;gap:4px;"><i class="ti ti-chart-bar"></i> ${t('ceoDashboardSection.performance')}</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
         <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 14px;">
           <div style="font-size:.62rem;color:var(--muted);margin-bottom:3px;display:flex;align-items:center;gap:4px;"><i class="ti ti-building"></i> Clients installed</div>
@@ -222,7 +222,7 @@ async function showPartnerDashboard(){
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
         <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 16px;">
-          <div style="font-family:var(--mono);font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;display:flex;align-items:center;gap:4px;"><i class="ti ti-heartbeat"></i> PLATFORM HEALTH</div>
+          <div style="font-family:var(--mono);font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;display:flex;align-items:center;gap:4px;"><i class="ti ti-heartbeat"></i> ${t('ceoDashboardSection.platformHealth')}</div>
           <div style="display:flex;flex-direction:column;gap:8px;" id="partnerHealthItems">
             <div style="display:flex;justify-content:space-between;font-size:.72rem;"><span style="color:var(--muted);">Backend</span><span style="color:#3fb950;">● Online</span></div>
             <div style="display:flex;justify-content:space-between;font-size:.72rem;"><span style="color:var(--muted);">Database</span><span style="color:#3fb950;">● Online</span></div>
@@ -247,7 +247,7 @@ async function showPartnerDashboard(){
     </div>
     <div style="width:320px;border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;" id="partnerFeedPanel">
       <div style="padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
-        <div style="font-family:var(--mono);font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;display:flex;align-items:center;gap:4px;"><i class="ti ti-news"></i> MARKET INTELLIGENCE</div>
+        <div style="font-family:var(--mono);font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;display:flex;align-items:center;gap:4px;"><i class="ti ti-news"></i> ${t('ceoDashboardSection.marketIntelligence')}</div>
         <span id="partnerFeedBadge" style="font-size:.6rem;padding:1px 6px;border-radius:10px;background:rgba(64,156,255,.1);color:var(--nes-blue);display:none;">0 NEW</span>
       </div>
       <div style="flex:1;overflow-y:auto;padding:10px 14px;" id="partnerFeedItems">
@@ -389,7 +389,7 @@ async function showCEODashboard(){
       <div style="overflow-y:auto;padding:14px 16px;border-right:1px solid var(--border);">
         ${uncontacted>0
           ?`<div class="alert-bar alert-warn"><i class="ti ti-alert-triangle"></i> ${uncontacted} lead${uncontacted>1?'s':''} uncontacted 48h+ — follow up today</div>`
-          :`<div class="alert-bar alert-good"><i class="ti ti-circle-check"></i> All systems operational — platform running smoothly</div>`}
+          :`<div class="alert-bar alert-good"><i class="ti ti-circle-check"></i> ${t('ceoDashboardSection.allSystemsOperational')}</div>`}
         <div id="weatherCard" style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 13px;margin-bottom:10px;display:flex;align-items:center;gap:12px;">
           <i class="ti ti-cloud" style="font-size:22px;color:var(--nes-blue);filter:drop-shadow(0 0 4px var(--nes-blue))" id="weatherIcon"></i>
           <div style="flex:1">
