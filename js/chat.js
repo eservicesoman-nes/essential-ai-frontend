@@ -23,16 +23,16 @@ function showChatInterface(mode='chat'){
           </div>
         </div>
         <div class="prompt-wrap" style="flex:1;">
-          <input type="text" id="msgInput" placeholder="${mode==='image'?'Describe the image you want…':'Ask me anything...'}" maxlength="8000" autocomplete="off">
+          <input type="text" id="msgInput" placeholder="${mode==='image'?t('chatUi.describeImage'):t('chatUi.askMeAnything')}" maxlength="8000" autocomplete="off">
           <button class="send-btn" id="sendBtn" onclick="sendMsg()"><i class="ti ti-arrow-up"></i></button>
         </div>
       </div>
       <div class="bottom-bar">
         <div class="bottom-left">
-          <span class="status-dot" id="statusEl">Ready</span>
-          <button class="act-btn" onclick="handleAttach()"><i class="ti ti-paperclip"></i> Attach</button>
-          <button class="act-btn" id="voiceBtn" onclick="toggleVoice()"><i class="ti ti-microphone"></i> Voice</button>
-          <span class="disclaimer">NES AI can make mistakes</span>
+          <span class="status-dot" id="statusEl">${t('chatUi.ready')}</span>
+          <button class="act-btn" onclick="handleAttach()"><i class="ti ti-paperclip"></i> ${t('chatUi.attach')}</button>
+          <button class="act-btn" id="voiceBtn" onclick="toggleVoice()"><i class="ti ti-microphone"></i> ${t('chatUi.voice')}</button>
+          <span class="disclaimer">${t('chatUi.disclaimer')}</span>
         </div>
         <div class="bottom-right">
           <div class="stat-item stat-msgs"><i class="ti ti-message"></i> <b id="statMsgs">${limits.messages-chatUsed}</b> left</div>
@@ -105,7 +105,7 @@ async function sendMsg(){
     removeTyping();
     const bubbleId='stream-'+Date.now();
     const streamStart=Date.now();
-    const bubbleHTML=`<div class="msg ai" id="${bubbleId}"><div class="chat-av-wrap"><div class="chat-av-ring"><div class="chat-av-mid"><div class="chat-av-dot"></div></div></div><div class="chat-av-online"></div></div><div class="msg-body"><div class="msg-role">NES AI</div><div class="msg-bubble" id="${bubbleId}-text"></div><button class="copy-btn" onclick="copyMsg(this)">Copy</button></div></div>`;
+    const bubbleHTML=`<div class="msg ai" id="${bubbleId}"><div class="chat-av-wrap"><div class="chat-av-ring"><div class="chat-av-mid"><div class="chat-av-dot"></div></div></div><div class="chat-av-online"></div></div><div class="msg-body"><div class="msg-role">NES AI</div><div class="msg-bubble" id="${bubbleId}-text"></div><button class="copy-btn" onclick="copyMsg(this)">${t('chatUi.copy')}</button></div></div>`;
     document.getElementById('messages')?.insertAdjacentHTML('beforeend',bubbleHTML);
     scroll();
 
