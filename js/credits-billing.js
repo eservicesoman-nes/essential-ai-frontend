@@ -47,8 +47,8 @@ async function loadApiCredits(){
   html+=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;"><div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;">API Credit Status</div><div style="display:flex;gap:8px;"><button onclick="saveAllThresholds()" style="background:var(--nes-btn-grad);border:none;border-radius:6px;padding:4px 12px;color:#fff;font-size:.72rem;font-weight:700;cursor:pointer;font-family:var(--mono);"><i class="ti ti-device-floppy"></i> Save Thresholds</button><button onclick="addApiService()" style="background:none;border:1px solid var(--border);border-radius:6px;padding:4px 10px;color:var(--muted);cursor:pointer;font-size:.72rem;font-family:var(--mono);"><i class="ti ti-plus"></i> Add API</button></div></div>`;
   html+=`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:10px;margin-bottom:20px;">`;
   apis.forEach(function(api){
-    const t=thresholds[api.id]||{};
-    const balance=t.current_balance||0;const threshold=t.alert_threshold||5;const rechargeAt=t.recharge_at||5;const rechargeAmt=t.recharge_amount||20;const usage=t.monthly_usage||0;
+    const th=thresholds[api.id]||{};
+    const balance=th.current_balance||0;const threshold=th.alert_threshold||5;const rechargeAt=th.recharge_at||5;const rechargeAmt=th.recharge_amount||20;const usage=th.monthly_usage||0;
     const status=balance===0?'unknown':balance<threshold?'low':'healthy';
     const statusColor=status==='healthy'?'#3fb950':status==='low'?'#f85149':'#d29922';
     const statusBg=status==='healthy'?'#0d2818':status==='low'?'#2d0e0e':'#2d1f00';
