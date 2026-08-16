@@ -356,5 +356,11 @@
   "coreUi": {
     "companySettings": "Company Settings",
     "passwordMinChars": "Password (min 6 chars)"
+  },
+  "pricingCta": {
+    "getStarted": "Get Started →",
+    "upgradeToOperations": "Upgrade to Operations →",
+    "upgradeToWorkforce": "Upgrade to Workforce →",
+    "contactUs": "Contact Us →"
   }
 }
