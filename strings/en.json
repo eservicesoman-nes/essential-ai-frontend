@@ -382,5 +382,13 @@
   "miscPanelsUi": {
     "fieldNamePrompt": "Field name (e.g. stripe_key):",
     "value": "Value"
+  },
+  "chatUtilsUi": {
+    "trialEnded": "Trial ended",
+    "credits": "credits",
+    "free": "free",
+    "clearedHowCanIHelp": "Cleared. How can I help you?",
+    "copied": "Copied",
+    "thinking": "Thinking…"
   }
 }
