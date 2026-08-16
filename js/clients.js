@@ -177,13 +177,13 @@ function renderClientDetail(c,colors,textColors,idx){
         <div class="cm-stat"><div class="cs-lbl">Region</div><div class="cs-val" style="font-size:.85rem;">${c.region||'—'}</div></div>
       </div>
       <div class="cm-tabs">
-        <div class="cm-tab ${(!window._activeTab||window._activeTab==='modules')?'active':''}" onclick="cmTab('modules',this)">Modules</div>
-        <div class="cm-tab ${window._activeTab==='creds'?'active':''}" onclick="cmTab('creds',this)">Credentials</div>
-        <div class="cm-tab ${window._activeTab==='branding'?'active':''}" onclick="cmTab('branding',this)">Branding</div>
-        <div class="cm-tab ${window._activeTab==='agents'?'active':''}" onclick="cmTab('agents',this)">AI Agents</div>
-        <div class="cm-tab ${window._activeTab==='billing'?'active':''}" onclick="cmTab('billing',this)">Billing</div>
-        <div class="cm-tab ${window._activeTab==='users'?'active':''}" onclick="cmTab('users',this)"><i class="ti ti-users" style="margin-right:4px;font-size:11px;"></i>Users</div>
-        <div class="cm-tab ${window._activeTab==='email'?'active':''}" onclick="cmTab('email',this)"><i class="ti ti-mail" style="margin-right:4px;font-size:11px;"></i>Email</div>
+        <div class="cm-tab ${(!window._activeTab||window._activeTab==='modules')?'active':''}" onclick="cmTab('modules',this)">${t('clientTab.modules')}</div>
+        <div class="cm-tab ${window._activeTab==='creds'?'active':''}" onclick="cmTab('creds',this)">${t('clientTab.credentials')}</div>
+        <div class="cm-tab ${window._activeTab==='branding'?'active':''}" onclick="cmTab('branding',this)">${t('clientTab.branding')}</div>
+        <div class="cm-tab ${window._activeTab==='agents'?'active':''}" onclick="cmTab('agents',this)">${t('clientTab.aiAgents')}</div>
+        <div class="cm-tab ${window._activeTab==='billing'?'active':''}" onclick="cmTab('billing',this)">${t('clientTab.billing')}</div>
+        <div class="cm-tab ${window._activeTab==='users'?'active':''}" onclick="cmTab('users',this)"><i class="ti ti-users" style="margin-right:4px;font-size:11px;"></i>${t('clientTab.users')}</div>
+        <div class="cm-tab ${window._activeTab==='email'?'active':''}" onclick="cmTab('email',this)"><i class="ti ti-mail" style="margin-right:4px;font-size:11px;"></i>${t('clientTab.email')}</div>
       </div>
       <div class="cm-content">
 
@@ -240,7 +240,7 @@ function renderClientDetail(c,colors,textColors,idx){
               </div>`).join('')}
           </div>
           <div style="display:flex;gap:8px;margin-top:10px;">
-            <button class="form-submit" style="flex:1;" onclick="saveClientCreds('${c.id}')"><i class="ti ti-device-floppy"></i> Save Credentials</button>
+            <button class="form-submit" style="flex:1;" onclick="saveClientCreds('${c.id}')"><i class="ti ti-device-floppy"></i> ${t('clientTab.saveCredentials')}</button>
             <button onclick="addCustomCredField('${c.id}')" style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--muted);cursor:pointer;font-size:.8rem;white-space:nowrap;"><i class="ti ti-plus"></i> Add Field</button>
           </div>
           <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;margin-top:20px;">Website Chat Widget</div>
@@ -275,7 +275,7 @@ function renderClientDetail(c,colors,textColors,idx){
               <textarea class="cf-input" rows="3" placeholder="Describe the company for social media posts..." data-field="company_description" style="resize:vertical;">${esc(c.company_description||'')} </textarea>
             </div>
           </div>
-          <button class="form-submit" style="margin-top:10px;" onclick="saveClientBranding('${c.id}')"><i class="ti ti-device-floppy"></i> Save Branding</button>
+          <button class="form-submit" style="margin-top:10px;" onclick="saveClientBranding('${c.id}')"><i class="ti ti-device-floppy"></i> ${t('clientTab.saveBranding')}</button>
         </div>
 
         <div id="cm-agents" style="display:none;">
