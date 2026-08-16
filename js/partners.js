@@ -8,7 +8,7 @@ async function showSalesPortal(){
     <div style="padding:11px 18px 11px 60px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;">
       <div>
         <div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;display:flex;align-items:center;gap:6px;">
-          <i class="ti ti-users-group" style="filter:drop-shadow(0 0 3px var(--nes-blue))"></i>PARTNER HUB
+          <i class="ti ti-users-group" style="filter:drop-shadow(0 0 3px var(--nes-blue))"></i>${t('partnerHub.title')}
         </div>
         <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">${t('pageSubtitle.partnerHub')}</div>
       </div>
@@ -81,11 +81,11 @@ async function renderPartnerHub(){
     </style>
 
     <div class="ph-tabs">
-      <button class="ph-tab active" onclick="switchPhTab('overview',this)">Overview</button>
+      <button class="ph-tab active" onclick="switchPhTab('overview',this)">${t('partnerHub.overview')}</button>
       <button class="ph-tab" onclick="switchPhTab('pending',this)">Pending <span id="pendingBadge" style="display:none;background:#f85149;color:#fff;font-size:.55rem;padding:1px 5px;border-radius:8px;margin-left:4px;"></span></button>
-      <button class="ph-tab" onclick="switchPhTab('partners',this)">Partners</button>
-      <button class="ph-tab" onclick="switchPhTab('commissions',this)">Commissions</button>
-      <button class="ph-tab" onclick="switchPhTab('tiers',this)">Programme</button>
+      <button class="ph-tab" onclick="switchPhTab('partners',this)">${t('partnerHub.partners')}</button>
+      <button class="ph-tab" onclick="switchPhTab('commissions',this)">${t('partnerHub.commissions')}</button>
+      <button class="ph-tab" onclick="switchPhTab('tiers',this)">${t('partnerHub.programme')}</button>
       <button class="ph-tab" onclick="switchPhTab('add-partner',this)">${t('button.addPartnerTab')}</button>
     </div>
 
@@ -99,19 +99,19 @@ async function renderPartnerHub(){
           <div class="ph-kbar"><div class="ph-kfill" style="width:100%;background:#409cff;"></div></div>
         </div>
         <div class="ph-kcard" style="border-color:#3fb95033;">
-          <div class="ph-klbl"><i class="ti ti-building" style="font-size:11px;color:#3fb950;"></i>Partner MRR</div>
+          <div class="ph-klbl"><i class="ti ti-building" style="font-size:11px;color:#3fb950;"></i>${t('partnerHub.partnerMrr')}</div>
           <div class="ph-kval" style="color:#3fb950;">OMR ${partnerMRR.toFixed(0)}</div>
           <div class="ph-kdelta">${partnerClients.filter(c=>c.status==='active').length} partner clients · ${totalMRR>0?Math.round((partnerMRR/totalMRR)*100):0}% of total</div>
           <div class="ph-kbar"><div class="ph-kfill" style="width:${totalMRR>0?Math.round((partnerMRR/totalMRR)*100):0}%;background:#3fb950;"></div></div>
         </div>
         <div class="ph-kcard" style="border-color:#d2992233;">
-          <div class="ph-klbl"><i class="ti ti-coin" style="font-size:11px;color:#d29922;"></i>Commission Due</div>
+          <div class="ph-klbl"><i class="ti ti-coin" style="font-size:11px;color:#d29922;"></i>${t('partnerHub.commissionDue')}</div>
           <div class="ph-kval" style="color:#d29922;">OMR ${pendingCommissions.toFixed(2)}</div>
           <div class="ph-kdelta">Pending approval · OMR ${paidCommissions.toFixed(2)} paid to date</div>
           <div class="ph-kbar"><div class="ph-kfill" style="width:60%;background:#d29922;"></div></div>
         </div>
         <div class="ph-kcard" style="border-color:#7f77dd33;">
-          <div class="ph-klbl"><i class="ti ti-chart-bar" style="font-size:11px;color:#7f77dd;"></i>Success Rate</div>
+          <div class="ph-klbl"><i class="ti ti-chart-bar" style="font-size:11px;color:#7f77dd;"></i>${t('partnerHub.successRate')}</div>
           <div class="ph-kval" style="color:#7f77dd;">${successRate}%</div>
           <div class="ph-kdelta">Partner clients still active</div>
           <div class="ph-kbar"><div class="ph-kfill" style="width:${successRate}%;background:#7f77dd;"></div></div>
@@ -120,7 +120,7 @@ async function renderPartnerHub(){
 
       <!-- Partner MRR strip -->
       <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:12px;">
-        <div class="ph-section-title">Active Partners</div>
+        <div class="ph-section-title">${t('partnerHub.activePartners')}</div>
         ${allPartners.filter(p=>p.status==='active').length === 0
           ? `<div style="color:var(--muted);font-size:.8rem;text-align:center;padding:16px;">No active partners yet. Add your first partner →</div>`
           : allPartners.filter(p=>p.status==='active').map(p => {
@@ -247,7 +247,7 @@ async function renderPartnerHub(){
         <div style="display:flex;gap:6px;">
           <select id="commFilter" onchange="filterCommissions()" style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:4px 8px;color:var(--muted);font-size:.72rem;">
             <option value="all">All status</option>
-            <option value="pending">Pending</option>
+            <option value="pending">${t('partnerHub.pending')}</option>
             <option value="approved">Approved</option>
             <option value="paid">Paid</option>
           </select>
