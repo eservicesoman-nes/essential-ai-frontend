@@ -378,5 +378,9 @@
     "phone": "Phone",
     "date": "Date",
     "status": "Status"
+  },
+  "miscPanelsUi": {
+    "fieldNamePrompt": "Field name (e.g. stripe_key):",
+    "value": "Value"
   }
 }
