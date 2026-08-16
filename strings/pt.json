@@ -213,5 +213,12 @@
     "received": "Received",
     "noMessagesYet": "No WhatsApp messages yet",
     "unknown": "Unknown"
+  },
+  "plan": {
+    "aiPresence": "AI Presence",
+    "aiOperations": "AI Operations",
+    "aiWorkforce": "AI Workforce",
+    "aiInfrastructure": "AI Infrastructure",
+    "totalMrr": "Total MRR"
   }
 }
