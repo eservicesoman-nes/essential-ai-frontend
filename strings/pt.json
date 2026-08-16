@@ -328,5 +328,14 @@
     "backendErrors": "Backend Errors",
     "nesAiOutput": "NES AI Output",
     "backendOutput": "Backend Output"
+  },
+  "incidentsStat": {
+    "uptime7Days": "Uptime (7 days)",
+    "incidents7Days": "Incidents (7 days)",
+    "totalIncidents": "Total Incidents",
+    "autoResolved": "Auto-Resolved",
+    "escalated": "Escalated",
+    "avgDuration": "Avg Duration",
+    "recentIncidents": "Recent Incidents"
   }
 }
