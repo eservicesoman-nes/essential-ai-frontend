@@ -149,7 +149,7 @@ async function showInbox(){
       <div style="display:flex;flex-direction:column;overflow:hidden;" id="emailPanel">
         <div style="display:flex;align-items:center;justify-content:center;flex:1;flex-direction:column;gap:8px;color:var(--muted);">
           <i class="ti ti-mail" style="font-size:2rem;opacity:.3;"></i>
-          <div style="font-family:var(--mono);font-size:.75rem;">Select an email to read</div>
+          <div style="font-family:var(--mono);font-size:.75rem;">${t('welcomeUi.selectEmailToRead')}</div>
         </div>
       </div>
     </div>`;
