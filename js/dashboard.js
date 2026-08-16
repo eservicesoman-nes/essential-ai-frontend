@@ -17,7 +17,7 @@ async function showIncidents(){
       <div id="incidentsSummary" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:20px;">
         <div style="text-align:center;padding:40px;color:var(--muted);font-family:var(--mono);font-size:.8rem;grid-column:1/-1;">${t('common.loading')}</div>
       </div>
-      <div style="font-family:var(--mono);font-size:.72rem;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;">Recent Incidents</div>
+      <div style="font-family:var(--mono);font-size:.72rem;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;">${t('incidentsStat.recentIncidents')}</div>
       <div id="incidentsTimeline" style="background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;">
         <div style="padding:20px;text-align:center;color:var(--muted);font-family:var(--mono);font-size:.8rem;">${t('common.loading')}</div>
       </div>
@@ -33,17 +33,17 @@ async function loadIncidents(){
 
     const s = data.summary;
     const cards = [
-      { label: 'Uptime (7 days)', value: s.uptimePercentLast7Days + '%', color: '#3fb950' },
-      { label: 'Incidents (7 days)', value: s.incidentsLast7Days, color: '#409cff' },
-      { label: 'Total Incidents', value: s.totalIncidents, color: 'var(--text)' },
-      { label: 'Auto-Resolved', value: s.autoResolved, color: '#3fb950' },
-      { label: 'Escalated', value: s.escalated, color: s.escalated > 0 ? '#f85149' : 'var(--muted)' },
-      { label: 'Avg Duration', value: s.avgDurationSeconds + 's', color: 'var(--text)' }
+      { label: 'Uptime (7 days)', labelKey: 'incidentsStat.uptime7Days', value: s.uptimePercentLast7Days + '%', color: '#3fb950' },
+      { label: 'Incidents (7 days)', labelKey: 'incidentsStat.incidents7Days', value: s.incidentsLast7Days, color: '#409cff' },
+      { label: 'Total Incidents', labelKey: 'incidentsStat.totalIncidents', value: s.totalIncidents, color: 'var(--text)' },
+      { label: 'Auto-Resolved', labelKey: 'incidentsStat.autoResolved', value: s.autoResolved, color: '#3fb950' },
+      { label: 'Escalated', labelKey: 'incidentsStat.escalated', value: s.escalated, color: s.escalated > 0 ? '#f85149' : 'var(--muted)' },
+      { label: 'Avg Duration', labelKey: 'incidentsStat.avgDuration', value: s.avgDurationSeconds + 's', color: 'var(--text)' }
     ];
     document.getElementById('incidentsSummary').innerHTML = cards.map(c => `
       <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;">
         <div style="font-size:1.5rem;font-weight:700;color:${c.color};font-family:var(--mono);">${c.value}</div>
-        <div style="font-size:.68rem;color:var(--muted);margin-top:4px;text-transform:uppercase;letter-spacing:.5px;">${c.label}</div>
+        <div style="font-size:.68rem;color:var(--muted);margin-top:4px;text-transform:uppercase;letter-spacing:.5px;">${c.labelKey?t(c.labelKey,c.label):c.label}</div>
       </div>`).join('');
 
     const rows = data.incidents || [];
