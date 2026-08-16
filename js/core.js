@@ -133,7 +133,7 @@ function updateConfirmBtn(){
 
 async function submitAgreement(userId){
   const btn=document.getElementById('agreeBtn');
-  btn.textContent='Saving...';
+  btn.textContent=t('authFlow.saving');
   btn.disabled=true;
   try{
     await sb.from('agreements').insert({
@@ -147,7 +147,7 @@ async function submitAgreement(userId){
     loadUsageFromServer();
     bindNav();
   }catch(e){
-    btn.textContent='Error — please try again';
+    btn.textContent=t('authFlow.errorTryAgain');
     btn.disabled=false;
     btn.style.background='#f85149';
     btn.style.color='#fff';
@@ -325,7 +325,7 @@ async function doLogin(){
   const email=document.getElementById('loginEmail').value.trim();
   const pass=document.getElementById('loginPassword').value;
   const err=document.getElementById('loginErr');err.textContent='';
-  if(!email||!pass){err.textContent='Email and password required.';return;}
+  if(!email||!pass){err.textContent=t('authFlow.emailPasswordRequired');return;}
   const{error}=await sb.auth.signInWithPassword({email,password:pass});
   if(error)err.textContent=error.message;
 }
@@ -345,20 +345,20 @@ async function doForgotPassword(){
   const email=document.getElementById('forgotEmail').value.trim();
   const err=document.getElementById('forgotErr');const msg=document.getElementById('forgotMsg');
   err.textContent='';msg.textContent='';
-  if(!email){err.textContent='Email required.';return;}
+  if(!email){err.textContent=t('authFlow.emailRequired');return;}
   const{error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin+window.location.pathname});
   if(error){err.textContent=error.message;return;}
-  msg.textContent='Check your email for a password reset link.';
+  msg.textContent=t('authFlow.checkEmailResetLink');
 }
 
 async function checkRecoveryMode(){
   const hash=window.location.hash;
   if(hash&&hash.includes('type=recovery')){
-    const newPass=prompt('Enter your new password (min 6 characters):');
+    const newPass=prompt(t('authFlow.enterNewPasswordPrompt'));
   if(newPass&&newPass.length>=6){
       const{error}=await sb.auth.updateUser({password:newPass});
-      if(error){alert('Failed to update password: '+error.message);}
-      else{alert('Password updated successfully. Please sign in with your new password.');window.location.hash='';window.location.reload();}
+      if(error){alert(t('authFlow.failedUpdatePassword')+error.message);}
+      else{alert(t('authFlow.passwordUpdatedSignIn'));window.location.hash='';window.location.reload();}
     }
   }
 }
@@ -468,13 +468,13 @@ async function doChangePassword(){
   const p1=document.getElementById('newPwd1').value;
   const p2=document.getElementById('newPwd2').value;
   const err=document.getElementById('pwdErr');err.style.display='none';
-  if(!p1||p1.length<6){err.textContent='Password must be at least 6 characters.';err.style.display='block';return;}
-  if(p1!==p2){err.textContent='Passwords do not match.';err.style.display='block';return;}
+  if(!p1||p1.length<6){err.textContent=t('authFlow.passwordMin6Chars');err.style.display='block';return;}
+  if(p1!==p2){err.textContent=t('authFlow.passwordsDoNotMatch');err.style.display='block';return;}
   const btn=document.querySelector('#changePwdModal button:last-child');
-  btn.textContent='Updating...';btn.disabled=true;
+  btn.textContent=t('authFlow.updating');btn.disabled=true;
   const{error}=await sb.auth.updateUser({password:p1});
-  if(error){err.textContent=error.message;err.style.display='block';btn.textContent='Update';btn.disabled=false;}
-  else{document.getElementById('changePwdModal').remove();alert('Password updated successfully!');}
+  if(error){err.textContent=error.message;err.style.display='block';btn.textContent=t('authFlow.update');btn.disabled=false;}
+  else{document.getElementById('changePwdModal').remove();alert(t('authFlow.passwordUpdatedSuccess'));}
 }
 
 async function doLogout(){
@@ -497,7 +497,7 @@ function saveRecentChat(label){
     existing.history=historySnapshot;
     existing.msgs=msgSnapshot;
   } else {
-    rc.unshift({date:today,time:now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}),label:label||'Chat',history:historySnapshot,msgs:msgSnapshot});
+    rc.unshift({date:today,time:now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}),label:label||t('authFlow.chat'),history:historySnapshot,msgs:msgSnapshot});
   }
   rc=rc.slice(0,5);
   localStorage.setItem(STORAGE_KEYS.rc,JSON.stringify(rc));
@@ -511,8 +511,8 @@ function loadRecentChats(){
   const today=new Date().toDateString();
   const yesterday=new Date(Date.now()-86400000).toDateString();
   el.innerHTML=rc.map(r=>{
-    let lbl=r.date===today?'Today '+r.time:r.date===yesterday?'Yesterday '+r.time:new Date(r.date).toLocaleDateString('en-GB',{day:'numeric',month:'short'})+' '+r.time;
-    return`<div class="recent-item" onclick="restoreChat(${rc.indexOf(r)})" title="${r.label||'Chat'}"><i class="ti ti-clock"></i><span>${lbl}</span></div>`;
+    let lbl=r.date===today?t('authFlow.today')+' '+r.time:r.date===yesterday?t('authFlow.yesterday')+' '+r.time:new Date(r.date).toLocaleDateString('en-GB',{day:'numeric',month:'short'})+' '+r.time;
+    return`<div class="recent-item" onclick="restoreChat(${rc.indexOf(r)})" title="${r.label||t('authFlow.chat')}"><i class="ti ti-clock"></i><span>${lbl}</span></div>`;
   }).join('');
 }
 
