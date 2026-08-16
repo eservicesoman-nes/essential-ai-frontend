@@ -320,5 +320,13 @@
     "lastChecked": "Last checked:",
     "backupStatus": "BACKUP STATUS",
     "refresh": "Refresh"
+  },
+  "systemLogsUi": {
+    "subtitle": "Live backend error and output logs · NES Admin only",
+    "last50Lines": "Last 50 lines",
+    "nesAiErrors": "NES AI Errors",
+    "backendErrors": "Backend Errors",
+    "nesAiOutput": "NES AI Output",
+    "backendOutput": "Backend Output"
   }
 }
