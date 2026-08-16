@@ -138,11 +138,11 @@ async function showTeam(){
   mc.innerHTML = `
     <div style="padding:11px 160px 11px 60px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;" class="an-hdr">
       <div>
-        <div style="font-family:var(--mono);font-size:.8rem;color:#3fb950;font-weight:800;display:flex;align-items:center;gap:6px;"><i class="ti ti-users"></i>TEAM MANAGEMENT</div>
-        <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">Invite staff · Assign departments · Manage roles</div>
+        <div style="font-family:var(--mono);font-size:.8rem;color:#3fb950;font-weight:800;display:flex;align-items:center;gap:6px;"><i class="ti ti-users"></i>${t('teamSection.teamManagement')}</div>
+        <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">${t('teamSection.subtitle')}</div>
       </div>
       <button onclick="showInviteModal()" style="background:linear-gradient(135deg,#1a56db,#2563eb);border:none;border-radius:8px;padding:7px 14px;color:#fff;font-size:.75rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;">
-        <i class="ti ti-user-plus"></i> Invite Staff
+        <i class="ti ti-user-plus"></i> ${t('teamSection.inviteStaff')}
       </button>
     </div>
     <div class="page scrollable" id="teamContent" style="padding:14px 18px;">
@@ -339,7 +339,7 @@ function showInviteModal(){
   modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;display:flex;align-items:center;justify-content:center;';
   modal.innerHTML = `
     <div style="background:#161b22;border:1px solid #1a2332;border-radius:14px;padding:28px;width:360px;max-width:90vw;">
-      <div style="font-size:16px;font-weight:700;margin-bottom:6px;color:#e6edf3;">Invite Staff Member</div>
+      <div style="font-size:16px;font-weight:700;margin-bottom:6px;color:#e6edf3;">${t('teamSection.inviteStaffMember')}</div>
       <div style="font-size:12px;color:#8b949e;margin-bottom:20px;">They'll receive an email to set up their account</div>
       <label style="font-size:11px;color:#8b949e;font-weight:600;display:block;margin-bottom:5px;">WORK EMAIL</label>
       <input id="inviteEmail" type="email" placeholder="ahmed@company.com" style="width:100%;background:#0a0f1e;border:1px solid #1a2332;border-radius:8px;padding:10px 12px;color:#e6edf3;font-size:13px;margin-bottom:12px;outline:none;box-sizing:border-box;">
