@@ -11,9 +11,9 @@ async function showAnalytics(){
         <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">${t('pageSubtitle.analytics')}</div>
       </div>
       <div style="display:flex;gap:8px;">
-        <button onclick="loadAnalytics('7')" id="anBtn7" style="font-family:var(--mono);font-size:.65rem;padding:4px 10px;border-radius:6px;border:1px solid var(--nes-blue);background:var(--nes-blue);color:#fff;cursor:pointer;">7 days</button>
-        <button onclick="loadAnalytics('30')" id="anBtn30" style="font-family:var(--mono);font-size:.65rem;padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer;">30 days</button>
-        <button onclick="loadAnalytics('90')" id="anBtn90" style="font-family:var(--mono);font-size:.65rem;padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer;">90 days</button>
+        <button onclick="loadAnalytics('7')" id="anBtn7" style="font-family:var(--mono);font-size:.65rem;padding:4px 10px;border-radius:6px;border:1px solid var(--nes-blue);background:var(--nes-blue);color:#fff;cursor:pointer;">${t('daysFilter.d7')}</button>
+        <button onclick="loadAnalytics('30')" id="anBtn30" style="font-family:var(--mono);font-size:.65rem;padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer;">${t('daysFilter.d30')}</button>
+        <button onclick="loadAnalytics('90')" id="anBtn90" style="font-family:var(--mono);font-size:.65rem;padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer;">${t('daysFilter.d90')}</button>
       </div>
     </div>
     <div class="page scrollable" id="analyticsContent" style="padding:14px 18px;">
