@@ -122,19 +122,19 @@ async function loadAnalytics(days){
           <div class="an-bar"><div class="an-fill" style="width:100%;background:#409cff;"></div></div>
         </div>
         <div class="an-card" style="border-color:#3fb95033;">
-          <div class="an-lbl">Total leads</div>
+          <div class="an-lbl">${t('analyticsSection.totalLeads')}</div>
           <div class="an-val" style="color:#3fb950;">${totalLeads}</div>
           <div class="an-sub">Last ${days} days</div>
           <div class="an-bar"><div class="an-fill" style="width:${Math.min(100,totalLeads*2)}%;background:#3fb950;"></div></div>
         </div>
         <div class="an-card" style="border-color:#7f77dd33;">
-          <div class="an-lbl">Conversion rate</div>
+          <div class="an-lbl">${t('analyticsSection.conversionRate')}</div>
           <div class="an-val" style="color:#7f77dd;">${convRate}%</div>
           <div class="an-sub">${closedLeads} closed of ${totalLeads}</div>
           <div class="an-bar"><div class="an-fill" style="width:${convRate}%;background:#7f77dd;"></div></div>
         </div>
         <div class="an-card" style="border-color:#d2992233;">
-          <div class="an-lbl">Intel articles</div>
+          <div class="an-lbl">${t('analyticsSection.intelArticles')}</div>
           <div class="an-val" style="color:#d29922;">${feed.length}</div>
           <div class="an-sub">Last ${days} days</div>
           <div class="an-bar"><div class="an-fill" style="width:${Math.min(100,feed.length)}%;background:#d29922;"></div></div>
@@ -161,7 +161,7 @@ async function loadAnalytics(days){
 
       <div class="an-row2">
         <div>
-          <div class="an-sec"><i class="ti ti-map-pin" style="font-size:11px;color:#7f77dd;"></i>Lead geography</div>
+          <div class="an-sec"><i class="ti ti-map-pin" style="font-size:11px;color:#7f77dd;"></i>${t('analyticsSection.leadGeography')}</div>
           <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px;">
             ${topCountries.length > 0 ? topCountries.map(([cn,n]) => `
               <div class="geo-row">
@@ -192,7 +192,7 @@ async function loadAnalytics(days){
         </div>
       </div>
 
-      <div class="an-sec"><i class="ti ti-building" style="font-size:11px;color:#d29922;"></i>Client overview</div>
+      <div class="an-sec"><i class="ti ti-building" style="font-size:11px;color:#d29922;"></i>${t('analyticsSection.clientOverview')}</div>
       <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px;">
         ${clients.length === 0 ? `<div style="color:var(--muted);font-size:.72rem;">${t('empty.noClientsAnalytics')}</div>` :
           clients.map(cl => {
