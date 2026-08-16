@@ -310,5 +310,9 @@
     "platformHealth": "PLATFORM HEALTH",
     "marketIntelligence": "MARKET INTELLIGENCE",
     "allSystemsOperational": "All systems operational — platform running smoothly"
+  },
+  "briefcaseUi": {
+    "askNesAi": "Ask NES AI",
+    "filesUsage": "files ·"
   }
 }
