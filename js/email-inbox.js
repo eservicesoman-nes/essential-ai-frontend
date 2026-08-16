@@ -131,8 +131,8 @@ async function showInbox(){
   mc.innerHTML=`
     <div style="padding:11px 18px 11px 60px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;">
       <div>
-        <div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;display:flex;align-items:center;gap:6px;"><i class="ti ti-mail"></i>INBOX</div>
-        <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">Unified email · All accounts · <span id="emailAccountLimit" style="color:#409cff;">${_inboxAccountText}</span></div>
+        <div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;display:flex;align-items:center;gap:6px;"><i class="ti ti-mail"></i>${t('inbox.title')}</div>
+        <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">${t('inbox.unifiedEmailPrefix')}<span id="emailAccountLimit" style="color:#409cff;">${_inboxAccountText}</span></div>
       </div>
 
     </div>
@@ -198,7 +198,7 @@ async function loadInboxEmails(clientId){
     const filters2 = document.getElementById('acctFilters');
     if(filters2) {
       const updatedAccounts = [...new Set(emails.map(function(e){return e.account_email;}))];
-      filters2.innerHTML = '<button onclick="showComposeModal()" style="display:flex;align-items:center;gap:5px;font-size:.65rem;padding:4px 10px;border-radius:6px;border:none;background:linear-gradient(135deg,#1a56db,#2563eb);color:#fff;cursor:pointer;white-space:nowrap;flex-shrink:0;"><i class="ti ti-pencil" style="font-size:11px;"></i> Compose</button>'
+      filters2.innerHTML = `<button onclick="showComposeModal()" style="display:flex;align-items:center;gap:5px;font-size:.65rem;padding:4px 10px;border-radius:6px;border:none;background:linear-gradient(135deg,#1a56db,#2563eb);color:#fff;cursor:pointer;white-space:nowrap;flex-shrink:0;"><i class="ti ti-pencil" style="font-size:11px;"></i> ${t('inbox.compose')}</button>`
         + '<button onclick="filterInbox(\'all\',this)" style="display:flex;align-items:center;gap:5px;font-size:.65rem;padding:4px 10px;border-radius:6px;border:none;background:var(--nes-blue);color:#fff;cursor:pointer;white-space:nowrap;flex-shrink:0;"><i class="ti ti-inbox" style="font-size:11px;"></i> All</button>'
         + updatedAccounts.map(function(a,i){
             const label = (window._accountLabels&&window._accountLabels[a])||a.split('@')[0];
@@ -371,7 +371,7 @@ function showEmail(idx){
     if(filters) {
       const activeBtn = filters.querySelector('button[style*="var(--nes-blue)"]');
       const activeAcct = activeBtn ? activeBtn.getAttribute('data-acct') : 'all';
-      filters.innerHTML = '<button onclick="showComposeModal()" style="display:flex;align-items:center;gap:5px;font-size:.65rem;padding:4px 10px;border-radius:6px;border:none;background:linear-gradient(135deg,#1a56db,#2563eb);color:#fff;cursor:pointer;white-space:nowrap;flex-shrink:0;"><i class="ti ti-pencil" style="font-size:11px;"></i> Compose</button>'
+      filters.innerHTML = `<button onclick="showComposeModal()" style="display:flex;align-items:center;gap:5px;font-size:.65rem;padding:4px 10px;border-radius:6px;border:none;background:linear-gradient(135deg,#1a56db,#2563eb);color:#fff;cursor:pointer;white-space:nowrap;flex-shrink:0;"><i class="ti ti-pencil" style="font-size:11px;"></i> ${t('inbox.compose')}</button>`
         + '<button onclick="filterInbox(\'all\',this)" data-acct="all" style="display:flex;align-items:center;gap:5px;font-size:.65rem;padding:4px 10px;border-radius:6px;border:none;background:var(--nes-blue);color:#fff;cursor:pointer;white-space:nowrap;flex-shrink:0;"><i class=\"ti ti-inbox\" style=\"font-size:11px;\"></i> All</button>'
         + accounts.map(function(a,i){
             const label = labels[a]||a.split('@')[0];
