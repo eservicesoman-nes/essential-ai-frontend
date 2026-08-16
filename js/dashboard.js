@@ -533,7 +533,7 @@ async function showCEODashboard(){
           <div style="display:flex;justify-content:space-between;font-size:.7rem;margin-bottom:4px;"><span style="color:var(--muted);">Partner MRR</span><span id="ph_partner" style="color:#3fb950;font-weight:600;">—</span></div>
           <div style="display:flex;justify-content:space-between;font-size:.7rem;margin-bottom:4px;"><span style="color:var(--muted);">Commission pending</span><span id="ph_commission" style="color:#d29922;font-weight:600;">—</span></div>
           <div style="height:1px;background:var(--border);margin:6px 0;"></div>
-          <div style="display:flex;justify-content:space-between;font-size:.78rem;"><span style="color:var(--muted);">Total MRR</span><span id="ph_total" style="color:#e6edf3;font-weight:700;">—</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:.78rem;"><span style="color:var(--muted);">${t('plan.totalMrr')}</span><span id="ph_total" style="color:#e6edf3;font-weight:700;">—</span></div>
         </div>
         <div id="partnerRows" style="margin-bottom:10px;"></div>
         <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:7px;margin-top:14px;">FOUNDER EXPIRY ALERTS</div>
