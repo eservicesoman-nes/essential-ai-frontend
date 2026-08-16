@@ -390,5 +390,23 @@
     "clearedHowCanIHelp": "Cleared. How can I help you?",
     "copied": "Copied",
     "thinking": "Thinking…"
+  },
+  "authFlow": {
+    "saving": "Saving...",
+    "errorTryAgain": "Error — please try again",
+    "emailPasswordRequired": "Email and password required.",
+    "emailRequired": "Email required.",
+    "checkEmailResetLink": "Check your email for a password reset link.",
+    "enterNewPasswordPrompt": "Enter your new password (min 6 characters):",
+    "failedUpdatePassword": "Failed to update password: ",
+    "passwordUpdatedSignIn": "Password updated successfully. Please sign in with your new password.",
+    "passwordMin6Chars": "Password must be at least 6 characters.",
+    "passwordsDoNotMatch": "Passwords do not match.",
+    "updating": "Updating...",
+    "update": "Update",
+    "passwordUpdatedSuccess": "Password updated successfully!",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "chat": "Chat"
   }
 }
