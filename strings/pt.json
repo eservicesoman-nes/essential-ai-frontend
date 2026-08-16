@@ -342,5 +342,10 @@
     "d7": "7 days",
     "d30": "30 days",
     "d90": "90 days"
+  },
+  "clientListUi": {
+    "addBtn": "+ Add",
+    "noClientsYet": "No clients yet.",
+    "clickToCreate": "to create one."
   }
 }
