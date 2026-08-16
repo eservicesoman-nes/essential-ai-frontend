@@ -414,7 +414,7 @@ function showEmail(idx){
       <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px;">
         <div style="display:flex;gap:6px;">
           <button onclick="sendReply('${e.from_address}','${(e.subject||'').replace(/'/g,'')}')" style="background:var(--nes-btn-grad);border:none;color:#fff;font-size:.72rem;padding:6px 16px;border-radius:6px;cursor:pointer;display:flex;align-items:center;gap:5px;"><i class="ti ti-send"></i> Send</button>
-          <button style="background:none;border:1px solid var(--border);color:var(--muted);font-size:.72rem;padding:6px 12px;border-radius:6px;cursor:pointer;display:flex;align-items:center;gap:5px;"><i class="ti ti-paperclip"></i> Attach</button>
+          <button style="background:none;border:1px solid var(--border);color:var(--muted);font-size:.72rem;padding:6px 12px;border-radius:6px;cursor:pointer;display:flex;align-items:center;gap:5px;"><i class="ti ti-paperclip"></i> ${t('chatUi.attach')}</button>
         </div>
         <span style="font-size:.65rem;color:var(--muted);">Encrypted · SMTP</span>
       </div>
