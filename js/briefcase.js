@@ -27,7 +27,7 @@ async function showBriefcasePage(){
       <div style="flex:1;display:flex;flex-direction:column;min-width:0;">
         <div style="padding:10px 16px;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;flex-shrink:0;display:flex;align-items:center;gap:8px;">
           <button class="briefcase-panel-toggle" onclick="toggleBriefcaseFileList()" style="display:none;background:none;border:1px solid var(--border);border-radius:6px;color:var(--text);width:26px;height:26px;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;"><i class="ti ti-folder" style="font-size:13px"></i></button>
-          <span>Ask NES AI</span>
+          <span>${t('briefcaseUi.askNesAi')}</span>
         </div>
         <div id="briefcaseChatMessages" style="flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:10px;"></div>
         <div style="padding:12px 16px;border-top:1px solid var(--border);flex-shrink:0;">
@@ -80,7 +80,7 @@ async function loadVaultFiles(){
     const usedGB=(quota.usedBytes/1073741824).toFixed(2);
     const totalGB=(quota.totalBytes/1073741824).toFixed(1);
 
-    document.getElementById('briefcaseSubtitle').textContent=`${files?.length||0} files · ${usedGB}GB of ${totalGB}GB used`;
+    document.getElementById('briefcaseSubtitle').textContent=`${files?.length||0} ${t('briefcaseUi.filesUsage')} ${usedGB}GB of ${totalGB}GB used`;
     const listEl=document.getElementById('briefcaseFileList');
     if(listEl)listEl.innerHTML=renderVaultRows(files||[]);
   }catch(e){
