@@ -234,5 +234,11 @@
     "thisWeek": "This week",
     "govPortsAviation": "Gov · Ports · Aviation",
     "last7Days": "Last 7 days"
+  },
+  "teamSection": {
+    "teamManagement": "TEAM MANAGEMENT",
+    "subtitle": "Invite staff · Assign departments · Manage roles",
+    "inviteStaff": "Invite Staff",
+    "inviteStaffMember": "Invite Staff Member"
   }
 }
