@@ -147,7 +147,7 @@ function renderClientDetail(c,colors,textColors,idx){
     ['ti-mail','email_notifications','Email Notifications','Lead emails to team'],
     ['ti-phone-call','apex_advisory','Apex Advisory','Enterprise voice consultant'],
     ['ti-headset','apex_outreach','Apex Outreach','3-day follow-up calls'],
-    ['deen-custom','islam360','Deen دين','Islamic companion · Quran · Hadith'],
+    ['deen-custom','islam360','Deen NES AI','Islamic companion · Quran · Hadith'],
   ];
   return`
     <div class="cm-detail">
