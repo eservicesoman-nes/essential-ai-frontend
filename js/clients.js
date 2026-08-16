@@ -116,10 +116,10 @@ function renderClientManagerFull(clients,activeId=null){
       <div class="client-list" id="clientListEl">
         <div class="cl-header">
           <span>Clients (${clients.length})</span>
-          <button class="cl-add-btn" onclick="showAddClientForm()">+ Add</button>
+          <button class="cl-add-btn" onclick="showAddClientForm()">${t('clientListUi.addBtn')}</button>
         </div>
         ${clients.length===0
-          ?'<div style="padding:18px 11px;text-align:center;color:var(--muted);font-family:var(--mono);font-size:.72rem;line-height:1.6;">No clients yet.<br>Click <strong style="color:var(--nes-blue);">+ Add</strong> to create one.</div>'
+          ?`<div style="padding:18px 11px;text-align:center;color:var(--muted);font-family:var(--mono);font-size:.72rem;line-height:1.6;">${t('clientListUi.noClientsYet')}<br>Click <strong style="color:var(--nes-blue);">${t('clientListUi.addBtn')}</strong> ${t('clientListUi.clickToCreate')}</div>`
           :clients.map((c,i)=>`
           <div class="client-item ${c.id===active?.id?'active':''}" onclick="selectClientDB('${c.id}')">
             <div class="ci-av" style="background:${colors[i%5]};color:${textColors[i%5]};">${(c.name||'?').substring(0,2).toUpperCase()}</div>
@@ -726,7 +726,7 @@ function searchClients(query){
   const colors=['#1a3a6e','#2d1f00','#0d2818','#2d0e0e','#1a2332'];
   const textColors=['#409cff','#d29922','#3fb950','#f85149','#8b949e'];
   const listEl=document.getElementById('clientListEl');
-  listEl.innerHTML=`<div class="cl-header"><span>Clients (${filtered.length})</span><button class="cl-add-btn" onclick="showAddClientForm()">+ Add</button></div>`+
+  listEl.innerHTML=`<div class="cl-header"><span>Clients (${filtered.length})</span><button class="cl-add-btn" onclick="showAddClientForm()">${t('clientListUi.addBtn')}</button></div>`+
     (filtered.length===0?'<div style="padding:16px 11px;text-align:center;color:var(--muted);font-family:var(--mono);font-size:.72rem;">No match found</div>':
     filtered.map((c,i)=>`<div class="client-item ${c.id===window._activeClientId?'active':''}" onclick="selectClientDB('${c.id}')"><div class="ci-av" style="background:${colors[i%5]};color:${textColors[i%5]};">${(c.name||'?').substring(0,2).toUpperCase()}</div><div class="ci-name">${c.name}</div><div class="ci-dot" style="background:${c.status==='active'?'#3fb950':'#d29922'}"></div></div>`).join(''));
 }
