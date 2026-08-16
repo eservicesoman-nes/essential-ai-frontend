@@ -282,5 +282,13 @@
     "websiteDesc": "Your website URL",
     "emailAccount": "Email Account",
     "emailAccountDesc": "Connect your inbox (IMAP/SMTP)"
+  },
+  "apiCreditsLabel": {
+    "apisMonitored": "APIs monitored",
+    "alertsActive": "Alerts active",
+    "autoRecharge": "Auto-recharge",
+    "estMonthly": "Est. monthly",
+    "currentBalance": "Current balance",
+    "usedThisMonth": "Used this month"
   }
 }
