@@ -240,5 +240,17 @@
     "subtitle": "Invite staff · Assign departments · Manage roles",
     "inviteStaff": "Invite Staff",
     "inviteStaffMember": "Invite Staff Member"
+  },
+  "partnerHub": {
+    "title": "PARTNER HUB",
+    "overview": "Overview",
+    "partners": "Partners",
+    "commissions": "Commissions",
+    "programme": "Programme",
+    "partnerMrr": "Partner MRR",
+    "commissionDue": "Commission Due",
+    "successRate": "Success Rate",
+    "activePartners": "Active Partners",
+    "pending": "Pending"
   }
 }
