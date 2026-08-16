@@ -48,18 +48,18 @@ function renderMyCredsForm(creds, client){
       (urgent&&!expired?'<div style="font-size:.75rem;color:'+color+';margin-top:4px;font-weight:600;">Connect your credentials now to avoid interruption.</div>':'')+'</div>';
   }
   const sections=[
-    {title:'Social media',items:[
-      {label:'Facebook',desc:'Page token + Page ID',keys:['facebook_token','facebook_page_id'],icon:'ti-brand-facebook'},
-      {label:'Instagram',desc:'Business Account ID',keys:['instagram_business_id'],icon:'ti-brand-instagram'},
-      {label:'LinkedIn',desc:'Access token',keys:['linkedin_token'],icon:'ti-brand-linkedin'},
+    {title:'Social media',titleKey:'itSetupItem.socialMedia',items:[
+      {label:'Facebook',labelKey:'itSetupItem.facebook',desc:'Page token + Page ID',descKey:'itSetupItem.facebookDesc',keys:['facebook_token','facebook_page_id'],icon:'ti-brand-facebook'},
+      {label:'Instagram',labelKey:'itSetupItem.instagram',desc:'Business Account ID',descKey:'itSetupItem.instagramDesc',keys:['instagram_business_id'],icon:'ti-brand-instagram'},
+      {label:'LinkedIn',labelKey:'itSetupItem.linkedin',desc:'Access token',descKey:'itSetupItem.linkedinDesc',keys:['linkedin_token'],icon:'ti-brand-linkedin'},
     ]},
-    {title:'Messaging & leads',items:[
-      {label:'WhatsApp',desc:'Phone ID + API token',keys:['whatsapp_phone_id','whatsapp_token'],icon:'ti-brand-whatsapp'},
-      {label:'Lead alerts email',desc:'Where new leads are sent',keys:['lead_email'],icon:'ti-mail'},
-      {label:'Website',desc:'Your website URL',keys:['website'],icon:'ti-world'},
+    {title:'Messaging & leads',titleKey:'itSetupItem.messagingLeads',items:[
+      {label:'WhatsApp',labelKey:'itSetupItem.whatsapp',desc:'Phone ID + API token',descKey:'itSetupItem.whatsappDesc',keys:['whatsapp_phone_id','whatsapp_token'],icon:'ti-brand-whatsapp'},
+      {label:'Lead alerts email',labelKey:'itSetupItem.leadAlertsEmail',desc:'Where new leads are sent',descKey:'itSetupItem.leadAlertsEmailDesc',keys:['lead_email'],icon:'ti-mail'},
+      {label:'Website',labelKey:'itSetupItem.website',desc:'Your website URL',descKey:'itSetupItem.websiteDesc',keys:['website'],icon:'ti-world'},
     ]},
-    {title:'Inbox & Email',items:[
-      {label:'Email Account',desc:'Connect your inbox (IMAP/SMTP)',keys:['imap_email','imap_password','imap_host','smtp_host','smtp_port'],icon:'ti-inbox'},
+    {title:'Inbox & Email',titleKey:'itSetupItem.inboxEmail',items:[
+      {label:'Email Account',labelKey:'itSetupItem.emailAccount',desc:'Connect your inbox (IMAP/SMTP)',descKey:'itSetupItem.emailAccountDesc',keys:['imap_email','imap_password','imap_host','smtp_host','smtp_port'],icon:'ti-inbox'},
     ]},
   ];
   let connected=0,total=0;
@@ -75,13 +75,13 @@ function renderMyCredsForm(creds, client){
   html+='<div style="background:var(--surface);border-radius:6px;height:6px;margin-bottom:20px;overflow:hidden;">';
   html+='<div style="height:100%;width:'+pct+'%;background:'+(pct===100?'#3fb950':'#409cff')+';border-radius:6px;transition:width .4s;"></div></div>';
   sections.forEach(function(sec){
-    html+='<div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;margin-top:16px;">'+sec.title+'</div>';
+    html+='<div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;margin-top:16px;">'+(sec.titleKey?t(sec.titleKey,sec.title):sec.title)+'</div>';
     sec.items.forEach(function(item){
       const isConnected=item.keys.some(k=>creds[k]&&creds[k].trim());
       html+='<div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:6px;">';
       html+='<div style="width:34px;height:34px;border-radius:8px;background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti '+item.icon+'" style="font-size:16px;color:var(--nes-blue);"></i></div>';
-      html+='<div style="flex:1;"><div style="font-size:.82rem;color:var(--text);font-weight:500;">'+item.label+'</div>';
-      html+='<div style="font-size:.72rem;color:var(--muted);">'+item.desc+'</div></div>';
+      html+='<div style="flex:1;"><div style="font-size:.82rem;color:var(--text);font-weight:500;">'+(item.labelKey?t(item.labelKey,item.label):item.label)+'</div>';
+      html+='<div style="font-size:.72rem;color:var(--muted);">'+(item.descKey?t(item.descKey,item.desc):item.desc)+'</div></div>';
       html+='<div style="display:flex;align-items:center;gap:8px;">';
       html+='<span style="font-size:.68rem;font-family:var(--mono);padding:3px 10px;border-radius:12px;background:'+(isConnected?'#0d2818':'#2d1f00')+';color:'+(isConnected?'#3fb950':'#d29922')+';">'+(isConnected?'Connected':'Missing')+'</span>';
       html+='<button onclick="editItCred(\''+item.keys.join(',')+'\',\''+item.label+'\')" style="background:none;border:1px solid var(--border);border-radius:6px;padding:4px 10px;color:var(--muted);cursor:pointer;font-size:.72rem;">'+(isConnected?'Edit':'Connect')+'</button>';
