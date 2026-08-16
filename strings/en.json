@@ -263,5 +263,24 @@
     "email": "Email",
     "saveCredentials": "Save Credentials",
     "saveBranding": "Save Branding"
+  },
+  "itSetupItem": {
+    "socialMedia": "Social media",
+    "messagingLeads": "Messaging & leads",
+    "inboxEmail": "Inbox & Email",
+    "facebook": "Facebook",
+    "facebookDesc": "Page token + Page ID",
+    "instagram": "Instagram",
+    "instagramDesc": "Business Account ID",
+    "linkedin": "LinkedIn",
+    "linkedinDesc": "Access token",
+    "whatsapp": "WhatsApp",
+    "whatsappDesc": "Phone ID + API token",
+    "leadAlertsEmail": "Lead alerts email",
+    "leadAlertsEmailDesc": "Where new leads are sent",
+    "website": "Website",
+    "websiteDesc": "Your website URL",
+    "emailAccount": "Email Account",
+    "emailAccountDesc": "Connect your inbox (IMAP/SMTP)"
   }
 }
