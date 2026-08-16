@@ -75,12 +75,12 @@ async function showSysLogs(){
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
         <div>
           <div style="font-family:var(--mono);font-size:.8rem;color:#f85149;letter-spacing:1px;text-transform:uppercase;">System Logs</div>
-          <div style="font-size:.7rem;color:var(--muted);margin-top:2px;">Live backend error and output logs · NES Admin only</div>
+          <div style="font-size:.7rem;color:var(--muted);margin-top:2px;">${t('systemLogsUi.subtitle')}</div>
         </div>
         <div style="display:flex;gap:8px;align-items:center;">
           <select id="logLinesSelect" onchange="refreshSysLogs()" style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:5px 8px;color:var(--text);font-size:.72rem;cursor:pointer;">
             <option value="30">Last 30 lines</option>
-            <option value="50" selected>Last 50 lines</option>
+            <option value="50" selected>${t('systemLogsUi.last50Lines')}</option>
             <option value="100">Last 100 lines</option>
             <option value="200">Last 200 lines</option>
           </select>
@@ -91,10 +91,10 @@ async function showSysLogs(){
         </div>
       </div>
       <div id="logTabsRow" style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;">
-        <button class="log-tab-btn active" onclick="switchLogTab('nes_ai_errors',this)" style="padding:5px 12px;border-radius:6px;font-size:.72rem;font-weight:600;cursor:pointer;border:1px solid rgba(248,81,73,.3);background:rgba(248,81,73,.1);color:#f85149;">NES AI Errors</button>
-        <button class="log-tab-btn" onclick="switchLogTab('nes_backend_errors',this)" style="padding:5px 12px;border-radius:6px;font-size:.72rem;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--card);color:var(--muted);">Backend Errors</button>
-        <button class="log-tab-btn" onclick="switchLogTab('nes_ai_out',this)" style="padding:5px 12px;border-radius:6px;font-size:.72rem;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--card);color:var(--muted);">NES AI Output</button>
-        <button class="log-tab-btn" onclick="switchLogTab('nes_backend_out',this)" style="padding:5px 12px;border-radius:6px;font-size:.72rem;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--card);color:var(--muted);">Backend Output</button>
+        <button class="log-tab-btn active" onclick="switchLogTab('nes_ai_errors',this)" style="padding:5px 12px;border-radius:6px;font-size:.72rem;font-weight:600;cursor:pointer;border:1px solid rgba(248,81,73,.3);background:rgba(248,81,73,.1);color:#f85149;">${t('systemLogsUi.nesAiErrors')}</button>
+        <button class="log-tab-btn" onclick="switchLogTab('nes_backend_errors',this)" style="padding:5px 12px;border-radius:6px;font-size:.72rem;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--card);color:var(--muted);">${t('systemLogsUi.backendErrors')}</button>
+        <button class="log-tab-btn" onclick="switchLogTab('nes_ai_out',this)" style="padding:5px 12px;border-radius:6px;font-size:.72rem;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--card);color:var(--muted);">${t('systemLogsUi.nesAiOutput')}</button>
+        <button class="log-tab-btn" onclick="switchLogTab('nes_backend_out',this)" style="padding:5px 12px;border-radius:6px;font-size:.72rem;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--card);color:var(--muted);">${t('systemLogsUi.backendOutput')}</button>
       </div>
       <div id="logDisplay" style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;font-family:var(--mono);font-size:.7rem;line-height:1.7;overflow-x:auto;min-height:400px;">
         <div style="color:var(--muted);">${t('loading.logs')}</div>
