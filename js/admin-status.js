@@ -175,7 +175,7 @@ function showAddApiModalQuick(){
     <div style="font-size:.68rem;color:var(--muted);margin-bottom:6px;">Alert Threshold ($)</div>
     <input id="qapiThreshold" type="number" placeholder="5" style="width:100%;box-sizing:border-box;background:#0d1117;border:1px solid var(--border);border-radius:6px;padding:7px 10px;color:var(--text);font-family:var(--mono);font-size:.75rem;margin-bottom:16px;">
     <div style="display:flex;gap:8px;">
-      <button onclick="saveApiQuick()" style="flex:1;background:linear-gradient(135deg,#1a56db,#2563eb);border:none;border-radius:6px;padding:8px;color:#fff;font-family:var(--mono);font-size:.72rem;cursor:pointer;font-weight:700;">Add API</button>
+      <button onclick="saveApiQuick()" style="flex:1;background:linear-gradient(135deg,#1a56db,#2563eb);border:none;border-radius:6px;padding:8px;color:#fff;font-family:var(--mono);font-size:.72rem;cursor:pointer;font-weight:700;">${t('adminStatusUi.addApi')}</button>
       <button onclick="document.getElementById('addApiModalQuick').remove()" style="flex:1;background:none;border:1px solid var(--border);border-radius:6px;padding:8px;color:var(--muted);font-family:var(--mono);font-size:.72rem;cursor:pointer;">${t('common.cancel')}</button>
     </div>
   </div>`;
@@ -250,8 +250,8 @@ async function checkPlatformStatus(){
   let html='<div style="position:sticky;top:0;z-index:10;background:var(--bg);padding-bottom:10px;">';
 
   html+='<div style="display:flex;align-items:center;justify-content:space-between;padding-top:2px;margin-bottom:10px;">';
-  html+='<div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">Last checked: '+now+'</div>';
-  html+='<button onclick="checkPlatformStatus()" style="background:none;border:1px solid var(--border);border-radius:6px;padding:4px 10px;color:var(--muted);cursor:pointer;font-size:.72rem;font-family:var(--mono);"><i class="ti ti-refresh"></i> Refresh</button>';
+  html+=`<div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">${t('adminStatusUi.lastChecked')} ${now}</div>`;
+  html+=`<button onclick="checkPlatformStatus()" style="background:none;border:1px solid var(--border);border-radius:6px;padding:4px 10px;color:var(--muted);cursor:pointer;font-size:.72rem;font-family:var(--mono);"><i class="ti ti-refresh"></i> ${t('adminStatusUi.refresh')}</button>`;
   html+='</div>';
 
   html+='<div style="background:'+(allOk?'#0d2818':'#2d0e0e')+';border:1px solid '+(allOk?'#3fb95040':'#f8514940')+';border-radius:10px;padding:10px 16px;margin-bottom:10px;display:flex;align-items:center;gap:10px;">';
@@ -348,7 +348,7 @@ async function checkPlatformStatus(){
   html+='</div>';
   html+='</div></div>';
   html+='<div style="border:1px solid #7f77dd40;border-radius:12px;padding:14px;margin-top:4px;">';
-  html+='<div style="font-family:var(--mono);font-size:.65rem;color:#7f77dd;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;">BACKUP STATUS</div>';
+  html+=`<div style="font-family:var(--mono);font-size:.65rem;color:#7f77dd;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;">${t('adminStatusUi.backupStatus')}</div>`;
   html+='<div id="backupStatusCard" style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;"><div style="font-size:.75rem;color:var(--muted);">Loading backup status...</div></div>';
   html+='<div style="font-family:var(--mono);font-size:.65rem;color:#7f77dd;letter-spacing:.1em;text-transform:uppercase;margin:12px 0 8px;">VPS HEALTH</div>';
   html+='<div id="vpsStatsCard" style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;"><div style="font-size:.75rem;color:var(--muted);">Loading VPS stats...</div></div>';
