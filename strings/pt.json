@@ -367,5 +367,9 @@
     "sendInvite": "Send Invite",
     "addDepartment": "Add Department",
     "departmentNamePrompt": "Department name:"
+  },
+  "welcomeUi": {
+    "welcomeMessage": "Welcome to NES AI. How can I help you today?",
+    "selectEmailToRead": "Select an email to read"
   }
 }
