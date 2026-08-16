@@ -227,5 +227,12 @@
     "intelArticles": "Intel articles",
     "leadGeography": "Lead geography",
     "clientOverview": "Client overview"
+  },
+  "leadsKpi": {
+    "totalLeads": "Total leads",
+    "highValue": "High value",
+    "thisWeek": "This week",
+    "govPortsAviation": "Gov · Ports · Aviation",
+    "last7Days": "Last 7 days"
   }
 }
