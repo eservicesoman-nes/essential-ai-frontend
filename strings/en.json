@@ -304,5 +304,11 @@
     "attach": "Attach",
     "voice": "Voice",
     "disclaimer": "NES AI can make mistakes"
+  },
+  "ceoDashboardSection": {
+    "performance": "PERFORMANCE",
+    "platformHealth": "PLATFORM HEALTH",
+    "marketIntelligence": "MARKET INTELLIGENCE",
+    "allSystemsOperational": "All systems operational — platform running smoothly"
   }
 }
