@@ -93,7 +93,7 @@ async function renderPartnerHub(){
     <div id="ph-overview">
       <div class="ph-grid">
         <div class="ph-kcard" style="border-color:#409cff33;">
-          <div class="ph-klbl"><i class="ti ti-trending-up" style="font-size:11px;color:#409cff;"></i>Total MRR</div>
+          <div class="ph-klbl"><i class="ti ti-trending-up" style="font-size:11px;color:#409cff;"></i>${t('plan.totalMrr')}</div>
           <div class="ph-kval" style="color:#409cff;">OMR ${totalMRR.toFixed(0)}</div>
           <div class="ph-kdelta">${allClients.filter(c=>c.status==='active').length} active clients</div>
           <div class="ph-kbar"><div class="ph-kfill" style="width:100%;background:#409cff;"></div></div>
