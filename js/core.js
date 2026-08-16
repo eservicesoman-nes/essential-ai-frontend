@@ -228,7 +228,16 @@ function setupNavForRole(){
       if(commandNavEl && mods.nes_command === false) commandNavEl.style.display='none';
       if(intelNavEl && !tierOk) intelNavEl.style.display='none';
       if(imageNavEl && mods.image_gen === false) imageNavEl.style.display='none';
-      if(deenNavEl) deenNavEl.style.display = mods.islam360 !== false ? 'flex' : 'none';
+      if(deenNavEl){
+        const deenEnabled = mods.islam360 !== false;
+        const deenIcon = document.getElementById('deenHeaderIcon');
+        const deenLabel = document.getElementById('deenHeaderLabel');
+        deenNavEl.title = deenEnabled ? 'Deen دين' : 'NES AI';
+        deenNavEl.onclick = deenEnabled ? function(){showView('deen');} : null;
+        deenNavEl.style.cursor = deenEnabled ? 'pointer' : 'default';
+        if(deenIcon) deenIcon.src = deenEnabled ? 'https://deen.nes-ai.com/deen-icon.png' : '/icon.png';
+        if(deenLabel) deenLabel.textContent = deenEnabled ? 'Deen' : 'NES';
+      }
     });
   } else {
     if(['nesadmin','ceo','manager'].includes(userRole))intel.style.display='block';
@@ -270,8 +279,6 @@ async function showClientBrandingChip(){
     if(data.plan)window.clientPlan=data.plan;
     window.clientModules = data.modules || {};
     window.userRegion = (data.region || data.country || '').trim();
-    window.clientDeenEnabled = window.clientModules.islam360 !== false;
-    updateDeenIconVisibility();
     if(!window.userRegion){
       try{
         const{data:pData}=await sb.from('profiles').select('phone').eq('id',session.user.id).single();
