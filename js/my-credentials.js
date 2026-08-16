@@ -132,7 +132,7 @@ function renderMyCredsForm(creds, client){
   html+='<div style="font-size:.75rem;color:var(--muted);margin-bottom:10px;">Add an AI chat widget to your website by pasting this one line before </head> on your site.</div>';
   html+='<div style="display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-family:var(--mono);font-size:.68rem;color:#409cff;word-break:break-all;">';
   html+='<span id="widget-snippet">&lt;script src=\"https://api.essential-services.org/widget.js?client_id='+client.id+'\"&gt;&lt;/script&gt;</span>';
-  html+='<button onclick="copyWidgetSnippet(this, \''+client.id+'\')" style="background:var(--nes-btn-grad);border:none;border-radius:6px;padding:4px 12px;color:#fff;font-size:.68rem;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;">Copy</button>';
+  html+=`<button onclick="copyWidgetSnippet(this, '${client.id}')" style="background:var(--nes-btn-grad);border:none;border-radius:6px;padding:4px 12px;color:#fff;font-size:.68rem;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;">${t('chatUi.copy')}</button>`;
   html+='</div>';
   html+='<div style="font-size:.68rem;color:var(--muted);margin-top:8px;"><i class="ti ti-info-circle"></i> Works on WordPress, Wix, Squarespace, or any HTML site.</div>';
   html+='</div>';
