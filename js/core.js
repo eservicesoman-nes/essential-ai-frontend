@@ -171,8 +171,14 @@ async function loadUserRole(user){
 const BLOCKED_ACCOUNT_STATUSES = ['suspended', 'cancelled', 'inactive'];
 async function checkAccountBlocked(clientId){
   try{
-    const{data}=await sb.from('clients').select('status').eq('id',clientId).single();
-    return data && BLOCKED_ACCOUNT_STATUSES.includes(data.status);
+    const{data}=await sb.from('clients').select('status,trial_start,trial_duration_days').eq('id',clientId).single();
+    if(!data) return false;
+    if(BLOCKED_ACCOUNT_STATUSES.includes(data.status)) return true;
+    if(data.status==='trial' && data.trial_start){
+      const trialEnd = new Date(data.trial_start).getTime() + (parseInt(data.trial_duration_days)||7) * 24*60*60*1000;
+      if(Date.now() > trialEnd) return true;
+    }
+    return false;
   }catch(e){ return false; }
 }
 function showAccountBlockedScreen(){
