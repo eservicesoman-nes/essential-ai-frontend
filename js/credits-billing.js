@@ -55,7 +55,7 @@ async function loadApiCredits(){
     const pct=balance+usage>0?Math.round((usage/(balance+usage))*100):0;
     const barColor=pct>80?'#f85149':pct>60?'#d29922':'#409cff';
     html+=`<div style="background:var(--surface);border:1px solid ${status==='low'?'rgba(248,81,73,.3)':'var(--border)'};border-radius:12px;padding:14px 16px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;"><div style="display:flex;align-items:center;gap:8px;"><i class="ti ${api.icon}" style="font-size:16px;color:${api.color};"></i><span style="font-size:.82rem;font-weight:600;color:var(--text);">${api.name}</span></div><span style="font-size:.65rem;padding:2px 8px;border-radius:20px;font-weight:600;background:${statusBg};color:${statusColor};">${status==='unknown'?'Not set':status==='healthy'?'Healthy':'Low'}</span></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;"><div style="display:flex;align-items:center;gap:8px;"><i class="ti ${api.icon}" style="font-size:16px;color:${api.color};"></i><span style="font-size:.82rem;font-weight:600;color:var(--text);">${api.name}</span></div><span style="font-size:.65rem;padding:2px 8px;border-radius:20px;font-weight:600;background:${statusBg};color:${statusColor};">${status==='unknown'?t('pricingPage.notSet'):status==='healthy'?t('pricingPage.healthy'):t('pricingPage.low')}</span></div>
       <div style="font-size:.68rem;color:var(--muted);font-family:var(--mono);margin-bottom:10px;">${api.note}</div>
       <div style="font-size:1.5rem;font-weight:700;color:${status==='low'?'#f85149':'var(--text)'};margin-bottom:3px;">${balance===0?'—':'$'+balance.toFixed(2)}</div>
       <div style="font-size:.68rem;color:var(--muted);font-family:var(--mono);margin-bottom:10px;">${t('apiCreditsLabel.currentBalance')}</div>
@@ -81,7 +81,7 @@ async function saveNewApiService(){
   const threshold=parseFloat(document.getElementById('new_api_threshold')?.value)||5;
   const notes=document.getElementById('new_api_notes')?.value.trim();
   if(!name){showToast(t('toast.serviceNameRequired'));return;}
-  try{await sb.from('api_credits').insert([{service_name:name,current_balance:balance,alert_threshold:threshold,notes,status:balance<threshold?'low':'healthy'}]);showToast('API added');document.getElementById('addApiForm').style.display='none';await loadApiCredits();}catch(e){showToast('Error: '+e.message);}
+  try{await sb.from('api_credits').insert([{service_name:name,current_balance:balance,alert_threshold:threshold,notes,status:balance<threshold?'low':'healthy'}]);showToast(t('pricingPage.apiAdded'));document.getElementById('addApiForm').style.display='none';await loadApiCredits();}catch(e){showToast('Error: '+e.message);}
 }
 
 async function updateApiBalance(id,val){
@@ -92,7 +92,7 @@ async function updateApiBalance(id,val){
 async function saveAllThresholds(){
   const apis=window._apisList||[];
   const btn=document.querySelector('[onclick="saveAllThresholds()"]');
-  if(btn){btn.disabled=true;btn.textContent='Saving...';}
+  if(btn){btn.disabled=true;btn.textContent=t('pricingPage.saving');}
   try{
     for(const api of apis){
       const balance=parseFloat(document.getElementById('bal_'+api.id)?.value)||0;
@@ -114,18 +114,18 @@ function showPricing(){
   mc.innerHTML=`
     <div class="pricing-wrap">
       <a href="#" onclick="showView('chat');return false;" style="color:var(--nes-blue);text-decoration:none;display:inline-block;margin-bottom:22px;font-family:var(--mono);font-size:.8rem;">← Back</a>
-      <div style="text-align:center;margin-bottom:8px;"><h1 style="font-size:1.7rem;font-weight:700;font-family:'Syne',sans-serif;">Choose Your Plan</h1></div>
+      <div style="text-align:center;margin-bottom:8px;"><h1 style="font-size:1.7rem;font-weight:700;font-family:'Syne',sans-serif;">${t('pricingPage.chooseYourPlan')}</h1></div>
       <div style="text-align:center;margin-bottom:6px;font-family:var(--mono);font-size:.75rem;color:var(--muted);">NES AI — Unified Business Platform · Oman Pricing</div>
       <div style="text-align:center;margin-bottom:16px;font-family:var(--mono);font-size:.68rem;color:var(--muted);">All plans include a 7-day trial · Cancel anytime</div>
       <div style="background:#0c1f3a;border:1px solid #1a3a5e;border-radius:10px;padding:11px 20px;display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
-        <div><div style="font-family:'Syne',sans-serif;font-size:.78rem;color:var(--nes-blue);font-weight:700;">Founder pricing — 50% off for the first 50 clients · first quarter from signup</div><div style="font-size:.65rem;color:var(--muted);margin-top:2px;">Lock in this price for the first quarter from signup · Sara AI included in all plans · No setup fee during founder window</div></div>
+        <div><div style="font-family:'Syne',sans-serif;font-size:.78rem;color:var(--nes-blue);font-weight:700;">${t('pricingPage.founderPricingTitle')}</div><div style="font-size:.65rem;color:var(--muted);margin-top:2px;">${t('pricingPage.founderPricingDetail')}</div></div>
         <div style="font-family:var(--mono);font-size:.68rem;color:#3fb950;display:flex;align-items:center;gap:5px;"><div style="width:6px;height:6px;border-radius:50%;background:#3fb950;"></div>38 spots remaining</div>
       </div>
 
       <div class="plan-grid">
 
         <div class="plan-card">
-          <div style="font-family:'Syne',sans-serif;font-size:.65rem;color:var(--nes-blue);text-transform:uppercase;letter-spacing:.1em;text-align:center;margin-bottom:4px;">AI Presence</div>
+          <div style="font-family:'Syne',sans-serif;font-size:.65rem;color:var(--nes-blue);text-transform:uppercase;letter-spacing:.1em;text-align:center;margin-bottom:4px;">${t('plan.aiPresence')}</div>
           <div style="text-align:center;font-size:.72rem;color:var(--red);text-decoration:line-through;font-family:var(--mono);margin-bottom:2px;">OMR 59/mo (~$153)</div>
           <div class="plan-price">OMR 29</div>
           <div class="plan-period">per month · ~$75 USD · founder price for first quarter</div>
@@ -146,8 +146,8 @@ function showPricing(){
         </div>
 
         <div class="plan-card" style="border-color:var(--nes-blue);position:relative;">
-          <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--nes-btn-grad);color:#fff;font-size:.65rem;font-weight:700;padding:3px 12px;border-radius:20px;font-family:'Syne',sans-serif;">POPULAR</div>
-          <div style="font-family:'Syne',sans-serif;font-size:.65rem;color:var(--nes-blue);text-transform:uppercase;letter-spacing:.1em;text-align:center;margin-bottom:4px;">AI Operations</div>
+          <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--nes-btn-grad);color:#fff;font-size:.65rem;font-weight:700;padding:3px 12px;border-radius:20px;font-family:'Syne',sans-serif;">${t('pricingPage.popular')}</div>
+          <div style="font-family:'Syne',sans-serif;font-size:.65rem;color:var(--nes-blue);text-transform:uppercase;letter-spacing:.1em;text-align:center;margin-bottom:4px;">${t('plan.aiOperations')}</div>
           <div style="text-align:center;font-size:.72rem;color:var(--red);text-decoration:line-through;font-family:var(--mono);margin-bottom:2px;">OMR 159/mo (~$413)</div>
           <div class="plan-price">OMR 79</div>
           <div class="plan-period">per month · ~$205 USD · founder price for first quarter</div>
@@ -170,7 +170,7 @@ function showPricing(){
         </div>
 
         <div class="plan-card" style="border-color:#3fb950;position:relative;">
-          <div style="font-family:'Syne',sans-serif;font-size:.65rem;color:#3fb950;text-transform:uppercase;letter-spacing:.1em;text-align:center;margin-bottom:4px;">AI Workforce</div>
+          <div style="font-family:'Syne',sans-serif;font-size:.65rem;color:#3fb950;text-transform:uppercase;letter-spacing:.1em;text-align:center;margin-bottom:4px;">${t('plan.aiWorkforce')}</div>
           <div style="text-align:center;font-size:.72rem;color:var(--red);text-decoration:line-through;font-family:var(--mono);margin-bottom:2px;">OMR 299/mo (~$777)</div>
           <div class="plan-price" style="color:#3fb950;">OMR 149</div>
           <div class="plan-period">per month · ~$387 USD · founder price for first quarter</div>
@@ -247,9 +247,9 @@ function showPricing(){
 
 function openVoiceTopupModal(){
   const packs=[
-    {min:50,p:18,label:'Starter Bundle'},
-    {min:150,p:45,label:'Standard Bundle'},
-    {min:400,p:99,label:'Power Bundle'}
+    {min:50,p:18,label:t('pricingPage.starterBundle')},
+    {min:150,p:45,label:t('pricingPage.standardBundle')},
+    {min:400,p:99,label:t('pricingPage.powerBundle')}
   ];
   const packsHtml=packs.map(pk=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px;">
     <div><div style="font-weight:700;font-size:.85rem;">${pk.label}</div><div style="font-size:.75rem;color:var(--muted);">${pk.min} minutes · never expire</div><div style="font-size:.7rem;color:var(--muted);">OMR ${pk.p} + 5% VAT = OMR ${(pk.p*1.05).toFixed(3)}</div></div>
@@ -260,12 +260,12 @@ function openVoiceTopupModal(){
     ${packsHtml}
     <p style="color:var(--muted);font-size:.75rem;margin-top:10px;">Payments processed securely via Thawani. Minutes added to your account automatically after payment.</p>
   </div>`;
-  showModal('Sara Voice Top-up',html);
+  showModal(t('pricingPage.saraVoiceTopup'),html);
 }
 
 async function buyVoiceTopup(minutes,price,label){
   const btn=event.target;
-  btn.disabled=true;btn.textContent='Processing...';
+  btn.disabled=true;btn.textContent=t('pricingPage.processing');
   const vatAmount=Math.round(price*0.05*100)/100;
   const totalAmount=Math.round((price+vatAmount)*100)/100;
   try{
@@ -313,7 +313,7 @@ function openAdamTopupModal(){
 
 async function buyAdamTopup(credits,price,label){
   const btn=event.target;
-  btn.disabled=true;btn.textContent='Processing...';
+  btn.disabled=true;btn.textContent=t('pricingPage.processing');
   const vatAmount=Math.round(price*0.05*100)/100;
   const totalAmount=Math.round((price+vatAmount)*100)/100;
   try{
@@ -361,7 +361,7 @@ function openBriefcaseTopupModal(){
 
 async function buyBriefcaseTopup(gb,price,label){
   const btn=event.target;
-  btn.disabled=true;btn.textContent='Processing...';
+  btn.disabled=true;btn.textContent=t('pricingPage.processing');
   const vatAmount=Math.round(price*0.05*100)/100;
   const totalAmount=Math.round((price+vatAmount)*100)/100;
   try{
@@ -410,7 +410,7 @@ function openCreditsModal(){
 
 async function buyImageCredits(credits,price,label){
   const btn=event.target;
-  btn.disabled=true;btn.textContent='Processing...';
+  btn.disabled=true;btn.textContent=t('pricingPage.processing');
   const vatAmount=Math.round(price*0.05*100)/100;
   const totalAmount=Math.round((price+vatAmount)*100)/100;
   try{
