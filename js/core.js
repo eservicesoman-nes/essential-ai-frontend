@@ -192,6 +192,50 @@ function showAccountBlockedScreen(){
       <button onclick="sb.auth.signOut().then(()=>window.location.reload())" style="background:var(--nes-btn-grad);border:none;border-radius:8px;padding:10px 24px;color:#fff;font-weight:700;cursor:pointer;">Sign Out</button>
     </div>`;
 }
+function updateLanguageSwitcherIcon(){
+  const label=document.getElementById('langSwitcherLabel');
+  if(label) label.textContent=(window.clientLocale||'en').toUpperCase();
+}
+function toggleLangMenu(){
+  const existing=document.getElementById('langMenuDropdown');
+  if(existing){ existing.remove(); return; }
+  const btn=document.getElementById('langSwitcherBtn');
+  const rect=btn.getBoundingClientRect();
+  const menu=document.createElement('div');
+  menu.id='langMenuDropdown';
+  menu.style.cssText=`position:fixed;top:${rect.bottom+6}px;left:${rect.left}px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:4px;z-index:9999;min-width:140px;box-shadow:0 4px 16px rgba(0,0,0,.3);`;
+  const langs=[{code:'en',label:'English'},{code:'pt',label:'Portugu\u00eas'}];
+  menu.innerHTML=langs.map(l=>`<div onclick="selectLanguage('${l.code}')" style="padding:8px 12px;border-radius:6px;cursor:pointer;font-size:.8rem;color:var(--text);${l.code===(window.clientLocale||'en')?'background:var(--nes-blue);color:#fff;':''}" onmouseover="if('${l.code}'!=='${window.clientLocale||'en'}')this.style.background='var(--card)'" onmouseout="if('${l.code}'!=='${window.clientLocale||'en'}')this.style.background='transparent'">${l.label}</div>`).join('');
+  document.body.appendChild(menu);
+  setTimeout(()=>{
+    document.addEventListener('click', function closeMenu(e){
+      if(!menu.contains(e.target) && e.target.id!=='langSwitcherBtn' && !btn.contains(e.target)){
+        menu.remove();
+        document.removeEventListener('click', closeMenu);
+      }
+    });
+  },10);
+}
+async function selectLanguage(code){
+  document.getElementById('langMenuDropdown')?.remove();
+  if(code === (window.clientLocale||'en')) return;
+  window.clientLocale = code;
+  await loadNesStrings(code);
+  applyNesI18n();
+  updateLanguageSwitcherIcon();
+  if(userClientId){
+    try{
+      await fetch(API_URL+'/api/admin/update-client/'+userClientId,{
+        method:'PATCH',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
+        body:JSON.stringify({name:document.getElementById('roleChip').textContent||'Client',locale:code})
+      });
+    }catch(e){ console.error('Failed to save locale preference:', e); }
+  }
+}
+window.toggleLangMenu=toggleLangMenu;
+window.selectLanguage=selectLanguage;
+window.updateLanguageSwitcherIcon=updateLanguageSwitcherIcon;
 function setupNavForRole(){
   const intel=document.getElementById('intelligenceSection');
   const clientMgr=document.getElementById('clientMgrSection');
@@ -300,7 +344,7 @@ function hasTierModule(planKeys){
 
 async function showClientBrandingChip(){
   try{
-    const{data}=await sb.from('clients').select('name,primary_color,logo_url,plan,modules,full_access_override,apex_connect_paid_until,apex_outreach_paid_until,apex_advisory_paid_until,region,country,status').eq('id',userClientId).single();
+    const{data}=await sb.from('clients').select('name,primary_color,logo_url,plan,modules,full_access_override,apex_connect_paid_until,apex_outreach_paid_until,apex_advisory_paid_until,region,country,status,locale').eq('id',userClientId).single();
     if(!data)return;
     const chip=document.getElementById('roleChip');
     if(chip&&data.name)chip.textContent=data.name;
@@ -308,6 +352,9 @@ async function showClientBrandingChip(){
     window.clientModules = data.modules || {};
     window.userRegion = (data.region || data.country || '').trim();
     window.clientAccountStatus = data.status || 'active';
+    window.clientLocale = data.locale || 'en';
+    if(window.clientLocale !== 'en'){ await loadNesStrings(window.clientLocale); applyNesI18n(); }
+    updateLanguageSwitcherIcon();
     if(!window.userRegion){
       try{
         const{data:pData}=await sb.from('profiles').select('phone').eq('id',session.user.id).single();
