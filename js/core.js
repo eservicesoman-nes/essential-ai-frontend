@@ -20,6 +20,10 @@ async function showApp(user){
   loadLocal();
   loadRecentChats();
   await loadUserRole(user);
+  if(userClientId && userRole !== 'nesadmin'){
+    const blocked = await checkAccountBlocked(userClientId);
+    if(blocked){ showAccountBlockedScreen(); return; }
+  }
   await loadUserPlan();
   setupNavForRole();
   if(userRole !== 'nesadmin'){
@@ -164,6 +168,24 @@ async function loadUserRole(user){
   document.getElementById('roleChip').textContent=userRole;
 }
 
+const BLOCKED_ACCOUNT_STATUSES = ['suspended', 'cancelled', 'inactive'];
+async function checkAccountBlocked(clientId){
+  try{
+    const{data}=await sb.from('clients').select('status').eq('id',clientId).single();
+    return data && BLOCKED_ACCOUNT_STATUSES.includes(data.status);
+  }catch(e){ return false; }
+}
+function showAccountBlockedScreen(){
+  document.getElementById('authScreen').style.display='none';
+  document.getElementById('app').style.display='flex';
+  document.getElementById('mainContent').innerHTML=`
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:40px;text-align:center;">
+      <i class="ti ti-lock" style="font-size:48px;color:#f85149;margin-bottom:16px;"></i>
+      <div style="font-family:var(--mono);font-size:1.1rem;font-weight:800;color:#f85149;margin-bottom:8px;">Account Not Active</div>
+      <div style="font-size:.9rem;color:var(--muted);max-width:420px;margin-bottom:24px;">This account is currently inactive. Please contact NES AI to restore access.</div>
+      <button onclick="sb.auth.signOut().then(()=>window.location.reload())" style="background:var(--nes-btn-grad);border:none;border-radius:8px;padding:10px 24px;color:#fff;font-weight:700;cursor:pointer;">Sign Out</button>
+    </div>`;
+}
 function setupNavForRole(){
   const intel=document.getElementById('intelligenceSection');
   const clientMgr=document.getElementById('clientMgrSection');
@@ -272,13 +294,14 @@ function hasTierModule(planKeys){
 
 async function showClientBrandingChip(){
   try{
-    const{data}=await sb.from('clients').select('name,primary_color,logo_url,plan,modules,full_access_override,apex_connect_paid_until,apex_outreach_paid_until,apex_advisory_paid_until,region,country').eq('id',userClientId).single();
+    const{data}=await sb.from('clients').select('name,primary_color,logo_url,plan,modules,full_access_override,apex_connect_paid_until,apex_outreach_paid_until,apex_advisory_paid_until,region,country,status').eq('id',userClientId).single();
     if(!data)return;
     const chip=document.getElementById('roleChip');
     if(chip&&data.name)chip.textContent=data.name;
     if(data.plan)window.clientPlan=data.plan;
     window.clientModules = data.modules || {};
     window.userRegion = (data.region || data.country || '').trim();
+    window.clientAccountStatus = data.status || 'active';
     if(!window.userRegion){
       try{
         const{data:pData}=await sb.from('profiles').select('phone').eq('id',session.user.id).single();
