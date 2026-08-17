@@ -8,7 +8,7 @@ async function showAdminStatus(){
   mc.style.display='flex';
   mc.style.flexDirection='column';
   mc.innerHTML=`
-    <div style="padding:11px 18px 11px 60px;border-bottom:1px solid var(--border);flex-shrink:0;">
+    <div style="padding:11px 62px 11px 60px;border-bottom:1px solid var(--border);flex-shrink:0;">
       <div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;">${t('sectionTitle.platformStatus')}</div>
       <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">${t('pageSubtitle.platformStatus')}</div>
     </div>
