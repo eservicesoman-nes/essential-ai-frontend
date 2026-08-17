@@ -75,7 +75,7 @@ async function showClientManager(){
   const mc=document.getElementById('mainContent');
   mc.style.overflow='hidden';
   mc.innerHTML=`
-    <div style="padding:11px 18px 11px 60px;border-bottom:1px solid var(--border);flex-shrink:0;">
+    <div style="padding:11px 62px 11px 60px;border-bottom:1px solid var(--border);flex-shrink:0;">
       <div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;">${t('sectionTitle.clientManager')}</div>
       <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">${t('pageSubtitle.clientManager')}</div>
     </div>
@@ -734,7 +734,7 @@ function searchClients(query){
 function showAddClientForm(){
   document.getElementById('mainContent').style.overflow='auto';
   document.getElementById('mainContent').innerHTML=`
-    <div style="padding:11px 18px 11px 60px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;gap:10px;">
+    <div style="padding:11px 62px 11px 60px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;gap:10px;">
       <button onclick="showClientManager()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.1rem;"><i class="ti ti-arrow-left"></i></button>
       <div><div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;">${t('sectionTitle.addNewClient')}</div><div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">Fill in the details below</div></div>
     </div>
@@ -745,7 +745,7 @@ function showEditClientForm(clientId){
   const client=(window._clients||[]).find(c=>c.id===clientId);if(!client)return;
   document.getElementById('mainContent').style.overflow='auto';
   document.getElementById('mainContent').innerHTML=`
-    <div style="padding:11px 18px 11px 60px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;gap:10px;">
+    <div style="padding:11px 62px 11px 60px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;gap:10px;">
       <button onclick="showClientManager()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.1rem;"><i class="ti ti-arrow-left"></i></button>
       <div><div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;">EDIT — ${client.name}</div><div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">Update client details</div></div>
     </div>
