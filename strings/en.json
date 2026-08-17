@@ -423,5 +423,22 @@
     "documentAnalyzed": "Document analyzed.",
     "couldNotAnalyzeFile": "Could not analyze file.",
     "errorColon": "Error: "
+  },
+  "pricingPage": {
+    "chooseYourPlan": "Choose Your Plan",
+    "founderPricingTitle": "Founder pricing — 50% off for the first 50 clients · first quarter from signup",
+    "founderPricingDetail": "Lock in this price for the first quarter from signup · Sara AI included in all plans · No setup fee during founder window",
+    "popular": "POPULAR",
+    "notSet": "Not set",
+    "healthy": "Healthy",
+    "low": "Low",
+    "apiAdded": "API added",
+    "saving": "Saving...",
+    "processing": "Processing...",
+    "errorPrefix": "Error: ",
+    "starterBundle": "Starter Bundle",
+    "standardBundle": "Standard Bundle",
+    "powerBundle": "Power Bundle",
+    "saraVoiceTopup": "Sara Voice Top-up"
   }
 }
