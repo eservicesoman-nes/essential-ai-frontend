@@ -223,6 +223,9 @@ async function selectLanguage(code){
   await loadNesStrings(code);
   applyNesI18n();
   updateLanguageSwitcherIcon();
+  const currentView = localStorage.getItem('nesai_view') || 'chat';
+  showView(currentView);
+  bindNav();
   if(userClientId){
     try{
       await fetch(API_URL+'/api/admin/update-client/'+userClientId,{
