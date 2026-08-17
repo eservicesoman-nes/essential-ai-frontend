@@ -505,6 +505,15 @@
       .main > div > div:first-child{padding-top:56px!important;}
       /* Analytics + API Credits headers wrap on mobile */
       .an-hdr{flex-wrap:wrap!important;gap:6px!important;}
+      /* Universal header-button overflow safety: any page-header action button
+         gracefully truncates instead of visually overlapping the floating top-bar */
+      .an-hdr button, .an-hdr > div > button, .an-hdr [class*="btn"] {
+        max-width:calc(100% - 8px)!important;
+        overflow:hidden!important;
+        text-overflow:ellipsis!important;
+        white-space:nowrap!important;
+        flex-shrink:1!important;
+      }
       /* Fix header overlap with top-bar on mobile */
       #analyticsContent > div:first-child,
       #apiCreditsContent > div:first-child{padding-right:56px!important;padding-top:56px!important;}
@@ -598,12 +607,12 @@
 
     <div class="sb-divider"></div>
     <div class="nav-section">
-      <div class="nav-label">Usage &amp; Billing</div>
+      <div class="nav-label" data-i18n="nav.usageBilling">Usage &amp; Billing</div>
       <div class="nav">
-        <div class="nav-item" data-view="image"><i class="ti ti-photo"></i><span>Image Gen</span><span class="nav-badge nb-blue" style="cursor:pointer;" onclick="event.stopPropagation();showView('image');setTimeout(openCreditsModal,50);">PAYG</span></div>
-        <div class="nav-item" onclick="openVoiceTopupModal()"><i class="ti ti-phone-call"></i><span>Sara Top-up</span><span class="nav-badge nb-green" style="cursor:pointer;">PAYG</span></div>
-        <div class="nav-item" onclick="openAdamTopupModal()"><i class="ti ti-headset"></i><span>Adam Top-up</span><span class="nav-badge nb-green" style="cursor:pointer;">PAYG</span></div>
-        <div class="nav-item" onclick="openBriefcaseTopupModal()"><i class="ti ti-briefcase"></i><span>Briefcase Top-up</span><span class="nav-badge nb-blue" style="cursor:pointer;">PAYG</span></div>
+        <div class="nav-item" data-view="image"><i class="ti ti-photo"></i><span data-i18n="nav.imageGen">Image Gen</span><span class="nav-badge nb-blue" style="cursor:pointer;" onclick="event.stopPropagation();showView('image');setTimeout(openCreditsModal,50);">PAYG</span></div>
+        <div class="nav-item" onclick="openVoiceTopupModal()"><i class="ti ti-phone-call"></i><span data-i18n="nav.saraTopup">Sara Top-up</span><span class="nav-badge nb-green" style="cursor:pointer;">PAYG</span></div>
+        <div class="nav-item" onclick="openAdamTopupModal()"><i class="ti ti-headset"></i><span data-i18n="nav.adamTopup">Adam Top-up</span><span class="nav-badge nb-green" style="cursor:pointer;">PAYG</span></div>
+        <div class="nav-item" onclick="openBriefcaseTopupModal()"><i class="ti ti-briefcase"></i><span data-i18n="nav.briefcaseTopup">Briefcase Top-up</span><span class="nav-badge nb-blue" style="cursor:pointer;">PAYG</span></div>
       </div>
     </div>
     <div class="sb-divider"></div>
