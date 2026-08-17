@@ -129,7 +129,7 @@ async function showInbox(){
     _inboxAccountText = used + ' account' + (used !== 1 ? 's' : '') + ' connected';
   } catch(e) {}
   mc.innerHTML=`
-    <div style="padding:11px 18px 11px 60px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;">
+    <div style="padding:11px 62px 11px 60px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;">
       <div>
         <div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;display:flex;align-items:center;gap:6px;"><i class="ti ti-mail"></i>${t('inbox.title')}</div>
         <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">${t('inbox.unifiedEmailPrefix')}<span id="emailAccountLimit" style="color:#409cff;">${_inboxAccountText}</span></div>
