@@ -26,7 +26,12 @@
     "platformStatus": "Estado da Plataforma",
     "apiCredits": "Créditos API",
     "systemLogs": "Registos do Sistema",
-    "incidents": "Incidentes"
+    "incidents": "Incidentes",
+    "usageBilling": "Utilização e Faturação",
+    "imageGen": "Geração de Imagens",
+    "saraTopup": "Recarga Sara",
+    "adamTopup": "Recarga Adam",
+    "briefcaseTopup": "Recarga da Pasta"
   },
   "common": {
     "save": "Guardar",
