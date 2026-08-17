@@ -5,7 +5,7 @@ async function showAnalytics(){
   const mc = document.getElementById('mainContent');
   mc.style.overflow = 'auto';
   mc.innerHTML = `
-    <div style="padding:11px 160px 11px 60px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;" class="an-hdr">
+    <div style="padding:11px 204px 11px 60px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;" class="an-hdr">
       <div>
         <div style="font-family:var(--mono);font-size:.8rem;color:#d29922;font-weight:800;display:flex;align-items:center;gap:6px;"><i class="ti ti-chart-dots"></i>USAGE ANALYTICS</div>
         <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">${t('pageSubtitle.analytics')}</div>
