@@ -228,10 +228,10 @@ async function selectLanguage(code){
   bindNav();
   if(userClientId){
     try{
-      await fetch(API_URL+'/api/admin/update-client/'+userClientId,{
+      await fetch(API_URL+'/api/client/locale',{
         method:'PATCH',
         headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
-        body:JSON.stringify({name:document.getElementById('roleChip').textContent||'Client',locale:code})
+        body:JSON.stringify({locale:code})
       });
     }catch(e){ console.error('Failed to save locale preference:', e); }
   }
