@@ -360,8 +360,8 @@ async function showClientBrandingChip(){
     // before any manual language choice has been made. Never overrides a later manual choice.
     if(!localStorage.getItem('nesai_lang_detected') && window.clientLocale === 'en'){
       localStorage.setItem('nesai_lang_detected','1');
-      const browserLang = (navigator.language || navigator.userLanguage || '').toLowerCase();
-      if(browserLang.startsWith('pt')){
+      const clientCountry = (data.country || '').toLowerCase();
+      if(clientCountry.includes('portugal')){
         window.clientLocale = 'pt';
         if(userClientId){
           try{
