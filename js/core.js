@@ -356,6 +356,24 @@ async function showClientBrandingChip(){
     window.userRegion = (data.region || data.country || '').trim();
     window.clientAccountStatus = data.status || 'active';
     window.clientLocale = data.locale || 'en';
+    // One-time browser-language auto-detection: only runs once ever per browser,
+    // before any manual language choice has been made. Never overrides a later manual choice.
+    if(!localStorage.getItem('nesai_lang_detected') && window.clientLocale === 'en'){
+      localStorage.setItem('nesai_lang_detected','1');
+      const browserLang = (navigator.language || navigator.userLanguage || '').toLowerCase();
+      if(browserLang.startsWith('pt')){
+        window.clientLocale = 'pt';
+        if(userClientId){
+          try{
+            await fetch(API_URL+'/api/client/locale',{
+              method:'PATCH',
+              headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
+              body:JSON.stringify({locale:'pt'})
+            });
+          }catch(e){ console.error('Failed to save auto-detected locale:', e); }
+        }
+      }
+    }
     if(window.clientLocale !== 'en'){ await loadNesStrings(window.clientLocale); applyNesI18n(); }
     updateLanguageSwitcherIcon();
     if(!window.userRegion){
