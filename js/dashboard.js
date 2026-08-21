@@ -306,7 +306,7 @@ async function showPartnerDashboard(){
 
 async function loadPartnerFeed(){
   try{
-    const {data:feed}=await sb.from('ceo_feed').select('title,summary,source,tag,created_at').order('created_at',{ascending:false}).limit(20);
+    const {data:feed}=await sb.from('ceo_feed').select('title,summary,source,tag,created_at').eq('archived',false).order('created_at',{ascending:false}).limit(20);
     const feedEl=document.getElementById('partnerFeedItems');
     if(!feedEl)return;
     const badge=document.getElementById('partnerFeedBadge');
