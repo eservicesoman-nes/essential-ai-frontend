@@ -757,7 +757,7 @@ async function loadUsageSummary(){
 async function loadCeoFeed(){
   try{
     let feedQ=sb.from('ceo_feed').select('id,title,content,tag,type,source_url,created_at,client_id').order('created_at',{ascending:false}).limit(20);
-    if(userClientId && userRole !== 'nesadmin')feedQ=feedQ.or('client_id.eq.'+userClientId+',client_id.is.null');
+    if(userClientId)feedQ=feedQ.or('client_id.eq.'+userClientId+',client_id.is.null');
     const{data,error}=await feedQ;
     const el=document.getElementById('ceoFeedItems');
     if(!el)return;
