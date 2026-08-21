@@ -89,35 +89,19 @@ function renderMyCredsForm(creds, client){
     });
   });
   const isPro=(client.plan==='operations'||client.plan==='workforce'||client.plan==='infrastructure');
-  const isEnterprise=client.plan==='infrastructure';
-  const maxSources=isEnterprise?10:isPro?10:5;
-  const savedSources=client.feed_urls&&client.feed_urls.length?client.feed_urls:[];
-  const defaultSources=['https://timesofoman.com/rss','https://omanobserver.om/feed','https://www.arabianbusiness.com/rss','https://www.zawya.com/rss/technology','https://gulfnews.com/rss/technology'];
-  const sources=savedSources.length?savedSources:defaultSources;
+  const maxSources=isPro?10:5;
   html+='<div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;margin-top:20px;">NES Pulse — Feed Sources</div>';
   html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:16px;">';
-  html+='<div style="font-size:.75rem;color:var(--muted);margin-bottom:10px;">Your NES Pulse intelligence feed pulls from these sources daily.</div>';
-  for(var si=0;si<5;si++){
-    var sv=sources[si]||'';
-    html+='<div style="display:flex;gap:8px;margin-bottom:6px;">';
-    html+='<input id="feed_src_'+si+'" type="url" class="form-input" value="'+sv.replace(/"/g,'&quot;')+'" placeholder="https://news-source.com/rss" style="font-size:.72rem;">';
-    html+='</div>';
-  }
-  if(!isPro){
-    html+='<div style="margin-top:10px;padding:10px 12px;background:#0c1f35;border:1px solid #1a3a6e;border-radius:8px;display:flex;align-items:center;justify-content:space-between;">';
-    html+='<div><div style="font-family:var(--mono);font-size:.68rem;color:var(--nes-blue);font-weight:700;">+ 5 more sources</div>';
-    html+='<div style="font-size:.68rem;color:var(--muted);">Add custom industry sources</div></div>';
-    html+=`<button onclick="showPricing()" style="background:var(--nes-btn-grad);border:none;border-radius:6px;padding:5px 12px;color:#fff;font-size:.68rem;font-weight:700;cursor:pointer;">${t('button.upgradePlan')}</button>`;
-    html+='</div>';
-  } else {
-    for(var si2=5;si2<10;si2++){
-      var sv2=sources[si2]||'';
-      html+='<div style="display:flex;gap:8px;margin-bottom:6px;">';
-      html+='<input id="feed_src_'+si2+'" type="url" class="form-input" value="'+sv2.replace(/"/g,'&quot;')+'" placeholder="https://custom-source.com/rss" style="font-size:.72rem;">';
-      html+='</div>';
-    }
-  }
-  html+='<button onclick="saveFeedSources()" style="background:var(--nes-btn-grad);border:none;border-radius:7px;padding:7px 16px;color:#fff;font-size:.75rem;font-weight:700;cursor:pointer;margin-top:8px;width:100%;"><i class="ti ti-device-floppy"></i> Save Feed Sources</button>';
+  html+='<div style="font-size:.75rem;color:var(--muted);margin-bottom:10px;">Your NES Pulse intelligence feed pulls from these sources daily. Add a topic to search (e.g. "Pakistan logistics reform") or a specific website\'s RSS feed URL.</div>';
+  html+='<div id="feedSourcesList" style="margin-bottom:10px;"><div style="color:var(--muted);font-size:.72rem;">Loading…</div></div>';
+  html+='<div style="display:flex;gap:6px;margin-bottom:6px;">';
+  html+='<select id="newFeedSourceType" class="form-input" style="flex:0 0 90px;font-size:.72rem;"><option value="topic">Topic</option><option value="url">RSS URL</option></select>';
+  html+='<input id="newFeedSourceLabel" type="text" class="form-input" placeholder="Label (e.g. Pakistan Logistics)" style="font-size:.72rem;flex:1;">';
+  html+='</div>';
+  html+='<div style="display:flex;gap:6px;">';
+  html+='<input id="newFeedSourceValue" type="text" class="form-input" placeholder="Search topic or RSS URL" style="font-size:.72rem;flex:1;">';
+  html+=`<button onclick="addFeedSource('${client.id}')" style="background:var(--nes-btn-grad);border:none;border-radius:7px;padding:7px 16px;color:#fff;font-size:.72rem;font-weight:700;cursor:pointer;white-space:nowrap;"><i class="ti ti-plus"></i> Add</button>`;
+  html+='</div>';
   html+='</div>';
   html+='<div id="it-cred-form" style="display:none;margin-top:16px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;">';
   html+='<div id="it-cred-title" style="font-family:var(--mono);font-size:.75rem;font-weight:700;color:var(--nes-blue);margin-bottom:12px;"></div>';
@@ -138,6 +122,7 @@ function renderMyCredsForm(creds, client){
   html+='</div>';
   el.innerHTML=html;
   window._itCredsCache=creds;
+  loadFeedSources(client.id);
 }
 
 function copyWidgetSnippet(btn, clientId){
@@ -215,15 +200,48 @@ async function saveMyCredentials(){
   }
 }
 
-async function saveFeedSources(){
-  var sources=[];
-  for(var i=0;i<10;i++){
-    var el=document.getElementById('feed_src_'+i);
-    if(el&&el.value.trim())sources.push(el.value.trim());
-  }
+async function loadFeedSources(clientId){
+  const listEl=document.getElementById('feedSourcesList');
+  if(!listEl)return;
   try{
-    const r=await fetch(API_URL+'/api/admin/client/'+userClientId+'/feed-urls',{method:'PATCH',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify({feed_urls:sources})});const{error}=r.ok?{}:{message:(await r.json()).error};
-    if(error)throw error;
+    const r=await fetch(API_URL+'/api/client/'+clientId+'/feed-sources',{headers:{'Authorization':'Bearer '+session.access_token}});
+    const data=await r.json();
+    const sources=data.sources||[];
+    if(sources.length===0){
+      listEl.innerHTML='<div style="color:var(--muted);font-size:.72rem;padding:6px 0;">No feed sources yet — add one below.</div>';
+      return;
+    }
+    listEl.innerHTML=sources.map(function(s){
+      const typeLabel=s.source_type==='url'?'RSS URL':'Topic';
+      return '<div style="display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 10px;margin-bottom:6px;">'
+        +'<span style="font-size:.6rem;font-family:var(--mono);padding:2px 8px;border-radius:10px;background:#0d2818;color:#3fb950;flex-shrink:0;">'+typeLabel+'</span>'
+        +'<div style="flex:1;min-width:0;"><div style="font-size:.75rem;font-weight:600;">'+s.label+'</div><div style="font-size:.68rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+s.search_query+'</div></div>'
+        +'<button onclick="deleteFeedSource(\''+clientId+'\',\''+s.id+'\')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:.9rem;flex-shrink:0;"><i class="ti ti-trash"></i></button>'
+        +'</div>';
+    }).join('');
+  }catch(e){
+    listEl.innerHTML='<div style="color:var(--muted);font-size:.72rem;">Could not load feed sources.</div>';
+  }
+}
+async function addFeedSource(clientId){
+  const type=document.getElementById('newFeedSourceType').value;
+  const label=document.getElementById('newFeedSourceLabel').value.trim();
+  const value=document.getElementById('newFeedSourceValue').value.trim();
+  if(!label||!value){showToast('Enter both a label and a value');return;}
+  try{
+    const r=await fetch(API_URL+'/api/client/'+clientId+'/feed-sources',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify({label,search_query:value,source_type:type})});
+    const data=await r.json();
+    if(!r.ok)throw new Error(data.error||'Failed to add source');
+    document.getElementById('newFeedSourceLabel').value='';
+    document.getElementById('newFeedSourceValue').value='';
     showToast(t('toast.feedSourcesSaved'));
+    loadFeedSources(clientId);
+  }catch(e){showToast('Error: '+e.message);}
+}
+async function deleteFeedSource(clientId,sourceId){
+  try{
+    const r=await fetch(API_URL+'/api/client/'+clientId+'/feed-sources/'+sourceId,{method:'DELETE',headers:{'Authorization':'Bearer '+session.access_token}});
+    if(!r.ok)throw new Error('Failed to delete source');
+    loadFeedSources(clientId);
   }catch(e){showToast('Error: '+e.message);}
 }
