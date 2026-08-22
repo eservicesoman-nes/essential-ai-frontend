@@ -29,6 +29,7 @@ async function showLeadsPage(){
         <button class="tab-btn active" onclick="filterLeads('all',this)">All</button>
         <button class="tab-btn" onclick="filterLeads('today',this)">Today</button>
         <button class="tab-btn" onclick="filterLeads('week',this)">This week</button>
+        <button class="tab-btn" onclick="filterLeads('repeats',this)">Repeats</button>
       </div>
       <div class="leads-table">
         <div class="lt-header"><div>${t('leadsTableHeader.nameEmail')}</div><div>${t('leadsTableHeader.industry')}</div><div>${t('leadsTableHeader.phone')}</div><div>${t('leadsTableHeader.date')}</div><div>${t('leadsTableHeader.status')}</div></div>
@@ -38,12 +39,26 @@ async function showLeadsPage(){
   }catch(e){document.getElementById('leadsContent').innerHTML=`<div style="text-align:center;padding:40px;color:#f85149;font-family:var(--mono);">Error: ${e.message}</div>`;}
 }
 
+function getRepeatPhones(){
+  const all=window._allLeads||[];
+  const counts={};
+  all.forEach(l=>{
+    const p=(l.phone||'').trim();
+    if(!p)return;
+    counts[p]=(counts[p]||0)+1;
+  });
+  return new Set(Object.keys(counts).filter(p=>counts[p]>1));
+}
+
 function renderLeadRows(leads){
   if(!leads.length)return`<div style="padding:20px;text-align:center;color:var(--muted);font-family:var(--mono);font-size:.8rem;">${t('empty.noLeadsFound')}</div>`;
+  const repeatPhones=getRepeatPhones();
   return leads.map(l=>{
     const date=new Date(l.created_at);const timeAgo=getTimeAgo(date);const badge=getBadge(l,date);
     const _msg=(l.message||'').trim();const _msgId='msg-'+l.id;
-    return`<div class="lt-row" id="lead-row-${l.id}"><div><div class="lead-name">${l.name||'—'}</div><div class="lead-email">${l.email||'—'}</div>${_msg?`<div><button onclick="const el=document.getElementById('${_msgId}');el.style.display=el.style.display==='none'?'block':'none';" style="font-size:.58rem;padding:1px 6px;border-radius:4px;background:rgba(64,156,255,.08);color:var(--nes-blue);border:1px solid rgba(64,156,255,.2);cursor:pointer;margin-top:3px;"><i class='ti ti-message'></i> Message</button><div id="${_msgId}" style="display:none;font-size:.68rem;color:var(--muted);margin-top:4px;padding:6px 8px;background:var(--card);border-radius:5px;border:1px solid var(--border);font-style:italic;">${_msg}</div></div>`:''}</div><div class="lead-industry">${l.industry||'General'}</div><div class="lead-email">${l.phone||'—'}</div><div class="lead-time">${timeAgo}</div><div style="display:flex;align-items:center;gap:6px;"><span class="lead-badge ${badge.cls}">${badge.label}</span>${(userRole==='nesadmin'||userRole==='ceo'||userRole==='nes_partner')&&l.phone?`<button onclick="callWithSara('${l.id}','${(l.phone||'').replace(/'/g,'').replace(/\+/g,'%2B')}','${(l.name||'Lead').replace(/'/g,'')}')" style="font-size:.6rem;padding:2px 8px;border-radius:5px;background:rgba(63,185,80,0.1);color:#3fb950;border:1px solid rgba(63,185,80,0.3);cursor:pointer;white-space:nowrap;"><i class="ti ti-phone"></i> Sara</button>`:''}<button onclick="deleteLead('${l.id}','${(l.name||'this lead').replace(/'/g,'')}')" title="Delete permanently" style="font-size:.6rem;padding:2px 7px;border-radius:5px;background:rgba(248,81,73,0.1);color:#f85149;border:1px solid rgba(248,81,73,0.3);cursor:pointer;"><i class="ti ti-trash"></i></button></div></div>`;
+    const isRepeat=l.phone&&repeatPhones.has(l.phone.trim());
+    const repeatDot=isRepeat?`<span title="Repeat inquiry — same phone number seen before" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#d29922;margin-right:5px;flex-shrink:0;animation:pulse 1.5s infinite;"></span>`:'';
+    return`<div class="lt-row" id="lead-row-${l.id}"><div style="display:flex;align-items:flex-start;">${repeatDot}<div><div class="lead-name">${l.name||'—'}</div><div class="lead-email">${l.email||'—'}</div>${_msg?`<div><button onclick="const el=document.getElementById('${_msgId}');el.style.display=el.style.display==='none'?'block':'none';" style="font-size:.58rem;padding:1px 6px;border-radius:4px;background:rgba(64,156,255,.08);color:var(--nes-blue);border:1px solid rgba(64,156,255,.2);cursor:pointer;margin-top:3px;"><i class='ti ti-message'></i> Message</button><div id="${_msgId}" style="display:none;font-size:.68rem;color:var(--muted);margin-top:4px;padding:6px 8px;background:var(--card);border-radius:5px;border:1px solid var(--border);font-style:italic;">${_msg}</div></div>`:''}</div></div><div class="lead-industry">${l.industry||'General'}</div><div class="lead-email">${l.phone||'—'}</div><div class="lead-time">${timeAgo}</div><div style="display:flex;align-items:center;gap:6px;"><span class="lead-badge ${badge.cls}">${badge.label}</span>${(userRole==='nesadmin'||userRole==='ceo'||userRole==='nes_partner')&&l.phone?`<button onclick="callWithSara('${l.id}','${(l.phone||'').replace(/'/g,'').replace(/\+/g,'%2B')}','${(l.name||'Lead').replace(/'/g,'')}')" style="font-size:.6rem;padding:2px 8px;border-radius:5px;background:rgba(63,185,80,0.1);color:#3fb950;border:1px solid rgba(63,185,80,0.3);cursor:pointer;white-space:nowrap;"><i class="ti ti-phone"></i> Sara</button>`:''}<button onclick="deleteLead('${l.id}','${(l.name||'this lead').replace(/'/g,'')}')" title="Delete permanently" style="font-size:.6rem;padding:2px 7px;border-radius:5px;background:rgba(248,81,73,0.1);color:#f85149;border:1px solid rgba(248,81,73,0.3);cursor:pointer;"><i class="ti ti-trash"></i></button></div></div>`;
   }).join('');
 }
 
@@ -107,6 +122,7 @@ function filterLeads(filter,btn){
   let filtered=window._allLeads||[];
   if(filter==='today')filtered=filtered.filter(l=>l.created_at?.startsWith(new Date().toISOString().split('T')[0]));
   if(filter==='week')filtered=filtered.filter(l=>new Date(l.created_at)>new Date(Date.now()-7*24*60*60*1000));
+  if(filter==='repeats'){const rp=getRepeatPhones();filtered=filtered.filter(l=>l.phone&&rp.has(l.phone.trim()));}
   document.getElementById('leadsRows').innerHTML=renderLeadRows(filtered);
 }
 
