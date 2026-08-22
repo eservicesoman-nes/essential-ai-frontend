@@ -108,6 +108,35 @@ async function saveAllThresholds(){
 
 function showUpgradePopup(){ showPricing(); }
 
+function openSubscribeModal(plan,planLabel){
+  const html=`<div style="padding:4px 0;">
+    <p style="color:var(--muted);font-size:.85rem;margin-bottom:16px;">Choose your billing cycle for ${planLabel}. Annual billing includes a 15% discount.</p>
+    <button class="act-btn" style="width:100%;margin-bottom:8px;" onclick="startSubscription('${plan}','monthly')">Monthly</button>
+    <button class="act-btn" style="width:100%;background:linear-gradient(135deg,#1a7f37,#3fb950);" onclick="startSubscription('${plan}','annual')">Annual — 15% off</button>
+  </div>`;
+  showModal('Subscribe to '+planLabel,html);
+}
+async function startSubscription(plan,cycle){
+  const btn=event.target;
+  btn.disabled=true;btn.textContent='Processing...';
+  try{
+    const res=await fetch(API_URL+'/api/paypal/create-subscription',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
+      body:JSON.stringify({plan,cycle})
+    });
+    const data=await res.json();
+    if(data.checkout_url){
+      window.location.href=data.checkout_url;
+    } else {
+      alert('Subscription error: '+(data.error||'Unknown error'));
+      btn.disabled=false;btn.textContent=cycle==='monthly'?'Monthly':'Annual — 15% off';
+    }
+  }catch(e){
+    alert('Connection error. Please try again.');
+    btn.disabled=false;btn.textContent=cycle==='monthly'?'Monthly':'Annual — 15% off';
+  }
+}
 function showPricing(){
   const mc=document.getElementById('mainContent');
   mc.style.overflow='auto';
@@ -142,7 +171,7 @@ function showPricing(){
           <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);margin-bottom:8px;padding:6px 8px;background:var(--accent-lo);border-radius:6px;">
             + Apex Connect upgrade OMR 15/mo
           </div>
-          <button class="plan-action-btn" onclick="window.open('https://nes-ai.com/register.html?plan=presence','_blank')">${t('pricingCta.getStarted')}</button>
+          <button class="plan-action-btn" onclick="openSubscribeModal('presence','AI Presence')">Subscribe</button>
         </div>
 
         <div class="plan-card" style="border-color:var(--nes-blue);position:relative;">
@@ -166,7 +195,7 @@ function showPricing(){
           <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);margin-bottom:8px;padding:6px 8px;background:var(--accent-lo);border-radius:6px;">
             + Apex Outreach OMR 15/mo
           </div>
-          <button class="plan-action-btn" onclick="window.open('https://nes-ai.com/register.html?plan=operations','_blank')">${t('pricingCta.upgradeToOperations')}</button>
+          <button class="plan-action-btn" onclick="openSubscribeModal('operations','AI Operations')">Subscribe</button>
         </div>
 
         <div class="plan-card" style="border-color:#3fb950;position:relative;">
@@ -187,7 +216,7 @@ function showPricing(){
           <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);margin-bottom:8px;padding:6px 8px;background:rgba(63,185,80,.08);border-radius:6px;">
             + Apex Advisory OMR 20/mo<br>+ Extra social posts OMR 8/mo
           </div>
-          <button class="plan-action-btn" style="background:linear-gradient(135deg,#1a7f37,#3fb950);" onclick="window.open('https://nes-ai.com/register.html?plan=workforce','_blank')">${t('pricingCta.upgradeToWorkforce')}</button>
+          <button class="plan-action-btn" style="background:linear-gradient(135deg,#1a7f37,#3fb950);" onclick="openSubscribeModal('workforce','AI Workforce')">Subscribe</button>
         </div>
 
         <div class="plan-card" style="border-color:#d29922;position:relative;">
