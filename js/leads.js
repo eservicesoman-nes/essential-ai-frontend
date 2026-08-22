@@ -12,7 +12,7 @@ async function showLeadsPage(){
     <div class="page scrollable" id="leadsContent"><div style="text-align:center;padding:40px;color:var(--muted);font-family:var(--mono);font-size:.8rem;">${t('loading.leads')}</div></div>`;
   try{
     let leadsQ=sb.from('leads').select('*').order('created_at',{ascending:false}).limit(100);
-    if(userClientId)leadsQ=leadsQ.eq('client_id',userClientId);
+    if(userClientId && userRole !== 'nesadmin')leadsQ=leadsQ.eq('client_id',userClientId);
     const{data:leads,error}=await leadsQ;
     if(error)throw error;
     const today=new Date().toISOString().split('T')[0];
