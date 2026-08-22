@@ -100,7 +100,7 @@ function renderMyCredsForm(creds, client){
   html+='</div>';
   html+='<div style="display:flex;gap:6px;">';
   html+='<input id="newFeedSourceValue" type="text" class="form-input" placeholder="Search topic or RSS URL" style="font-size:.72rem;flex:1;">';
-  html+=`<button onclick="addFeedSource('${client.id}')" style="background:var(--nes-btn-grad);border:none;border-radius:7px;padding:7px 16px;color:#fff;font-size:.72rem;font-weight:700;cursor:pointer;white-space:nowrap;"><i class="ti ti-plus"></i> Add</button>`;
+  html+=`<button id="feedSourceSubmitBtn" onclick="addFeedSource('${client.id}')" style="background:var(--nes-btn-grad);border:none;border-radius:7px;padding:7px 16px;color:#fff;font-size:.72rem;font-weight:700;cursor:pointer;white-space:nowrap;"><i class="ti ti-plus"></i> Add</button> <button onclick="cancelEditFeedSource()" id="feedSourceCancelBtn" style="display:none;background:none;border:1px solid var(--border);border-radius:7px;padding:7px 12px;color:var(--muted);font-size:.72rem;cursor:pointer;white-space:nowrap;">Cancel</button>`;
   html+='</div>';
   html+='</div>';
   html+='<div id="it-cred-form" style="display:none;margin-top:16px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;">';
@@ -216,6 +216,7 @@ async function loadFeedSources(clientId){
       return '<div style="display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 10px;margin-bottom:6px;">'
         +'<span style="font-size:.6rem;font-family:var(--mono);padding:2px 8px;border-radius:10px;background:#0d2818;color:#3fb950;flex-shrink:0;">'+typeLabel+'</span>'
         +'<div style="flex:1;min-width:0;"><div style="font-size:.75rem;font-weight:600;">'+s.label+'</div><div style="font-size:.68rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+s.search_query+'</div></div>'
+        +'<button onclick="editFeedSource(\''+clientId+'\',\''+s.id+'\',\''+s.label.replace(/'/g,"\\'")+'\',\''+s.search_query.replace(/'/g,"\\'")+'\',\''+s.source_type+'\')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:.9rem;flex-shrink:0;"><i class="ti ti-pencil"></i></button>'
         +'<button onclick="deleteFeedSource(\''+clientId+'\',\''+s.id+'\')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:.9rem;flex-shrink:0;"><i class="ti ti-trash"></i></button>'
         +'</div>';
     }).join('');
@@ -237,6 +238,40 @@ async function addFeedSource(clientId){
     showToast(t('toast.feedSourcesSaved'));
     loadFeedSources(clientId);
   }catch(e){showToast('Error: '+e.message);}
+}
+let _editingSourceId=null;
+function editFeedSource(clientId,sourceId,label,searchQuery,sourceType){
+  _editingSourceId=sourceId;
+  document.getElementById('newFeedSourceType').value=sourceType;
+  document.getElementById('newFeedSourceLabel').value=label;
+  document.getElementById('newFeedSourceValue').value=searchQuery;
+  const btn=document.getElementById('feedSourceSubmitBtn');
+  if(btn){btn.textContent='Save Changes';btn.setAttribute('onclick',"saveEditedFeedSource('"+clientId+"')");}
+  const cancelBtn=document.getElementById('feedSourceCancelBtn');
+  if(cancelBtn)cancelBtn.style.display='inline-block';
+}
+async function saveEditedFeedSource(clientId){
+  const type=document.getElementById('newFeedSourceType').value;
+  const label=document.getElementById('newFeedSourceLabel').value.trim();
+  const value=document.getElementById('newFeedSourceValue').value.trim();
+  if(!label||!value){showToast('Enter both a label and a value');return;}
+  try{
+    const r=await fetch(API_URL+'/api/client/'+clientId+'/feed-sources/'+_editingSourceId,{method:'PATCH',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify({label,search_query:value,source_type:type})});
+    const data=await r.json();
+    if(!r.ok)throw new Error(data.error||'Failed to save changes');
+    cancelEditFeedSource();
+    showToast('Source updated');
+    loadFeedSources(clientId);
+  }catch(e){showToast('Error: '+e.message);}
+}
+function cancelEditFeedSource(){
+  _editingSourceId=null;
+  document.getElementById('newFeedSourceLabel').value='';
+  document.getElementById('newFeedSourceValue').value='';
+  const btn=document.getElementById('feedSourceSubmitBtn');
+  if(btn){btn.innerHTML='<i class="ti ti-plus"></i> Add';btn.setAttribute('onclick',"addFeedSource('"+(window._itCredsCache&&window._itCredsCache.clientId||'')+"')");}
+  const cancelBtn=document.getElementById('feedSourceCancelBtn');
+  if(cancelBtn)cancelBtn.style.display='none';
 }
 async function deleteFeedSource(clientId,sourceId){
   try{
