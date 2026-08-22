@@ -350,7 +350,7 @@ async function showCEODashboard(){
   try{
     const today=new Date().toISOString().split('T')[0];
     let leadsQ2=sb.from('leads').select('*').order('created_at',{ascending:false}).limit(100);
-    if(userClientId)leadsQ2=leadsQ2.eq('client_id',userClientId);
+    if(userClientId && userRole !== 'nesadmin')leadsQ2=leadsQ2.eq('client_id',userClientId);
     const{data:allLeads}=await leadsQ2;
     leads=allLeads||[];totalLeads=leads.length;
     leadsToday=leads.filter(l=>l.created_at?.startsWith(today)).length;
