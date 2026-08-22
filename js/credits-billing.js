@@ -111,8 +111,9 @@ function showUpgradePopup(){ showPricing(); }
 function openSubscribeModal(plan,planLabel){
   const html=`<div style="padding:4px 0;">
     <p style="color:var(--muted);font-size:.85rem;margin-bottom:16px;">Choose your billing cycle for ${planLabel}. Annual billing includes a 15% discount.</p>
-    <button class="act-btn" style="width:100%;margin-bottom:8px;" onclick="startSubscription('${plan}','monthly')">Monthly</button>
-    <button class="act-btn" style="width:100%;background:linear-gradient(135deg,#1a7f37,#3fb950);" onclick="startSubscription('${plan}','annual')">Annual — 15% off</button>
+    <button class="act-btn" style="width:100%;margin-bottom:8px;background:#003087;" onclick="startSubscription('${plan}','monthly')">Monthly — Pay with PayPal</button>
+    <button class="act-btn" style="width:100%;background:linear-gradient(135deg,#1a7f37,#3fb950);" onclick="startSubscription('${plan}','annual')">Annual — 15% off — Pay with PayPal</button>
+    <p style="color:var(--muted);font-size:.68rem;margin-top:10px;text-align:center;">You'll be redirected to PayPal to complete your subscription.</p>
   </div>`;
   showModal('Subscribe to '+planLabel,html);
 }
@@ -171,7 +172,7 @@ function showPricing(){
           <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);margin-bottom:8px;padding:6px 8px;background:var(--accent-lo);border-radius:6px;">
             + Apex Connect upgrade OMR 15/mo
           </div>
-          <button class="plan-action-btn" onclick="openSubscribeModal('presence','AI Presence')">Subscribe</button>
+          <button class="plan-action-btn" onclick="openSubscribeModal('presence','AI Presence')">Subscribe with PayPal</button>
         </div>
 
         <div class="plan-card" style="border-color:var(--nes-blue);position:relative;">
@@ -195,7 +196,7 @@ function showPricing(){
           <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);margin-bottom:8px;padding:6px 8px;background:var(--accent-lo);border-radius:6px;">
             + Apex Outreach OMR 15/mo
           </div>
-          <button class="plan-action-btn" onclick="openSubscribeModal('operations','AI Operations')">Subscribe</button>
+          <button class="plan-action-btn" onclick="openSubscribeModal('operations','AI Operations')">Subscribe with PayPal</button>
         </div>
 
         <div class="plan-card" style="border-color:#3fb950;position:relative;">
@@ -216,7 +217,7 @@ function showPricing(){
           <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);margin-bottom:8px;padding:6px 8px;background:rgba(63,185,80,.08);border-radius:6px;">
             + Apex Advisory OMR 20/mo<br>+ Extra social posts OMR 8/mo
           </div>
-          <button class="plan-action-btn" style="background:linear-gradient(135deg,#1a7f37,#3fb950);" onclick="openSubscribeModal('workforce','AI Workforce')">Subscribe</button>
+          <button class="plan-action-btn" style="background:linear-gradient(135deg,#1a7f37,#3fb950);" onclick="openSubscribeModal('workforce','AI Workforce')">Subscribe with PayPal</button>
         </div>
 
         <div class="plan-card" style="border-color:#d29922;position:relative;">
