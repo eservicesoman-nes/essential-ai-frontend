@@ -5,7 +5,7 @@ async function showWhatsAppPage(){
   const mc=document.getElementById('mainContent');
   mc.style.overflow='auto';
   mc.innerHTML=`
-    <div style="padding:11px 62px 11px 60px;border-bottom:1px solid var(--border);flex-shrink:0;">
+    <div style="padding-block:11px;padding-inline-end:var(--header-clearance);padding-inline-start:60px;border-bottom:1px solid var(--border);flex-shrink:0;">
       <div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;">${t('whatsapp.title')}</div>
       <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);" id="whatsappSubtitle">${t('common.loading')}</div>
     </div>
