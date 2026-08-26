@@ -951,7 +951,11 @@ hub.innerHTML=`<div style="padding-block:11px;padding-inline-end:var(--header-cl
 
 function hideTeamHub(){
   const hub=document.getElementById('teamHubWrapper');
-  if(hub)hub.style.display='none';
+  if(hub){
+    const iframe=document.getElementById('teamHubIframe');
+    if(iframe)iframe.src='about:blank';
+    hub.remove();
+  }
   document.getElementById('mainContent').style.display='flex';
   window._teamHubVisible=false;
 }
