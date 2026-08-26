@@ -5,7 +5,7 @@ async function showSalesPortal(){
   const mc = document.getElementById('mainContent');
   mc.style.overflow = 'hidden';
   mc.innerHTML = `
-    <div style="padding:11px 62px 11px 60px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;">
+    <div style="padding-block:11px;padding-inline-end:var(--header-clearance);padding-inline-start:60px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;">
       <div>
         <div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;display:flex;align-items:center;gap:6px;">
           <i class="ti ti-users-group" style="filter:drop-shadow(0 0 3px var(--nes-blue))"></i>${t('partnerHub.title')}
