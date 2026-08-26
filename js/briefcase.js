@@ -8,7 +8,7 @@ async function showBriefcasePage(){
   window._briefcaseDocContext='';
   window._briefcaseDocContextReady=false;
   mc.innerHTML=`
-    <div style="padding:11px 214px 11px 60px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;">
+    <div style="padding-block:11px;padding-inline-end:var(--header-clearance);padding-inline-start:60px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;">
       <div><div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;">${t('sectionTitle.briefcase')}</div><div style="font-family:var(--mono);font-size:.7rem;color:#3fb950;font-weight:700;" id="briefcaseSubtitle">${t('common.loading')}</div></div>
       <label style="font-size:.7rem;padding:5px 11px;border-radius:6px;border:1px solid rgba(64,156,255,0.4);background:rgba(64,156,255,0.15);color:var(--nes-blue);cursor:pointer;font-family:var(--mono);font-weight:700;display:flex;align-items:center;gap:5px;">
         <i class="ti ti-upload" style="font-size:13px"></i> Upload
