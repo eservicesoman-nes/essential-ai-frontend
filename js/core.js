@@ -646,10 +646,12 @@ function restoreChat(idx){
 
 function bindNav(){
   document.querySelectorAll('.nav-item[data-view]').forEach(item=>{
-    item.addEventListener('click',()=>{
-      const v=item.dataset.view;
+    const freshItem=item.cloneNode(true);
+    item.parentNode.replaceChild(freshItem,item);
+    freshItem.addEventListener('click',()=>{
+      const v=freshItem.dataset.view;
       document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-      item.classList.add('active');
+      freshItem.classList.add('active');
       showView(v);
       if(window.innerWidth<=900){
         document.getElementById('sidebar').classList.remove('open');
