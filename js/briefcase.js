@@ -280,6 +280,7 @@ async function sendBriefcaseChatMessage(){
       const check = setInterval(()=>{
         if(window._briefcaseDocContextReady){ clearInterval(check); resolve(); }
       }, 400);
+      setTimeout(()=>{ clearInterval(check); resolve(); }, 15000);
     });
     typingBubble.textContent = 'Thinking...';
   }
