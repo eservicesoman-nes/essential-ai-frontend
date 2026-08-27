@@ -209,7 +209,7 @@ async function loadBriefcaseDocContext(){
   try{
   const files = window._vaultFiles || [];
   window._briefcaseDocContextReady=false;
-  if(!files.length){ window._briefcaseDocContext=''; window._briefcaseDocContextReady=true; return; }
+  if(!files.length){ window._briefcaseDocContext=''; return; }
 
   let combined = '';
   let loadedCount = 0;
