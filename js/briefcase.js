@@ -204,6 +204,9 @@ async function saveExtractedText(fileId, text){
 }
 
 async function loadBriefcaseDocContext(){
+  if(window._briefcaseExtracting) return;
+  window._briefcaseExtracting = true;
+  try{
   const files = window._vaultFiles || [];
   window._briefcaseDocContextReady=false;
   if(!files.length){ window._briefcaseDocContext=''; window._briefcaseDocContextReady=true; return; }
@@ -214,7 +217,7 @@ async function loadBriefcaseDocContext(){
   for(const f of files){
     try{
       let text = f.extracted_text;
-      if(!text || text.length <= 4000){
+      if(!text){
         const urlRes = await fetch(`${API_URL}/api/vault/download-url/${f.id}`, {
           headers:{'Authorization':'Bearer '+session.access_token}
         });
@@ -239,6 +242,9 @@ async function loadBriefcaseDocContext(){
 
   window._briefcaseDocContext = combined;
   window._briefcaseDocContextReady = true;
+  }finally{
+    window._briefcaseExtracting = false;
+  }
 }
 
 function appendBriefcaseChatMsg(role, text){
