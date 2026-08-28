@@ -207,11 +207,11 @@ async function loadAnalytics(days){
                 <div style="font-size:.78rem;font-weight:600;">${cl.name}</div>
                 <div style="font-size:.62rem;color:var(--muted);">${cl.plan||'presence'} · ${cl.status}</div>
               </div>
-              <div style="text-align:right;">
+              <div style="text-align:end;">
                 <div style="font-size:.75rem;font-weight:600;color:var(--nes-blue);">OMR ${val}/mo</div>
                 <div style="font-size:.6rem;color:var(--muted);">${clientLeads} leads</div>
               </div>
-              <div style="width:7px;height:7px;border-radius:50%;background:${color};margin-left:8px;flex-shrink:0;"></div>
+              <div style="width:7px;height:7px;border-radius:50%;background:${color};margin-inline-start:8px;flex-shrink:0;"></div>
             </div>`;
           }).join('')}
         <div style="border-top:1px solid var(--border);margin-top:8px;padding-top:8px;display:flex;justify-content:space-between;font-family:var(--mono);font-size:.65rem;">
@@ -254,8 +254,8 @@ async function loadAnalytics(days){
           <table style="width:100%;border-collapse:collapse;font-size:.72rem;">
             <thead>
               <tr style="background:rgba(210,153,34,0.08);">
-                <th style="padding:8px 12px;text-align:left;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border);">${t('tableHeader.client')}</th>
-                <th style="padding:8px 12px;text-align:left;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border);">${t('tableHeader.month')}</th>
+                <th style="padding:8px 12px;text-align:start;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border);">${t('tableHeader.client')}</th>
+                <th style="padding:8px 12px;text-align:start;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border);">${t('tableHeader.month')}</th>
                 <th style="padding:8px 12px;text-align:right;color:#409cff;font-weight:600;border-bottom:1px solid var(--border);">${t('tableHeader.gemini')}</th>
                 <th style="padding:8px 12px;text-align:right;color:#7f77dd;font-weight:600;border-bottom:1px solid var(--border);">${t('tableHeader.claude')}</th>
                 <th style="padding:8px 12px;text-align:right;color:#3fb950;font-weight:600;border-bottom:1px solid var(--border);">${t('tableHeader.deepseek')}</th>
