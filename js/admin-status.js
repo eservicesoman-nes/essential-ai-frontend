@@ -238,7 +238,7 @@ async function checkPlatformStatus(){
     ])
   ]);
   const allOk=results.every(function(r){return r.ok;});
-  const now=new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  const now=new Date().toLocaleTimeString(getDateLocale('en-GB'),{hour:'2-digit',minute:'2-digit',second:'2-digit'});
   const apis=apiCredits.data||[];
   const [clientRes,leadRes,userRes,usageRes]=platformStats;
   const todayUsage=usageRes.data||[];
