@@ -1,0 +1,449 @@
+{
+  "auth": {
+    "signIn": "تسجيل الدخول",
+    "signUp": "إنشاء حساب",
+    "emailAddress": "البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "forgotPassword": "نسيت كلمة المرور؟",
+    "signInButton": "← تسجيل الدخول",
+    "changePassword": "تغيير كلمة المرور",
+    "logout": "تسجيل الخروج"
+  },
+  "nav": {
+    "askNesai": "اسأل نيس",
+    "documents": "المستندات",
+    "briefcase": "الحقيبة",
+    "ceoDashboard": "لوحة الرئيس التنفيذي",
+    "inbox": "البريد الوارد",
+    "teamHub": "مركز الفريق",
+    "leads": "العملاء المحتملون",
+    "team": "الفريق",
+    "itSetup": "إعدادات تقنية المعلومات",
+    "whatsapp": "واتساب",
+    "partnerHub": "مركز الشركاء",
+    "clientManager": "إدارة العملاء",
+    "usageAnalytics": "تحليلات الاستخدام",
+    "platformStatus": "حالة المنصة",
+    "apiCredits": "رصيد الـ API",
+    "systemLogs": "سجلات النظام",
+    "incidents": "الحوادث",
+    "usageBilling": "الاستخدام والفواتير",
+    "imageGen": "توليد الصور",
+    "saraTopup": "شحن رصيد سارة",
+    "adamTopup": "شحن رصيد آدم",
+    "briefcaseTopup": "شحن رصيد الحقيبة"
+  },
+  "common": {
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "add": "إضافة",
+    "search": "بحث",
+    "loading": "جاري التحميل…",
+    "ready": "جاهز",
+    "noIssuesFound": "لا توجد مشاكل"
+  },
+  "loading": {
+    "analytics": "جاري تحميل التحليلات...",
+    "clients": "جاري تحميل العملاء...",
+    "history": "جاري تحميل السجل...",
+    "users": "جاري تحميل المستخدمين...",
+    "logs": "جاري تحميل السجلات...",
+    "feed": "جاري تحميل النشرة...",
+    "dashboard": "جاري تحميل اللوحة...",
+    "usage": "جاري تحميل الاستخدام...",
+    "emails": "جاري تحميل الرسائل...",
+    "leads": "جاري تحميل العملاء المحتملين...",
+    "team": "جاري تحميل الفريق...",
+    "messages": "جاري تحميل الرسائل..."
+  },
+  "empty": {
+    "noLeadData": "لا توجد بيانات عملاء محتملين بعد",
+    "noClientsAnalytics": "لا يوجد عملاء بعد",
+    "noUsageData": "لا توجد بيانات استخدام بعد",
+    "noFiles": "لا توجد ملفات بعد",
+    "noTeamMembers": "لا يوجد أعضاء آخرون في الفريق بعد.",
+    "noEmailAccounts": "لم يتم ربط أي حساب بريد إلكتروني بعد.",
+    "noPayments": "لم يتم تسجيل أي مدفوعات بعد.",
+    "noRecentChats": "لا توجد محادثات حديثة",
+    "noFeedItems": "لا توجد عناصر في النشرة بعد",
+    "noLeadsDashboard": "لا يوجد عملاء محتملون بعد",
+    "noActivePartnersDashboard": "لا يوجد شركاء نشطون بعد",
+    "noLeadsFound": "لم يتم العثور على عملاء محتملين"
+  },
+  "placeholder": {
+    "searchDocs": "بحث في المستندات...",
+    "askAboutDocuments": "اسأل عن مستنداتك...",
+    "searchClients": "بحث في العملاء...",
+    "amountOmr": "المبلغ بالريال العماني",
+    "paymentNote": "ملاحظة (مطلوبة) - مثال: تم الاستلام شخصياً، إيصال رقم 102",
+    "appPassword": "كلمة مرور التطبيق (وليست كلمة المرور الرئيسية)",
+    "salesInbox": "بريد المبيعات",
+    "companyName": "اسم الشركة",
+    "emailLabel": "البريد الإلكتروني"
+  },
+  "toast": {
+    "fillBothFields": "يرجى تعبئة كلا الحقلين",
+    "serviceAdded": "تمت إضافة الخدمة",
+    "enterApiName": "أدخل اسم الـ API",
+    "apiAdded": "تمت إضافة الـ API",
+    "sharingUpdated": "تم تحديث المشاركة ✓",
+    "fileDeleted": "تم حذف الملف",
+    "credentialsSaved": "تم حفظ بيانات الاعتماد ✓",
+    "agentSettingsSaved": "تم حفظ إعدادات الوكيل ✓",
+    "enterValidAmount": "أدخل مبلغاً صحيحاً",
+    "noteRequired": "الملاحظة مطلوبة للإدخالات اليدوية",
+    "failedNetworkError": "فشل: خطأ في الشبكة",
+    "enterValidCustomAmount": "أدخل مبلغاً مخصصاً صحيحاً",
+    "clientCreated": "تم إنشاء العميل",
+    "clientUpdated": "تم تحديث العميل",
+    "cancellationRequestSent": "⚠️ تم إرسال طلب الإلغاء — تم إطلاق التنبيهات",
+    "clientDeleted": "تم حذف العميل",
+    "paymentSuccessful": "✅ تمت عملية الدفع بنجاح! تم تحديث حسابك.",
+    "paymentCancelled": "تم إلغاء عملية الدفع.",
+    "moduleNotIncluded": "هذه الوحدة غير مشمولة في باقتك الحالية. تواصل مع نيس للترقية.",
+    "serviceNameRequired": "اسم الخدمة مطلوب",
+    "thresholdsSaved": "تم حفظ الحدود",
+    "selectClientFirst": "اختر عميلاً أولاً",
+    "emailPasswordRequired": "البريد الإلكتروني وكلمة مرور التطبيق مطلوبان",
+    "emailAccountConnected": "تم ربط حساب البريد الإلكتروني ✓",
+    "accountRemoved": "تم إزالة الحساب",
+    "passwordUpdatedReconnecting": "تم تحديث كلمة المرور — جاري إعادة الاتصال...",
+    "emailRemovedFromView": "تمت إزالة البريد الإلكتروني من العرض",
+    "fillAllFields": "يرجى تعبئة جميع الحقول",
+    "accountNotFound": "الحساب غير موجود",
+    "emailSentSuccessfully": "تم إرسال البريد الإلكتروني بنجاح",
+    "writeReplyFirst": "اكتب رداً أولاً",
+    "replySent": "تم إرسال الرد ✓",
+    "leadDeleted": "تم حذف العميل المحتمل",
+    "incorrectCodeCallCancelled": "الرمز غير صحيح — تم إلغاء المكالمة",
+    "fieldAddedSave": "تمت إضافة الحقل — احفظ لتخزينه",
+    "saved": "تم الحفظ ✓",
+    "credentialsSavedSecurely": "تم حفظ بيانات الاعتماد بأمان ✓",
+    "feedSourcesSaved": "تم حفظ مصادر النشرة ✓",
+    "errorUpdatingPartner": "خطأ في تحديث الشريك",
+    "allCommissionsApproved": "تمت الموافقة على جميع العمولات المعلقة ✓",
+    "partnerUpdated": "تم تحديث الشريك ✓",
+    "userRemoved": "تمت إزالة المستخدم ✓",
+    "accessUpdated": "تم تحديث الصلاحيات ✓",
+    "roleUpdated": "تم تحديث الدور ✓",
+    "departmentUpdated": "تم تحديث القسم ✓",
+    "memberRemoved": "تمت إزالة العضو ✓",
+    "departmentAdded": "تمت إضافة القسم ✓",
+    "departmentDeleted": "تم حذف القسم ✓"
+  },
+  "formLabel": {
+    "companyName": "اسم الشركة *",
+    "email": "البريد الإلكتروني",
+    "website": "الموقع الإلكتروني",
+    "industry": "القطاع",
+    "region": "المنطقة",
+    "country": "الدولة",
+    "language": "اللغة",
+    "leadNotificationEmail": "بريد إشعارات العملاء المحتملين",
+    "primaryColour": "اللون الأساسي",
+    "logoUrl": "رابط الشعار",
+    "plan": "الباقة",
+    "status": "الحالة",
+    "trialStartDate": "تاريخ بداية الفترة التجريبية",
+    "trialDurationDays": "مدة الفترة التجريبية (أيام)",
+    "paygFullAccess": "وصول كامل بالدفع أولاً بأول (للاختبار)",
+    "grantImageCredits": "منح رصيد توليد الصور",
+    "emailAddress": "البريد الإلكتروني",
+    "role": "الدور"
+  },
+  "tableHeader": {
+    "client": "العميل",
+    "month": "الشهر",
+    "gemini": "جيميناي",
+    "claude": "كلود",
+    "deepseek": "ديب سيك",
+    "stream": "التدفق",
+    "costUsd": "التكلفة بالدولار",
+    "costOmr": "التكلفة بالريال العماني",
+    "partner": "الشريك",
+    "type": "النوع",
+    "rate": "النسبة",
+    "amount": "المبلغ"
+  },
+  "sectionTitle": {
+    "platformStatus": "حالة المنصة",
+    "briefcase": "الحقيبة",
+    "clientManager": "إدارة العملاء",
+    "addNewClient": "إضافة عميل جديد",
+    "addNewClientSubtitle": "أدخل التفاصيل أدناه",
+    "ceoDashboard": "لوحة الرئيس التنفيذي",
+    "teamHub": "مركز الفريق",
+    "teamHubSubtitle": "التواصل الداخلي للفريق",
+    "leads": "العملاء المحتملون",
+    "itSetup": "إعدادات تقنية المعلومات"
+  },
+  "confirm": {
+    "clearAllMessages": "مسح جميع الرسائل؟",
+    "signOut": "تسجيل الخروج؟",
+    "removeEmailAccount": "إزالة حساب البريد الإلكتروني هذا؟",
+    "deleteEmailFromInbox": "حذف هذا البريد من صندوق الوارد؟",
+    "removeUserFromClient": "إزالة هذا المستخدم من العميل؟",
+    "unsavedChangesSwitchTab": "لديك تغييرات غير محفوظة. هل تريد تبديل التبويب على أي حال؟",
+    "removeTeamMember": "إزالة عضو الفريق هذا؟",
+    "absolutelySureStaffUnassigned": "هل أنت متأكد تماماً؟ الموظفون المعينون في"
+  },
+  "pageSubtitle": {
+    "platformStatus": "نيس — منصة الأعمال الموحدة · فحص صحي مباشر",
+    "analytics": "استخدام المنصة · جميع العملاء · مباشر",
+    "clientManager": "لإدارة نيس فقط · إدارة جميع العملاء",
+    "apiCredits": "الرصيد · الاستخدام · حدود الشحن التلقائي",
+    "incidents": "وقت تشغيل الخادم وسجل الإصلاح التلقائي · لإدارة نيس فقط",
+    "itSetup": "قائمة التكامل · اربط خدماتك",
+    "partnerHub": "نيس · هيكل الحوافز · العملاء المباشرون وعملاء الشركاء"
+  },
+  "button": {
+    "signOff": "اعتماد نهائي",
+    "cancelSub": "إلغاء الاشتراك",
+    "upgradePlan": "ترقية الباقة",
+    "addPartnerTab": "+ إضافة شريك",
+    "addPartner": "إضافة شريك"
+  },
+  "deen": {
+    "subtitle": "الرفيق الإسلامي · القرآن الكريم · الحديث الشريف · مواقيت الصلاة · الأذكار",
+    "openFullPage": "فتح الصفحة كاملة"
+  },
+  "whatsapp": {
+    "title": "الرد التلقائي على واتساب",
+    "messagesReceived": "رسالة مستلمة",
+    "contact": "جهة الاتصال",
+    "phone": "الهاتف",
+    "message": "الرسالة",
+    "received": "تاريخ الاستلام",
+    "noMessagesYet": "لا توجد رسائل واتساب بعد",
+    "unknown": "غير معروف"
+  },
+  "plan": {
+    "aiPresence": "الحضور الذكي",
+    "aiOperations": "العمليات الذكية",
+    "aiWorkforce": "القوى العاملة الذكية",
+    "aiInfrastructure": "البنية التحتية الذكية",
+    "totalMrr": "إجمالي الإيراد الشهري"
+  },
+  "analyticsSection": {
+    "totalLeads": "إجمالي العملاء المحتملين",
+    "conversionRate": "معدل التحويل",
+    "intelArticles": "مقالات النشرة",
+    "leadGeography": "التوزيع الجغرافي للعملاء",
+    "clientOverview": "نظرة عامة على العملاء"
+  },
+  "leadsKpi": {
+    "totalLeads": "إجمالي العملاء المحتملين",
+    "highValue": "قيمة عالية",
+    "thisWeek": "هذا الأسبوع",
+    "govPortsAviation": "حكومي · موانئ · طيران",
+    "last7Days": "آخر 7 أيام"
+  },
+  "teamSection": {
+    "teamManagement": "إدارة الفريق",
+    "subtitle": "دعوة الموظفين · تعيين الأقسام · إدارة الأدوار",
+    "inviteStaff": "دعوة موظف",
+    "inviteStaffMember": "دعوة عضو للفريق"
+  },
+  "partnerHub": {
+    "title": "مركز الشركاء",
+    "overview": "نظرة عامة",
+    "partners": "الشركاء",
+    "commissions": "العمولات",
+    "programme": "البرنامج",
+    "partnerMrr": "إيراد الشركاء الشهري",
+    "commissionDue": "العمولة المستحقة",
+    "successRate": "معدل النجاح",
+    "activePartners": "الشركاء النشطون",
+    "pending": "قيد الانتظار"
+  },
+  "clientTab": {
+    "modules": "الوحدات",
+    "credentials": "بيانات الاعتماد",
+    "branding": "الهوية التجارية",
+    "aiAgents": "الوكلاء الأذكياء",
+    "billing": "الفواتير",
+    "users": "المستخدمون",
+    "email": "البريد الإلكتروني",
+    "saveCredentials": "حفظ بيانات الاعتماد",
+    "saveBranding": "حفظ الهوية التجارية"
+  },
+  "itSetupItem": {
+    "socialMedia": "وسائل التواصل الاجتماعي",
+    "messagingLeads": "الرسائل والعملاء المحتملون",
+    "inboxEmail": "البريد الوارد والبريد الإلكتروني",
+    "facebook": "فيسبوك",
+    "facebookDesc": "رمز الصفحة + معرّف الصفحة",
+    "instagram": "إنستغرام",
+    "instagramDesc": "معرّف الحساب التجاري",
+    "linkedin": "لينكدإن",
+    "linkedinDesc": "رمز الوصول",
+    "whatsapp": "واتساب",
+    "whatsappDesc": "معرّف الهاتف + رمز الـ API",
+    "leadAlertsEmail": "بريد تنبيهات العملاء المحتملين",
+    "leadAlertsEmailDesc": "أين تُرسل العملاء المحتملون الجدد",
+    "website": "الموقع الإلكتروني",
+    "websiteDesc": "رابط موقعك الإلكتروني",
+    "emailAccount": "حساب البريد الإلكتروني",
+    "emailAccountDesc": "اربط بريدك الوارد (IMAP/SMTP)"
+  },
+  "apiCreditsLabel": {
+    "apisMonitored": "واجهات API المراقَبة",
+    "alertsActive": "التنبيهات النشطة",
+    "autoRecharge": "الشحن التلقائي",
+    "estMonthly": "التقدير الشهري",
+    "currentBalance": "الرصيد الحالي",
+    "usedThisMonth": "المستخدم هذا الشهر"
+  },
+  "inbox": {
+    "title": "البريد الوارد",
+    "unifiedEmailPrefix": "بريد موحّد · جميع الحسابات · ",
+    "compose": "إنشاء رسالة"
+  },
+  "chatUi": {
+    "copy": "نسخ",
+    "describeImage": "صف الصورة التي تريدها…",
+    "askMeAnything": "اسألني عن أي شيء...",
+    "ready": "جاهز",
+    "attach": "إرفاق",
+    "voice": "صوت",
+    "disclaimer": "قد يخطئ نيس أحياناً"
+  },
+  "ceoDashboardSection": {
+    "performance": "الأداء",
+    "platformHealth": "صحة المنصة",
+    "marketIntelligence": "الاستخبارات السوقية",
+    "allSystemsOperational": "جميع الأنظمة تعمل — المنصة تعمل بسلاسة"
+  },
+  "briefcaseUi": {
+    "askNesAi": "اسأل نيس",
+    "filesUsage": "ملفات ·"
+  },
+  "adminStatusUi": {
+    "addApi": "إضافة API",
+    "lastChecked": "آخر فحص:",
+    "backupStatus": "حالة النسخ الاحتياطي",
+    "refresh": "تحديث"
+  },
+  "systemLogsUi": {
+    "subtitle": "سجلات الأخطاء والمخرجات المباشرة للخادم · لإدارة نيس فقط",
+    "last50Lines": "آخر 50 سطراً",
+    "nesAiErrors": "أخطاء نيس",
+    "backendErrors": "أخطاء الخادم",
+    "nesAiOutput": "مخرجات نيس",
+    "backendOutput": "مخرجات الخادم"
+  },
+  "incidentsStat": {
+    "uptime7Days": "وقت التشغيل (7 أيام)",
+    "incidents7Days": "الحوادث (7 أيام)",
+    "totalIncidents": "إجمالي الحوادث",
+    "autoResolved": "تم الحل تلقائياً",
+    "escalated": "تم التصعيد",
+    "avgDuration": "متوسط المدة",
+    "recentIncidents": "الحوادث الأخيرة"
+  },
+  "daysFilter": {
+    "d7": "7 أيام",
+    "d30": "30 يوماً",
+    "d90": "90 يوماً"
+  },
+  "clientListUi": {
+    "addBtn": "+ إضافة",
+    "noClientsYet": "لا يوجد عملاء بعد.",
+    "clickToCreate": "لإنشاء واحد."
+  },
+  "modeLabel": {
+    "chat": "اسأل نيس",
+    "docs": "وضع المستندات",
+    "image": "وضع توليد الصور"
+  },
+  "coreUi": {
+    "companySettings": "إعدادات الشركة",
+    "passwordMinChars": "كلمة المرور (6 أحرف على الأقل)"
+  },
+  "pricingCta": {
+    "getStarted": "← ابدأ الآن",
+    "upgradeToOperations": "← ترقية إلى العمليات الذكية",
+    "upgradeToWorkforce": "← ترقية إلى القوى العاملة الذكية",
+    "contactUs": "← تواصل معنا"
+  },
+  "teamInvite": {
+    "sendInvite": "إرسال الدعوة",
+    "addDepartment": "إضافة قسم",
+    "departmentNamePrompt": "اسم القسم:"
+  },
+  "welcomeUi": {
+    "welcomeMessage": "مرحباً بك في نيس. كيف يمكنني مساعدتك اليوم؟",
+    "selectEmailToRead": "اختر بريداً إلكترونياً لقراءته"
+  },
+  "leadsTableHeader": {
+    "nameEmail": "الاسم / البريد الإلكتروني",
+    "industry": "القطاع",
+    "phone": "الهاتف",
+    "date": "التاريخ",
+    "status": "الحالة"
+  },
+  "miscPanelsUi": {
+    "fieldNamePrompt": "اسم الحقل (مثال: stripe_key):",
+    "value": "القيمة"
+  },
+  "chatUtilsUi": {
+    "trialEnded": "انتهت الفترة التجريبية",
+    "credits": "رصيد",
+    "free": "مجاني",
+    "clearedHowCanIHelp": "تم المسح. كيف يمكنني مساعدتك؟",
+    "copied": "تم النسخ",
+    "thinking": "جاري التفكير…"
+  },
+  "authFlow": {
+    "saving": "جاري الحفظ...",
+    "errorTryAgain": "خطأ — يرجى المحاولة مرة أخرى",
+    "emailPasswordRequired": "البريد الإلكتروني وكلمة المرور مطلوبان.",
+    "emailRequired": "البريد الإلكتروني مطلوب.",
+    "checkEmailResetLink": "تحقق من بريدك الإلكتروني للحصول على رابط إعادة تعيين كلمة المرور.",
+    "enterNewPasswordPrompt": "أدخل كلمة المرور الجديدة (6 أحرف على الأقل):",
+    "failedUpdatePassword": "فشل تحديث كلمة المرور: ",
+    "passwordUpdatedSignIn": "تم تحديث كلمة المرور بنجاح. يرجى تسجيل الدخول بكلمة المرور الجديدة.",
+    "passwordMin6Chars": "يجب أن تتكون كلمة المرور من 6 أحرف على الأقل.",
+    "passwordsDoNotMatch": "كلمتا المرور غير متطابقتين.",
+    "updating": "جاري التحديث...",
+    "update": "تحديث",
+    "passwordUpdatedSuccess": "تم تحديث كلمة المرور بنجاح!",
+    "today": "اليوم",
+    "yesterday": "أمس",
+    "chat": "محادثة"
+  },
+  "chatError": {
+    "webSearchOn": "البحث في الإنترنت مُفعّل",
+    "dailyLimitReached": "تم بلوغ الحد اليومي. عد غداً!",
+    "errorPrefix": "خطأ ",
+    "pleaseTryAgain": ". يرجى المحاولة مرة أخرى.",
+    "networkError": "خطأ في الشبكة. يرجى التحقق من اتصالك.",
+    "sorryCouldNotGenerate": "عذراً، لم أتمكن من توليد رد.",
+    "fileAttachmentDocsMode": "إرفاق الملفات متاح في وضع المستندات.",
+    "fileTooLarge": "الملف كبير جداً. الحد الأقصى 10 ميغابايت.",
+    "analyzing": "جاري التحليل…",
+    "couldNotExtractText": "تعذّر استخراج النص.",
+    "documentAnalyzed": "تم تحليل المستند.",
+    "couldNotAnalyzeFile": "تعذّر تحليل الملف.",
+    "errorColon": "خطأ: "
+  },
+  "pricingPage": {
+    "chooseYourPlan": "اختر باقتك",
+    "founderPricingTitle": "تسعير المؤسسين — خصم 50٪ لأول 50 عميلاً · للربع الأول من الاشتراك",
+    "founderPricingDetail": "احصل على هذا السعر للربع الأول من الاشتراك · سارة مشمولة في جميع الباقات · لا رسوم إعداد خلال فترة المؤسسين",
+    "popular": "الأكثر طلباً",
+    "notSet": "غير محدد",
+    "healthy": "جيد",
+    "low": "منخفض",
+    "apiAdded": "تمت إضافة الـ API",
+    "saving": "جاري الحفظ...",
+    "processing": "جاري المعالجة...",
+    "errorPrefix": "خطأ: ",
+    "starterBundle": "باقة البداية",
+    "standardBundle": "الباقة القياسية",
+    "powerBundle": "باقة القوة",
+    "saraVoiceTopup": "شحن رصيد سارة الصوتي"
+  }
+}
