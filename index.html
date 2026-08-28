@@ -76,7 +76,7 @@
     /* ── SIDEBAR ── */
     .sb-toggle{position:fixed;inset-inline-start:16px;top:16px;z-index:1010;background:var(--accent);border:none;border-radius:50%;width:42px;height:42px;display:grid;place-items:center;cursor:pointer;color:#fff;font-size:1.2rem;box-shadow:0 2px 12px rgba(0,0,0,.3);}
     .sidebar{width:228px;flex-shrink:0;background:var(--surface);border-inline-end:1px solid var(--border);display:flex;flex-direction:column;padding:0;height:100dvh;overflow-y:auto;z-index:1000;transition:transform .3s ease;}
-    @media(max-width:900px){.sidebar{position:fixed;top:0;inset-inline-start:0;transform:translateX(-100%);}.sidebar.open{transform:translateX(0);box-shadow:4px 0 20px rgba(0,0,0,.5);}.welcome-card{padding-top:70px!important;}main{margin-inline-start:0!important;width:100%!important;}}[dir='rtl'] .sidebar{transform:translateX(100%);}[dir='rtl'] .sidebar.open{transform:translateX(0);}
+    @media(max-width:900px){.sidebar{position:fixed;top:0;inset-inline-start:0;transform:translateX(-100%);}.sidebar.open{transform:translateX(0);box-shadow:4px 0 20px rgba(0,0,0,.5);}.welcome-card{padding-top:70px!important;}main{margin-inline-start:0!important;width:100%!important;}[dir='rtl'] .sidebar{transform:translateX(100%);}[dir='rtl'] .sidebar.open{transform:translateX(0);}}
     @media(min-width:901px){.sidebar{position:relative;}.sidebar.collapsed{position:fixed;transform:translateX(-100%);}.sb-toggle{display:none!important;}}
 
     /* Avatar with ping */
