@@ -224,7 +224,7 @@ function renderEmailList(emails){
   el.innerHTML=emails.map((e,i)=>{
     const acctIdx=accounts.indexOf(e.account_email);
     const color=colors[acctIdx%5]||'#409cff';
-    const date=e.received_at?new Date(e.received_at).toLocaleDateString('en-GB',{day:'numeric',month:'short'}):'';
+    const date=e.received_at?new Date(e.received_at).toLocaleDateString(getDateLocale('en-GB'),{day:'numeric',month:'short'}):'';
     return`<div onclick="showEmail(${i})" style="padding:12px;border-bottom:1px solid rgba(26,35,50,.5);cursor:pointer;border-inline-start:3px solid ${color};-webkit-tap-highlight-color:transparent;${!e.is_read?'background:rgba(64,156,255,0.05);':''}" class="email-row-${i}">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;">
         <div style="font-size:.75rem;font-weight:${e.is_read?'400':'600'};color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;">${e.from_name||e.from_address||'Unknown'}</div>
@@ -396,7 +396,7 @@ function showEmail(idx){
       <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
         <span style="font-size:.65rem;padding:2px 8px;border-radius:12px;color:#fff;background:${color};">${e.account_email}</span>
         <span style="font-size:.72rem;color:var(--muted);">From: ${e.from_name?e.from_name+' &lt;'+e.from_address+'&gt;':e.from_address}</span>
-        <span style="font-size:.65rem;color:var(--muted);margin-inline-start:auto;">${e.received_at?new Date(e.received_at).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):''}</span>
+        <span style="font-size:.65rem;color:var(--muted);margin-inline-start:auto;">${e.received_at?new Date(e.received_at).toLocaleString(getDateLocale('en-GB'),{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):''}</span>
       </div>
     </div>
     <div style="flex:1;padding:18px;overflow-y:auto;font-size:.82rem;color:var(--text);line-height:1.7;" id="emailBodyPanel">
