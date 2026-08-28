@@ -157,7 +157,7 @@ async function renderPartnerHub(){
               <div style="font-size:.72rem;color:var(--muted);margin-top:2px;">${p.partner_type||'—'} · ${p.region||'—'}</div>
               <div style="font-size:.72rem;color:var(--muted);margin-top:2px;">Self-selected: <span style="color:#d29922;font-weight:600;">${(p.tier||'apex').toUpperCase()}</span> · ${p.expected_referrals||'—'}/month</div>
               ${p.network_description?`<div style="font-size:.7rem;color:var(--muted);margin-top:6px;padding:8px;background:rgba(255,255,255,.03);border-radius:6px;border:1px solid var(--border);">${p.network_description}</div>`:''}
-              <div style="font-size:.65rem;color:var(--muted);margin-top:6px;">Applied: ${new Date(p.applied_at||p.created_at).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</div>
+              <div style="font-size:.65rem;color:var(--muted);margin-top:6px;">Applied: ${new Date(p.applied_at||p.created_at).toLocaleDateString(getDateLocale('en-GB'),{day:'numeric',month:'short',year:'numeric'})}</div>
             </div>
             <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;flex-shrink:0;">
               <select id="tier-assign-${p.id}" style="background:#0a0f1e;border:1px solid var(--border);border-radius:6px;padding:5px 10px;color:#e6edf3;font-size:.72rem;outline:none;">
