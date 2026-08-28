@@ -381,6 +381,7 @@ async function showClientBrandingChip(){
       }
     }
     if(window.clientLocale !== 'en'){ await loadNesStrings(window.clientLocale); applyNesI18n(); }
+    applyTextDirection(window.clientLocale);
     updateLanguageSwitcherIcon();
     if(!window.userRegion){
       try{
