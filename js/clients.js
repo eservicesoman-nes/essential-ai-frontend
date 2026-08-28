@@ -182,8 +182,8 @@ function renderClientDetail(c,colors,textColors,idx){
         <div class="cm-tab ${window._activeTab==='branding'?'active':''}" onclick="cmTab('branding',this)">${t('clientTab.branding')}</div>
         <div class="cm-tab ${window._activeTab==='agents'?'active':''}" onclick="cmTab('agents',this)">${t('clientTab.aiAgents')}</div>
         <div class="cm-tab ${window._activeTab==='billing'?'active':''}" onclick="cmTab('billing',this)">${t('clientTab.billing')}</div>
-        <div class="cm-tab ${window._activeTab==='users'?'active':''}" onclick="cmTab('users',this)"><i class="ti ti-users" style="margin-right:4px;font-size:11px;"></i>${t('clientTab.users')}</div>
-        <div class="cm-tab ${window._activeTab==='email'?'active':''}" onclick="cmTab('email',this)"><i class="ti ti-mail" style="margin-right:4px;font-size:11px;"></i>${t('clientTab.email')}</div>
+        <div class="cm-tab ${window._activeTab==='users'?'active':''}" onclick="cmTab('users',this)"><i class="ti ti-users" style="margin-inline-end:4px;font-size:11px;"></i>${t('clientTab.users')}</div>
+        <div class="cm-tab ${window._activeTab==='email'?'active':''}" onclick="cmTab('email',this)"><i class="ti ti-mail" style="margin-inline-end:4px;font-size:11px;"></i>${t('clientTab.email')}</div>
       </div>
       <div class="cm-content">
 
@@ -194,7 +194,7 @@ function renderClientDetail(c,colors,textColors,idx){
               const apexPaidUntilMap = {'apex_connect':'apex_connect_paid_until','apex_outreach':'apex_outreach_paid_until','apex_advisory':'apex_advisory_paid_until'};
               if(!tierDerived){
                 const paidField = apexPaidUntilMap[key];
-                const dateInput = paidField ? `<input type="date" id="field_${paidField}" value="${c[paidField]||''}" title="Paid through date" style="font-size:.68rem;padding:3px 6px;border-radius:5px;border:1px solid var(--border);background:var(--card);color:var(--text);margin-right:8px;">` : '';
+                const dateInput = paidField ? `<input type="date" id="field_${paidField}" value="${c[paidField]||''}" title="Paid through date" style="font-size:.68rem;padding:3px 6px;border-radius:5px;border:1px solid var(--border);background:var(--card);color:var(--text);margin-inline-end:8px;">` : '';
                 return `
               <div class="mod">
                 <i class="ti ${icon} mod-icon"></i>
@@ -279,7 +279,7 @@ function renderClientDetail(c,colors,textColors,idx){
         </div>
 
         <div id="cm-agents" style="display:none;">
-          <div style="font-family:var(--mono);font-size:.65rem;color:var(--nes-blue);font-weight:800;margin-bottom:8px;padding:6px 10px;background:#0c1f35;border-radius:6px;border:1px solid #1a3a6e;"><i class="ti ti-lock" style="margin-right:5px;"></i>NES MANAGED — Admin only</div>
+          <div style="font-family:var(--mono);font-size:.65rem;color:var(--nes-blue);font-weight:800;margin-bottom:8px;padding:6px 10px;background:#0c1f35;border-radius:6px;border:1px solid #1a3a6e;"><i class="ti ti-lock" style="margin-inline-end:5px;"></i>NES MANAGED — Admin only</div>
           <div class="creds-grid">
             ${[
               ['AI Voice Number (Twilio)','twilio_number'],
@@ -313,7 +313,7 @@ function renderClientDetail(c,colors,textColors,idx){
                   ${trialExpired?'TRIAL EXPIRED':'TRIAL ACTIVE'}
                 </div>
                 <div style="font-size:.75rem;color:var(--muted);">
-                  ${trialActive?'<i class="ti ti-clock" style="margin-right:4px;"></i>'+daysLeft+' day'+( daysLeft===1?'':'s')+' remaining — ends '+trialEnd.toLocaleDateString():(trialExpired?'Expired '+trialEnd.toLocaleDateString():'No trial set')}
+                  ${trialActive?'<i class="ti ti-clock" style="margin-inline-end:4px;"></i>'+daysLeft+' day'+( daysLeft===1?'':'s')+' remaining — ends '+trialEnd.toLocaleDateString():(trialExpired?'Expired '+trialEnd.toLocaleDateString():'No trial set')}
                 </div>
               </div>`:''
           })()}
@@ -405,7 +405,7 @@ function renderClientDetail(c,colors,textColors,idx){
         <div id="cm-email" style="display:none;">
           <div style="margin-bottom:12px;">
             <div style="font-family:var(--mono);font-size:.65rem;color:var(--nes-blue);font-weight:800;margin-bottom:8px;padding:6px 10px;background:#0c1f35;border-radius:6px;border:1px solid #1a3a6e;">
-              <i class="ti ti-mail" style="margin-right:5px;"></i>IMAP EMAIL ACCOUNTS
+              <i class="ti ti-mail" style="margin-inline-end:5px;"></i>IMAP EMAIL ACCOUNTS
             </div>
             <div id="cm-email-accounts" style="margin-bottom:12px;">
               <div style="color:var(--muted);font-family:var(--mono);font-size:.75rem;">${t('empty.noEmailAccounts')}</div>
@@ -673,8 +673,8 @@ async function loadPaymentHistory(clientId){
       const color=p.type==='adjustment'?'#f85149':'#3fb950';
       const date=new Date(p.created_at).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
       const vatLine=p.vat_amount>0?`<span style="color:var(--muted);font-size:.7rem;"> (incl. VAT OMR ${parseFloat(p.vat_amount).toFixed(3)})</span>`:'';
-      const invoiceBtn=p.type==='payment'&&p.invoice_number?`<a href="${API_URL}/api/clients/${clientId}/payments/${p.id}/invoice?token=${session.access_token}" target="_blank" style="font-size:.65rem;padding:2px 8px;border-radius:4px;border:1px solid var(--border);color:var(--nes-blue);text-decoration:none;margin-left:8px;white-space:nowrap;"><i class='ti ti-file-invoice'></i> ${p.invoice_number}</a>`:'';
-      const reversedBadge=(p.type==='payment'&&reversalMap[p.id])?`<span style="font-size:.6rem;padding:2px 6px;border-radius:4px;background:#2d1300;color:#f85149;margin-left:6px;">REVERSED</span>`:'';
+      const invoiceBtn=p.type==='payment'&&p.invoice_number?`<a href="${API_URL}/api/clients/${clientId}/payments/${p.id}/invoice?token=${session.access_token}" target="_blank" style="font-size:.65rem;padding:2px 8px;border-radius:4px;border:1px solid var(--border);color:var(--nes-blue);text-decoration:none;margin-inline-start:8px;white-space:nowrap;"><i class='ti ti-file-invoice'></i> ${p.invoice_number}</a>`:'';
+      const reversedBadge=(p.type==='payment'&&reversalMap[p.id])?`<span style="font-size:.6rem;padding:2px 6px;border-radius:4px;background:#2d1300;color:#f85149;margin-inline-start:6px;">REVERSED</span>`:'';
       const reversesNote=(p.type==='adjustment'&&p.reverses_payment_id)?`<div style="color:#f85149;font-size:.68rem;padding-bottom:2px;">↩ Reverses payment from ${(data.payments.find(x=>x.id===p.reverses_payment_id)||{}).invoice_number||'earlier entry'}</div>`:'';
       return `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);">
         <span style="display:flex;align-items:center;gap:4px;">${date} · ${p.method}${p.source==='auto'?' (auto)':''}${invoiceBtn}${reversedBadge}</span>
