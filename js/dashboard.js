@@ -320,7 +320,7 @@ async function loadPartnerFeed(){
       return`<div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:8px;">
         <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
           <span style="font-size:.58rem;padding:1px 6px;border-radius:10px;background:${isAlert?'rgba(210,153,34,.15)':'rgba(64,156,255,.1)'};color:${isAlert?'#d29922':'var(--nes-blue)'};">${isAlert?'⚡ ALERT':'INTEL'}</span>
-          <span style="font-size:.6rem;color:var(--muted);">${new Date(f.created_at).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}</span>
+          <span style="font-size:.6rem;color:var(--muted);">${new Date(f.created_at).toLocaleDateString(getDateLocale('en-GB'),{day:'numeric',month:'short'})}</span>
         </div>
         <div style="font-size:.72rem;color:var(--text);font-weight:600;margin-bottom:3px;">${f.title||''}</div>
         <div style="font-size:.65rem;color:var(--muted);">${(f.summary||'').substring(0,80)}${(f.summary||'').length>80?'...':''}</div>
@@ -341,7 +341,7 @@ async function showCEODashboard(){
   mc.innerHTML=`
     <div style="padding-block:11px;padding-inline-end:var(--header-clearance);padding-inline-start:60px;border-bottom:1px solid var(--border);flex-shrink:0;">
       <div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;">${t('sectionTitle.ceoDashboard')}</div>
-      <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">Live · ${new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</div>
+      <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">Live · ${new Date().toLocaleDateString(getDateLocale('en-GB'),{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</div>
     </div>
     <div class="page" id="ceoDashContent" style="opacity:0;transition:opacity .3s;display:grid;grid-template-columns:1fr 6px 380px;min-height:0;">
       <div style="text-align:center;padding:40px;color:var(--muted);font-family:var(--mono);font-size:.8rem;">${t('loading.dashboard')}</div>
@@ -851,7 +851,7 @@ async function loadCeoFeed(){
         '<span style="font-size:.6rem;font-family:var(--mono);padding:2px 7px;border-radius:5px;background:'+
         (item.type==='intelligence'?'#0d2818':'#0c1f35')+';color:'+tagColor+';">'+tagLabel+'</span>'+
         '<span style="font-size:.6rem;color:var(--muted);font-family:var(--mono);">'+
-        new Date(item.created_at).toLocaleDateString('en-GB',{day:'numeric',month:'short'})+'</span>'+
+        new Date(item.created_at).toLocaleDateString(getDateLocale('en-GB'),{day:'numeric',month:'short'})+'</span>'+
         '<i class="ti ti-chevron-down feed-chevron-'+idx+'" style="font-size:12px;color:var(--muted);transition:transform .2s;"></i>'+
         '</div></div>'+
         '<div style="font-size:.8rem;font-weight:600;color:var(--text);margin-bottom:4px;">'+
