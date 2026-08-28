@@ -605,12 +605,12 @@ function saveRecentChat(label){
   const msgSnapshot=allMsgsHTML;
   const existing=rc.find(r=>r.date===today);
   if(existing){
-    existing.time=now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+    existing.time=now.toLocaleTimeString(getDateLocale('en-GB'),{hour:'2-digit',minute:'2-digit'});
     existing.label=label||existing.label;
     existing.history=historySnapshot;
     existing.msgs=msgSnapshot;
   } else {
-    rc.unshift({date:today,time:now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}),label:label||t('authFlow.chat'),history:historySnapshot,msgs:msgSnapshot});
+    rc.unshift({date:today,time:now.toLocaleTimeString(getDateLocale('en-GB'),{hour:'2-digit',minute:'2-digit'}),label:label||t('authFlow.chat'),history:historySnapshot,msgs:msgSnapshot});
   }
   rc=rc.slice(0,5);
   localStorage.setItem(STORAGE_KEYS.rc,JSON.stringify(rc));
@@ -624,7 +624,7 @@ function loadRecentChats(){
   const today=new Date().toDateString();
   const yesterday=new Date(Date.now()-86400000).toDateString();
   el.innerHTML=rc.map(r=>{
-    let lbl=r.date===today?t('authFlow.today')+' '+r.time:r.date===yesterday?t('authFlow.yesterday')+' '+r.time:new Date(r.date).toLocaleDateString('en-GB',{day:'numeric',month:'short'})+' '+r.time;
+    let lbl=r.date===today?t('authFlow.today')+' '+r.time:r.date===yesterday?t('authFlow.yesterday')+' '+r.time:new Date(r.date).toLocaleDateString(getDateLocale('en-GB'),{day:'numeric',month:'short'})+' '+r.time;
     return`<div class="recent-item" onclick="restoreChat(${rc.indexOf(r)})" title="${r.label||t('authFlow.chat')}"><i class="ti ti-clock"></i><span>${lbl}</span></div>`;
   }).join('');
 }
