@@ -1,12 +1,25 @@
-// briefcase.js — extracted from index.html, NES Locale Phase 0
-// 16 functions, zero logic changes
+// briefcase-v2.js — rebuilt Aug 27 2026 session
+// Same features as the original briefcase.js, plus:
+//  - Page-visit session-ID guard on every async operation, preventing stale
+//    results from an old visit corrupting a newer one after fast navigation
+//  - All 4 fixes from tonight's investigation already integrated:
+//    correct extraction caching, extraction concurrency guard, chat wait
+//    timeout, guaranteed ready-flag via finally
+//  - AbortController timeouts on every fetch, so no request can hang forever
 
 async function showBriefcasePage(){
+  // New page visit — invalidate any in-flight work from a previous visit
+  window._briefcaseSession = (window._briefcaseSession || 0) + 1;
+  const mySession = window._briefcaseSession;
+
   const mc=document.getElementById('mainContent');
   mc.style.overflow='hidden';
   window._briefcaseChatHistory=[];
   window._briefcaseDocContext='';
   window._briefcaseDocContextReady=false;
+  window._briefcaseExtracting=false;
+  window._vaultFiles=[];
+
   mc.innerHTML=`
     <div style="padding-block:11px;padding-inline-end:var(--header-clearance);padding-inline-start:60px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;">
       <div><div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;">${t('sectionTitle.briefcase')}</div><div style="font-family:var(--mono);font-size:.7rem;color:#3fb950;font-weight:700;" id="briefcaseSubtitle">${t('common.loading')}</div></div>
@@ -45,45 +58,46 @@ async function showBriefcasePage(){
         </div>
       </div>
     </div>`;
+
   document.getElementById('briefcaseChatInput').addEventListener('keypress', e=>{ if(e.key==='Enter') sendBriefcaseChatMessage(); });
-  await loadVaultFiles();
-  loadBriefcaseDocContext();
-  loadBriefcaseChatHistory();
+
+  await loadVaultFiles(mySession);
+  loadBriefcaseDocContext(mySession);
+  loadBriefcaseChatHistory(mySession);
 }
 
-async function loadBriefcaseChatHistory(){
-  try{
-    const res = await fetch(`${API_URL}/api/chat/docs/history`, {
-      headers:{'Authorization':'Bearer '+session.access_token}
-    });
-    const data = await res.json();
-    const msgs = data.messages || [];
-    window._briefcaseChatHistory = msgs.map(m => ({ role: m.role, content: m.content }));
-    for(const m of msgs){
-      appendBriefcaseChatMsg(m.role === 'user' ? 'user' : 'ai', m.content);
-    }
-  }catch(e){
-    console.warn('Could not load Briefcase chat history', e.message);
-  }
+function isBriefcaseSessionCurrent(session){
+  return session === window._briefcaseSession;
 }
 
-async function loadVaultFiles(){
+function fetchWithTimeout(url, options={}, timeoutMs=20000){
+  const controller = new AbortController();
+  const id = setTimeout(()=>controller.abort(), timeoutMs);
+  return fetch(url, {...options, signal: controller.signal}).finally(()=>clearTimeout(id));
+}
+
+async function loadVaultFiles(pageSession){
   try{
     const[filesRes,quotaRes]=await Promise.all([
-      fetch(`${API_URL}/api/vault/list`,{headers:{'Authorization':'Bearer '+session.access_token}}),
-      fetch(`${API_URL}/api/vault/quota`,{headers:{'Authorization':'Bearer '+session.access_token}}),
+      fetchWithTimeout(`${API_URL}/api/vault/list`,{headers:{'Authorization':'Bearer '+session.access_token}}),
+      fetchWithTimeout(`${API_URL}/api/vault/quota`,{headers:{'Authorization':'Bearer '+session.access_token}}),
     ]);
     const{files}=await filesRes.json();
     const quota=await quotaRes.json();
+
+    if(!isBriefcaseSessionCurrent(pageSession)) return;
+
     window._vaultFiles=files||[];
 
     const usedGB=(quota.usedBytes/1073741824).toFixed(2);
     const totalGB=(quota.totalBytes/1073741824).toFixed(1);
 
-    document.getElementById('briefcaseSubtitle').textContent=`${files?.length||0} ${t('briefcaseUi.filesUsage')} ${usedGB}GB of ${totalGB}GB used`;
+    const subtitleEl=document.getElementById('briefcaseSubtitle');
+    if(subtitleEl)subtitleEl.textContent=`${files?.length||0} ${t('briefcaseUi.filesUsage')} ${usedGB}GB of ${totalGB}GB used`;
     const listEl=document.getElementById('briefcaseFileList');
     if(listEl)listEl.innerHTML=renderVaultRows(files||[]);
   }catch(e){
+    if(!isBriefcaseSessionCurrent(pageSession)) return;
     const listEl=document.getElementById('briefcaseFileList');
     if(listEl)listEl.innerHTML=`<div style="text-align:center;padding:20px 0;color:#f85149;font-family:var(--mono);font-size:.7rem;">Error loading files</div>`;
   }
@@ -145,7 +159,7 @@ async function openShareModal(fileId, fileName, currentRolesStr, currentUsersStr
   `);
 
   try{
-    const res = await fetch(`${API_URL}/api/client/${userClientId}/users`, {
+    const res = await fetchWithTimeout(`${API_URL}/api/client/${userClientId}/users`, {
       headers:{'Authorization':'Bearer '+session.access_token}
     });
     const data = await res.json();
@@ -175,7 +189,7 @@ async function saveFileShare(fileId){
   if(document.getElementById('shareRoleStaff')?.checked) roles.push('staff');
   const userIds = Array.from(document.querySelectorAll('.sharePersonCheck:checked')).map(el => el.value);
   try{
-    const res=await fetch(`${API_URL}/api/vault/${fileId}/share`,{
+    const res=await fetchWithTimeout(`${API_URL}/api/vault/${fileId}/share`,{
       method:'PATCH',
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
       body:JSON.stringify({roles, userIds})
@@ -184,7 +198,7 @@ async function saveFileShare(fileId){
     if(data.success){
       showToast(t('toast.sharingUpdated'));
       document.getElementById('genericModalOverlay')?.remove();
-      await loadVaultFiles();
+      await loadVaultFiles(window._briefcaseSession);
     }else{
       showToast('❌ '+(data.error||'Failed to update sharing'));
     }
@@ -195,7 +209,7 @@ async function saveFileShare(fileId){
 
 async function saveExtractedText(fileId, text){
   try{
-    await fetch(`${API_URL}/api/vault/${fileId}/extracted-text`, {
+    await fetchWithTimeout(`${API_URL}/api/vault/${fileId}/extracted-text`, {
       method:'PATCH',
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
       body: JSON.stringify({ text })
@@ -203,46 +217,46 @@ async function saveExtractedText(fileId, text){
   }catch(e){ console.warn('Could not save extracted text', e.message); }
 }
 
-async function loadBriefcaseDocContext(){
+async function loadBriefcaseDocContext(pageSession){
   if(window._briefcaseExtracting) return;
   window._briefcaseExtracting = true;
   try{
-  const files = window._vaultFiles || [];
-  window._briefcaseDocContextReady=false;
-  if(!files.length){ window._briefcaseDocContext=''; return; }
+    const files = window._vaultFiles || [];
+    window._briefcaseDocContextReady=false;
+    if(!files.length){ window._briefcaseDocContext=''; return; }
 
-  let combined = '';
-  let loadedCount = 0;
+    let combined = '';
+    let loadedCount = 0;
 
-  for(const f of files){
-    try{
-      let text = f.extracted_text;
-      if(!text){
-        const urlRes = await fetch(`${API_URL}/api/vault/download-url/${f.id}`, {
-          headers:{'Authorization':'Bearer '+session.access_token}
-        });
-        const urlData = await urlRes.json();
-        if(!urlData.url) continue;
+    for(const f of files){
+      if(!isBriefcaseSessionCurrent(pageSession)) return;
+      try{
+        let text = f.extracted_text;
+        if(!text){
+          const urlRes = await fetchWithTimeout(`${API_URL}/api/vault/download-url/${f.id}`, {
+            headers:{'Authorization':'Bearer '+session.access_token}
+          });
+          const urlData = await urlRes.json();
+          if(!urlData.url) continue;
 
-        const fileRes = await fetch(urlData.url);
-        const blob = await fileRes.blob();
-        const file = new File([blob], f.file_name);
+          const fileRes = await fetchWithTimeout(urlData.url);
+          const blob = await fileRes.blob();
+          const file = new File([blob], f.file_name);
 
-        text = await extractText(file);
-        if(text.trim()) saveExtractedText(f.id, text);
+          text = await extractText(file);
+          if(text.trim()) saveExtractedText(f.id, text);
+        }
+        if(text && text.trim()){
+          combined += `\n\n[File: ${f.file_name}]\n${text.substring(0, 4000)}`;
+          loadedCount++;
+        }
+      }catch(e){
+        console.warn('Could not load', f.file_name, e.message);
       }
-      if(text && text.trim()){
-        combined += `\n\n[File: ${f.file_name}]\n${text.substring(0, 4000)}`;
-        loadedCount++;
-      }
-    }catch(e){
-      console.warn('Could not load', f.file_name, e.message);
     }
-  }
-
-  window._briefcaseDocContext = combined;
-  window._briefcaseDocContextReady = true;
+    window._briefcaseDocContext = combined;
   }finally{
+    window._briefcaseDocContextReady = true;
     window._briefcaseExtracting = false;
   }
 }
@@ -257,6 +271,23 @@ function appendBriefcaseChatMsg(role, text){
   el.appendChild(bubble);
   el.scrollTop = el.scrollHeight;
   return bubble;
+}
+
+async function loadBriefcaseChatHistory(pageSession){
+  try{
+    const res = await fetchWithTimeout(`${API_URL}/api/chat/docs/history`, {
+      headers:{'Authorization':'Bearer '+session.access_token}
+    });
+    const data = await res.json();
+    if(!isBriefcaseSessionCurrent(pageSession)) return;
+    const msgs = Array.isArray(data.messages) ? data.messages : [];
+    window._briefcaseChatHistory = msgs.map(m => ({ role: m.role, content: m.content }));
+    for(const m of msgs){
+      appendBriefcaseChatMsg(m.role === 'user' ? 'user' : 'ai', m.content);
+    }
+  }catch(e){
+    console.warn('Could not load Briefcase chat history', e.message);
+  }
 }
 
 async function sendBriefcaseChatMessage(){
@@ -291,7 +322,7 @@ async function sendBriefcaseChatMessage(){
     const contextPrefix = window._briefcaseChatHistory.length===1
       ? `Briefcase documents:${window._briefcaseDocContext}\n\nQuestion: `
       : '';
-    const res = await fetch(API_URL+'/api/chat/docs', {
+    const res = await fetchWithTimeout(API_URL+'/api/chat/docs', {
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
       body: JSON.stringify({
@@ -299,7 +330,7 @@ async function sendBriefcaseChatMessage(){
         mode:'docs', webSearch:false,
         history: window._briefcaseChatHistory.slice(-6)
       })
-    });
+    }, 45000);
     const data = await res.json();
     const reply = res.ok ? (data.reply || 'No response.') : ('Error: '+(data.error||'Failed'));
     typingBubble.textContent = reply;
@@ -316,11 +347,11 @@ async function uploadVaultFile(file){
   try{
     const fd=new FormData();
     fd.append('file',file);
-    const res=await fetch(`${API_URL}/api/vault/upload`,{
+    const res=await fetchWithTimeout(`${API_URL}/api/vault/upload`,{
       method:'POST',
       headers:{'Authorization':'Bearer '+session.access_token},
       body:fd
-    });
+    }, 60000);
     const data=await res.json();
     if(data.success){
       showToast(`✅ ${file.name} uploaded`);
@@ -330,8 +361,8 @@ async function uploadVaultFile(file){
           await saveExtractedText(data.file.id, text);
         }
       }catch(e){ console.warn('Text extraction failed for', file.name, e.message); }
-      await loadVaultFiles();
-      loadBriefcaseDocContext();
+      await loadVaultFiles(window._briefcaseSession);
+      loadBriefcaseDocContext(window._briefcaseSession);
     }else{
       showToast('❌ Upload failed: '+(data.error||'Unknown error'));
     }
@@ -344,7 +375,7 @@ async function uploadVaultFile(file){
 
 async function downloadVaultFile(fileId){
   try{
-    const res=await fetch(`${API_URL}/api/vault/download-url/${fileId}`,{
+    const res=await fetchWithTimeout(`${API_URL}/api/vault/download-url/${fileId}`,{
       headers:{'Authorization':'Bearer '+session.access_token}
     });
     const data=await res.json();
@@ -361,7 +392,7 @@ async function downloadVaultFile(fileId){
 async function deleteVaultFile(fileId, fileName){
   if(!confirm(`Permanently delete "${fileName}"?\n\nThis cannot be undone.`))return;
   try{
-    const res=await fetch(`${API_URL}/api/vault/${fileId}`,{
+    const res=await fetchWithTimeout(`${API_URL}/api/vault/${fileId}`,{
       method:'DELETE',
       headers:{'Authorization':'Bearer '+session.access_token}
     });
@@ -371,8 +402,8 @@ async function deleteVaultFile(fileId, fileName){
       const row=document.getElementById('vault-row-'+fileId);
       if(row)row.remove();
       showToast(t('toast.fileDeleted'));
-      await loadVaultFiles();
-      loadBriefcaseDocContext();
+      await loadVaultFiles(window._briefcaseSession);
+      loadBriefcaseDocContext(window._briefcaseSession);
     }else{
       showToast('❌ Delete failed: '+(data.error||'Unknown error'));
     }
