@@ -223,6 +223,11 @@ window.addCustomCredField=addCustomCredField;
 let _nesStrings = { en: {} };
 let _nesLocale = 'en';
 
+function getDateLocale(fallback){
+  // Arabic dates use Arabic month/day names but Western (0-9) digits,
+  // matching standard Gulf business convention - not Eastern Arabic numerals.
+  return (window.clientLocale === 'ar') ? 'ar-u-nu-latn' : (fallback || 'en-GB');
+}
 async function loadNesStrings(locale) {
   _nesLocale = locale || 'en';
   try {
