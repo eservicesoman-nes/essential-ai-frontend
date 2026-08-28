@@ -204,7 +204,7 @@ function toggleLangMenu(){
   const menu=document.createElement('div');
   menu.id='langMenuDropdown';
   menu.style.cssText=`position:fixed;top:${rect.bottom+6}px;left:${rect.left}px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:4px;z-index:9999;min-width:140px;box-shadow:0 4px 16px rgba(0,0,0,.3);`;
-  const langs=[{code:'en',label:'English'},{code:'pt',label:'Portugu\u00eas'}];
+  const langs=[{code:'en',label:'English'},{code:'pt',label:'Portugu\u00eas'},{code:'ar',label:'العربية'}];
   menu.innerHTML=langs.map(l=>`<div onclick="selectLanguage('${l.code}')" style="padding:8px 12px;border-radius:6px;cursor:pointer;font-size:.8rem;color:var(--text);${l.code===(window.clientLocale||'en')?'background:var(--nes-blue);color:#fff;':''}" onmouseover="if('${l.code}'!=='${window.clientLocale||'en'}')this.style.background='var(--card)'" onmouseout="if('${l.code}'!=='${window.clientLocale||'en'}')this.style.background='transparent'">${l.label}</div>`).join('');
   document.body.appendChild(menu);
   setTimeout(()=>{
@@ -216,10 +216,16 @@ function toggleLangMenu(){
     });
   },10);
 }
+function applyTextDirection(locale){
+  const isRtl = locale === 'ar';
+  document.documentElement.dir = isRtl ? 'rtl' : 'ltr';
+  document.documentElement.classList.toggle('rtl-mode', isRtl);
+}
 async function selectLanguage(code){
   document.getElementById('langMenuDropdown')?.remove();
   if(code === (window.clientLocale||'en')) return;
   window.clientLocale = code;
+  applyTextDirection(code);
   await loadNesStrings(code);
   applyNesI18n();
   updateLanguageSwitcherIcon();
