@@ -166,7 +166,7 @@ function md(s){
       const rows=[];
       let j=i+2;
       while(j<lines.length&&isTableRow(lines[j])){rows.push(splitRow(lines[j]));j++;}
-      let tbl='<div style="overflow-x:auto;margin:8px 0;"><table style="width:100%;border-collapse:collapse;font-size:.78rem;"><thead><tr>'+headerCells.map(h=>'<th style="text-align:left;padding:6px 10px;border-bottom:2px solid var(--border);color:var(--nes-blue);white-space:nowrap;">'+h+'</th>').join('')+'</tr></thead><tbody>'+rows.map(r=>'<tr>'+r.map(c=>'<td style="padding:6px 10px;border-bottom:1px solid var(--border);">'+c+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>';
+      let tbl='<div style="overflow-x:auto;margin:8px 0;"><table style="width:100%;border-collapse:collapse;font-size:.78rem;"><thead><tr>'+headerCells.map(h=>'<th style="text-align:start;padding:6px 10px;border-bottom:2px solid var(--border);color:var(--nes-blue);white-space:nowrap;">'+h+'</th>').join('')+'</tr></thead><tbody>'+rows.map(r=>'<tr>'+r.map(c=>'<td style="padding:6px 10px;border-bottom:1px solid var(--border);">'+c+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>';
       out.push(tbl);
       i=j;
       continue;
@@ -175,7 +175,7 @@ function md(s){
       const items=[];
       let j=i;
       while(j<lines.length&&isBullet(lines[j])){items.push(lines[j].replace(/^\s*[-*•▪]\s+/,''));j++;}
-      out.push('<ul style="margin:6px 0;padding-left:20px;">'+items.map(it=>'<li style="margin-bottom:3px;">'+it+'</li>').join('')+'</ul>');
+      out.push('<ul style="margin:6px 0;padding-inline-start:20px;">'+items.map(it=>'<li style="margin-bottom:3px;">'+it+'</li>').join('')+'</ul>');
       i=j;
       continue;
     }
@@ -183,7 +183,7 @@ function md(s){
       const items=[];
       let j=i;
       while(j<lines.length&&isNumbered(lines[j])){items.push(lines[j].replace(/^\s*\d+[\.\)]\s+/,''));j++;}
-      out.push('<ol style="margin:6px 0;padding-left:20px;">'+items.map(it=>'<li style="margin-bottom:3px;">'+it+'</li>').join('')+'</ol>');
+      out.push('<ol style="margin:6px 0;padding-inline-start:20px;">'+items.map(it=>'<li style="margin-bottom:3px;">'+it+'</li>').join('')+'</ol>');
       i=j;
       continue;
     }
