@@ -54,7 +54,7 @@ async function loadIncidents(){
     document.getElementById('incidentsTimeline').innerHTML = rows.map(i => {
       const isAuto = i.resolution === 'auto-recovered';
       const dot = isAuto ? '#3fb950' : '#f85149';
-      const started = new Date(i.started_at).toLocaleString();
+      const started = new Date(i.started_at).toLocaleString(getDateLocale('en-GB'));
       return `<div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border);">
         <div style="width:8px;height:8px;border-radius:50%;background:${dot};flex-shrink:0;"></div>
         <div style="flex:1;min-width:0;">
