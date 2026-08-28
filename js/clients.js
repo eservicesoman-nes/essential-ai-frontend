@@ -657,7 +657,7 @@ async function loadPaymentHistory(clientId){
     if(reversesEl){
       const paymentEntries=(data.payments||[]).filter(p=>p.type==='payment');
       reversesEl.innerHTML='<option value="">Reverses which payment? (optional)</option>'+paymentEntries.map(p=>{
-        const d=new Date(p.created_at).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+        const d=new Date(p.created_at).toLocaleDateString(getDateLocale('en-GB'),{day:'numeric',month:'short',year:'numeric'});
         return `<option value="${p.id}">${d} · OMR ${parseFloat(p.gross_amount||p.amount).toFixed(3)}${p.invoice_number?' · '+p.invoice_number:''}</option>`;
       }).join('');
     }
@@ -671,7 +671,7 @@ async function loadPaymentHistory(clientId){
     listEl.innerHTML=data.payments.map(p=>{
       const sign=p.type==='adjustment'?'-':'+';
       const color=p.type==='adjustment'?'#f85149':'#3fb950';
-      const date=new Date(p.created_at).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+      const date=new Date(p.created_at).toLocaleDateString(getDateLocale('en-GB'),{day:'numeric',month:'short',year:'numeric'});
       const vatLine=p.vat_amount>0?`<span style="color:var(--muted);font-size:.7rem;"> (incl. VAT OMR ${parseFloat(p.vat_amount).toFixed(3)})</span>`:'';
       const invoiceBtn=p.type==='payment'&&p.invoice_number?`<a href="${API_URL}/api/clients/${clientId}/payments/${p.id}/invoice?token=${session.access_token}" target="_blank" style="font-size:.65rem;padding:2px 8px;border-radius:4px;border:1px solid var(--border);color:var(--nes-blue);text-decoration:none;margin-inline-start:8px;white-space:nowrap;"><i class='ti ti-file-invoice'></i> ${p.invoice_number}</a>`:'';
       const reversedBadge=(p.type==='payment'&&reversalMap[p.id])?`<span style="font-size:.6rem;padding:2px 6px;border-radius:4px;background:#2d1300;color:#f85149;margin-inline-start:6px;">REVERSED</span>`:'';
@@ -923,8 +923,8 @@ function showSignoff(clientId, clientName, plan, monthlyFee, trialStart, trialDa
   if (trialStart) {
     const trialEnd = new Date(new Date(trialStart).getTime() + (parseInt(trialDays)||7) * 24*60*60*1000);
     const billing = new Date(trialEnd.getTime() + 24*60*60*1000);
-    trialEndStr = trialEnd.toLocaleDateString('en-GB', {day:'numeric',month:'long',year:'numeric'});
-    billingStartStr = billing.toLocaleDateString('en-GB', {day:'numeric',month:'long',year:'numeric'});
+    trialEndStr = trialEnd.toLocaleDateString(getDateLocale('en-GB'), {day:'numeric',month:'long',year:'numeric'});
+    billingStartStr = billing.toLocaleDateString(getDateLocale('en-GB'), {day:'numeric',month:'long',year:'numeric'});
   }
 
   const waMsg = `As-salamu alaykum ${clientName} 👋
