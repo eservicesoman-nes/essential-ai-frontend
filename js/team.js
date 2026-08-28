@@ -36,7 +36,7 @@ function showInviteUserForm(clientId){
   modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:9999;';
   modal.innerHTML=`
     <div style="background:var(--bg);border:1px solid var(--border);border-radius:14px;padding:24px;width:340px;max-width:95vw;">
-      <div style="font-family:var(--mono);font-size:.85rem;font-weight:700;color:var(--nes-blue);margin-bottom:16px;"><i class="ti ti-user-plus" style="margin-right:6px;"></i>Invite User</div>
+      <div style="font-family:var(--mono);font-size:.85rem;font-weight:700;color:var(--nes-blue);margin-bottom:16px;"><i class="ti ti-user-plus" style="margin-inline-end:6px;"></i>Invite User</div>
       <div class="form-field">
         <label class="form-label">${t('formLabel.emailAddress')}</label>
         <input id="inviteEmail" type="email" class="form-input" placeholder="user@company.com">
@@ -225,7 +225,7 @@ async function loadTeam(){
             <i class="ti ti-building" style="color:#409cff;font-size:13px;"></i>
             <span style="font-size:.78rem;color:#e6edf3;font-weight:500;">${d.name}</span>
             <span style="font-size:.65rem;color:var(--muted);">${users.filter(u=>u.department_id===d.id).length} staff</span>
-            <i onclick="event.stopPropagation();deleteDept('${d.id}','${d.name.replace(/'/g,"\\'")}')" class="ti ti-x" style="color:var(--muted);font-size:13px;cursor:pointer;margin-left:4px;" title="Delete department"></i>
+            <i onclick="event.stopPropagation();deleteDept('${d.id}','${d.name.replace(/'/g,"\\'")}')" class="ti ti-x" style="color:var(--muted);font-size:13px;cursor:pointer;margin-inline-start:4px;" title="Delete department"></i>
           </div>`).join('')}
         <div onclick="showAddDeptModal()" style="background:rgba(64,156,255,0.05);border:1px dashed rgba(64,156,255,0.3);border-radius:8px;padding:8px 14px;display:flex;align-items:center;gap:6px;cursor:pointer;color:#409cff;font-size:.75rem;">
           <i class="ti ti-plus"></i> ${t('teamInvite.addDepartment')}
