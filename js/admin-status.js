@@ -63,7 +63,7 @@ async function showAdminStatus(){
               '<div style="font-size:.78rem;font-weight:600;color:#e6edf3;">Backblaze B2 — nes-vps-backup</div>' +
               '<div style="font-size:.68rem;color:var(--muted);">Last backup: ' + (bd.last_date||'Unknown') + ' · ' + (bd.last_time||'') + '</div>' +
             '</div>' +
-            '<div style="text-align:right;flex-shrink:0;">' +
+            '<div style="text-align:end;flex-shrink:0;">' +
               '<div style="font-size:.75rem;font-weight:700;color:' + color + ';">' + (ok?'✅ Success':'❌ Failed') + '</div>' +
               '<div style="font-size:.65rem;color:var(--muted);">Daily at 2:00 AM</div>' +
             '</div>' +
@@ -238,7 +238,7 @@ async function checkPlatformStatus(){
     ])
   ]);
   const allOk=results.every(function(r){return r.ok;});
-  const now=new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  const now=new Date().toLocaleTimeString(getDateLocale('en-GB'),{hour:'2-digit',minute:'2-digit',second:'2-digit'});
   const apis=apiCredits.data||[];
   const [clientRes,leadRes,userRes,usageRes]=platformStats;
   const todayUsage=usageRes.data||[];
@@ -257,7 +257,7 @@ async function checkPlatformStatus(){
   html+='<div style="background:'+(allOk?'#0d2818':'#2d0e0e')+';border:1px solid '+(allOk?'#3fb95040':'#f8514940')+';border-radius:10px;padding:10px 16px;margin-bottom:10px;display:flex;align-items:center;gap:10px;">';
   html+='<div style="width:10px;height:10px;border-radius:50%;background:'+(allOk?'#3fb950':'#f85149')+';'+(allOk?'box-shadow:0 0 6px #3fb950;':'')+'"></div>';
   html+='<div style="font-family:var(--mono);font-size:.8rem;font-weight:700;color:'+(allOk?'#3fb950':'#f85149')+'">'+(allOk?'All systems operational':'Some services need attention')+'</div>';
-  if(lowApis.length>0){html+='<div style="margin-left:auto;font-size:.65rem;font-family:var(--mono);color:#f85149;"><i class="ti ti-alert-triangle"></i> '+lowApis.length+' API'+(lowApis.length>1?'s':'')+' low</div>';}
+  if(lowApis.length>0){html+='<div style="margin-inline-start:auto;font-size:.65rem;font-family:var(--mono);color:#f85149;"><i class="ti ti-alert-triangle"></i> '+lowApis.length+' API'+(lowApis.length>1?'s':'')+' low</div>';}
   html+='</div>';
 
   html+='<div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;">Platform Stats & Today&#39;s Usage</div>';

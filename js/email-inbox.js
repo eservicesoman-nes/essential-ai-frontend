@@ -67,7 +67,7 @@ async function loadEmailAccounts(clientId){
           <div style="font-size:.78rem;font-weight:600;color:var(--text);">${a.label||a.email_address}</div>
           <div style="font-size:.65rem;color:var(--muted);font-family:var(--mono);">${a.email_address} · ${a.provider} · ${a.is_active?'Active':'Inactive'}</div>
         </div>
-        <button onclick="resaveEmailPassword('${a.id}','${a.email_address}','${clientId}')" style="background:none;border:1px solid #1a3a2a;border-radius:6px;padding:3px 8px;color:#3fb950;cursor:pointer;font-size:.65rem;margin-right:4px;"><i class="ti ti-key"></i> Re-auth</button>
+        <button onclick="resaveEmailPassword('${a.id}','${a.email_address}','${clientId}')" style="background:none;border:1px solid #1a3a2a;border-radius:6px;padding:3px 8px;color:#3fb950;cursor:pointer;font-size:.65rem;margin-inline-end:4px;"><i class="ti ti-key"></i> Re-auth</button>
         <button onclick="deleteEmailAccount('${a.id}','${clientId}')" style="background:none;border:1px solid #2d0e0e;border-radius:6px;padding:3px 8px;color:#f85149;cursor:pointer;font-size:.65rem;"><i class="ti ti-trash"></i></button>
       </div>`).join('');
   }catch(e){if(el)el.innerHTML='<div style="color:#f85149;font-size:.72rem;">Error loading accounts</div>';}
@@ -141,7 +141,7 @@ async function showInbox(){
       <button onclick="filterInbox('all',this)" style="font-size:.65rem;padding:3px 10px;border-radius:20px;border:none;background:var(--nes-blue);color:#fff;cursor:pointer;white-space:nowrap;">All</button>
     </div>
     <div style="display:grid;grid-template-columns:280px 1fr;flex:1;overflow:hidden;height:calc(100% - 48px);" id="inboxGrid" class="inbox-grid-wrap">
-      <div style="border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;background:var(--surface);">
+      <div style="border-inline-end:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;background:var(--surface);">
         <div style="overflow-y:auto;flex:1;" id="emailList">
           <div style="padding:20px;text-align:center;color:var(--muted);font-family:var(--mono);font-size:.75rem;">${t('loading.emails')}</div>
         </div>
@@ -204,7 +204,7 @@ async function loadInboxEmails(clientId){
             const label = (window._accountLabels&&window._accountLabels[a])||a.split('@')[0];
             const clr = (window._inboxColors||['#409cff'])[i%5]||'#409cff';
             const unread = emails.filter(function(e){return e.account_email===a&&!e.is_read;}).length;
-            const badge = unread>0 ? '<span style="background:'+clr+';color:#fff;border-radius:10px;padding:1px 5px;font-size:.55rem;font-weight:700;margin-left:3px;">'+unread+'</span>' : '';
+            const badge = unread>0 ? '<span style="background:'+clr+';color:#fff;border-radius:10px;padding:1px 5px;font-size:.55rem;font-weight:700;margin-inline-start:3px;">'+unread+'</span>' : '';
             return '<button onclick="filterInbox(' + "'" + a + "'" + ',this)" style="display:flex;align-items:center;gap:5px;font-size:.65rem;padding:4px 10px;border-radius:6px;border:0.5px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer;white-space:nowrap;flex-shrink:0;"><span style="display:inline-block;width:8px;height:14px;border-radius:8px 0 0 8px;border:2px solid '+clr+';border-right:none;margin-right:4px;flex-shrink:0;"></span>'+label+badge+'</button>';
           }).join('');
     }
@@ -224,12 +224,12 @@ function renderEmailList(emails){
   el.innerHTML=emails.map((e,i)=>{
     const acctIdx=accounts.indexOf(e.account_email);
     const color=colors[acctIdx%5]||'#409cff';
-    const date=e.received_at?new Date(e.received_at).toLocaleDateString('en-GB',{day:'numeric',month:'short'}):'';
-    return`<div onclick="showEmail(${i})" style="padding:12px;border-bottom:1px solid rgba(26,35,50,.5);cursor:pointer;border-left:3px solid ${color};-webkit-tap-highlight-color:transparent;${!e.is_read?'background:rgba(64,156,255,0.05);':''}" class="email-row-${i}">
+    const date=e.received_at?new Date(e.received_at).toLocaleDateString(getDateLocale('en-GB'),{day:'numeric',month:'short'}):'';
+    return`<div onclick="showEmail(${i})" style="padding:12px;border-bottom:1px solid rgba(26,35,50,.5);cursor:pointer;border-inline-start:3px solid ${color};-webkit-tap-highlight-color:transparent;${!e.is_read?'background:rgba(64,156,255,0.05);':''}" class="email-row-${i}">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;">
         <div style="font-size:.75rem;font-weight:${e.is_read?'400':'600'};color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;">${e.from_name||e.from_address||'Unknown'}</div>
-        <div style="font-size:.6rem;color:var(--muted);margin-left:8px;flex-shrink:0;">${date}</div>
-        ${!e.is_read?'<div style="width:6px;height:6px;border-radius:50%;background:'+color+';margin-left:6px;flex-shrink:0;"></div>':''}
+        <div style="font-size:.6rem;color:var(--muted);margin-inline-start:8px;flex-shrink:0;">${date}</div>
+        ${!e.is_read?'<div style="width:6px;height:6px;border-radius:50%;background:'+color+';margin-inline-start:6px;flex-shrink:0;"></div>':''}
       </div>
       <div style="font-size:.72rem;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:2px;">${e.subject||'(no subject)'}</div>
       <div style="display:flex;align-items:center;justify-content:space-between;">
@@ -376,7 +376,7 @@ function showEmail(idx){
         + accounts.map(function(a,i){
             const label = labels[a]||a.split('@')[0];
             const unread = allEmails.filter(function(m){return m.account_email===a&&!m.is_read;}).length;
-            const badge = unread>0 ? '<span style=\"background:'+colors[i%5]+';color:#fff;border-radius:10px;padding:1px 5px;font-size:.55rem;font-weight:700;margin-left:3px;\">'+unread+'</span>' : '';
+            const badge = unread>0 ? '<span style=\"background:'+colors[i%5]+';color:#fff;border-radius:10px;padding:1px 5px;font-size:.55rem;font-weight:700;margin-inline-start:3px;\">'+unread+'</span>' : '';
             return '<button onclick="filterInbox(' + "'" + a + "'" + ',this)" data-acct="'+a+'" style="display:flex;align-items:center;gap:5px;font-size:.65rem;padding:4px 10px;border-radius:6px;border:0.5px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer;white-space:nowrap;flex-shrink:0;"><span style="display:inline-block;width:8px;height:14px;border-radius:8px 0 0 8px;border:2px solid '+colors[i%5]+';border-right:none;margin-right:4px;flex-shrink:0;"></span>'+label+badge+'</button>';
           }).join('');
     }
@@ -396,7 +396,7 @@ function showEmail(idx){
       <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
         <span style="font-size:.65rem;padding:2px 8px;border-radius:12px;color:#fff;background:${color};">${e.account_email}</span>
         <span style="font-size:.72rem;color:var(--muted);">From: ${e.from_name?e.from_name+' &lt;'+e.from_address+'&gt;':e.from_address}</span>
-        <span style="font-size:.65rem;color:var(--muted);margin-left:auto;">${e.received_at?new Date(e.received_at).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):''}</span>
+        <span style="font-size:.65rem;color:var(--muted);margin-inline-start:auto;">${e.received_at?new Date(e.received_at).toLocaleString(getDateLocale('en-GB'),{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):''}</span>
       </div>
     </div>
     <div style="flex:1;padding:18px;overflow-y:auto;font-size:.82rem;color:var(--text);line-height:1.7;" id="emailBodyPanel">

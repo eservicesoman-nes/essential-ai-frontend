@@ -54,7 +54,7 @@ async function loadIncidents(){
     document.getElementById('incidentsTimeline').innerHTML = rows.map(i => {
       const isAuto = i.resolution === 'auto-recovered';
       const dot = isAuto ? '#3fb950' : '#f85149';
-      const started = new Date(i.started_at).toLocaleString();
+      const started = new Date(i.started_at).toLocaleString(getDateLocale('en-GB'));
       return `<div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border);">
         <div style="width:8px;height:8px;border-radius:50%;background:${dot};flex-shrink:0;"></div>
         <div style="flex:1;min-width:0;">
@@ -188,7 +188,7 @@ async function showPartnerDashboard(){
             <div id="partnerWeatherDesc" style="font-size:.78rem;color:var(--text);">${t('common.loading')}</div>
           </div>
         </div>
-        <div style="text-align:right;">
+        <div style="text-align:end;">
           <div id="partnerWeatherTemp" style="font-size:1.4rem;font-weight:700;color:var(--nes-blue);">—</div>
           <div id="partnerWeatherFeel" style="font-size:.65rem;color:var(--muted);"></div>
         </div>
@@ -233,10 +233,10 @@ async function showPartnerDashboard(){
         <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 16px;">
           <div style="font-family:var(--mono);font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;display:flex;align-items:center;gap:4px;"><i class="ti ti-bolt"></i> QUICK ACTIONS</div>
           <div style="display:flex;flex-direction:column;gap:6px;">
-            <button onclick="window.open('https://nes-ai.com/nes-assessment.html','_blank')" style="text-align:left;font-size:.7rem;padding:6px 10px;border-radius:6px;cursor:pointer;display:flex;align-items:center;gap:6px;background:none;border:1px solid var(--border);color:var(--text);"><i class="ti ti-clipboard-plus"></i> New assessment</button>
-            <button onclick="showView('clientmanager')" style="text-align:left;font-size:.7rem;padding:6px 10px;border-radius:6px;cursor:pointer;display:flex;align-items:center;gap:6px;background:none;border:1px solid var(--border);color:var(--text);"><i class="ti ti-key"></i> Client credentials</button>
-            <button onclick="showView('inbox')" style="text-align:left;font-size:.7rem;padding:6px 10px;border-radius:6px;cursor:pointer;display:flex;align-items:center;gap:6px;background:none;border:1px solid var(--border);color:var(--text);"><i class="ti ti-mail"></i> Inbox</button>
-            <button onclick="showView('command')" style="text-align:left;font-size:.7rem;padding:6px 10px;border-radius:6px;cursor:pointer;display:flex;align-items:center;gap:6px;background:none;border:1px solid var(--border);color:var(--text);"><i class="ti ti-message-circle"></i> Command centre</button>
+            <button onclick="window.open('https://nes-ai.com/nes-assessment.html','_blank')" style="text-align:start;font-size:.7rem;padding:6px 10px;border-radius:6px;cursor:pointer;display:flex;align-items:center;gap:6px;background:none;border:1px solid var(--border);color:var(--text);"><i class="ti ti-clipboard-plus"></i> New assessment</button>
+            <button onclick="showView('clientmanager')" style="text-align:start;font-size:.7rem;padding:6px 10px;border-radius:6px;cursor:pointer;display:flex;align-items:center;gap:6px;background:none;border:1px solid var(--border);color:var(--text);"><i class="ti ti-key"></i> Client credentials</button>
+            <button onclick="showView('inbox')" style="text-align:start;font-size:.7rem;padding:6px 10px;border-radius:6px;cursor:pointer;display:flex;align-items:center;gap:6px;background:none;border:1px solid var(--border);color:var(--text);"><i class="ti ti-mail"></i> Inbox</button>
+            <button onclick="showView('command')" style="text-align:start;font-size:.7rem;padding:6px 10px;border-radius:6px;cursor:pointer;display:flex;align-items:center;gap:6px;background:none;border:1px solid var(--border);color:var(--text);"><i class="ti ti-message-circle"></i> Command centre</button>
           </div>
         </div>
       </div>
@@ -245,7 +245,7 @@ async function showPartnerDashboard(){
         <div id="partnerClientList" style="font-size:.72rem;color:var(--muted);text-align:center;padding:12px 0;">${t('common.loading')}</div>
       </div>
     </div>
-    <div style="width:320px;border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;" id="partnerFeedPanel">
+    <div style="width:320px;border-inline-start:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;" id="partnerFeedPanel">
       <div style="padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
         <div style="font-family:var(--mono);font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;display:flex;align-items:center;gap:4px;"><i class="ti ti-news"></i> ${t('ceoDashboardSection.marketIntelligence')}</div>
         <span id="partnerFeedBadge" style="font-size:.6rem;padding:1px 6px;border-radius:10px;background:rgba(64,156,255,.1);color:var(--nes-blue);display:none;">0 NEW</span>
@@ -320,7 +320,7 @@ async function loadPartnerFeed(){
       return`<div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:8px;">
         <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
           <span style="font-size:.58rem;padding:1px 6px;border-radius:10px;background:${isAlert?'rgba(210,153,34,.15)':'rgba(64,156,255,.1)'};color:${isAlert?'#d29922':'var(--nes-blue)'};">${isAlert?'⚡ ALERT':'INTEL'}</span>
-          <span style="font-size:.6rem;color:var(--muted);">${new Date(f.created_at).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}</span>
+          <span style="font-size:.6rem;color:var(--muted);">${new Date(f.created_at).toLocaleDateString(getDateLocale('en-GB'),{day:'numeric',month:'short'})}</span>
         </div>
         <div style="font-size:.72rem;color:var(--text);font-weight:600;margin-bottom:3px;">${f.title||''}</div>
         <div style="font-size:.65rem;color:var(--muted);">${(f.summary||'').substring(0,80)}${(f.summary||'').length>80?'...':''}</div>
@@ -341,7 +341,7 @@ async function showCEODashboard(){
   mc.innerHTML=`
     <div style="padding-block:11px;padding-inline-end:var(--header-clearance);padding-inline-start:60px;border-bottom:1px solid var(--border);flex-shrink:0;">
       <div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;">${t('sectionTitle.ceoDashboard')}</div>
-      <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">Live · ${new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</div>
+      <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">Live · ${new Date().toLocaleDateString(getDateLocale('en-GB'),{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</div>
     </div>
     <div class="page" id="ceoDashContent" style="opacity:0;transition:opacity .3s;display:grid;grid-template-columns:1fr 6px 380px;min-height:0;">
       <div style="text-align:center;padding:40px;color:var(--muted);font-family:var(--mono);font-size:.8rem;">${t('loading.dashboard')}</div>
@@ -386,7 +386,7 @@ async function showCEODashboard(){
       <button onclick="toggleCeoPanel('stats')" id="ceoToggleStats" style="flex:1;padding:7px;border:none;border-radius:7px;background:var(--nes-blue);color:#fff;font-size:.75rem;font-weight:600;cursor:pointer;"><i class="ti ti-chart-bar"></i> Stats</button>
       <button onclick="toggleCeoPanel('feed')" id="ceoToggleFeed" style="flex:1;padding:7px;border:none;border-radius:7px;background:var(--surface);color:var(--muted);font-size:.75rem;font-weight:600;cursor:pointer;border:1px solid var(--border);"><i class="ti ti-radar"></i> Feed</button>
     </div>
-      <div style="overflow-y:auto;padding:14px 16px;border-right:1px solid var(--border);">
+      <div style="overflow-y:auto;padding:14px 16px;border-inline-end:1px solid var(--border);">
         ${uncontacted>0
           ?`<div class="alert-bar alert-warn"><i class="ti ti-alert-triangle"></i> ${uncontacted} lead${uncontacted>1?'s':''} uncontacted 48h+ — follow up today</div>`
           :`<div class="alert-bar alert-good"><i class="ti ti-circle-check"></i> ${t('ceoDashboardSection.allSystemsOperational')}</div>`}
@@ -396,7 +396,7 @@ async function showCEODashboard(){
             <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px;display:flex;align-items:center;gap:4px;"><i class="ti ti-map-pin" style="font-size:10px"></i>WEATHER — <span id="weatherLocLabel">MUSCAT</span></div>
             <div id="weatherDesc" style="font-size:.85rem;font-weight:600;color:var(--text)">${t('common.loading')}</div>
           </div>
-          <div style="text-align:right">
+          <div style="text-align:end">
             <div id="weatherTemp" style="font-size:1.4rem;font-weight:700;color:var(--nes-blue)">—</div>
             <div id="weatherFeels" style="font-size:.65rem;color:var(--muted);font-family:var(--mono)">Feels like —</div>
           </div>
@@ -410,7 +410,7 @@ async function showCEODashboard(){
                 <div style="width:28px;height:28px;border-radius:7px;background:#0c1f35;display:flex;align-items:center;justify-content:center;"><i class="ti ti-trending-up" style="font-size:13px;color:var(--nes-blue);"></i></div>
                 <div><div style="font-size:.62rem;color:var(--muted);">${userRole==='nesadmin'?'High value leads':'Total leads'}</div><div style="font-size:1.05rem;font-weight:700;color:var(--nes-blue);">${userRole==='nesadmin'?hotLeads+' leads':totalLeads}</div><div style="height:3px;background:var(--border);border-radius:2px;margin-top:3px;width:110px;"><div style="height:100%;width:72%;background:var(--nes-blue);border-radius:2px;"></div></div></div>
               </div>
-              <div style="font-size:.6rem;color:var(--muted);text-align:right;">${totalLeads} total<br>Gov · Ports · Aviation</div>
+              <div style="font-size:.6rem;color:var(--muted);text-align:end;">${totalLeads} total<br>Gov · Ports · Aviation</div>
             </div>
             <div style="height:1px;background:var(--border);margin:6px 0;"></div>
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
@@ -418,7 +418,7 @@ async function showCEODashboard(){
                 <div style="width:28px;height:28px;border-radius:7px;background:#0d2818;display:flex;align-items:center;justify-content:center;"><i class="ti ti-users" style="font-size:13px;color:#3fb950;"></i></div>
                 <div><div style="font-size:.62rem;color:var(--muted);">New today</div><div style="font-size:1.05rem;font-weight:700;color:#3fb950;">${leadsToday}</div><div style="height:3px;background:var(--border);border-radius:2px;margin-top:3px;width:110px;"><div style="height:100%;width:${Math.min(100,leadsToday*10)}%;background:#3fb950;border-radius:2px;"></div></div></div>
               </div>
-              <div style="font-size:.6rem;color:var(--muted);text-align:right;">Total: ${totalLeads}<br>+${leadsToday} today</div>
+              <div style="font-size:.6rem;color:var(--muted);text-align:end;">Total: ${totalLeads}<br>+${leadsToday} today</div>
             </div>
             <div style="height:1px;background:var(--border);margin:6px 0;"></div>
             <div style="display:flex;align-items:center;justify-content:space-between;">
@@ -426,7 +426,7 @@ async function showCEODashboard(){
                 <div style="width:28px;height:28px;border-radius:7px;background:${uncontacted>0?'#2d1800':'#0d2818'};display:flex;align-items:center;justify-content:center;"><i class="ti ti-bell" style="font-size:13px;color:${uncontacted>0?'#f85149':'#3fb950'};"></i></div>
                 <div><div style="font-size:.62rem;color:var(--muted);">Needs follow-up</div><div style="font-size:1.05rem;font-weight:700;color:${uncontacted>0?'#f85149':'#3fb950'};">${uncontacted}</div><div style="height:3px;background:var(--border);border-radius:2px;margin-top:3px;width:110px;"><div style="height:100%;width:${Math.min(100,uncontacted*2)}%;background:${uncontacted>0?'#f85149':'#3fb950'};border-radius:2px;"></div></div></div>
               </div>
-              <div style="font-size:.6rem;color:${uncontacted>0?'#f85149':'var(--muted)'};text-align:right;">${uncontacted>0?'Action<br>required':'All<br>followed up'}</div>
+              <div style="font-size:.6rem;color:${uncontacted>0?'#f85149':'var(--muted)'};text-align:end;">${uncontacted>0?'Action<br>required':'All<br>followed up'}</div>
             </div>
           </div>
           ${userRole==='nesadmin'?`
@@ -437,7 +437,7 @@ async function showCEODashboard(){
                 <div style="width:28px;height:28px;border-radius:7px;background:#0d2818;display:flex;align-items:center;justify-content:center;"><i class="ti ti-shield-check" style="font-size:13px;color:#3fb950;"></i></div>
                 <div><div style="font-size:.62rem;color:var(--muted);">API health</div><div style="font-size:1.05rem;font-weight:700;color:#3fb950;" id="apiHealthVal">—</div><div style="height:3px;background:var(--border);border-radius:2px;margin-top:3px;width:110px;"><div id="apiHealthBar" style="height:100%;width:0%;background:#3fb950;border-radius:2px;"></div></div></div>
               </div>
-              <div style="font-size:.6rem;color:var(--muted);text-align:right;" id="apiHealthDelta">${t('common.loading')}</div>
+              <div style="font-size:.6rem;color:var(--muted);text-align:end;" id="apiHealthDelta">${t('common.loading')}</div>
             </div>
             <div style="height:1px;background:var(--border);margin:6px 0;"></div>
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
@@ -445,7 +445,7 @@ async function showCEODashboard(){
                 <div style="width:28px;height:28px;border-radius:7px;background:#1a1040;display:flex;align-items:center;justify-content:center;"><i class="ti ti-credit-card" style="font-size:13px;color:#7f77dd;"></i></div>
                 <div><div style="font-size:.62rem;color:var(--muted);">API credits</div><div style="font-size:1.05rem;font-weight:700;color:#7f77dd;" id="creditVal">—</div><div style="height:3px;background:var(--border);border-radius:2px;margin-top:3px;width:110px;"><div id="creditBar" style="height:100%;width:0%;background:#7f77dd;border-radius:2px;"></div></div></div>
               </div>
-              <div style="font-size:.6rem;color:var(--muted);text-align:right;" id="creditDelta">${t('common.loading')}</div>
+              <div style="font-size:.6rem;color:var(--muted);text-align:end;" id="creditDelta">${t('common.loading')}</div>
             </div>
             <div style="height:1px;background:var(--border);margin:6px 0;"></div>
             <div style="display:flex;align-items:center;justify-content:space-between;">
@@ -453,7 +453,7 @@ async function showCEODashboard(){
                 <div style="width:28px;height:28px;border-radius:7px;background:#0c1827;display:flex;align-items:center;justify-content:center;"><i class="ti ti-clock" style="font-size:13px;color:#409cff;"></i></div>
                 <div><div style="font-size:.62rem;color:var(--muted);">Platform uptime</div><div style="font-size:1.05rem;font-weight:700;color:#409cff;">99.9%</div><div style="height:3px;background:var(--border);border-radius:2px;margin-top:3px;width:110px;"><div style="height:100%;width:99%;background:#409cff;border-radius:2px;"></div></div></div>
               </div>
-              <div style="font-size:.6rem;color:var(--muted);text-align:right;">30 days<br>running</div>
+              <div style="font-size:.6rem;color:var(--muted);text-align:end;">30 days<br>running</div>
             </div>
           </div>
         </div>`:''}
@@ -778,7 +778,7 @@ async function loadCeoFeed(){
     el.innerHTML=data.map(function(item,idx){
       try{
       const isAlert=item.title&&(item.title.indexOf('Alert')>-1||item.title.indexOf('ALERT')>-1||item.title.indexOf('Breaking')>-1||item.title.indexOf('BREAKING')>-1);
-      const alertIcon=isAlert?'<span style="color:#f0883e;margin-right:4px;">⚡</span>':'';
+      const alertIcon=isAlert?'<span style="color:#f0883e;margin-inline-end:4px;">⚡</span>':'';
       const tagColor=tagColors[item.type]||tagColors.default;
       const tagLabel=tagLabels[item.type]||tagLabels.default;
       const urls=[];
@@ -851,7 +851,7 @@ async function loadCeoFeed(){
         '<span style="font-size:.6rem;font-family:var(--mono);padding:2px 7px;border-radius:5px;background:'+
         (item.type==='intelligence'?'#0d2818':'#0c1f35')+';color:'+tagColor+';">'+tagLabel+'</span>'+
         '<span style="font-size:.6rem;color:var(--muted);font-family:var(--mono);">'+
-        new Date(item.created_at).toLocaleDateString('en-GB',{day:'numeric',month:'short'})+'</span>'+
+        new Date(item.created_at).toLocaleDateString(getDateLocale('en-GB'),{day:'numeric',month:'short'})+'</span>'+
         '<i class="ti ti-chevron-down feed-chevron-'+idx+'" style="font-size:12px;color:var(--muted);transition:transform .2s;"></i>'+
         '</div></div>'+
         '<div style="font-size:.8rem;font-weight:600;color:var(--text);margin-bottom:4px;">'+
@@ -939,7 +939,7 @@ function showCommandCentre(){
   if(!hub){
     hub=document.createElement('div');
     hub.id='teamHubWrapper';
-    hub.style.cssText='position:absolute;top:0;left:228px;right:0;bottom:0;background:var(--bg);z-index:50;display:flex;flex-direction:column;';
+    hub.style.cssText='position:absolute;top:0;inset-inline-start:228px;inset-inline-end:0;bottom:0;background:var(--bg);z-index:50;display:flex;flex-direction:column;';
     hub.style.overflow='hidden';
 hub.innerHTML=`<div style="padding-block:11px;padding-inline-end:var(--header-clearance);padding-inline-start:60px;border-bottom:1px solid var(--border);flex-shrink:0;"><div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;">${t('sectionTitle.teamHub')}</div><div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">Internal team communications</div></div><div class="command-wrap" style="width:100%;flex:1;"><iframe id="teamHubIframe" class="command-iframe" src="${ROCKET_URL}" title="NES Team Hub" allow="microphone; camera" style="width:100%;height:100%;border:none;"></iframe></div>`;
     document.getElementById('app').appendChild(hub);

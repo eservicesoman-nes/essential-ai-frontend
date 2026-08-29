@@ -82,7 +82,7 @@ async function renderPartnerHub(){
 
     <div class="ph-tabs">
       <button class="ph-tab active" onclick="switchPhTab('overview',this)">${t('partnerHub.overview')}</button>
-      <button class="ph-tab" onclick="switchPhTab('pending',this)">Pending <span id="pendingBadge" style="display:none;background:#f85149;color:#fff;font-size:.55rem;padding:1px 5px;border-radius:8px;margin-left:4px;"></span></button>
+      <button class="ph-tab" onclick="switchPhTab('pending',this)">Pending <span id="pendingBadge" style="display:none;background:#f85149;color:#fff;font-size:.55rem;padding:1px 5px;border-radius:8px;margin-inline-start:4px;"></span></button>
       <button class="ph-tab" onclick="switchPhTab('partners',this)">${t('partnerHub.partners')}</button>
       <button class="ph-tab" onclick="switchPhTab('commissions',this)">${t('partnerHub.commissions')}</button>
       <button class="ph-tab" onclick="switchPhTab('tiers',this)">${t('partnerHub.programme')}</button>
@@ -134,7 +134,7 @@ async function renderPartnerHub(){
                   <div style="font-size:.8rem;font-weight:600;color:#e6edf3;">${p.name}</div>
                   <div style="font-size:.65rem;color:var(--muted);">${nextTier} · ${pClients.length} active clients</div>
                 </div>
-                <div style="text-align:right;">
+                <div style="text-align:end;">
                   <div style="font-size:.82rem;font-weight:700;color:${color};">OMR ${pMRR.toFixed(0)}/mo</div>
                   <span class="ph-badge" style="background:${tierBg[p.tier]};color:${color};">${p.tier}</span>
                 </div>
@@ -157,7 +157,7 @@ async function renderPartnerHub(){
               <div style="font-size:.72rem;color:var(--muted);margin-top:2px;">${p.partner_type||'—'} · ${p.region||'—'}</div>
               <div style="font-size:.72rem;color:var(--muted);margin-top:2px;">Self-selected: <span style="color:#d29922;font-weight:600;">${(p.tier||'apex').toUpperCase()}</span> · ${p.expected_referrals||'—'}/month</div>
               ${p.network_description?`<div style="font-size:.7rem;color:var(--muted);margin-top:6px;padding:8px;background:rgba(255,255,255,.03);border-radius:6px;border:1px solid var(--border);">${p.network_description}</div>`:''}
-              <div style="font-size:.65rem;color:var(--muted);margin-top:6px;">Applied: ${new Date(p.applied_at||p.created_at).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</div>
+              <div style="font-size:.65rem;color:var(--muted);margin-top:6px;">Applied: ${new Date(p.applied_at||p.created_at).toLocaleDateString(getDateLocale('en-GB'),{day:'numeric',month:'short',year:'numeric'})}</div>
             </div>
             <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;flex-shrink:0;">
               <select id="tier-assign-${p.id}" style="background:#0a0f1e;border:1px solid var(--border);border-radius:6px;padding:5px 10px;color:#e6edf3;font-size:.72rem;outline:none;">
@@ -257,10 +257,10 @@ async function renderPartnerHub(){
         <table style="width:100%;border-collapse:collapse;font-size:.72rem;" id="commTable">
           <thead>
             <tr style="background:rgba(64,156,255,0.05);">
-              <th style="padding:8px 12px;text-align:left;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border);">${t('tableHeader.partner')}</th>
-              <th style="padding:8px 12px;text-align:left;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border);">${t('tableHeader.client')}</th>
-              <th style="padding:8px 12px;text-align:left;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border);">${t('tableHeader.type')}</th>
-              <th style="padding:8px 12px;text-align:left;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border);">${t('tableHeader.month')}</th>
+              <th style="padding:8px 12px;text-align:start;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border);">${t('tableHeader.partner')}</th>
+              <th style="padding:8px 12px;text-align:start;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border);">${t('tableHeader.client')}</th>
+              <th style="padding:8px 12px;text-align:start;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border);">${t('tableHeader.type')}</th>
+              <th style="padding:8px 12px;text-align:start;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border);">${t('tableHeader.month')}</th>
               <th style="padding:8px 12px;text-align:right;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border);">${t('tableHeader.rate')}</th>
               <th style="padding:8px 12px;text-align:right;color:#d29922;font-weight:600;border-bottom:1px solid var(--border);">${t('tableHeader.amount')}</th>
               <th style="padding:8px 12px;text-align:center;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border);">Status</th>
