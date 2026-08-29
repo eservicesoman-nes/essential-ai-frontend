@@ -225,6 +225,7 @@ let _nesLocale = 'en';
 
 async function loadNesStrings(locale) {
   _nesLocale = locale || 'en';
+  window._nesLocale = _nesLocale;
   try {
     const promises = [fetch('strings/en.json').then(r => r.json())];
     if (_nesLocale !== 'en') promises.push(fetch('strings/' + _nesLocale + '.json').then(r => r.json()).catch(() => ({})));
