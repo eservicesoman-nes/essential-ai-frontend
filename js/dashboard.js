@@ -306,7 +306,7 @@ async function showPartnerDashboard(){
 
 async function loadPartnerFeed(){
   try{
-    const {data:feed}=await sb.from('ceo_feed').select('title,summary,source,tag,created_at').eq('archived',false).order('created_at',{ascending:false}).limit(20);
+    const {data:feed}=await sb.from('ceo_feed').select('title,summary,source,tag,created_at,translations').eq('archived',false).order('created_at',{ascending:false}).limit(20);
     const feedEl=document.getElementById('partnerFeedItems');
     if(!feedEl)return;
     const badge=document.getElementById('partnerFeedBadge');
@@ -317,13 +317,19 @@ async function loadPartnerFeed(){
     let html='<div style="font-size:.65rem;color:var(--muted);margin-bottom:8px;">Today</div>';
     html+=feed.map(f=>{
       const isAlert=f.tag==='ALERT';
+      let tr=f.translations;
+      if(typeof tr==='string'){try{tr=JSON.parse(tr);}catch(e){tr=null;}}
+      const loc=window._nesLocale;
+      const localized=tr&&loc&&tr[loc];
+      const title=localized?localized.title:f.title;
+      const summaryText=localized?localized.insight:f.summary;
       return`<div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:8px;">
         <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
           <span style="font-size:.58rem;padding:1px 6px;border-radius:10px;background:${isAlert?'rgba(210,153,34,.15)':'rgba(64,156,255,.1)'};color:${isAlert?'#d29922':'var(--nes-blue)'};">${isAlert?'⚡ ALERT':'INTEL'}</span>
           <span style="font-size:.6rem;color:var(--muted);">${new Date(f.created_at).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}</span>
         </div>
-        <div style="font-size:.72rem;color:var(--text);font-weight:600;margin-bottom:3px;">${f.title||''}</div>
-        <div style="font-size:.65rem;color:var(--muted);">${(f.summary||'').substring(0,80)}${(f.summary||'').length>80?'...':''}</div>
+        <div style="font-size:.72rem;color:var(--text);font-weight:600;margin-bottom:3px;">${title||''}</div>
+        <div style="font-size:.65rem;color:var(--muted);">${(summaryText||'').substring(0,80)}${(summaryText||'').length>80?'...':''}</div>
       </div>`;
     }).join('');
     feedEl.innerHTML=html;
@@ -756,7 +762,7 @@ async function loadUsageSummary(){
 
 async function loadCeoFeed(){
   try{
-    let feedQ=sb.from('ceo_feed').select('id,title,content,tag,type,source_url,created_at,client_id').eq('archived',false).order('created_at',{ascending:false}).limit(20);
+    let feedQ=sb.from('ceo_feed').select('id,title,content,tag,type,source_url,created_at,client_id,translations').eq('archived',false).order('created_at',{ascending:false}).limit(20);
     if(userClientId)feedQ=feedQ.or('client_id.eq.'+userClientId+',client_id.is.null');
     const{data,error}=await feedQ;
     const el=document.getElementById('ceoFeedItems');
@@ -777,6 +783,11 @@ async function loadCeoFeed(){
     const tagLabels={briefing:'BRIEF',intelligence:'INTEL',default:'INFO'};
     el.innerHTML=data.map(function(item,idx){
       try{
+      let tr=item.translations;
+      if(typeof tr==='string'){try{tr=JSON.parse(tr);}catch(e){tr=null;}}
+      const loc=window._nesLocale;
+      const localized=tr&&loc&&tr[loc];
+      if(localized){item=Object.assign({},item,{title:localized.title||item.title,content:localized.insight||item.content});}
       const isAlert=item.title&&(item.title.indexOf('Alert')>-1||item.title.indexOf('ALERT')>-1||item.title.indexOf('Breaking')>-1||item.title.indexOf('BREAKING')>-1);
       const alertIcon=isAlert?'<span style="color:#f0883e;margin-right:4px;">⚡</span>':'';
       const tagColor=tagColors[item.type]||tagColors.default;
