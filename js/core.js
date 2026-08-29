@@ -224,6 +224,7 @@ function applyTextDirection(locale){
 async function selectLanguage(code){
   document.getElementById('langMenuDropdown')?.remove();
   if(code === (window.clientLocale||'en')) return;
+  if(userRole === 'nesadmin') return;
   window.clientLocale = code;
   applyTextDirection(code);
   await loadNesStrings(code);
@@ -380,7 +381,7 @@ async function showClientBrandingChip(){
         }
       }
     }
-    if(window.clientLocale !== 'en'){ await loadNesStrings(window.clientLocale); applyNesI18n(); }
+    if(window.clientLocale !== 'en' && userRole !== 'nesadmin'){ await loadNesStrings(window.clientLocale); applyNesI18n(); }
     applyTextDirection(window.clientLocale);
     updateLanguageSwitcherIcon();
     if(!window.userRegion){
