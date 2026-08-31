@@ -389,8 +389,8 @@ async function showCEODashboard(){
 
   document.getElementById('ceoDashContent').innerHTML=`
     <div class="ceo-panel-toggle" style="display:none!important;padding:6px 12px;border-bottom:1px solid var(--border);gap:6px;flex-shrink:0;">
-      <button onclick="toggleCeoPanel('stats')" id="ceoToggleStats" style="flex:1;padding:7px;border:none;border-radius:7px;background:var(--nes-blue);color:#fff;font-size:.75rem;font-weight:600;cursor:pointer;"><i class="ti ti-chart-bar"></i> Stats</button>
-      <button onclick="toggleCeoPanel('feed')" id="ceoToggleFeed" style="flex:1;padding:7px;border:none;border-radius:7px;background:var(--surface);color:var(--muted);font-size:.75rem;font-weight:600;cursor:pointer;border:1px solid var(--border);"><i class="ti ti-radar"></i> Feed</button>
+      <button onclick="toggleCeoPanel('stats')" id="ceoToggleStats" style="flex:1;padding:7px;border:none;border-radius:7px;background:var(--nes-blue);color:#fff;font-size:.75rem;font-weight:600;cursor:pointer;"><i class="ti ti-chart-bar"></i> ${t('ceoDashboardSection.stats')}</button>
+      <button onclick="toggleCeoPanel('feed')" id="ceoToggleFeed" style="flex:1;padding:7px;border:none;border-radius:7px;background:var(--surface);color:var(--muted);font-size:.75rem;font-weight:600;cursor:pointer;border:1px solid var(--border);"><i class="ti ti-radar"></i> ${t('ceoDashboardSection.feed')}</button>
     </div>
       <div style="overflow-y:auto;padding:14px 16px;border-inline-end:1px solid var(--border);">
         ${uncontacted>0
@@ -399,40 +399,40 @@ async function showCEODashboard(){
         <div id="weatherCard" style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 13px;margin-bottom:10px;display:flex;align-items:center;gap:12px;">
           <i class="ti ti-cloud" style="font-size:22px;color:var(--nes-blue);filter:drop-shadow(0 0 4px var(--nes-blue))" id="weatherIcon"></i>
           <div style="flex:1">
-            <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px;display:flex;align-items:center;gap:4px;"><i class="ti ti-map-pin" style="font-size:10px"></i>WEATHER — <span id="weatherLocLabel">MUSCAT</span></div>
+            <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px;display:flex;align-items:center;gap:4px;"><i class="ti ti-map-pin" style="font-size:10px"></i>${t('ceoDashboardSection.weather')} — <span id="weatherLocLabel">MUSCAT</span></div>
             <div id="weatherDesc" style="font-size:.85rem;font-weight:600;color:var(--text)">${t('common.loading')}</div>
           </div>
           <div style="text-align:end">
             <div id="weatherTemp" style="font-size:1.4rem;font-weight:700;color:var(--nes-blue)">—</div>
-            <div id="weatherFeels" style="font-size:.65rem;color:var(--muted);font-family:var(--mono)">Feels like —</div>
+            <div id="weatherFeels" style="font-size:.65rem;color:var(--muted);font-family:var(--mono)">${t('ceoDashboardSection.feelsLike')} —</div>
           </div>
         </div>
-        <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:7px;display:flex;align-items:center;gap:5px;"><i class="ti ti-chart-bar" style="font-size:12px;color:var(--nes-blue);filter:drop-shadow(0 0 3px var(--nes-blue))"></i>Performance</div>
+        <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:7px;display:flex;align-items:center;gap:5px;"><i class="ti ti-chart-bar" style="font-size:12px;color:var(--nes-blue);filter:drop-shadow(0 0 3px var(--nes-blue))"></i>${t('ceoDashboardSection.performance')}</div>
         <div style="display:grid;grid-template-columns:1fr${userRole==='nesadmin'?' 1fr':''};gap:8px;margin-bottom:12px;">
           <div class="dash-card">
-            <div class="dc-title" style="display:flex;align-items:center;gap:5px;"><i class="ti ti-chart-bar" style="font-size:10px;color:var(--nes-blue)"></i>Lead performance</div>
+            <div class="dc-title" style="display:flex;align-items:center;gap:5px;"><i class="ti ti-chart-bar" style="font-size:10px;color:var(--nes-blue)"></i>${t('ceoDashboardSection.leadPerformance')}</div>
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
               <div style="display:flex;align-items:center;gap:8px;">
                 <div style="width:28px;height:28px;border-radius:7px;background:#0c1f35;display:flex;align-items:center;justify-content:center;"><i class="ti ti-trending-up" style="font-size:13px;color:var(--nes-blue);"></i></div>
-                <div><div style="font-size:.62rem;color:var(--muted);">${userRole==='nesadmin'?'High value leads':'Total leads'}</div><div style="font-size:1.05rem;font-weight:700;color:var(--nes-blue);">${userRole==='nesadmin'?hotLeads+' leads':totalLeads}</div><div style="height:3px;background:var(--border);border-radius:2px;margin-top:3px;width:110px;"><div style="height:100%;width:72%;background:var(--nes-blue);border-radius:2px;"></div></div></div>
+                <div><div style="font-size:.62rem;color:var(--muted);">${userRole==='nesadmin'?t('ceoDashboardSection.highValueLeads')||'High value leads':t('ceoDashboardSection.totalLeads')}</div><div style="font-size:1.05rem;font-weight:700;color:var(--nes-blue);">${userRole==='nesadmin'?hotLeads+' leads':totalLeads}</div><div style="height:3px;background:var(--border);border-radius:2px;margin-top:3px;width:110px;"><div style="height:100%;width:72%;background:var(--nes-blue);border-radius:2px;"></div></div></div>
               </div>
-              <div style="font-size:.6rem;color:var(--muted);text-align:end;">${totalLeads} total<br>Gov · Ports · Aviation</div>
+              <div style="font-size:.6rem;color:var(--muted);text-align:end;">${totalLeads} ${t('ceoDashboardSection.total')}<br>${t('ceoDashboardSection.gov')}</div>
             </div>
             <div style="height:1px;background:var(--border);margin:6px 0;"></div>
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
               <div style="display:flex;align-items:center;gap:8px;">
                 <div style="width:28px;height:28px;border-radius:7px;background:#0d2818;display:flex;align-items:center;justify-content:center;"><i class="ti ti-users" style="font-size:13px;color:#3fb950;"></i></div>
-                <div><div style="font-size:.62rem;color:var(--muted);">New today</div><div style="font-size:1.05rem;font-weight:700;color:#3fb950;">${leadsToday}</div><div style="height:3px;background:var(--border);border-radius:2px;margin-top:3px;width:110px;"><div style="height:100%;width:${Math.min(100,leadsToday*10)}%;background:#3fb950;border-radius:2px;"></div></div></div>
+                <div><div style="font-size:.62rem;color:var(--muted);">${t('ceoDashboardSection.newToday')}</div><div style="font-size:1.05rem;font-weight:700;color:#3fb950;">${leadsToday}</div><div style="height:3px;background:var(--border);border-radius:2px;margin-top:3px;width:110px;"><div style="height:100%;width:${Math.min(100,leadsToday*10)}%;background:#3fb950;border-radius:2px;"></div></div></div>
               </div>
-              <div style="font-size:.6rem;color:var(--muted);text-align:end;">Total: ${totalLeads}<br>+${leadsToday} today</div>
+              <div style="font-size:.6rem;color:var(--muted);text-align:end;">${t('ceoDashboardSection.totalColon')} ${totalLeads}<br>+${leadsToday} ${t('ceoDashboardSection.todayLower')}</div>
             </div>
             <div style="height:1px;background:var(--border);margin:6px 0;"></div>
             <div style="display:flex;align-items:center;justify-content:space-between;">
               <div style="display:flex;align-items:center;gap:8px;">
                 <div style="width:28px;height:28px;border-radius:7px;background:${uncontacted>0?'#2d1800':'#0d2818'};display:flex;align-items:center;justify-content:center;"><i class="ti ti-bell" style="font-size:13px;color:${uncontacted>0?'#f85149':'#3fb950'};"></i></div>
-                <div><div style="font-size:.62rem;color:var(--muted);">Needs follow-up</div><div style="font-size:1.05rem;font-weight:700;color:${uncontacted>0?'#f85149':'#3fb950'};">${uncontacted}</div><div style="height:3px;background:var(--border);border-radius:2px;margin-top:3px;width:110px;"><div style="height:100%;width:${Math.min(100,uncontacted*2)}%;background:${uncontacted>0?'#f85149':'#3fb950'};border-radius:2px;"></div></div></div>
+                <div><div style="font-size:.62rem;color:var(--muted);">${t('ceoDashboardSection.needsFollowUp')}</div><div style="font-size:1.05rem;font-weight:700;color:${uncontacted>0?'#f85149':'#3fb950'};">${uncontacted}</div><div style="height:3px;background:var(--border);border-radius:2px;margin-top:3px;width:110px;"><div style="height:100%;width:${Math.min(100,uncontacted*2)}%;background:${uncontacted>0?'#f85149':'#3fb950'};border-radius:2px;"></div></div></div>
               </div>
-              <div style="font-size:.6rem;color:${uncontacted>0?'#f85149':'var(--muted)'};text-align:end;">${uncontacted>0?'Action<br>required':'All<br>followed up'}</div>
+              <div style="font-size:.6rem;color:${uncontacted>0?'#f85149':'var(--muted)'};text-align:end;">${uncontacted>0?t('ceoDashboardSection.actionRequired'):t('ceoDashboardSection.allFollowedUp')}</div>
             </div>
           </div>
           ${userRole==='nesadmin'?`
@@ -466,7 +466,7 @@ async function showCEODashboard(){
         ${(userRole==='ceo'||userRole==='nesadmin'||userRole==='nes_partner')?`
         <div class="row2">
           <div class="dash-card">
-            <div class="dc-title">Lead pipeline</div>
+            <div class="dc-title">${t('ceoDashboardSection.leadPipeline')}</div>
             <div class="pipe-track">
               <div class="pipe-seg" style="width:${stagePcts.new}%;background:var(--nes-blue);border-radius:3px 0 0 3px;box-shadow:0 0 4px var(--nes-blue)"></div>
               <div class="pipe-seg" style="width:${stagePcts.contacted}%;background:#7f77dd;box-shadow:0 0 4px #7f77dd"></div>
@@ -474,33 +474,33 @@ async function showCEODashboard(){
               <div class="pipe-seg" style="width:${stagePcts.closed}%;background:#484f58;border-radius:0 3px 3px 0"></div>
             </div>
             <div class="pipe-legend">
-              <div class="pipe-item"><div class="pipe-dot" style="background:var(--nes-blue);box-shadow:0 0 3px var(--nes-blue)"></div>New <span class="pipe-num">${stageCounts.new}</span></div>
-              <div class="pipe-item"><div class="pipe-dot" style="background:#7f77dd;box-shadow:0 0 3px #7f77dd"></div>Contacted <span class="pipe-num">${stageCounts.contacted}</span></div>
-              <div class="pipe-item"><div class="pipe-dot" style="background:#3fb950;box-shadow:0 0 3px #3fb950"></div>Qualified <span class="pipe-num">${stageCounts.qualified}</span></div>
-              <div class="pipe-item"><div class="pipe-dot" style="background:#484f58"></div>Closed <span class="pipe-num">${stageCounts.closed}</span></div>
+              <div class="pipe-item"><div class="pipe-dot" style="background:var(--nes-blue);box-shadow:0 0 3px var(--nes-blue)"></div>${t('ceoDashboardSection.new')} <span class="pipe-num">${stageCounts.new}</span></div>
+              <div class="pipe-item"><div class="pipe-dot" style="background:#7f77dd;box-shadow:0 0 3px #7f77dd"></div>${t('ceoDashboardSection.contacted')} <span class="pipe-num">${stageCounts.contacted}</span></div>
+              <div class="pipe-item"><div class="pipe-dot" style="background:#3fb950;box-shadow:0 0 3px #3fb950"></div>${t('ceoDashboardSection.qualified')} <span class="pipe-num">${stageCounts.qualified}</span></div>
+              <div class="pipe-item"><div class="pipe-dot" style="background:#484f58"></div>${t('ceoDashboardSection.closed')} <span class="pipe-num">${stageCounts.closed}</span></div>
             </div>
           </div>
           <div class="dash-card">
-            <div class="dc-title">Lead geography</div>
+            <div class="dc-title">${t('ceoDashboardSection.leadGeography')}</div>
             ${geoRows||`<div style="color:var(--muted);font-family:var(--mono);font-size:.75rem;">${t('empty.noLeadsDashboard')}</div>`}
           </div>
         </div>`:''}
         <div class="dash-card" style="margin-bottom:12px;">
-          <div class="dc-title">Usage this month</div>
+          <div class="dc-title">${t('ceoDashboardSection.usageThisMonth')}</div>
           <div id="usageSummaryContent" style="display:flex;flex-direction:column;gap:8px;">
             <div style="color:var(--muted);font-family:var(--mono);font-size:.7rem;">${t('loading.usage')}</div>
           </div>
         </div>
-        <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:7px;margin-top:4px;display:flex;align-items:center;gap:5px;"><i class="ti ti-shield-check" style="font-size:12px;color:#f85149;"></i>Risk & action</div>
+        <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:7px;margin-top:4px;display:flex;align-items:center;gap:5px;"><i class="ti ti-shield-check" style="font-size:12px;color:#f85149;"></i>${t('ceoDashboardSection.riskAction')}</div>
         <div style="display:flex;flex-direction:column;gap:5px;margin-bottom:10px;">
           <div style="display:flex;align-items:center;gap:8px;padding:8px 11px;background:var(--card);border:1px solid var(--border);border-radius:7px;">
             <div style="width:7px;height:7px;border-radius:50%;background:${uncontacted>0?'#d29922':'#3fb950'};flex-shrink:0;"></div>
-            <div style="font-size:.75rem;flex:1;">${uncontacted>0?uncontacted+' leads uncontacted — follow up today':'All leads contacted'}</div>
-            <div style="font-size:.58rem;font-family:var(--mono);padding:2px 7px;border-radius:7px;background:${uncontacted>0?'#2d1f00':'#0d2818'};color:${uncontacted>0?'#d29922':'#3fb950'};">${uncontacted>0?'ACTION':'OK'}</div>
+            <div style="font-size:.75rem;flex:1;">${uncontacted>0?uncontacted+' '+t('ceoDashboardSection.leadUncontactedSuffix'):t('ceoDashboardSection.allLeadsContacted')}</div>
+            <div style="font-size:.58rem;font-family:var(--mono);padding:2px 7px;border-radius:7px;background:${uncontacted>0?'#2d1f00':'#0d2818'};color:${uncontacted>0?'#d29922':'#3fb950'};">${uncontacted>0?t('ceoDashboardSection.action'):t('ceoDashboardSection.ok')}</div>
           </div>
           <div style="display:flex;align-items:center;gap:8px;padding:8px 11px;background:var(--card);border:1px solid var(--border);border-radius:7px;">
             <div style="width:7px;height:7px;border-radius:50%;background:#3fb950;flex-shrink:0;"></div>
-            <div style="font-size:.75rem;flex:1;">Platform running 24/7 — all systems normal</div>
+            <div style="font-size:.75rem;flex:1;">${t('ceoDashboardSection.platformRunning')}</div>
             <div style="font-size:.58rem;font-family:var(--mono);padding:2px 7px;border-radius:7px;background:#0d2818;color:#3fb950;">OK</div>
           </div>
           ${(function(){
@@ -550,7 +550,7 @@ async function showCEODashboard(){
       <div id="ceoResizer" title="Drag to resize"></div>
       <div style="display:flex;flex-direction:column;overflow:hidden;">
         <div style="padding:9px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
-          <div style="font-family:var(--mono);font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;display:flex;align-items:center;gap:5px;"><i class="ti ti-radar" style="font-size:11px;color:var(--nes-blue);"></i>Market Intelligence</div>
+          <div style="font-family:var(--mono);font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;display:flex;align-items:center;gap:5px;"><i class="ti ti-radar" style="font-size:11px;color:var(--nes-blue);"></i>${t('ceoDashboardSection.marketIntelligence')}</div>
           <div id="feedUnreadBadge" style="font-size:.58rem;font-family:var(--mono);padding:2px 7px;border-radius:8px;background:#1a3a6e;color:#409cff;font-weight:700;display:none;">0 NEW</div>
         </div>
         <div id="ceoFeedItems" style="overflow-y:auto;flex:1;padding:10px 14px;">
