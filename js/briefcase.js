@@ -63,7 +63,7 @@ async function loadBriefcaseChatHistory(){
       appendBriefcaseChatMsg(m.role === 'user' ? 'user' : 'ai', m.content);
     }
   }catch(e){
-    console.warn('Could not load Briefcase chat history', e.message);
+    console.error('Could not load Briefcase chat history', e);
   }
 }
 
