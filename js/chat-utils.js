@@ -188,8 +188,8 @@ function md(s){
       continue;
     }
     if(line.trim()===''){i++;continue;}
-    const paraLines=[];
-    let j=i;
+    const paraLines=[lines[i]];
+    let j=i+1;
     while(j<lines.length&&lines[j].trim()!==''&&!isTableRow(lines[j])&&!isBullet(lines[j])&&!isNumbered(lines[j])){paraLines.push(lines[j]);j++;}
     out.push('<p>'+paraLines.join('<br>')+'</p>');
     i=j;
