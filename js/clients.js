@@ -295,6 +295,34 @@ function renderClientDetail(c,colors,textColors,idx){
                 <input class="cf-input" type="text" value="${esc(String((window._clientCreds&&window._clientCreds[c.id]&&window._clientCreds[c.id][key])||c[key]||'')||'')}" placeholder="Not configured" data-field="${key}">
               </div>`).join('')}
           </div>
+          <div class="cred-field" style="grid-column:1/-1;display:flex;align-items:center;gap:10px;padding:8px 0;">
+            <input type="checkbox" id="callHours247_${c.id}" data-field="call_hours_24_7" ${((window._clientCreds&&window._clientCreds[c.id]&&window._clientCreds[c.id].call_hours_24_7)===true)?'checked':''} onchange="document.getElementById('callHoursRange_${c.id}').style.display=this.checked?'none':'grid';" style="width:16px;height:16px;">
+            <label for="callHours247_${c.id}" style="font-size:.8rem;cursor:pointer;">Available 24/7 (bypass call hours entirely)</label>
+          </div>
+          <div id="callHoursRange_${c.id}" class="creds-grid" style="display:${((window._clientCreds&&window._clientCreds[c.id]&&window._clientCreds[c.id].call_hours_24_7)===true)?'none':'grid'};grid-column:1/-1;">
+            <div class="cred-field">
+              <div class="cf-lbl">Call hours start</div>
+              <select class="cf-input" data-field="call_hours_start">
+                ${Array.from({length:24},(_,h)=>{
+                  const val=String(h).padStart(2,'0')+':00';
+                  const label=(h===0?'12':h>12?h-12:h)+':00 '+(h<12?'AM':'PM');
+                  const current=(window._clientCreds&&window._clientCreds[c.id]&&window._clientCreds[c.id].call_hours_start)||c.call_hours_start||'09:00';
+                  return `<option value="${val}" ${current===val?'selected':''}>${label}</option>`;
+                }).join('')}
+              </select>
+            </div>
+            <div class="cred-field">
+              <div class="cf-lbl">Call hours end</div>
+              <select class="cf-input" data-field="call_hours_end">
+                ${Array.from({length:24},(_,h)=>{
+                  const val=String(h).padStart(2,'0')+':00';
+                  const label=(h===0?'12':h>12?h-12:h)+':00 '+(h<12?'AM':'PM');
+                  const current=(window._clientCreds&&window._clientCreds[c.id]&&window._clientCreds[c.id].call_hours_end)||c.call_hours_end||'17:00';
+                  return `<option value="${val}" ${current===val?'selected':''}>${label}</option>`;
+                }).join('')}
+              </select>
+            </div>
+          </div>
           <button class="form-submit" style="margin-top:10px;" onclick="saveClientAgents('${c.id}')"><i class="ti ti-device-floppy"></i> Save Agent Settings</button>
         </div>
 
@@ -509,7 +537,9 @@ async function saveClientBranding(id){
 
 async function saveClientAgents(id){
   const settings={};
-  document.querySelectorAll('#cm-agents [data-field]').forEach(el=>{settings[el.dataset.field]=el.value.trim();});
+  document.querySelectorAll('#cm-agents [data-field]').forEach(el=>{
+    settings[el.dataset.field] = (el.type==='checkbox') ? el.checked : el.value.trim();
+  });
   const btn=document.querySelector('#cm-agents .form-submit');
   if(btn){btn.disabled=true;btn.textContent='Saving...';}
   try{
