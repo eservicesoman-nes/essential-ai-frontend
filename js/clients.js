@@ -546,7 +546,7 @@ async function saveClientAgents(id){
     const res=await fetch(API_URL+'/api/client/'+id+'/credentials',{
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
-      body:JSON.stringify({settings})
+      body:JSON.stringify({credentials: settings})
     });
     if(!res.ok){const e=await res.json();throw new Error(e.error||'Save failed');}
     showToast(t('toast.agentSettingsSaved'));
