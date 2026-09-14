@@ -550,6 +550,7 @@ async function saveClientAgents(id){
     });
     if(!res.ok){const e=await res.json();throw new Error(e.error||'Save failed');}
     showToast(t('toast.agentSettingsSaved'));
+    await selectClientDB(id);
     await loadClientsFromDB();
   }catch(e){alert('Error: '+e.message);}
   finally{if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-device-floppy"></i> Save Agent Settings';}}
