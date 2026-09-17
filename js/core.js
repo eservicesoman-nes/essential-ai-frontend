@@ -347,7 +347,7 @@ function hasTierModule(planKeys){
 
 async function showClientBrandingChip(){
   try{
-    const{data}=await sb.from('clients').select('name,primary_color,logo_url,plan,modules,full_access_override,apex_connect_paid_until,apex_outreach_paid_until,apex_advisory_paid_until,region,country,status,locale').eq('id',userClientId).single();
+    const{data}=await sb.from('clients').select('name,primary_color,logo_url,plan,modules,full_access_override,apex_connect_paid_until,apex_outreach_paid_until,apex_advisory_paid_until,region,country,status,locale,currency').eq('id',userClientId).single();
     if(!data)return;
     const chip=document.getElementById('roleChip');
     if(chip&&data.name)chip.textContent=data.name;
@@ -355,6 +355,7 @@ async function showClientBrandingChip(){
     window.clientModules = data.modules || {};
     window.userRegion = (data.region || data.country || '').trim();
     window.clientAccountStatus = data.status || 'active';
+    window.clientCurrency = data.currency || 'OMR';
     window.clientLocale = (userRole === 'nesadmin') ? 'en' : (data.locale || 'en');
     // One-time browser-language auto-detection: only runs once ever per browser,
     // before any manual language choice has been made. Never overrides a later manual choice.
