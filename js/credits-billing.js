@@ -281,10 +281,14 @@ function showPricing(){
 // on any error or for OMR clients, so it can never break pricing display.
 async function addLocalCurrencyToPricing(){
   try{
+    if(!window.clientCurrency || window.clientCurrency==='OMR') return;
     const {data:rates} = await sb.from('currency_rates').select('currency_code,rate_to_omr');
+    if(!rates) return;
     const rateRow = rates.find(r=>r.currency_code===window.clientCurrency);
+    if(!rateRow) return;
     document.querySelectorAll('.plan-price').forEach(el=>{
       const match = el.textContent.match(/OMR\s*([\d.]+)/);
+      if(!match) return;
       const omr = parseFloat(match[1]);
       const converted = (omr*rateRow.rate_to_omr).toFixed(2);
       const note=document.createElement('div');
