@@ -273,6 +273,26 @@ function showPricing(){
         <a href="mailto:office@essential-services.org" style="color:var(--nes-blue);text-decoration:none;">office@essential-services.org</a>
       </div>
     </div>`;
+  addLocalCurrencyToPricing();
+}
+
+// Purely additive: for non-Oman clients, appends a small local-currency equivalent
+// under each OMR price. Never modifies the existing OMR/USD text. No-ops silently
+// on any error or for OMR clients, so it can never break pricing display.
+async function addLocalCurrencyToPricing(){
+  try{
+    const {data:rates} = await sb.from('currency_rates').select('currency_code,rate_to_omr');
+    const rateRow = rates.find(r=>r.currency_code===window.clientCurrency);
+    document.querySelectorAll('.plan-price').forEach(el=>{
+      const match = el.textContent.match(/OMR\s*([\d.]+)/);
+      const omr = parseFloat(match[1]);
+      const converted = (omr*rateRow.rate_to_omr).toFixed(2);
+      const note=document.createElement('div');
+      note.style.cssText='font-family:var(--mono);font-size:.65rem;color:var(--muted);margin-top:2px;';
+      note.textContent=`≈ ${window.clientCurrency} ${converted}`;
+      el.insertAdjacentElement('afterend', note);
+    });
+  }catch(e){ console.error('addLocalCurrencyToPricing error:', e.message); }
 }
 
 async function payWithPayPal(amountOMR,description){
