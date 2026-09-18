@@ -324,6 +324,32 @@ function renderClientDetail(c,colors,textColors,idx){
             </div>
           </div>
           <button class="form-submit" style="margin-top:10px;" onclick="saveClientAgents('${c.id}')"><i class="ti ti-device-floppy"></i> Save Agent Settings</button>
+
+          <div style="font-family:var(--mono);font-size:.65rem;color:var(--nes-blue);font-weight:800;margin:20px 0 8px;padding:6px 10px;background:#0c1f35;border-radius:6px;border:1px solid #1a3a6e;"><i class="ti ti-language" style="margin-inline-end:5px;"></i>VOICE &amp; REGION — controls what language Sara/Adam/Layla listen for and how calls open/close</div>
+          <div class="creds-grid">
+            ${[
+              ['Primary Language','primary_language'],
+              ['Secondary Language','secondary_language'],
+              ['Region Name','region_name'],
+              ['Greeting Phrase','greeting_phrase'],
+              ['Closing Phrase','closing_phrase'],
+              ['Compliance Region','compliance_region'],
+              ['WhatsApp Contact Number','whatsapp_contact_number'],
+            ].map(([lbl,key])=>`
+              <div class="cred-field">
+                <div class="cf-lbl">${lbl}</div>
+                <input class="cf-input" type="text" value="${esc(String(c[key]||'')||'')}" placeholder="Not configured" data-voicefield="${key}">
+              </div>`).join('')}
+          </div>
+          <div class="cred-field" style="grid-column:1/-1;margin-top:10px;">
+            <div class="cf-lbl">Solutions Focus (what Sara pitches — full text block)</div>
+            <textarea class="cf-input" rows="6" placeholder="Solutions list text..." data-voicefield="solutions_focus" style="resize:vertical;">${esc(c.solutions_focus||'')}</textarea>
+          </div>
+          <div class="cred-field" style="grid-column:1/-1;margin-top:10px;">
+            <div class="cf-lbl">Industries Served</div>
+            <textarea class="cf-input" rows="2" placeholder="Comma-separated industries..." data-voicefield="industries_served" style="resize:vertical;">${esc(c.industries_served||'')}</textarea>
+          </div>
+          <button class="form-submit" style="margin-top:10px;" onclick="saveClientVoiceConfig('${c.id}')"><i class="ti ti-device-floppy"></i> Save Voice &amp; Region Settings</button>
         </div>
 
         <div id="cm-billing" style="display:none;">
@@ -554,6 +580,27 @@ async function saveClientAgents(id){
     await loadClientsFromDB();
   }catch(e){alert('Error: '+e.message);}
   finally{if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-device-floppy"></i> Save Agent Settings';}}
+}
+
+async function saveClientVoiceConfig(id){
+  const data={};
+  document.querySelectorAll('#cm-agents [data-voicefield]').forEach(el=>{
+    data[el.dataset.voicefield] = el.value.trim();
+  });
+  const btn=document.querySelector('[onclick="saveClientVoiceConfig(\'' + id + '\')"]');
+  if(btn){btn.disabled=true;btn.textContent='Saving...';}
+  try{
+    const res=await fetch(API_URL+'/api/admin/update-client/'+id,{
+      method:'PATCH',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
+      body:JSON.stringify(data)
+    });
+    if(!res.ok){const e=await res.json();throw new Error(e.error||'Save failed');}
+    showToast('Voice & region settings saved');
+    await selectClientDB(id);
+    await loadClientsFromDB();
+  }catch(e){alert('Error: '+e.message);}
+  finally{if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-device-floppy"></i> Save Voice & Region Settings';}}
 }
 
 function previewEffectiveRate(id,plan){
