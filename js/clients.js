@@ -287,7 +287,6 @@ function renderClientDetail(c,colors,textColors,idx){
               ['AI Voice Assistant (Layla)','layla_assistant_id'],
               ['AI Voice Assistant (Adam)','adam_assistant_id'],
               ['Appointment Booking Link','calcom_link'],
-              ['Agent Language','agent_language'],
               ['Callback Delay (mins)','callback_delay'],
             ].map(([lbl,key])=>`
               <div class="cred-field">
