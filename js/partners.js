@@ -425,7 +425,7 @@ async function renderPartnerHub(){
 }
 
 function switchPhTab(tab, btn){
-  ['overview','partners','commissions','tiers','add-partner'].forEach(t=>{
+  ['overview','pending','partners','commissions','tiers','add-partner'].forEach(t=>{
     const el=document.getElementById('ph-'+t);
     if(el) el.style.display = t===tab ? 'block' : 'none';
   });
