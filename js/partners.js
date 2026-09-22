@@ -24,17 +24,22 @@ async function renderPartnerHub(){
   if(!el) return;
 
   // Fetch all data
+  // NOTE: clients read stays on the direct Supabase client (sb) — that
+  // table already has a working RLS policy for authenticated admin reads
+  // and was never part of this bug. Only partners/partner_commissions
+  // reads moved to the backend API, since that table's RLS is
+  // service_role_only and blocks the anon key entirely.
   const [clientsRes, partnersRes, pendingRes, commissionsRes] = await Promise.all([
     sb.from('clients').select('id,name,plan,status,partner_ref,monthly_fee,first_payment_confirmed'),
-    sb.from('partners').select('*').order('created_at', {ascending:false}),
-    sb.from('partners').select('*').eq('status','pending').order('applied_at', {ascending:false}),
-    sb.from('partner_commissions').select('*').order('created_at', {ascending:false})
+    fetch(API_URL+'/api/admin/partners', {headers:{'Authorization':'Bearer '+session.access_token}}).then(r=>r.json()),
+    fetch(API_URL+'/api/admin/partners/pending', {headers:{'Authorization':'Bearer '+session.access_token}}).then(r=>r.json()),
+    fetch(API_URL+'/api/admin/partner-commissions', {headers:{'Authorization':'Bearer '+session.access_token}}).then(r=>r.json())
   ]);
 
   const allClients = clientsRes.data || [];
-  const allPartners = (partnersRes.data || []).filter(p => p.status !== 'pending');
-  const pendingPartners = pendingRes.data || [];
-  const allCommissions = commissionsRes.data || [];
+  const allPartners = (partnersRes.partners || []).filter(p => p.status !== 'pending');
+  const pendingPartners = pendingRes.partners || [];
+  const allCommissions = commissionsRes.commissions || [];
   // Update pending badge
   setTimeout(()=>updatePendingBadge(pendingPartners.length), 100);
 
