@@ -209,6 +209,7 @@ async function renderPartnerHub(){
                 <div style="display:flex;gap:6px;flex-shrink:0;">
                   <button class="ph-btn" onclick="editPartner('${p.id}')" style="background:rgba(64,156,255,0.1);color:#409cff;">${t('common.edit')}</button>
                   <button class="ph-btn" onclick="approveCommissions('${p.id}')" style="background:rgba(63,185,80,0.1);color:#3fb950;">Approve</button>
+                  <button class="ph-btn" onclick="deletePartner('${p.id}','${p.name}')" style="background:rgba(248,81,73,0.1);color:#f85149;">Delete</button>
                 </div>
               </div>
               <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px;">
@@ -545,7 +546,8 @@ async function approveCommissions(partnerId){
 }
 
 async function editPartner(id){
-  const { data: p } = await sb.from('partners').select('*').eq('id',id).single();
+  const r_ep = await fetch(API_URL+'/api/admin/partner/'+id,{headers:{'Authorization':'Bearer '+session.access_token}});
+  const { partner: p } = await r_ep.json();
   if(!p) return;
   const newRate = prompt(`Custom rate % for ${p.name} (current: ${p.custom_rate||'default'})`);
   if(newRate === null) return;
@@ -553,6 +555,13 @@ async function editPartner(id){
   if(newNotes === null) return;
   const r_pr=await fetch(API_URL+'/api/admin/partner/'+id,{method:'PATCH',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify({custom_rate:newRate?parseFloat(newRate):null,custom_notes:newNotes||null})});
   if(r_pr.ok){ showToast(t('toast.partnerUpdated')); await renderPartnerHub(); }
+}
+
+async function deletePartner(id, name){
+  if(!confirm('Delete ' + name + '? This cannot be undone.')) return;
+  const r_dp = await fetch(API_URL+'/api/admin/partner/'+id,{method:'DELETE',headers:{'Authorization':'Bearer '+session.access_token}});
+  if(r_dp.ok){ showToast(name + ' deleted'); await renderPartnerHub(); }
+  else { const ed = await r_dp.json(); alert(ed.error || 'Delete failed'); }
 }
 
 function filterCommissions(){
