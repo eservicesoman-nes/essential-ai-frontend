@@ -563,6 +563,7 @@ async function showCEODashboard(){
   loadCeoFeed();
   loadApiSummary();
   loadUsageSummary();
+  if(userRole==='nesadmin')loadPartnerMrr();
   setTimeout(function(){
     if(window.innerWidth <= 700){
       const tog = document.querySelector('.ceo-panel-toggle');
@@ -574,11 +575,14 @@ async function showCEODashboard(){
 
 async function loadPartnerMrr(){
   try{
+    // partners/partner_commissions are service_role_only (RLS) — read via backend admin routes, same as Partner Hub (Fix 215)
+    const{data:{session}}=await sb.auth.getSession();if(!session)return;
+    const _ah={headers:{'Authorization':'Bearer '+session.access_token}};
     const getPV=c=>{const f=parseFloat(c.monthly_fee);if(f>0)return f;const p=(c.plan||'').toLowerCase();if(p.includes('workforce'))return 149;if(p.includes('operations'))return 79;return 29;};
     const[{data:clients},{data:partners},{data:commissions}]=await Promise.all([
       sb.from('clients').select('id,name,plan,status,monthly_fee,partner_ref,founder_discount_expires_at'),
-      sb.from('partners').select('id,name,tier,ref_code,status'),
-      sb.from('partner_commissions').select('partner_id,amount_omr,status').eq('status','pending')
+      fetch(API_URL+'/api/admin/partners',_ah).then(r=>r.json()).then(j=>({data:j.partners||[]})),
+      fetch(API_URL+'/api/admin/partner-commissions',_ah).then(r=>r.json()).then(j=>({data:(j.commissions||[]).filter(c=>c.status==='pending')}))
     ]);
     const cl=clients||[],pt=partners||[],cm=commissions||[];
     const active=cl.filter(c=>c.status==='active');
@@ -603,8 +607,8 @@ async function loadPartnerMrr(){
         const prog=nextTier?Math.min(100,Math.round((pClients.length/nextTier)*100)):100;
         return `<div style="background:var(--card);border:1px solid var(--border);border-radius:7px;padding:8px 10px;margin-bottom:6px;">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;">
-            <div style="width:24px;height:24px;border-radius:6px;background:rgba(64,156,255,0.08);display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;color:${color};">${(p.name||'?')[0].toUpperCase()}</div>
-            <div style="flex:1;font-size:.75rem;font-weight:600;color:#e6edf3;">${p.name}</div>
+            <div style="width:24px;height:24px;border-radius:6px;background:rgba(64,156,255,0.08);display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;color:${color};">${esc((p.name||'?')[0].toUpperCase())}</div>
+            <div style="flex:1;font-size:.75rem;font-weight:600;color:#e6edf3;">${esc(p.name)}</div>
             <span style="font-size:.6rem;padding:1px 6px;border-radius:4px;background:rgba(64,156,255,0.08);color:${color};">${p.tier}</span>
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;font-size:.65rem;">
@@ -631,7 +635,7 @@ async function loadPartnerMrr(){
         const days=Math.ceil((exp-now)/(1000*60*60*24));
         const color=days<=7?'#f85149':days<=30?'#d29922':'#3fb950';
         return `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 8px;background:var(--card);border:1px solid ${color}33;border-radius:6px;margin-bottom:4px;font-size:.7rem;">
-          <span style="color:#e6edf3;">${c.name||c.id}</span>
+          <span style="color:#e6edf3;">${esc(c.name||c.id)}</span>
           <span style="color:${color};font-family:monospace;">${days}d left</span>
         </div>`;
       });
