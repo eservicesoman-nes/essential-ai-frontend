@@ -6,8 +6,9 @@ async function loadClientUsers(clientId){
   if(!el)return;
   el.innerHTML=`<div style="color:var(--muted);font-family:var(--mono);font-size:.75rem;">${t('common.loading')}</div>`;
   try{
-    const res=await fetch(API_URL+'/api/client/'+clientId+'/users');
+    const res=await fetch(API_URL+'/api/client/'+clientId+'/users',{headers:{'Authorization':'Bearer '+session.access_token}});
     const json=await res.json();
+    if(res.ok===false)throw new Error(json.error||'Failed to load users');
     const users=json.users||[];
     if(users.length===0){
       el.innerHTML='<div style="color:var(--muted);font-family:var(--mono);font-size:.75rem;padding:12px 0;">No users linked yet. Click Invite User to add one.</div>';
@@ -17,16 +18,16 @@ async function loadClientUsers(clientId){
     el.innerHTML=users.map(u=>`
       <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-radius:8px;margin-bottom:6px;">
         <div style="display:flex;align-items:center;gap:10px;">
-          <div style="width:32px;height:32px;border-radius:50%;background:#0c1f35;display:flex;align-items:center;justify-content:center;font-size:.75rem;color:var(--nes-blue);font-weight:700;">${(u.email||'?')[0].toUpperCase()}</div>
+          <div style="width:32px;height:32px;border-radius:50%;background:#0c1f35;display:flex;align-items:center;justify-content:center;font-size:.75rem;color:var(--nes-blue);font-weight:700;">${esc((u.email||'?')[0].toUpperCase())}</div>
           <div>
-            <div style="font-size:.82rem;color:var(--text);">${u.email||'—'}</div>
+            <div style="font-size:.82rem;color:var(--text);">${esc(u.email)||'—'}</div>
             <div style="font-size:.68rem;color:${roleColors[u.role]||'var(--muted)'};font-family:var(--mono);text-transform:uppercase;">${u.role||'staff'}</div>
           </div>
         </div>
         <button onclick="removeClientUser('${clientId}','${u.id}')" style="background:none;border:1px solid #2d0e0e;border-radius:6px;padding:4px 8px;color:#f85149;cursor:pointer;font-size:.7rem;"><i class="ti ti-user-minus"></i></button>
       </div>`).join('');
   }catch(e){
-    el.innerHTML='<div style="color:var(--red);font-family:var(--mono);font-size:.75rem;">Error: '+e.message+'</div>';
+    el.innerHTML='<div style="color:var(--red);font-family:var(--mono);font-size:.75rem;">Error: '+esc(e.message)+'</div>';
   }
 }
 
@@ -84,7 +85,7 @@ async function sendClientInvite(clientId){
 async function removeClientUser(clientId,userId){
   if(!confirm(t('confirm.removeUserFromClient')))return;
   try{
-    const res=await fetch(API_URL+'/api/client/'+clientId+'/user/'+userId,{method:'DELETE'});
+    const res=await fetch(API_URL+'/api/client/'+clientId+'/user/'+userId,{method:'DELETE',headers:{'Authorization':'Bearer '+session.access_token}});
     const json=await res.json();
     if(!res.ok)throw new Error(json.error||'Failed');
     showToast(t('toast.userRemoved'));
