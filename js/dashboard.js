@@ -202,21 +202,21 @@ async function showPartnerDashboard(){
           <div style="height:3px;background:var(--border);border-radius:2px;margin-top:6px;"><div id="pClientsBar" style="height:100%;width:0%;background:var(--nes-blue);border-radius:2px;"></div></div>
         </div>
         <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 14px;">
-          <div style="font-size:.62rem;color:var(--muted);margin-bottom:3px;display:flex;align-items:center;gap:4px;"><i class="ti ti-coin"></i> Installation earned</div>
-          <div id="pInstallEarned" style="font-size:1.05rem;font-weight:700;color:#3fb950;">OMR 0.000</div>
-          <div style="display:flex;justify-content:space-between;font-size:.6rem;color:var(--muted);margin-top:3px;"><span>OMR 49.500 each</span><span id="pInstallCount">0 installs</span></div>
+          <div style="font-size:.62rem;color:var(--muted);margin-bottom:3px;display:flex;align-items:center;gap:4px;"><i class="ti ti-coin"></i> Per-Client Bonus</div>
+          <div id="pInstallEarned" style="font-size:1.05rem;font-weight:700;color:#3fb950;">40–55%</div>
+          <div style="display:flex;justify-content:space-between;font-size:.6rem;color:var(--muted);margin-top:3px;"><span>of first invoice, one-time</span><span id="pInstallCount">0 referrals</span></div>
           <div style="height:3px;background:var(--border);border-radius:2px;margin-top:6px;"><div style="height:100%;width:0%;background:#3fb950;border-radius:2px;"></div></div>
         </div>
         <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 14px;">
-          <div style="font-size:.62rem;color:var(--muted);margin-bottom:3px;display:flex;align-items:center;gap:4px;"><i class="ti ti-repeat"></i> Recurring this month</div>
-          <div id="pRecurring" style="font-size:1.05rem;font-weight:700;color:#3fb950;">OMR 0.000</div>
-          <div style="display:flex;justify-content:space-between;font-size:.6rem;color:var(--muted);margin-top:3px;"><span>25% of client MRR</span><span id="pActiveClients">0 active</span></div>
+          <div style="font-size:.62rem;color:var(--muted);margin-bottom:3px;display:flex;align-items:center;gap:4px;"><i class="ti ti-calendar-stats"></i> Monthly statement</div>
+          <div id="pRecurring" style="font-size:1.05rem;font-weight:700;color:#3fb950;">By email</div>
+          <div style="display:flex;justify-content:space-between;font-size:.6rem;color:var(--muted);margin-top:3px;"><span>within 30 days of month end</span><span id="pActiveClients">0 active</span></div>
           <div style="height:3px;background:var(--border);border-radius:2px;margin-top:6px;"><div id="pRecurringBar" style="height:100%;width:0%;background:#3fb950;border-radius:2px;"></div></div>
         </div>
         <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 14px;">
           <div style="font-size:.62rem;color:var(--muted);margin-bottom:3px;display:flex;align-items:center;gap:4px;"><i class="ti ti-wallet"></i> Total earned</div>
-          <div id="pTotalEarned" style="font-size:1.05rem;font-weight:700;color:var(--text);">OMR 0.000</div>
-          <div style="display:flex;justify-content:space-between;font-size:.6rem;color:var(--muted);margin-top:3px;"><span>Cumulative</span><span>Paid 10th monthly</span></div>
+          <div id="pTotalEarned" style="font-size:1.05rem;font-weight:700;color:var(--text);">See statement</div>
+          <div style="display:flex;justify-content:space-between;font-size:.6rem;color:var(--muted);margin-top:3px;"><span>Per Partner Agreement</span><span>Schedules 1 &amp; 2</span></div>
           <div style="height:3px;background:var(--border);border-radius:2px;margin-top:6px;"></div>
         </div>
       </div>
@@ -269,7 +269,6 @@ async function showPartnerDashboard(){
 
   // Load partner metrics from Supabase
   try{
-    const planPrice={presence:59,operations:109,workforce:169};
     const {data:allClients} = await sb.from('clients').select('id,name,plan,status,created_at,installed_by').eq('installed_by',session.user.email);
     const clients=allClients||[];
     const activeClients=clients.filter(c=>c.status==='active');
@@ -277,24 +276,18 @@ async function showPartnerDashboard(){
     const thisMonth=now2.getMonth();
     const thisYear=now2.getFullYear();
     const newThisMonth=clients.filter(c=>{const d=new Date(c.created_at);return d.getMonth()===thisMonth&&d.getFullYear()===thisYear;}).length;
-    const installEarned=(clients.length*49.5);
-    const recurring=activeClients.reduce((s,c)=>s+((planPrice[c.plan]||59)*0.25),0);
-    const total=installEarned+recurring;
     document.getElementById('pClientsCount').textContent=activeClients.length;
     document.getElementById('pClientsTotal').textContent='Total: '+clients.length;
     document.getElementById('pClientsNew').textContent='+'+newThisMonth+' this month';
-    document.getElementById('pInstallEarned').textContent='OMR '+installEarned.toFixed(3);
-    document.getElementById('pInstallCount').textContent=clients.length+' installs';
-    document.getElementById('pRecurring').textContent='OMR '+recurring.toFixed(3);
+    document.getElementById('pInstallCount').textContent=clients.length+' referrals';
     document.getElementById('pActiveClients').textContent=activeClients.length+' active';
-    document.getElementById('pTotalEarned').textContent='OMR '+total.toFixed(3);
     if(clients.length>0)document.getElementById('pClientsBar').style.width=Math.min(100,activeClients.length*10)+'%';
 
     // Client list
     const listEl=document.getElementById('partnerClientList');
     if(clients.length===0){listEl.innerHTML='<i class="ti ti-inbox" style="font-size:1.4rem;display:block;margin-bottom:6px;opacity:.3;"></i>No clients installed yet';
     }else{
-      listEl.innerHTML=clients.map(c=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);"><div><div style="font-size:.75rem;color:var(--text);font-weight:600;">${c.name||'—'}</div><div style="font-size:.65rem;color:var(--muted);text-transform:capitalize;">${c.plan||'—'}</div></div><span style="font-size:.6rem;padding:2px 8px;border-radius:10px;background:${c.status==='active'?'rgba(63,185,80,.1)':'rgba(248,81,73,.1)'};color:${c.status==='active'?'#3fb950':'#f85149'};">${c.status}</span></div>`).join('');
+      listEl.innerHTML=clients.map(c=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);"><div><div style="font-size:.75rem;color:var(--text);font-weight:600;">${esc(c.name)||'—'}</div><div style="font-size:.65rem;color:var(--muted);text-transform:capitalize;">${c.plan||'—'}</div></div><span style="font-size:.6rem;padding:2px 8px;border-radius:10px;background:${c.status==='active'?'rgba(63,185,80,.1)':'rgba(248,81,73,.1)'};color:${c.status==='active'?'#3fb950':'#f85149'};">${c.status}</span></div>`).join('');
     }
   }catch(e){console.error('Partner metrics error:',e);}
 
