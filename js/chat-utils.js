@@ -143,7 +143,7 @@ function setBusy(b){
 
 function setStatus(cls,txt){const el=document.getElementById('statusEl');if(el){el.className='status-dot'+(cls==='busy'?' busy':'');el.textContent=txt;}}
 
-function esc(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":' &#39;'}) [m]);}
+function esc(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}) [m]);}
 
 function md(s){
   let src=esc(s);
