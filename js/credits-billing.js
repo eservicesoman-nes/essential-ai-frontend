@@ -81,12 +81,12 @@ async function saveNewApiService(){
   const threshold=parseFloat(document.getElementById('new_api_threshold')?.value)||5;
   const notes=document.getElementById('new_api_notes')?.value.trim();
   if(!name){showToast(t('toast.serviceNameRequired'));return;}
-  try{await sb.from('api_credits').insert([{service_name:name,current_balance:balance,alert_threshold:threshold,notes,status:balance<threshold?'low':'healthy'}]);showToast(t('pricingPage.apiAdded'));document.getElementById('addApiForm').style.display='none';await loadApiCredits();}catch(e){showToast('Error: '+e.message);}
+  try{{const{error:_e}=await sb.from('api_credits').insert([{service_name:name,current_balance:balance,alert_threshold:threshold,notes,status:balance<threshold?'low':'healthy'}]);if(_e)throw _e;}showToast(t('pricingPage.apiAdded'));document.getElementById('addApiForm').style.display='none';await loadApiCredits();}catch(e){showToast('Error: '+e.message);}
 }
 
 async function updateApiBalance(id,val){
   const balance=parseFloat(val)||0;const threshold=parseFloat(document.getElementById('thr_'+id)?.value)||5;
-  try{await sb.from('api_credits').upsert({service_name:id,current_balance:balance,status:balance<threshold?'low':'healthy'},{onConflict:'service_name'});}catch(e){}
+  try{{const{error:_e}=await sb.from('api_credits').upsert({service_name:id,current_balance:balance,status:balance<threshold?'low':'healthy'},{onConflict:'service_name'});if(_e)throw _e;}}catch(e){showToast('Error: '+e.message);}
 }
 
 async function saveAllThresholds(){
@@ -99,7 +99,7 @@ async function saveAllThresholds(){
       const threshold=parseFloat(document.getElementById('thr_'+api.id)?.value)||5;
       const rechargeAt=parseFloat(document.getElementById('rat_'+api.id)?.value)||5;
       const rechargeAmt=parseFloat(document.getElementById('ram_'+api.id)?.value)||20;
-      await sb.from('api_credits').upsert({service_name:api.id,current_balance:balance,alert_threshold:threshold,recharge_at:rechargeAt,recharge_amount:rechargeAmt,status:balance===0?'unknown':balance<threshold?'low':'healthy'},{onConflict:'service_name'});
+      {const{error:_e}=await sb.from('api_credits').upsert({service_name:api.id,current_balance:balance,alert_threshold:threshold,recharge_at:rechargeAt,recharge_amount:rechargeAmt,status:balance===0?'unknown':balance<threshold?'low':'healthy'},{onConflict:'service_name'});if(_e)throw _e;}
     }
     showToast(t('toast.thresholdsSaved'));await loadApiCredits();
   }catch(e){showToast('Error: '+e.message);}
