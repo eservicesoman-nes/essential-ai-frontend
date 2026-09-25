@@ -188,7 +188,7 @@ async function saveApiQuick(){
   const threshold=parseFloat(document.getElementById('qapiThreshold').value)||5;
   if(!name){showToast(t('toast.enterApiName'));return;}
   try{
-    await sb.from('api_credits').insert([{service_name:name,current_balance:balance,alert_threshold:threshold,status:balance<threshold?'low':'healthy'}]);
+    {const{error:_e}=await sb.from('api_credits').insert([{service_name:name,current_balance:balance,alert_threshold:threshold,status:balance<threshold?'low':'healthy'}]);if(_e)throw _e;}
     document.getElementById('addApiModalQuick').remove();
     showToast(t('toast.apiAdded'));
     await checkPlatformStatus();
