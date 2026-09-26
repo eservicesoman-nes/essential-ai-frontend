@@ -334,6 +334,7 @@ function renderClientDetail(c,colors,textColors,idx){
               ['Closing Phrase','closing_phrase'],
               ['Compliance Region','compliance_region'],
               ['WhatsApp Contact Number','whatsapp_contact_number'],
+              ['Public Phone (social posts)','contact_phone'],
             ].map(([lbl,key])=>`
               <div class="cred-field">
                 <div class="cf-lbl">${lbl}</div>
