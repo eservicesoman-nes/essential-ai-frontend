@@ -62,7 +62,7 @@ function showInviteUserForm(clientId){
 async function sendClientInvite(clientId){
   const email=document.getElementById('inviteEmail')?.value?.trim();
   const role=document.getElementById('inviteRole')?.value;
-  if(!email){alert('Please enter an email address');return;}
+  if(!email){alert(t('popup.enterEmail'));return;}
   const btn=document.querySelector('#inviteModal .form-submit');
   if(btn){btn.disabled=true;btn.innerHTML='<i class="ti ti-loader"></i> Sending...';}
   try{
@@ -74,10 +74,10 @@ async function sendClientInvite(clientId){
     const json=await res.json();
     if(!res.ok)throw new Error(json.error||'Failed');
     document.getElementById('inviteModal')?.remove();
-    showToast('Invite sent to '+email+' ✓');
+    showToast(t('popup.inviteSent').replace('{email}',email)+' ✓');
     loadClientUsers(clientId);
   }catch(e){
-    alert('Error: '+e.message);
+    alert(t('popup.error')+': '+e.message);
     if(btn){btn.disabled=false;btn.innerHTML=`<i class="ti ti-send"></i> ${t('teamInvite.sendInvite')}`;}
   }
 }
@@ -90,7 +90,7 @@ async function removeClientUser(clientId,userId){
     if(!res.ok)throw new Error(json.error||'Failed');
     showToast(t('toast.userRemoved'));
     loadClientUsers(clientId);
-  }catch(e){alert('Error: '+e.message);}
+  }catch(e){alert(t('popup.error')+': '+e.message);}
 }
 
 function cmTab(name,el){
@@ -392,7 +392,7 @@ async function sendTeamInvite(){
     const data = await res.json();
     if(!res.ok) throw new Error(data.error||'Failed');
     document.getElementById('inviteModal').remove();
-    showToast('Invite sent to '+email+' ✓');
+    showToast(t('popup.inviteSent').replace('{email}',email)+' ✓');
     loadTeam();
   }catch(e){
     err.textContent=e.message; err.style.display='block';
@@ -422,7 +422,7 @@ async function updateUserRole(userId, clientId, role){
       body:JSON.stringify({role})
     });
     if(res.ok) showToast(t('toast.roleUpdated'));
-  }catch(e){ showToast('Failed: '+e.message); }
+  }catch(e){ showToast(t('popup.failed')+': '+e.message); }
 }
 
 async function updateUserDept(userId, clientId, deptId){
@@ -434,8 +434,8 @@ async function updateUserDept(userId, clientId, deptId){
     });
     const data = await res.json();
     if(res.ok) showToast(t('toast.departmentUpdated'));
-    else showToast('Failed: '+(data.error||'Unknown error'));
-  }catch(e){ showToast('Failed: '+e.message); }
+    else showToast(t('popup.failed')+': '+(data.error||t('popup.unknownError')));
+  }catch(e){ showToast(t('popup.failed')+': '+e.message); }
 }
 
 async function removeTeamMember(userId, clientId){
@@ -446,7 +446,7 @@ async function removeTeamMember(userId, clientId){
       headers:{'Authorization':'Bearer '+session.access_token}
     });
     if(res.ok){ showToast(t('toast.memberRemoved')); loadTeam(); }
-  }catch(e){ showToast('Failed: '+e.message); }
+  }catch(e){ showToast(t('popup.failed')+': '+e.message); }
 }
 
 function showAddDeptModal(){
@@ -456,9 +456,9 @@ function showAddDeptModal(){
     .then(async r=>{
       const data = await r.json().catch(()=>({}));
       if(r.ok && !data.error){ showToast(t('toast.departmentAdded')); loadTeam(); }
-      else showToast('Failed: '+(data.error||'Unknown error'));
+      else showToast(t('popup.failed')+': '+(data.error||t('popup.unknownError')));
     })
-    .catch(e=>showToast('Failed: '+e.message));
+    .catch(e=>showToast(t('popup.failed')+': '+e.message));
 }
 
 function filterByDept(deptId){
@@ -475,13 +475,13 @@ function filterByDept(deptId){
 }
 
 function deleteDept(deptId, deptName){
-  if(!confirm('Delete department \'' + deptName + '\'? This cannot be undone.')) return;
-  if(!confirm('Are you absolutely sure? Staff assigned to \'' + deptName + '\' will be unassigned.')) return;
+  if(!confirm(t('popup.deleteDept').replace('{name}',deptName))) return;
+  if(!confirm(t('popup.deleteDeptConfirm').replace('{name}',deptName))) return;
   fetch(API_URL+'/api/admin/client/'+window.userClientId+'/department/'+deptId,{method:'DELETE',headers:{'Authorization':'Bearer '+session.access_token}})
     .then(async r=>{
       const data = await r.json().catch(()=>({}));
       if(r.ok && !data.error){ showToast(t('toast.departmentDeleted')); loadTeam(); }
-      else showToast('Failed: '+(data.error||'Unknown error'));
+      else showToast(t('popup.failed')+': '+(data.error||t('popup.unknownError')));
     })
-    .catch(e=>showToast('Failed: '+e.message));
+    .catch(e=>showToast(t('popup.failed')+': '+e.message));
 }
