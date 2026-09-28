@@ -45,7 +45,7 @@ function showChatInterface(mode='chat'){
   const msgsEl=document.getElementById('messages');
   if(allMsgsHTML&&allMsgsHTML.trim()){msgsEl.innerHTML=allMsgsHTML;msgsEl.scrollTop=msgsEl.scrollHeight;}
   else if(history.length===0){loadServerChatHistory(msgsEl);}
-  else{history.forEach(h=>{if(h.role==='user')appendMsg(userBubble(h.content));else appendMsg(aiBubble(h.content,h.sources||[]));});msgsEl.scrollTop=msgsEl.scrollHeight;}
+  else{history.forEach(h=>{if(h.role==='user')appendMsg(userBubble(stripLangDirective(h.content)));else appendMsg(aiBubble(h.content,h.sources||[]));});msgsEl.scrollTop=msgsEl.scrollHeight;}
 }
 
 async function loadServerChatHistory(msgsEl){
@@ -56,7 +56,7 @@ async function loadServerChatHistory(msgsEl){
       const data=await res.json();
       if(data.messages&&data.messages.length>0){
         data.messages.forEach(m=>{
-          if(m.role==='user'){appendMsg(userBubble(m.content));history.push({role:'user',content:m.content});}
+          if(m.role==='user'){appendMsg(userBubble(stripLangDirective(m.content)));history.push({role:'user',content:stripLangDirective(m.content)});}
           else{appendMsg(aiBubble(m.content));history.push({role:'assistant',content:m.content});}
         });
         msgsEl.scrollTop=msgsEl.scrollHeight;
@@ -92,7 +92,7 @@ async function sendMsg(){
     const res=await fetch(API_URL+'/api/chat',{
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
-      body:JSON.stringify({message:text,mode:currentView,webSearch:useSearch,history:history.slice(-10)})
+      body:JSON.stringify({message:text+aiLangDirective(),mode:currentView,webSearch:useSearch,history:history.slice(-10)})
     });
 
     if(!res.ok){
