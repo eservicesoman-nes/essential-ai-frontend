@@ -528,5 +528,37 @@
     "earlier": "Anteriores",
     "empty": "Ainda sem dados de inteligência. Volte amanhã depois das 6h.",
     "new": "NOVOS"
+  },
+  "leads": {
+    "exportCsv": "Exportar CSV",
+    "total": "total",
+    "today": "hoje",
+    "tabAll": "Todos",
+    "tabToday": "Hoje",
+    "tabWeek": "Esta semana",
+    "tabRepeats": "Repetidos"
+  },
+  "team": {
+    "members": "MEMBROS DA EQUIPA",
+    "departments": "DEPARTAMENTOS",
+    "seatsLeft": "LUGARES DISPONÍVEIS",
+    "staff": "COLABORADORES",
+    "staffCount": "colaboradores",
+    "noDept": "Sem departamento",
+    "noDepartment": "Sem departamento",
+    "roleCeo": "CEO",
+    "rolePartner": "Parceiro Tecnológico",
+    "roleManager": "Gestor",
+    "roleStaff": "Colaborador",
+    "role_ceo": "ceo",
+    "role_manager": "gestor",
+    "role_staff": "colaborador",
+    "role_nes_partner": "parceiro",
+    "role_nesadmin": "nesadmin",
+    "access": "Acessos",
+    "remove": "Remover",
+    "accessNote": "A aplicação dos acessos chega na próxima atualização — aqui vê as permissões previstas por departamento.",
+    "roleLabel": "FUNÇÃO",
+    "deptOptional": "DEPARTAMENTO (OPCIONAL)"
   }
 }
