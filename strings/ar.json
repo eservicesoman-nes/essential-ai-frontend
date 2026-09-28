@@ -7,7 +7,10 @@
     "forgotPassword": "نسيت كلمة المرور؟",
     "signInButton": "← تسجيل الدخول",
     "changePassword": "تغيير كلمة المرور",
-    "logout": "تسجيل الخروج"
+    "logout": "تسجيل الخروج",
+    "sendResetLink": "إرسال رابط إعادة التعيين",
+    "backToSignIn": "العودة إلى تسجيل الدخول",
+    "createAccount": "إنشاء حساب ←"
   },
   "nav": {
     "askNesai": "اسأل نيس",
@@ -31,7 +34,15 @@
     "imageGen": "توليد الصور",
     "saraTopup": "شحن رصيد سارة",
     "adamTopup": "شحن رصيد آدم",
-    "briefcaseTopup": "شحن رصيد الحقيبة"
+    "briefcaseTopup": "شحن رصيد الحقيبة",
+    "sectionWorkspace": "مساحة العمل",
+    "sectionIntelligence": "الذكاء",
+    "sectionRecent": "الأخيرة",
+    "waAutoReply": "الرد التلقائي واتساب",
+    "dailyMessages": "الرسائل اليومية",
+    "payg": "حسب الاستخدام",
+    "live": "مباشر",
+    "myDashboard": "لوحتي"
   },
   "common": {
     "save": "حفظ",
