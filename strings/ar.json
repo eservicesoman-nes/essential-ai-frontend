@@ -528,5 +528,37 @@
     "earlier": "سابقاً",
     "empty": "لا توجد بيانات بعد. تحقق غداً بعد السادسة صباحاً.",
     "new": "جديد"
+  },
+  "leads": {
+    "exportCsv": "تصدير CSV",
+    "total": "إجمالي",
+    "today": "اليوم",
+    "tabAll": "الكل",
+    "tabToday": "اليوم",
+    "tabWeek": "هذا الأسبوع",
+    "tabRepeats": "المكررة"
+  },
+  "team": {
+    "members": "أعضاء الفريق",
+    "departments": "الأقسام",
+    "seatsLeft": "المقاعد المتبقية",
+    "staff": "الموظفون",
+    "staffCount": "موظف",
+    "noDept": "بدون قسم",
+    "noDepartment": "بدون قسم",
+    "roleCeo": "المدير التنفيذي",
+    "rolePartner": "شريك تقني",
+    "roleManager": "مدير",
+    "roleStaff": "موظف",
+    "role_ceo": "المدير التنفيذي",
+    "role_manager": "مدير",
+    "role_staff": "موظف",
+    "role_nes_partner": "شريك",
+    "role_nesadmin": "nesadmin",
+    "access": "الصلاحيات",
+    "remove": "إزالة",
+    "accessNote": "تطبيق الصلاحيات قادم في التحديث القادم — هذه هي الصلاحيات المخططة لكل قسم.",
+    "roleLabel": "الدور",
+    "deptOptional": "القسم (اختياري)"
   }
 }
