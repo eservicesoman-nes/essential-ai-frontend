@@ -45,9 +45,9 @@ function showInviteUserForm(clientId){
       <div class="form-field" style="margin-top:10px;">
         <label class="form-label">${t('formLabel.role')}</label>
         <select id="inviteRole" class="form-select">
-          <option value="ceo">CEO</option>
-          <option value="manager" selected>Manager</option>
-          <option value="staff">Staff</option>
+          <option value="ceo">${t('team.roleCeo')}</option>
+          <option value="manager" selected>${t('team.roleManager')}</option>
+          <option value="staff">${t('team.roleStaff')}</option>
         </select>
       </div>
       <div style="display:flex;gap:8px;margin-top:16px;">
@@ -129,7 +129,7 @@ function showDeptAccessModal(){
       <button onclick="this.closest('[style*=fixed]').remove()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.2rem;">×</button>
     </div>
     <div style="overflow-y:auto;padding:8px 0;">${rows}</div>
-    <div style="padding:10px 14px;border-top:1px solid var(--border);font-size:.68rem;color:var(--muted);">Access enforcement coming in next update — this shows the planned permissions per department.</div>
+    <div style="padding:10px 14px;border-top:1px solid var(--border);font-size:.68rem;color:var(--muted);">${t('team.accessNote')}</div>
   </div>`;
   document.body.appendChild(modal);
 }
@@ -204,28 +204,28 @@ async function loadTeam(){
     let html = `
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;">
         <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;">
-          <div style="font-size:.65rem;color:var(--muted);font-family:var(--mono);margin-bottom:4px;">TEAM MEMBERS</div>
+          <div style="font-size:.65rem;color:var(--muted);font-family:var(--mono);margin-bottom:4px;">${t('team.members')}</div>
           <div style="font-size:1.4rem;font-weight:700;color:#e6edf3;">${used}<span style="font-size:.75rem;color:var(--muted);font-weight:400;"> / ${limit}</span></div>
         </div>
         <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;">
-          <div style="font-size:.65rem;color:var(--muted);font-family:var(--mono);margin-bottom:4px;">DEPARTMENTS</div>
+          <div style="font-size:.65rem;color:var(--muted);font-family:var(--mono);margin-bottom:4px;">${t('team.departments')}</div>
           <div style="font-size:1.4rem;font-weight:700;color:#3fb950;">${depts.length}</div>
         </div>
         <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;">
-          <div style="font-size:.65rem;color:var(--muted);font-family:var(--mono);margin-bottom:4px;">SEATS LEFT</div>
+          <div style="font-size:.65rem;color:var(--muted);font-family:var(--mono);margin-bottom:4px;">${t('team.seatsLeft')}</div>
           <div style="font-size:1.4rem;font-weight:700;color:#409cff;">${Math.max(0,limit-used)}</div>
         </div>
       </div>`;
 
     // Departments section
     html += `<div style="margin-bottom:20px;">
-      <div style="font-family:var(--mono);font-size:.72rem;color:var(--muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em;">Departments</div>
+      <div style="font-family:var(--mono);font-size:.72rem;color:var(--muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em;">${t('team.departments')}</div>
       <div style="display:flex;flex-wrap:wrap;gap:8px;">
         ${depts.map(d=>`
           <div onclick="filterByDept('${d.id}')" data-dept-badge="${d.id}" style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 14px;display:flex;align-items:center;gap:8px;cursor:pointer;">
             <i class="ti ti-building" style="color:#409cff;font-size:13px;"></i>
             <span style="font-size:.78rem;color:#e6edf3;font-weight:500;">${d.name}</span>
-            <span style="font-size:.65rem;color:var(--muted);">${users.filter(u=>u.department_id===d.id).length} staff</span>
+            <span style="font-size:.65rem;color:var(--muted);">${users.filter(u=>u.department_id===d.id).length} ${t('team.staffCount')}</span>
             <i onclick="event.stopPropagation();deleteDept('${d.id}','${d.name.replace(/'/g,"\\'")}')" class="ti ti-x" style="color:var(--muted);font-size:13px;cursor:pointer;margin-inline-start:4px;" title="Delete department"></i>
           </div>`).join('')}
         <div onclick="showAddDeptModal()" style="background:rgba(64,156,255,0.05);border:1px dashed rgba(64,156,255,0.3);border-radius:8px;padding:8px 14px;display:flex;align-items:center;gap:6px;cursor:pointer;color:#409cff;font-size:.75rem;">
@@ -239,7 +239,7 @@ async function loadTeam(){
 
     // Staff list
     html += `<div>
-      <div style="font-family:var(--mono);font-size:.72rem;color:var(--muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em;">Staff</div>`;
+      <div style="font-family:var(--mono);font-size:.72rem;color:var(--muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em;">${t('team.staff')}</div>`;
 
     if(users.length === 0){
       html += `<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:32px;text-align:center;color:var(--muted);font-size:.8rem;">
@@ -257,22 +257,22 @@ async function loadTeam(){
             <div style="flex:1;min-width:0;">
               <div style="font-size:.8rem;color:#e6edf3;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${u.email||'—'}</div>
               <div style="display:flex;align-items:center;gap:6px;margin-top:3px;">
-                <span style="font-size:.6rem;padding:1px 6px;border-radius:4px;background:rgba(${roleColor==='#f85149'?'248,81,73':roleColor==='#d29922'?'210,153,34':roleColor==='#409cff'?'64,156,255':'139,148,158'},0.12);color:${roleColor};font-family:monospace;">${u.role||'staff'}</span>
+                <span style="font-size:.6rem;padding:1px 6px;border-radius:4px;background:rgba(${roleColor==='#f85149'?'248,81,73':roleColor==='#d29922'?'210,153,34':roleColor==='#409cff'?'64,156,255':'139,148,158'},0.12);color:${roleColor};font-family:monospace;">${t('team.role_'+(u.role||'staff'))}</span>
               </div>
             </div>
             <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
               <select onchange="updateUserDept('${u.id}','${clientId}',this.value)" style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:4px 8px;color:var(--muted);font-size:.7rem;cursor:pointer;">
-                <option value="">No dept</option>
-                ${deptOptions}
+                <option value="">${t('team.noDept')}</option>
+                ${depts.map(d=>`<option value="${d.id}" ${u.department_id===d.id?'selected':''}>${d.name}</option>`).join('')}
               </select>
               <select onchange="updateUserRole('${u.id}','${clientId}',this.value)" style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:4px 8px;color:var(--muted);font-size:.7rem;cursor:pointer;">
-                <option value="ceo" ${u.role==='ceo'?'selected':''}>CEO</option>
-                <option value="nes_partner" ${u.role==='nes_partner'?'selected':''}>Technology Partner</option>
-                <option value="manager" ${u.role==='manager'?'selected':''}>Manager</option>
-                <option value="staff" ${u.role==='staff'?'selected':''}>Staff</option>
+                <option value="ceo" ${u.role==='ceo'?'selected':''}>${t('team.roleCeo')}</option>
+                <option value="nes_partner" ${u.role==='nes_partner'?'selected':''}>${t('team.rolePartner')}</option>
+                <option value="manager" ${u.role==='manager'?'selected':''}>${t('team.roleManager')}</option>
+                <option value="staff" ${u.role==='staff'?'selected':''}>${t('team.roleStaff')}</option>
               </select>
-              <button onclick='showEditAccessModal(${JSON.stringify(u.id)},${JSON.stringify(clientId)},${JSON.stringify(u.granted_modules||[])})' style="background:none;border:1px solid rgba(64,156,255,0.3);border-radius:6px;padding:4px 8px;color:#409cff;cursor:pointer;font-size:.7rem;">Access</button>
-              <button onclick="removeTeamMember('${u.id}','${clientId}')" style="background:none;border:1px solid rgba(248,81,73,0.3);border-radius:6px;padding:4px 8px;color:#f85149;cursor:pointer;font-size:.7rem;">Remove</button>
+              <button onclick='showEditAccessModal(${JSON.stringify(u.id)},${JSON.stringify(clientId)},${JSON.stringify(u.granted_modules||[])})' style="background:none;border:1px solid rgba(64,156,255,0.3);border-radius:6px;padding:4px 8px;color:#409cff;cursor:pointer;font-size:.7rem;">${t('team.access')}</button>
+              <button onclick="removeTeamMember('${u.id}','${clientId}')" style="background:none;border:1px solid rgba(248,81,73,0.3);border-radius:6px;padding:4px 8px;color:#f85149;cursor:pointer;font-size:.7rem;">${t('team.remove')}</button>
             </div>
           </div>`;
       });
@@ -344,14 +344,14 @@ function showInviteModal(){
       <div style="font-size:12px;color:#8b949e;margin-bottom:20px;">They'll receive an email to set up their account</div>
       <label style="font-size:11px;color:#8b949e;font-weight:600;display:block;margin-bottom:5px;">WORK EMAIL</label>
       <input id="inviteEmail" type="email" placeholder="ahmed@company.com" style="width:100%;background:#0a0f1e;border:1px solid #1a2332;border-radius:8px;padding:10px 12px;color:#e6edf3;font-size:13px;margin-bottom:12px;outline:none;box-sizing:border-box;">
-      <label style="font-size:11px;color:#8b949e;font-weight:600;display:block;margin-bottom:5px;">ROLE</label>
+      <label style="font-size:11px;color:#8b949e;font-weight:600;display:block;margin-bottom:5px;">${t('team.roleLabel')}</label>
       <select id="inviteRole" style="width:100%;background:#0a0f1e;border:1px solid #1a2332;border-radius:8px;padding:10px 12px;color:#e6edf3;font-size:13px;margin-bottom:12px;outline:none;box-sizing:border-box;">
-        <option value="manager">Manager</option>
-        <option value="staff" selected>Staff</option>
+        <option value="manager">${t('team.roleManager')}</option>
+        <option value="staff" selected>${t('team.roleStaff')}</option>
       </select>
-      <label style="font-size:11px;color:#8b949e;font-weight:600;display:block;margin-bottom:5px;">DEPARTMENT (OPTIONAL)</label>
+      <label style="font-size:11px;color:#8b949e;font-weight:600;display:block;margin-bottom:5px;">${t('team.deptOptional')}</label>
       <select id="inviteDept" style="width:100%;background:#0a0f1e;border:1px solid #1a2332;border-radius:8px;padding:10px 12px;color:#e6edf3;font-size:13px;margin-bottom:20px;outline:none;box-sizing:border-box;">
-        <option value="">No department</option>
+        <option value="">${t('team.noDepartment')}</option>
         ${window._deptOptions || ''}
       </select>
       <label style="font-size:11px;color:#8b949e;font-weight:600;display:block;margin-bottom:5px;">GRANT ACCESS TO (OPTIONAL)</label>
