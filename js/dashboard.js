@@ -166,7 +166,7 @@ async function showPartnerDashboard(){
   const now=new Date();
   const dayNames=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   const monNames=['January','February','March','April','May','June','July','August','September','October','November','December'];
-  const dateStr=dayNames[now.getDay()]+', '+now.getDate()+' '+monNames[now.getMonth()]+' '+now.getFullYear();
+  const dateStr=now.toLocaleDateString(getDateLocale('en-GB'),{weekday:'long',day:'numeric',month:'long',year:'numeric'});
 
   mc.innerHTML=`
   <div style="display:flex;height:100%;overflow:hidden;">
@@ -174,7 +174,7 @@ async function showPartnerDashboard(){
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
         <div>
           <div style="font-family:var(--mono);font-size:.8rem;color:#7f77dd;font-weight:800;">PARTNER DASHBOARD</div>
-          <div style="font-size:.7rem;color:var(--muted);">Live · ${dateStr}</div>
+          <div style="font-size:.7rem;color:var(--muted);">${t('nav.live')} · ${dateStr}</div>
         </div>
       </div>
       <div id="partnerStatusBar" style="background:rgba(63,185,80,.08);border:1px solid rgba(63,185,80,.2);border-radius:8px;padding:8px 14px;margin-bottom:12px;font-size:.72rem;color:#3fb950;display:flex;align-items:center;gap:6px;">
@@ -262,9 +262,9 @@ async function showPartnerDashboard(){
     const wd=await wr.json();
     const c=wd.current;
     const wDesc=c.weathercode<=1?'Sunny':c.weathercode<=3?'Partly cloudy':c.weathercode<=48?'Foggy':c.weathercode<=67?'Rainy':'Cloudy';
-    document.getElementById('partnerWeatherDesc').textContent=wDesc+' · Humidity '+c.relativehumidity_2m+'%';
+    document.getElementById('partnerWeatherDesc').textContent=t('weather.'+(c.weathercode<=1?'sunny':c.weathercode<=3?'partlyCloudy':c.weathercode<=48?'foggy':c.weathercode<=67?'rainy':'cloudy'))+' · '+t('weather.humidity')+' '+c.relativehumidity_2m+'%';
     document.getElementById('partnerWeatherTemp').textContent=Math.round(c.temperature_2m)+'°C';
-    document.getElementById('partnerWeatherFeel').textContent='Feels like '+Math.round(c.apparent_temperature)+'°C';
+    document.getElementById('partnerWeatherFeel').textContent=t('ceoDashboardSection.feelsLike')+' '+Math.round(c.apparent_temperature)+'°C';
   }catch(e){}
 
   // Load partner metrics from Supabase
@@ -307,7 +307,7 @@ async function loadPartnerFeed(){
     const todayItems=(feed||[]).filter(f=>new Date(f.created_at).toDateString()===today);
     if(badge&&todayItems.length>0){badge.textContent=todayItems.length+' NEW';badge.style.display='inline';}
     if(!feed||feed.length===0){feedEl.innerHTML=`<div style="text-align:center;color:var(--muted);font-size:.72rem;padding:20px;">${t('empty.noFeedItems')}</div>`;return;}
-    let html='<div style="font-size:.65rem;color:var(--muted);margin-bottom:8px;">Today</div>';
+    let html='<div style="font-size:.65rem;color:var(--muted);margin-bottom:8px;">'+t('feed.today')+'</div>';
     html+=feed.map(f=>{
       const isAlert=f.tag==='ALERT';
       let tr=f.translations;
@@ -340,7 +340,7 @@ async function showCEODashboard(){
   mc.innerHTML=`
     <div style="padding-block:11px;padding-inline-end:var(--header-clearance);padding-inline-start:60px;border-bottom:1px solid var(--border);flex-shrink:0;">
       <div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;">${t('sectionTitle.ceoDashboard')}</div>
-      <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">Live · ${new Date().toLocaleDateString(getDateLocale('en-GB'),{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</div>
+      <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">${t('nav.live')} · ${new Date().toLocaleDateString(getDateLocale('en-GB'),{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</div>
     </div>
     <div class="page" id="ceoDashContent" style="opacity:0;transition:opacity .3s;display:grid;grid-template-columns:1fr 6px 380px;min-height:0;">
       <div style="text-align:center;padding:40px;color:var(--muted);font-family:var(--mono);font-size:.8rem;">${t('loading.dashboard')}</div>
@@ -378,7 +378,7 @@ async function showCEODashboard(){
     qualified:Math.round(stageCounts.qualified/totalLeads*100)||0,
     closed:Math.round(stageCounts.closed/totalLeads*100)||0
   };
-  if(window._weatherCache){setTimeout(()=>{const w=window._weatherCache;const wi=document.getElementById('weatherIcon');const wd=document.getElementById('weatherDesc');const wt=document.getElementById('weatherTemp');const wf=document.getElementById('weatherFeels');if(wi){wi.className='ti '+w.icon;wi.style.cssText='font-size:22px;color:var(--nes-blue);filter:drop-shadow(0 0 4px var(--nes-blue))';}if(wd)wd.textContent=w.desc;if(wt)wt.textContent=w.temp;if(wf)wf.textContent=w.feels;const wl=document.getElementById('weatherLocLabel');if(wl)wl.textContent=(window.userRegion||'Muscat').toUpperCase();},50);}else{setTimeout(()=>{fetch('https://wttr.in/'+encodeURIComponent(window.userRegion||'Muscat')+'?format=j1').then(r=>r.json()).then(w=>{const c=w.current_condition[0];const desc=c.weatherDesc[0].value;const temp=c.temp_C;const feels=c.FeelsLikeC;const humidity=c.humidity;const icons={'Sunny':'ti-sun','Clear':'ti-moon-stars','Partly cloudy':'ti-cloud-sun','Cloudy':'ti-cloud','Overcast':'ti-cloud','Mist':'ti-mist','Fog':'ti-mist','Rain':'ti-cloud-rain','Drizzle':'ti-cloud-drizzle','Thunderstorm':'ti-storm','Snow':'ti-snowflake','Blizzard':'ti-snowflake'};const iconKey=Object.keys(icons).find(k=>desc.includes(k))||'Sunny';const icon=icons[iconKey]||'ti-sun';const descTxt=desc+' · Humidity '+humidity+'%';const tempTxt=temp+'°C';const feelsTxt='Feels like '+feels+'°C';window._weatherCache={icon,desc:descTxt,temp:tempTxt,feels:feelsTxt};const wi=document.getElementById('weatherIcon');const wd=document.getElementById('weatherDesc');const wt=document.getElementById('weatherTemp');const wf=document.getElementById('weatherFeels');if(wi){wi.className='ti '+icon;wi.style.cssText='font-size:22px;color:var(--nes-blue);filter:drop-shadow(0 0 4px var(--nes-blue))';}if(wd)wd.textContent=descTxt;if(wt)wt.textContent=tempTxt;if(wf)wf.textContent=feelsTxt;const wl=document.getElementById('weatherLocLabel');if(wl)wl.textContent=(window.userRegion||'Muscat').toUpperCase();}).catch(()=>{const wd=document.getElementById('weatherDesc');if(wd)wd.textContent='Weather unavailable';});},100);}
+  if(window._weatherCache){setTimeout(()=>{const w=window._weatherCache;const wi=document.getElementById('weatherIcon');const wd=document.getElementById('weatherDesc');const wt=document.getElementById('weatherTemp');const wf=document.getElementById('weatherFeels');if(wi){wi.className='ti '+w.icon;wi.style.cssText='font-size:22px;color:var(--nes-blue);filter:drop-shadow(0 0 4px var(--nes-blue))';}if(wd)wd.textContent=w.desc;if(wt)wt.textContent=w.temp;if(wf)wf.textContent=w.feels;const wl=document.getElementById('weatherLocLabel');if(wl)wl.textContent=(window.userRegion||'Muscat').toUpperCase();},50);}else{setTimeout(()=>{fetch('https://wttr.in/'+encodeURIComponent(window.userRegion||'Muscat')+'?format=j1&lang='+(window.clientLocale||'en')).then(r=>r.json()).then(w=>{const c=w.current_condition[0];const desc=c.weatherDesc[0].value;const temp=c.temp_C;const feels=c.FeelsLikeC;const humidity=c.humidity;const icons={'Sunny':'ti-sun','Clear':'ti-moon-stars','Partly cloudy':'ti-cloud-sun','Cloudy':'ti-cloud','Overcast':'ti-cloud','Mist':'ti-mist','Fog':'ti-mist','Rain':'ti-cloud-rain','Drizzle':'ti-cloud-drizzle','Thunderstorm':'ti-storm','Snow':'ti-snowflake','Blizzard':'ti-snowflake'};const iconKey=Object.keys(icons).find(k=>desc.includes(k))||'Sunny';const icon=icons[iconKey]||'ti-sun';const locDesc=(window.clientLocale&&c['lang_'+window.clientLocale]&&c['lang_'+window.clientLocale][0]&&c['lang_'+window.clientLocale][0].value)||desc;const descTxt=locDesc+' · '+t('weather.humidity')+' '+humidity+'%';const tempTxt=temp+'°C';const feelsTxt=t('ceoDashboardSection.feelsLike')+' '+feels+'°C';window._weatherCache={icon,desc:descTxt,temp:tempTxt,feels:feelsTxt};const wi=document.getElementById('weatherIcon');const wd=document.getElementById('weatherDesc');const wt=document.getElementById('weatherTemp');const wf=document.getElementById('weatherFeels');if(wi){wi.className='ti '+icon;wi.style.cssText='font-size:22px;color:var(--nes-blue);filter:drop-shadow(0 0 4px var(--nes-blue))';}if(wd)wd.textContent=descTxt;if(wt)wt.textContent=tempTxt;if(wf)wf.textContent=feelsTxt;const wl=document.getElementById('weatherLocLabel');if(wl)wl.textContent=(window.userRegion||'Muscat').toUpperCase();}).catch(()=>{const wd=document.getElementById('weatherDesc');if(wd)wd.textContent='Weather unavailable';});},100);}
 
   document.getElementById('ceoDashContent').innerHTML=`
     <div class="ceo-panel-toggle" style="display:none!important;padding:6px 12px;border-bottom:1px solid var(--border);gap:6px;flex-shrink:0;">
@@ -737,18 +737,18 @@ async function loadUsageSummary(){
         </div>
       </div>`;
     }
-    if(u.sara&&u.sara.limit>0)rows.push(bar('Sara AI calls',u.sara.used,u.sara.limit));
-    else if(u.sara&&u.sara.limit===-1)rows.push(`<div style="display:flex;align-items:center;justify-content:space-between;"><span style="font-size:.72rem;color:var(--text);">Sara AI calls</span><span style="font-size:.7rem;color:var(--muted);">${u.sara.used} · Unlimited</span></div>`);
-    if(u.adam&&u.adam.enabled)rows.push(bar('Adam consultations',u.adam.used,u.adam.included));
-    if(u.chat)rows.push(bar('Ask NES AI messages',u.chat.used,u.chat.limit));
+    if(u.sara&&u.sara.limit>0)rows.push(bar(t('usage.saraCalls'),u.sara.used,u.sara.limit));
+    else if(u.sara&&u.sara.limit===-1)rows.push(`<div style="display:flex;align-items:center;justify-content:space-between;"><span style="font-size:.72rem;color:var(--text);">${t('usage.saraCalls')}</span><span style="font-size:.7rem;color:var(--muted);">${u.sara.used} · Unlimited</span></div>`);
+    if(u.adam&&u.adam.enabled)rows.push(bar(t('usage.adamConsultations'),u.adam.used,u.adam.included));
+    if(u.chat)rows.push(bar(t('usage.chatMessages'),u.chat.used,u.chat.limit));
     if(u.image){
       if(u.image.freeAllowanceActive){
-        rows.push(bar('Image gen (daily, trial)',u.image.dailyUsed,u.image.dailyLimit));
+        rows.push(bar(t('usage.imageTrial'),u.image.dailyUsed,u.image.dailyLimit));
       }else{
-        rows.push(`<div style="display:flex;align-items:center;justify-content:space-between;"><span style="font-size:.72rem;color:var(--text);">Image gen</span><span style="font-size:.7rem;color:var(--muted);">${u.image.creditBalance} credits remaining · PAYG</span></div>`);
+        rows.push(`<div style="display:flex;align-items:center;justify-content:space-between;"><span style="font-size:.72rem;color:var(--text);">${t('usage.imageGen')}</span><span style="font-size:.7rem;color:var(--muted);">${u.image.creditBalance} credits remaining · PAYG</span></div>`);
       }
     }
-    if(u.storage)rows.push(bar('Briefcase storage',u.storage.usedBytes,u.storage.quotaBytes,'GB'));
+    if(u.storage)rows.push(bar(t('usage.briefcaseStorage'),u.storage.usedBytes,u.storage.quotaBytes,'GB'));
     const el=document.getElementById('usageSummaryContent');
     if(el)el.innerHTML=rows.length?rows.join(''):'<div style="color:var(--muted);font-family:var(--mono);font-size:.7rem;">No usage data available</div>';
   }catch(e){
@@ -765,7 +765,7 @@ async function loadCeoFeed(){
     const el=document.getElementById('ceoFeedItems');
     if(!el)return;
     if(error||!data||data.length===0){
-      el.innerHTML='<div style="color:var(--muted);font-family:var(--mono);font-size:.7rem;padding:10px 0;">No intelligence feed data yet. Check back after 6AM tomorrow.</div>';
+      el.innerHTML='<div style="color:var(--muted);font-family:var(--mono);font-size:.7rem;padding:10px 0;">'+t('feed.empty')+'</div>';
       return;
     }
     const lastRead=localStorage.getItem('nesai_feed_lastread')||'';
@@ -773,11 +773,11 @@ async function loadCeoFeed(){
     const unreadItems=data.filter(function(item){return new Date(item.created_at)>lastReadTime;});
     const unreadBadge=document.getElementById('feedUnreadBadge');
     if(unreadBadge){
-      if(unreadItems.length>0){unreadBadge.textContent=unreadItems.length+' NEW';unreadBadge.style.display='block';}
+      if(unreadItems.length>0){unreadBadge.textContent=unreadItems.length+' '+t('feed.new');unreadBadge.style.display='block';}
       else{unreadBadge.style.display='none';}
     }
     const tagColors={briefing:'#409cff',intelligence:'#3fb950',default:'#d29922'};
-    const tagLabels={briefing:'BRIEF',intelligence:'INTEL',default:'INFO'};
+    const tagLabels={briefing:t('feed.tagBrief'),intelligence:t('feed.tagIntel'),default:t('feed.tagInfo')};
     el.innerHTML=data.map(function(item,idx){
       try{
       let tr=item.translations;
@@ -843,8 +843,8 @@ async function loadCeoFeed(){
       const isNew=new Date(item.created_at)>lastReadTime;
       const isToday=new Date(item.created_at).toDateString()===new Date().toDateString();
       let dividerHtml='';
-      if(idx===0){dividerHtml='<div style="text-align:center;font-family:var(--mono);font-size:.58rem;color:var(--muted);padding:4px 0 6px;display:flex;align-items:center;gap:6px;margin-bottom:4px;"><div style=\"flex:1;height:1px;background:var(--border)\"></div>Today<div style=\"flex:1;height:1px;background:var(--border)\"></div></div>';}
-      else if(!isToday&&new Date(data[idx-1]?.created_at).toDateString()===new Date().toDateString()){dividerHtml='<div style="text-align:center;font-family:var(--mono);font-size:.58rem;color:var(--muted);padding:4px 0 6px;display:flex;align-items:center;gap:6px;margin-bottom:4px;"><div style=\"flex:1;height:1px;background:var(--border)\"></div>Earlier<div style=\"flex:1;height:1px;background:var(--border)\"></div></div>';}
+      if(idx===0){dividerHtml='<div style="text-align:center;font-family:var(--mono);font-size:.58rem;color:var(--muted);padding:4px 0 6px;display:flex;align-items:center;gap:6px;margin-bottom:4px;"><div style=\"flex:1;height:1px;background:var(--border)\"></div>'+t('feed.today')+'<div style=\"flex:1;height:1px;background:var(--border)\"></div></div>';}
+      else if(!isToday&&new Date(data[idx-1]?.created_at).toDateString()===new Date().toDateString()){dividerHtml='<div style="text-align:center;font-family:var(--mono);font-size:.58rem;color:var(--muted);padding:4px 0 6px;display:flex;align-items:center;gap:6px;margin-bottom:4px;"><div style=\"flex:1;height:1px;background:var(--border)\"></div>'+t('feed.earlier')+'<div style=\"flex:1;height:1px;background:var(--border)\"></div></div>';}
       // isAlert and alertIcon declared at top of try block
       return dividerHtml+'<div class="feed-card" id="feed-'+idx+'" style="background:'+(isNew?'#0c1827':'var(--surface)')+';border:1px solid '+(isNew?'#409cff33':'var(--border)')+';border-radius:12px;margin-bottom:8px;overflow:hidden;">'+
         '<div style="display:flex;align-items:flex-start;gap:10px;padding:12px 14px;cursor:pointer;" onclick="toggleFeedItem('+idx+')">'+
