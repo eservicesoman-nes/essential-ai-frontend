@@ -612,5 +612,15 @@
     "Finance": "Finance",
     "HR": "HR",
     "Operations": "Operations"
+  },
+  "briefcase2": {
+    "upload": "Upload",
+    "file": "file",
+    "files": "files",
+    "of": "of",
+    "used": "used",
+    "tooLarge": "File exceeds 25MB limit",
+    "uploadFailed": "Upload failed",
+    "noResponse": "No response."
   }
 }
