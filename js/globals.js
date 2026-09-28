@@ -242,7 +242,19 @@ async function loadNesStrings(locale) {
   } catch (e) {
     _nesStrings = { en: {} };
   }
+  // Re-translate anything drawn while the language files were still loading
+  if (typeof applyNesI18n === 'function') applyNesI18n();
 }
+// Tells the AI to answer only in the language selected in the app (all chats)
+function aiLangDirective(){
+  const names = { en: 'English', pt: 'European Portuguese (pt-PT)', ar: 'Arabic' };
+  const loc = window.clientLocale || _nesLocale || 'en';
+  return '\n\n[Reply only in ' + (names[loc] || 'English') + ', whatever language the question is written in.]';
+}
+window.aiLangDirective = aiLangDirective;
+// Hide that instruction when saved conversations are shown again
+function stripLangDirective(s){ return String(s||'').replace(/\n\n\[Reply only in [^\]]*\]\s*$/,''); }
+window.stripLangDirective = stripLangDirective;
 
 function t(keyPath, fallback) {
   const parts = keyPath.split('.');
