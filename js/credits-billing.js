@@ -81,12 +81,12 @@ async function saveNewApiService(){
   const threshold=parseFloat(document.getElementById('new_api_threshold')?.value)||5;
   const notes=document.getElementById('new_api_notes')?.value.trim();
   if(!name){showToast(t('toast.serviceNameRequired'));return;}
-  try{{const{error:_e}=await sb.from('api_credits').insert([{service_name:name,current_balance:balance,alert_threshold:threshold,notes,status:balance<threshold?'low':'healthy'}]);if(_e)throw _e;}showToast(t('pricingPage.apiAdded'));document.getElementById('addApiForm').style.display='none';await loadApiCredits();}catch(e){showToast('Error: '+e.message);}
+  try{{const{error:_e}=await sb.from('api_credits').insert([{service_name:name,current_balance:balance,alert_threshold:threshold,notes,status:balance<threshold?'low':'healthy'}]);if(_e)throw _e;}showToast(t('pricingPage.apiAdded'));document.getElementById('addApiForm').style.display='none';await loadApiCredits();}catch(e){showToast(t('popup.error')+': '+e.message);}
 }
 
 async function updateApiBalance(id,val){
   const balance=parseFloat(val)||0;const threshold=parseFloat(document.getElementById('thr_'+id)?.value)||5;
-  try{{const{error:_e}=await sb.from('api_credits').upsert({service_name:id,current_balance:balance,status:balance<threshold?'low':'healthy'},{onConflict:'service_name'});if(_e)throw _e;}}catch(e){showToast('Error: '+e.message);}
+  try{{const{error:_e}=await sb.from('api_credits').upsert({service_name:id,current_balance:balance,status:balance<threshold?'low':'healthy'},{onConflict:'service_name'});if(_e)throw _e;}}catch(e){showToast(t('popup.error')+': '+e.message);}
 }
 
 async function saveAllThresholds(){
@@ -102,7 +102,7 @@ async function saveAllThresholds(){
       {const{error:_e}=await sb.from('api_credits').upsert({service_name:api.id,current_balance:balance,alert_threshold:threshold,recharge_at:rechargeAt,recharge_amount:rechargeAmt,status:balance===0?'unknown':balance<threshold?'low':'healthy'},{onConflict:'service_name'});if(_e)throw _e;}
     }
     showToast(t('toast.thresholdsSaved'));await loadApiCredits();
-  }catch(e){showToast('Error: '+e.message);}
+  }catch(e){showToast(t('popup.error')+': '+e.message);}
   finally{if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-device-floppy"></i> Save Thresholds';}}
 }
 
@@ -130,11 +130,11 @@ async function startSubscription(plan,cycle){
     if(data.checkout_url){
       window.location.href=data.checkout_url;
     } else {
-      alert('Subscription error: '+(data.error||'Unknown error'));
+      alert(t('popup.subscriptionError')+': '+(data.error||t('popup.unknownError')));
       btn.disabled=false;btn.textContent=cycle==='monthly'?'Monthly':'Annual — 15% off';
     }
   }catch(e){
-    alert('Connection error. Please try again.');
+    alert(t('popup.connectionError'));
     btn.disabled=false;btn.textContent=cycle==='monthly'?'Monthly':'Annual — 15% off';
   }
 }
@@ -314,11 +314,11 @@ async function payWithPayPal(amountOMR,description){
     if(data.checkout_url){
       window.location.href=data.checkout_url;
     } else {
-      alert('Payment error: '+(data.error||'Unknown error'));
+      alert(t('popup.paymentError')+': '+(data.error||t('popup.unknownError')));
       btn.disabled=false;btn.textContent='PayPal';
     }
   }catch(e){
-    alert('Connection error. Please try again.');
+    alert(t('popup.connectionError'));
     btn.disabled=false;btn.textContent='PayPal';
   }
 }
@@ -362,11 +362,11 @@ async function buyVoiceTopup(minutes,price,label){
     if(data.checkout_url){
       window.location.href=data.checkout_url;
     } else {
-      alert('Payment error: '+(data.error||'Unknown error'));
+      alert(t('popup.paymentError')+': '+(data.error||t('popup.unknownError')));
       btn.disabled=false;btn.textContent='Buy Now';
     }
   }catch(e){
-    alert('Connection error. Please try again.');
+    alert(t('popup.connectionError'));
     btn.disabled=false;btn.textContent='Buy Now';
   }
 }
@@ -411,11 +411,11 @@ async function buyAdamTopup(credits,price,label){
     if(data.checkout_url){
       window.location.href=data.checkout_url;
     } else {
-      alert('Payment error: '+(data.error||'Unknown error'));
+      alert(t('popup.paymentError')+': '+(data.error||t('popup.unknownError')));
       btn.disabled=false;btn.textContent='Buy Now';
     }
   }catch(e){
-    alert('Connection error. Please try again.');
+    alert(t('popup.connectionError'));
     btn.disabled=false;btn.textContent='Buy Now';
   }
 }
@@ -460,11 +460,11 @@ async function buyBriefcaseTopup(gb,price,label){
     if(data.checkout_url){
       window.location.href=data.checkout_url;
     } else {
-      alert('Payment error: '+(data.error||'Unknown error'));
+      alert(t('popup.paymentError')+': '+(data.error||t('popup.unknownError')));
       btn.disabled=false;btn.textContent='Buy Now';
     }
   }catch(e){
-    alert('Connection error. Please try again.');
+    alert(t('popup.connectionError'));
     btn.disabled=false;btn.textContent='Buy Now';
   }
 }
@@ -510,11 +510,11 @@ async function buyImageCredits(credits,price,label){
     if(data.checkout_url){
       window.location.href=data.checkout_url;
     } else {
-      alert('Payment error: '+(data.error||'Unknown error'));
+      alert(t('popup.paymentError')+': '+(data.error||t('popup.unknownError')));
       btn.disabled=false;btn.textContent='Buy Now';
     }
   }catch(e){
-    alert('Connection error. Please try again.');
+    alert(t('popup.connectionError'));
     btn.disabled=false;btn.textContent='Buy Now';
   }
 }
