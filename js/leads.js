@@ -7,7 +7,7 @@ async function showLeadsPage(){
   mc.innerHTML=`
     <div style="padding-block:11px;padding-inline-end:var(--header-clearance);padding-inline-start:60px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;">
       <div><div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;">${t('sectionTitle.leads')}</div><div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);" id="leadsSubtitle">${t('common.loading')}</div></div>
-      <button onclick="exportLeads()" style="font-size:.7rem;padding:4px 9px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:var(--mono);display:flex;align-items:center;gap:5px;"><i class="ti ti-download" style="font-size:13px"></i> Export CSV</button>
+      <button onclick="exportLeads()" style="font-size:.7rem;padding:4px 9px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:var(--mono);display:flex;align-items:center;gap:5px;"><i class="ti ti-download" style="font-size:13px"></i> ${t('leads.exportCsv')}</button>
     </div>
     <div class="page scrollable" id="leadsContent"><div style="text-align:center;padding:40px;color:var(--muted);font-family:var(--mono);font-size:.8rem;">${t('loading.leads')}</div></div>`;
   try{
@@ -17,19 +17,19 @@ async function showLeadsPage(){
     if(error)throw error;
     const today=new Date().toISOString().split('T')[0];
     const todayLeads=(leads||[]).filter(l=>l.created_at?.startsWith(today)).length;
-    document.getElementById('leadsSubtitle').textContent=`${leads?.length||0} total · ${todayLeads} today`;
+    document.getElementById('leadsSubtitle').textContent=`${leads?.length||0} ${t('leads.total')} · ${todayLeads} ${t('leads.today')}`;
     const hotLeads=(leads||[]).filter(l=>['Government','Ports & Customs','Aviation & Airports'].includes(l.industry)).length;
     document.getElementById('leadsContent').innerHTML=`
       <div class="leads-stats">
-        <div class="kcard hot"><div class="klbl" style="display:flex;align-items:center;gap:4px;"><i class="ti ti-users" style="font-size:11px;color:var(--nes-blue);filter:drop-shadow(0 0 3px var(--nes-blue))"></i>${t('leadsKpi.totalLeads')}</div><div class="kval" style="color:var(--nes-blue)">${leads?.length||0}</div><div class="kdelta kup">${todayLeads} today</div></div>
+        <div class="kcard hot"><div class="klbl" style="display:flex;align-items:center;gap:4px;"><i class="ti ti-users" style="font-size:11px;color:var(--nes-blue);filter:drop-shadow(0 0 3px var(--nes-blue))"></i>${t('leadsKpi.totalLeads')}</div><div class="kval" style="color:var(--nes-blue)">${leads?.length||0}</div><div class="kdelta kup">${todayLeads} ${t('leads.today')}</div></div>
         <div class="kcard"><div class="klbl" style="display:flex;align-items:center;gap:4px;"><i class="ti ti-flame" style="font-size:11px;color:#3fb950;filter:drop-shadow(0 0 3px #3fb950)"></i>${t('leadsKpi.highValue')}</div><div class="kval" style="color:#3fb950">${hotLeads}</div><div class="kdelta kneu">${t('leadsKpi.govPortsAviation')}</div></div>
         <div class="kcard"><div class="klbl" style="display:flex;align-items:center;gap:4px;"><i class="ti ti-calendar-week" style="font-size:11px;color:#7f77dd;filter:drop-shadow(0 0 3px #7f77dd)"></i>${t('leadsKpi.thisWeek')}</div><div class="kval">${(leads||[]).filter(l=>new Date(l.created_at)>new Date(Date.now()-7*24*60*60*1000)).length}</div><div class="kdelta kneu">${t('leadsKpi.last7Days')}</div></div>
       </div>
       <div class="tabs-bar">
-        <button class="tab-btn active" onclick="filterLeads('all',this)">All</button>
-        <button class="tab-btn" onclick="filterLeads('today',this)">Today</button>
-        <button class="tab-btn" onclick="filterLeads('week',this)">This week</button>
-        <button class="tab-btn" onclick="filterLeads('repeats',this)">Repeats</button>
+        <button class="tab-btn active" onclick="filterLeads('all',this)">${t('leads.tabAll')}</button>
+        <button class="tab-btn" onclick="filterLeads('today',this)">${t('leads.tabToday')}</button>
+        <button class="tab-btn" onclick="filterLeads('week',this)">${t('leads.tabWeek')}</button>
+        <button class="tab-btn" onclick="filterLeads('repeats',this)">${t('leads.tabRepeats')}</button>
       </div>
       <div class="leads-table">
         <div class="lt-header"><div>${t('leadsTableHeader.nameEmail')}</div><div>${t('leadsTableHeader.industry')}</div><div>${t('leadsTableHeader.phone')}</div><div>${t('leadsTableHeader.date')}</div><div>${t('leadsTableHeader.status')}</div></div>
@@ -73,7 +73,7 @@ async function deleteLead(leadId, leadName){
     const todayStr=new Date().toISOString().split('T')[0];
     const todayLeads=window._allLeads.filter(l=>l.created_at?.startsWith(todayStr)).length;
     const subEl=document.getElementById('leadsSubtitle');
-    if(subEl)subEl.textContent=`${window._allLeads.length} total · ${todayLeads} today`;
+    if(subEl)subEl.textContent=`${window._allLeads.length} ${t('leads.total')} · ${todayLeads} ${t('leads.today')}`;
     showToast(t('toast.leadDeleted'));
   }catch(e){
     showToast('❌ Delete failed: '+e.message);
