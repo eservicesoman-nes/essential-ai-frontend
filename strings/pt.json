@@ -53,7 +53,8 @@
     "search": "Pesquisar",
     "loading": "A carregar…",
     "ready": "Pronto",
-    "noIssuesFound": "Nenhum problema encontrado"
+    "noIssuesFound": "Nenhum problema encontrado",
+    "back": "Voltar"
   },
   "loading": {
     "analytics": "A carregar análises...",
@@ -559,6 +560,57 @@
     "remove": "Remover",
     "accessNote": "A aplicação dos acessos chega na próxima atualização — aqui vê as permissões previstas por departamento.",
     "roleLabel": "FUNÇÃO",
-    "deptOptional": "DEPARTAMENTO (OPCIONAL)"
+    "deptOptional": "DEPARTAMENTO (OPCIONAL)",
+    "staffCountOne": "colaborador"
+  },
+  "itsetup": {
+    "connected": "ligados",
+    "statusConnected": "Ligado",
+    "statusMissing": "Em falta",
+    "edit": "Editar",
+    "connect": "Ligar",
+    "feedTitle": "NES Pulse — Fontes de notícias",
+    "feedIntro": "O seu feed NES Pulse recolhe diariamente destas fontes. Adicione um tema para pesquisar (ex.: \"notícias do setor da construção\") ou o URL RSS de um website.",
+    "topic": "Tema",
+    "labelPlaceholder": "Nome (ex.: Notícias do Setor)",
+    "valuePlaceholder": "Tema de pesquisa ou URL RSS",
+    "add": "Adicionar",
+    "widgetTitle": "Widget de Chat para Website",
+    "widgetIntro": "Adicione um chat de IA ao seu website colando esta linha antes de &lt;/body&gt; no seu site.",
+    "widgetWorks": "Funciona em WordPress, Wix, Squarespace ou qualquer site HTML.",
+    "noSources": "Ainda sem fontes — adicione uma abaixo."
+  },
+  "topup": {
+    "minutes": "minutos",
+    "consultations": "consultas",
+    "credits": "créditos",
+    "neverExpire": "não expiram",
+    "extraStorage": "de armazenamento extra",
+    "buyNow": "Comprar",
+    "saraIntro": "Carregue minutos da Sara quando o limite mensal estiver a acabar. Os minutos são adicionados de imediato e não expiram.",
+    "adamIntro": "Carregue consultas do Adam quando as 20 consultas mensais incluídas acabarem. Os créditos são adicionados de imediato e não expiram.",
+    "storageIntro": "Aumente o armazenamento da Pasta quando o espaço incluído no plano estiver a acabar. O espaço é adicionado de imediato.",
+    "imageIntro": "Todos os planos incluem 3 imagens grátis por dia durante o período experimental. Precisa de mais? Compre um pacote — cada crédito gera uma imagem extra e os créditos não expiram.",
+    "payNoteMinutes": "Pagamentos processados com segurança via Thawani. Os minutos são adicionados automaticamente após o pagamento.",
+    "payNoteCredits": "Pagamentos processados com segurança via Thawani. Os créditos são adicionados automaticamente após o pagamento.",
+    "payNoteStorage": "Pagamentos processados com segurança via Thawani. O espaço é adicionado automaticamente após o pagamento.",
+    "adamTitle": "Recarga de Consultas Adam",
+    "storageTitle": "Recarga de Armazenamento da Pasta",
+    "imageTitle": "Créditos de Imagem",
+    "trialEnded": "O seu período experimental terminou.",
+    "youHave": "Tem atualmente",
+    "creditsRemaining": "créditos disponíveis no seu saldo.",
+    "topUpBelow": "Compre um pacote abaixo para continuar a gerar imagens.",
+    "freeImagesLeft": "imagens grátis restantes hoje",
+    "and": "e",
+    "creditsInBalance": "créditos no seu saldo"
+  },
+  "dept": {
+    "Management": "Gestão",
+    "Sales": "Vendas",
+    "IT": "TI",
+    "Finance": "Finanças",
+    "HR": "RH",
+    "Operations": "Operações"
   }
 }
