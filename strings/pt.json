@@ -472,5 +472,25 @@
     "standardBundle": "Pacote Padrão",
     "powerBundle": "Pacote Avançado",
     "saraVoiceTopup": "Recarga de Voz Sara"
+  },
+  "popup": {
+    "enterEmail": "Introduza um endereço de email",
+    "inviteSent": "Convite enviado para {email}",
+    "error": "Erro",
+    "failed": "Falhou",
+    "unknownError": "Erro desconhecido",
+    "deleteDept": "Eliminar o departamento '{name}'? Esta ação não pode ser anulada.",
+    "deleteDeptConfirm": "Tem a certeza absoluta? A equipa atribuída a '{name}' ficará sem departamento.",
+    "subscriptionError": "Erro na subscrição",
+    "paymentError": "Erro no pagamento",
+    "connectionError": "Erro de ligação. Tente novamente.",
+    "errorSavingCreds": "Erro ao guardar as credenciais",
+    "enterLabelValue": "Introduza uma etiqueta e um valor",
+    "sourceUpdated": "Origem atualizada",
+    "failedToSend": "Falha no envio",
+    "deleteLead": "Eliminar definitivamente o contacto \"{name}\"?\n\nSerá removido de todo o lado — estatísticas, totais do pipeline e painéis. Esta ação não pode ser anulada.",
+    "callingLead": "A ligar a {name}... A Sara está a marcar",
+    "uploading": "A carregar {name}...",
+    "deleteFile": "Eliminar definitivamente \"{name}\"?\n\nEsta ação não pode ser anulada."
   }
 }
