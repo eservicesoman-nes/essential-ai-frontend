@@ -53,7 +53,8 @@
     "search": "Search",
     "loading": "Loading…",
     "ready": "Ready",
-    "noIssuesFound": "No issues found"
+    "noIssuesFound": "No issues found",
+    "back": "Back"
   },
   "loading": {
     "analytics": "Loading analytics...",
@@ -559,6 +560,57 @@
     "remove": "Remove",
     "accessNote": "Access enforcement coming in next update — this shows the planned permissions per department.",
     "roleLabel": "ROLE",
-    "deptOptional": "DEPARTMENT (OPTIONAL)"
+    "deptOptional": "DEPARTMENT (OPTIONAL)",
+    "staffCountOne": "staff member"
+  },
+  "itsetup": {
+    "connected": "connected",
+    "statusConnected": "Connected",
+    "statusMissing": "Missing",
+    "edit": "Edit",
+    "connect": "Connect",
+    "feedTitle": "NES Pulse — Feed Sources",
+    "feedIntro": "Your NES Pulse intelligence feed pulls from these sources daily. Add a topic to search (e.g. \"construction industry news\") or a specific website's RSS feed URL.",
+    "topic": "Topic",
+    "labelPlaceholder": "Label (e.g. Industry News)",
+    "valuePlaceholder": "Search topic or RSS URL",
+    "add": "Add",
+    "widgetTitle": "Website Chat Widget",
+    "widgetIntro": "Add an AI chat widget to your website by pasting this one line before &lt;/body&gt; on your site.",
+    "widgetWorks": "Works on WordPress, Wix, Squarespace, or any HTML site.",
+    "noSources": "No feed sources yet — add one below."
+  },
+  "topup": {
+    "minutes": "minutes",
+    "consultations": "consultations",
+    "credits": "credits",
+    "neverExpire": "never expire",
+    "extraStorage": "extra storage",
+    "buyNow": "Buy Now",
+    "saraIntro": "Top up Sara's call allowance when your monthly limit runs low. Minutes are added instantly and never expire.",
+    "adamIntro": "Top up Adam's consultation allowance when your monthly 20 included consultations run out. Credits are added instantly and never expire.",
+    "storageIntro": "Top up your Briefcase storage when your plan's free allowance runs low. Storage is added instantly.",
+    "imageIntro": "Every plan includes 3 free images per day during your trial. Need more? Top up with a credit pack — each credit generates one extra image, and credits never expire.",
+    "payNoteMinutes": "Payments processed securely via Thawani. Minutes added to your account automatically after payment.",
+    "payNoteCredits": "Payments processed securely via Thawani. Credits added to your account automatically after payment.",
+    "payNoteStorage": "Payments processed securely via Thawani. Storage added to your account automatically after payment.",
+    "adamTitle": "Adam Consultation Top-up",
+    "storageTitle": "Briefcase Storage Top-up",
+    "imageTitle": "Image Credits",
+    "trialEnded": "Your free trial has ended.",
+    "youHave": "You currently have",
+    "creditsRemaining": "credits remaining in your balance.",
+    "topUpBelow": "Top up with a credit pack below to keep generating images.",
+    "freeImagesLeft": "free images left today",
+    "and": "and",
+    "creditsInBalance": "credits in your balance"
+  },
+  "dept": {
+    "Management": "Management",
+    "Sales": "Sales",
+    "IT": "IT",
+    "Finance": "Finance",
+    "HR": "HR",
+    "Operations": "Operations"
   }
 }
