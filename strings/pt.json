@@ -612,5 +612,15 @@
     "Finance": "Finanças",
     "HR": "RH",
     "Operations": "Operações"
+  },
+  "briefcase2": {
+    "upload": "Carregar",
+    "file": "ficheiro",
+    "files": "ficheiros",
+    "of": "de",
+    "used": "usados",
+    "tooLarge": "O ficheiro excede o limite de 25MB",
+    "uploadFailed": "Falha no carregamento",
+    "noResponse": "Sem resposta."
   }
 }
