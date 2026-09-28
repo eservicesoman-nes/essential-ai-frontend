@@ -503,5 +503,30 @@
     "callingLead": "جاري الاتصال بـ {name}... سارة تتصل الآن",
     "uploading": "جاري رفع {name}...",
     "deleteFile": "حذف \"{name}\" نهائياً؟\n\nلا يمكن التراجع عن ذلك."
+  },
+  "usage": {
+    "saraCalls": "مكالمات سارة",
+    "adamConsultations": "استشارات آدم",
+    "chatMessages": "رسائل Ask NES AI",
+    "imageTrial": "توليد الصور (يومي، تجريبي)",
+    "briefcaseStorage": "مساحة الحقيبة",
+    "imageGen": "توليد الصور"
+  },
+  "weather": {
+    "humidity": "الرطوبة",
+    "sunny": "مشمس",
+    "partlyCloudy": "غائم جزئياً",
+    "foggy": "ضبابي",
+    "rainy": "ممطر",
+    "cloudy": "غائم"
+  },
+  "feed": {
+    "tagBrief": "ملخص",
+    "tagIntel": "معلومات",
+    "tagInfo": "معلومة",
+    "today": "اليوم",
+    "earlier": "سابقاً",
+    "empty": "لا توجد بيانات بعد. تحقق غداً بعد السادسة صباحاً.",
+    "new": "جديد"
   }
 }
