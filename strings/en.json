@@ -472,5 +472,25 @@
     "standardBundle": "Standard Bundle",
     "powerBundle": "Power Bundle",
     "saraVoiceTopup": "Sara Voice Top-up"
+  },
+  "popup": {
+    "enterEmail": "Please enter an email address",
+    "inviteSent": "Invite sent to {email}",
+    "error": "Error",
+    "failed": "Failed",
+    "unknownError": "Unknown error",
+    "deleteDept": "Delete department '{name}'? This cannot be undone.",
+    "deleteDeptConfirm": "Are you absolutely sure? Staff assigned to '{name}' will be unassigned.",
+    "subscriptionError": "Subscription error",
+    "paymentError": "Payment error",
+    "connectionError": "Connection error. Please try again.",
+    "errorSavingCreds": "Error saving credentials",
+    "enterLabelValue": "Enter both a label and a value",
+    "sourceUpdated": "Source updated",
+    "failedToSend": "Failed to send",
+    "deleteLead": "Permanently delete lead \"{name}\"?\n\nThis removes it everywhere — lead stats, pipeline totals, and any dashboards. This cannot be undone.",
+    "callingLead": "Calling {name}... Sara is dialing",
+    "uploading": "Uploading {name}...",
+    "deleteFile": "Permanently delete \"{name}\"?\n\nThis cannot be undone."
   }
 }
