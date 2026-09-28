@@ -305,14 +305,14 @@ async function sendBriefcaseChatMessage(){
     typingBubble.textContent = reply;
     window._briefcaseChatHistory.push({role:'assistant', content:reply});
   }catch(e){
-    typingBubble.textContent = 'Error: '+e.message;
+    typingBubble.textContent = t('popup.error')+': '+e.message;
   }
 }
 
 async function uploadVaultFile(file){
   if(!file)return;
   if(file.size>25*1024*1024){showToast('❌ File exceeds 25MB limit');return;}
-  showToast(`Uploading ${file.name}...`);
+  showToast(t('popup.uploading').replace('{name}',file.name));
   try{
     const fd=new FormData();
     fd.append('file',file);
@@ -333,7 +333,7 @@ async function uploadVaultFile(file){
       await loadVaultFiles();
       loadBriefcaseDocContext();
     }else{
-      showToast('❌ Upload failed: '+(data.error||'Unknown error'));
+      showToast('❌ Upload failed: '+(data.error||t('popup.unknownError')));
     }
   }catch(e){
     showToast('❌ Upload failed: '+e.message);
@@ -359,7 +359,7 @@ async function downloadVaultFile(fileId){
 }
 
 async function deleteVaultFile(fileId, fileName){
-  if(!confirm(`Permanently delete "${fileName}"?\n\nThis cannot be undone.`))return;
+  if(!confirm(t('popup.deleteFile').replace('{name}',fileName)))return;
   try{
     const res=await fetch(`${API_URL}/api/vault/${fileId}`,{
       method:'DELETE',
@@ -374,7 +374,7 @@ async function deleteVaultFile(fileId, fileName){
       await loadVaultFiles();
       loadBriefcaseDocContext();
     }else{
-      showToast('❌ Delete failed: '+(data.error||'Unknown error'));
+      showToast('❌ Delete failed: '+(data.error||t('popup.unknownError')));
     }
   }catch(e){
     showToast('❌ Delete failed: '+e.message);
