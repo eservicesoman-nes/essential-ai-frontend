@@ -503,5 +503,30 @@
     "callingLead": "Calling {name}... Sara is dialing",
     "uploading": "Uploading {name}...",
     "deleteFile": "Permanently delete \"{name}\"?\n\nThis cannot be undone."
+  },
+  "usage": {
+    "saraCalls": "Sara AI calls",
+    "adamConsultations": "Adam consultations",
+    "chatMessages": "Ask NES AI messages",
+    "imageTrial": "Image gen (daily, trial)",
+    "briefcaseStorage": "Briefcase storage",
+    "imageGen": "Image gen"
+  },
+  "weather": {
+    "humidity": "Humidity",
+    "sunny": "Sunny",
+    "partlyCloudy": "Partly cloudy",
+    "foggy": "Foggy",
+    "rainy": "Rainy",
+    "cloudy": "Cloudy"
+  },
+  "feed": {
+    "tagBrief": "BRIEF",
+    "tagIntel": "INTEL",
+    "tagInfo": "INFO",
+    "today": "Today",
+    "earlier": "Earlier",
+    "empty": "No intelligence feed data yet. Check back after 6AM tomorrow.",
+    "new": "NEW"
   }
 }
