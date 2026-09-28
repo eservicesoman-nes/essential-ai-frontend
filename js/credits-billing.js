@@ -143,7 +143,7 @@ function showPricing(){
   mc.style.overflow='auto';
   mc.innerHTML=`
     <div class="pricing-wrap">
-      <a href="#" onclick="showView('chat');return false;" style="color:var(--nes-blue);text-decoration:none;display:inline-block;margin-bottom:22px;font-family:var(--mono);font-size:.8rem;">← Back</a>
+      <a href="#" onclick="showView('chat');return false;" style="color:var(--nes-blue);text-decoration:none;display:inline-block;margin-bottom:22px;font-family:var(--mono);font-size:.8rem;">← ${t('common.back','Back')}</a>
       <div style="text-align:center;margin-bottom:8px;"><h1 style="font-size:1.7rem;font-weight:700;font-family:'Syne',sans-serif;">${t('pricingPage.chooseYourPlan')}</h1></div>
       <div style="text-align:center;margin-bottom:6px;font-family:var(--mono);font-size:.75rem;color:var(--muted);">NES AI — Unified Business Platform · Oman Pricing</div>
       <div style="text-align:center;margin-bottom:16px;font-family:var(--mono);font-size:.68rem;color:var(--muted);">All plans include a 7-day trial · Cancel anytime</div>
@@ -329,14 +329,14 @@ function openVoiceTopupModal(){
     {min:400,p:99,label:t('pricingPage.powerBundle')}
   ];
   const packsHtml=packs.map(pk=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px;">
-    <div><div style="font-weight:700;font-size:.85rem;">${pk.label}</div><div style="font-size:.75rem;color:var(--muted);">${pk.min} minutes · never expire</div><div style="font-size:.7rem;color:var(--muted);">OMR ${pk.p} + 5% VAT = OMR ${(pk.p*1.05).toFixed(3)}</div></div>
-    <button class="act-btn" onclick="buyVoiceTopup(${pk.min},${pk.p},'${pk.label}')">Buy Now</button>
+    <div><div style="font-weight:700;font-size:.85rem;">${pk.label}</div><div style="font-size:.75rem;color:var(--muted);">${pk.min} ${t('topup.minutes')} · ${t('topup.neverExpire')}</div><div style="font-size:.7rem;color:var(--muted);">OMR ${pk.p} + 5% VAT = OMR ${(pk.p*1.05).toFixed(3)}</div></div>
+    <button class="act-btn" onclick="buyVoiceTopup(${pk.min},${pk.p},'${pk.label}')">${t('topup.buyNow')}</button>
     <button class="act-btn" style="margin-inline-start:6px;background:#003087;" onclick="payWithPayPal(${pk.p},'Sara Top-up ${pk.min}min')">PayPal</button>
   </div>`).join('');
   const html=`<div style="padding:4px 0;">
-    <p style="color:var(--muted);font-size:.85rem;margin-bottom:14px;">Top up Sara's call allowance when your monthly limit runs low. Minutes are added instantly and never expire.</p>
+    <p style="color:var(--muted);font-size:.85rem;margin-bottom:14px;">${t('topup.saraIntro')}</p>
     ${packsHtml}
-    <p style="color:var(--muted);font-size:.75rem;margin-top:10px;">Payments processed securely via Thawani. Minutes added to your account automatically after payment.</p>
+    <p style="color:var(--muted);font-size:.75rem;margin-top:10px;">${t('topup.payNoteMinutes')}</p>
   </div>`;
   showModal(t('pricingPage.saraVoiceTopup'),html);
 }
@@ -363,31 +363,31 @@ async function buyVoiceTopup(minutes,price,label){
       window.location.href=data.checkout_url;
     } else {
       alert(t('popup.paymentError')+': '+(data.error||t('popup.unknownError')));
-      btn.disabled=false;btn.textContent='Buy Now';
+      btn.disabled=false;btn.textContent=t('topup.buyNow');
     }
   }catch(e){
     alert(t('popup.connectionError'));
-    btn.disabled=false;btn.textContent='Buy Now';
+    btn.disabled=false;btn.textContent=t('topup.buyNow');
   }
 }
 
 function openAdamTopupModal(){
   const packs=[
-    {credits:5,p:8,label:'Starter Bundle'},
-    {credits:10,p:15,label:'Standard Bundle'},
-    {credits:25,p:35,label:'Power Bundle'}
+    {credits:5,p:8,label:t('pricingPage.starterBundle')},
+    {credits:10,p:15,label:t('pricingPage.standardBundle')},
+    {credits:25,p:35,label:t('pricingPage.powerBundle')}
   ];
   const packsHtml=packs.map(pk=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px;">
-    <div><div style="font-weight:700;font-size:.85rem;">${pk.label}</div><div style="font-size:.75rem;color:var(--muted);">${pk.credits} consultations · never expire</div><div style="font-size:.7rem;color:var(--muted);">OMR ${pk.p} + 5% VAT = OMR ${(pk.p*1.05).toFixed(3)}</div></div>
-    <button class="act-btn" onclick="buyAdamTopup(${pk.credits},${pk.p},'${pk.label}')">Buy Now</button>
+    <div><div style="font-weight:700;font-size:.85rem;">${pk.label}</div><div style="font-size:.75rem;color:var(--muted);">${pk.credits} ${t('topup.consultations')} · ${t('topup.neverExpire')}</div><div style="font-size:.7rem;color:var(--muted);">OMR ${pk.p} + 5% VAT = OMR ${(pk.p*1.05).toFixed(3)}</div></div>
+    <button class="act-btn" onclick="buyAdamTopup(${pk.credits},${pk.p},'${pk.label}')">${t('topup.buyNow')}</button>
     <button class="act-btn" style="margin-inline-start:6px;background:#003087;" onclick="payWithPayPal(${pk.p},'Adam Top-up ${pk.credits} credits')">PayPal</button>
   </div>`).join('');
   const html=`<div style="padding:4px 0;">
-    <p style="color:var(--muted);font-size:.85rem;margin-bottom:14px;">Top up Adam's consultation allowance when your monthly 20 included consultations run out. Credits are added instantly and never expire.</p>
+    <p style="color:var(--muted);font-size:.85rem;margin-bottom:14px;">${t('topup.adamIntro')}</p>
     ${packsHtml}
-    <p style="color:var(--muted);font-size:.75rem;margin-top:10px;">Payments processed securely via Thawani. Credits added to your account automatically after payment.</p>
+    <p style="color:var(--muted);font-size:.75rem;margin-top:10px;">${t('topup.payNoteCredits')}</p>
   </div>`;
-  showModal('Adam Consultation Top-up',html);
+  showModal(t('topup.adamTitle'),html);
 }
 
 async function buyAdamTopup(credits,price,label){
@@ -412,31 +412,31 @@ async function buyAdamTopup(credits,price,label){
       window.location.href=data.checkout_url;
     } else {
       alert(t('popup.paymentError')+': '+(data.error||t('popup.unknownError')));
-      btn.disabled=false;btn.textContent='Buy Now';
+      btn.disabled=false;btn.textContent=t('topup.buyNow');
     }
   }catch(e){
     alert(t('popup.connectionError'));
-    btn.disabled=false;btn.textContent='Buy Now';
+    btn.disabled=false;btn.textContent=t('topup.buyNow');
   }
 }
 
 function openBriefcaseTopupModal(){
   const packs=[
-    {gb:20,p:8,label:'Starter Bundle'},
-    {gb:50,p:18,label:'Standard Bundle'},
-    {gb:100,p:30,label:'Power Bundle'}
+    {gb:20,p:8,label:t('pricingPage.starterBundle')},
+    {gb:50,p:18,label:t('pricingPage.standardBundle')},
+    {gb:100,p:30,label:t('pricingPage.powerBundle')}
   ];
   const packsHtml=packs.map(pk=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px;">
-    <div><div style="font-weight:700;font-size:.85rem;">${pk.label}</div><div style="font-size:.75rem;color:var(--muted);">${pk.gb}GB extra storage</div><div style="font-size:.7rem;color:var(--muted);">OMR ${pk.p} + 5% VAT = OMR ${(pk.p*1.05).toFixed(3)}/mo</div></div>
-    <button class="act-btn" onclick="buyBriefcaseTopup(${pk.gb},${pk.p},'${pk.label}')">Buy Now</button>
+    <div><div style="font-weight:700;font-size:.85rem;">${pk.label}</div><div style="font-size:.75rem;color:var(--muted);">${pk.gb}GB ${t('topup.extraStorage')}</div><div style="font-size:.7rem;color:var(--muted);">OMR ${pk.p} + 5% VAT = OMR ${(pk.p*1.05).toFixed(3)}/mo</div></div>
+    <button class="act-btn" onclick="buyBriefcaseTopup(${pk.gb},${pk.p},'${pk.label}')">${t('topup.buyNow')}</button>
     <button class="act-btn" style="margin-inline-start:6px;background:#003087;" onclick="payWithPayPal(${pk.p},'Briefcase Top-up ${pk.gb}GB')">PayPal</button>
   </div>`).join('');
   const html=`<div style="padding:4px 0;">
-    <p style="color:var(--muted);font-size:.85rem;margin-bottom:14px;">Top up your Briefcase storage when your plan's free allowance runs low. Storage is added instantly.</p>
+    <p style="color:var(--muted);font-size:.85rem;margin-bottom:14px;">${t('topup.storageIntro')}</p>
     ${packsHtml}
-    <p style="color:var(--muted);font-size:.75rem;margin-top:10px;">Payments processed securely via Thawani. Storage added to your account automatically after payment.</p>
+    <p style="color:var(--muted);font-size:.75rem;margin-top:10px;">${t('topup.payNoteStorage')}</p>
   </div>`;
-  showModal('Briefcase Storage Top-up',html);
+  showModal(t('topup.storageTitle'),html);
 }
 
 async function buyBriefcaseTopup(gb,price,label){
@@ -461,32 +461,32 @@ async function buyBriefcaseTopup(gb,price,label){
       window.location.href=data.checkout_url;
     } else {
       alert(t('popup.paymentError')+': '+(data.error||t('popup.unknownError')));
-      btn.disabled=false;btn.textContent='Buy Now';
+      btn.disabled=false;btn.textContent=t('topup.buyNow');
     }
   }catch(e){
     alert(t('popup.connectionError'));
-    btn.disabled=false;btn.textContent='Buy Now';
+    btn.disabled=false;btn.textContent=t('topup.buyNow');
   }
 }
 
 function openCreditsModal(){
-  const packs=[{n:50,p:5,label:'Starter'},{n:200,p:18,label:'Standard'},{n:500,p:40,label:'Value'}];
+  const packs=[{n:50,p:5,label:t('pricingPage.starterBundle')},{n:200,p:18,label:t('pricingPage.standardBundle')},{n:500,p:40,label:t('pricingPage.powerBundle')}];
   const packsHtml=packs.map(pk=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px;">
-    <div><div style="font-weight:700;font-size:.85rem;">${pk.label}</div><div style="font-size:.75rem;color:var(--muted);">${pk.n} credits · never expire</div><div style="font-size:.7rem;color:var(--muted);">OMR ${pk.p} + 5% VAT = OMR ${(pk.p*1.05).toFixed(3)}</div></div>
-    <button class="act-btn" onclick="buyImageCredits(${pk.n},${pk.p},'${pk.label}')">Buy Now</button>
+    <div><div style="font-weight:700;font-size:.85rem;">${pk.label}</div><div style="font-size:.75rem;color:var(--muted);">${pk.n} ${t('topup.credits')} · ${t('topup.neverExpire')}</div><div style="font-size:.7rem;color:var(--muted);">OMR ${pk.p} + 5% VAT = OMR ${(pk.p*1.05).toFixed(3)}</div></div>
+    <button class="act-btn" onclick="buyImageCredits(${pk.n},${pk.p},'${pk.label}')">${t('topup.buyNow')}</button>
     <button class="act-btn" style="margin-inline-start:6px;background:#003087;" onclick="payWithPayPal(${pk.p},'Image Credits ${pk.n}cr')">PayPal</button>
   </div>`).join('');
   const trialEnded=imageCredits.freeAllowanceActive===false;
   const statusHtml=trialEnded
-    ? `<p style="font-size:.8rem;margin-bottom:14px;color:#f85149;"><b>Your free trial has ended.</b> ${imageCredits.balance>0?`You have <b>${imageCredits.balance}</b> credits remaining in your balance.`:'Top up with a credit pack below to keep generating images.'}</p>`
-    : `<p style="font-size:.8rem;margin-bottom:14px;">You currently have <b>${imageCredits.dailyFreeRemaining}</b> free images left today${imageCredits.balance>0?` and <b>${imageCredits.balance}</b> credits in your balance`:''}.</p>`;
+    ? `<p style="font-size:.8rem;margin-bottom:14px;color:#f85149;"><b>${t('topup.trialEnded')}</b> ${imageCredits.balance>0?`${t('topup.youHave')} <b>${imageCredits.balance}</b> ${t('topup.creditsRemaining')}`:t('topup.topUpBelow')}</p>`
+    : `<p style="font-size:.8rem;margin-bottom:14px;">${t('topup.youHave')} <b>${imageCredits.dailyFreeRemaining}</b> ${t('topup.freeImagesLeft')}${imageCredits.balance>0?` ${t('topup.and')} <b>${imageCredits.balance}</b> ${t('topup.creditsInBalance')}`:''}.</p>`;
   const html=`<div style="padding:4px 0;">
-    <p style="color:var(--muted);font-size:.85rem;margin-bottom:14px;">Every plan includes 3 free images per day during your trial. Need more? Top up with a credit pack — each credit generates one extra image, and credits never expire.</p>
+    <p style="color:var(--muted);font-size:.85rem;margin-bottom:14px;">${t('topup.imageIntro')}</p>
     ${statusHtml}
     ${packsHtml}
-    <p style="color:var(--muted);font-size:.75rem;margin-top:10px;">Payments processed securely via Thawani. Credits added to your account automatically after payment.</p>
+    <p style="color:var(--muted);font-size:.75rem;margin-top:10px;">${t('topup.payNoteCredits')}</p>
   </div>`;
-  showModal('Image Credits',html);
+  showModal(t('topup.imageTitle'),html);
 }
 
 async function buyImageCredits(credits,price,label){
@@ -511,10 +511,10 @@ async function buyImageCredits(credits,price,label){
       window.location.href=data.checkout_url;
     } else {
       alert(t('popup.paymentError')+': '+(data.error||t('popup.unknownError')));
-      btn.disabled=false;btn.textContent='Buy Now';
+      btn.disabled=false;btn.textContent=t('topup.buyNow');
     }
   }catch(e){
     alert(t('popup.connectionError'));
-    btn.disabled=false;btn.textContent='Buy Now';
+    btn.disabled=false;btn.textContent=t('topup.buyNow');
   }
 }
