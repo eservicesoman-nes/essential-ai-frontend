@@ -177,7 +177,7 @@ async function saveItCred(){
     showToast(t('toast.saved'));
     document.getElementById('it-cred-form').style.display='none';
     renderMyCredsForm(creds, window._itClientCache||{});
-  }catch(e){alert('Error: '+e.message);}
+  }catch(e){alert(t('popup.error')+': '+e.message);}
 }
 
 async function saveMyCredentials(){
@@ -196,7 +196,7 @@ async function saveMyCredentials(){
     if(!res.ok)throw new Error(await res.text());
     showToast(t('toast.credentialsSavedSecurely'));
   }catch(e){
-    alert('Error saving credentials: '+e.message);
+    alert(t('popup.errorSavingCreds')+': '+e.message);
   }
 }
 
@@ -228,7 +228,7 @@ async function addFeedSource(clientId){
   const type=document.getElementById('newFeedSourceType').value;
   const label=document.getElementById('newFeedSourceLabel').value.trim();
   const value=document.getElementById('newFeedSourceValue').value.trim();
-  if(!label||!value){showToast('Enter both a label and a value');return;}
+  if(!label||!value){showToast(t('popup.enterLabelValue'));return;}
   try{
     const r=await fetch(API_URL+'/api/client/'+clientId+'/feed-sources',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify({label,search_query:value,source_type:type})});
     const data=await r.json();
@@ -237,7 +237,7 @@ async function addFeedSource(clientId){
     document.getElementById('newFeedSourceValue').value='';
     showToast(t('toast.feedSourcesSaved'));
     loadFeedSources(clientId);
-  }catch(e){showToast('Error: '+e.message);}
+  }catch(e){showToast(t('popup.error')+': '+e.message);}
 }
 let _editingSourceId=null;
 function editFeedSource(clientId,sourceId,label,searchQuery,sourceType){
@@ -254,15 +254,15 @@ async function saveEditedFeedSource(clientId){
   const type=document.getElementById('newFeedSourceType').value;
   const label=document.getElementById('newFeedSourceLabel').value.trim();
   const value=document.getElementById('newFeedSourceValue').value.trim();
-  if(!label||!value){showToast('Enter both a label and a value');return;}
+  if(!label||!value){showToast(t('popup.enterLabelValue'));return;}
   try{
     const r=await fetch(API_URL+'/api/client/'+clientId+'/feed-sources/'+_editingSourceId,{method:'PATCH',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify({label,search_query:value,source_type:type})});
     const data=await r.json();
     if(!r.ok)throw new Error(data.error||'Failed to save changes');
     cancelEditFeedSource();
-    showToast('Source updated');
+    showToast(t('popup.sourceUpdated'));
     loadFeedSources(clientId);
-  }catch(e){showToast('Error: '+e.message);}
+  }catch(e){showToast(t('popup.error')+': '+e.message);}
 }
 function cancelEditFeedSource(){
   _editingSourceId=null;
@@ -278,5 +278,5 @@ async function deleteFeedSource(clientId,sourceId){
     const r=await fetch(API_URL+'/api/client/'+clientId+'/feed-sources/'+sourceId,{method:'DELETE',headers:{'Authorization':'Bearer '+session.access_token}});
     if(!r.ok)throw new Error('Failed to delete source');
     loadFeedSources(clientId);
-  }catch(e){showToast('Error: '+e.message);}
+  }catch(e){showToast(t('popup.error')+': '+e.message);}
 }
