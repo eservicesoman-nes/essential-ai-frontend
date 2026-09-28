@@ -472,5 +472,25 @@
     "standardBundle": "الباقة القياسية",
     "powerBundle": "باقة القوة",
     "saraVoiceTopup": "شحن رصيد سارة الصوتي"
+  },
+  "popup": {
+    "enterEmail": "يرجى إدخال البريد الإلكتروني",
+    "inviteSent": "تم إرسال الدعوة إلى {email}",
+    "error": "خطأ",
+    "failed": "فشل",
+    "unknownError": "خطأ غير معروف",
+    "deleteDept": "حذف القسم '{name}'؟ لا يمكن التراجع عن ذلك.",
+    "deleteDeptConfirm": "هل أنت متأكد تماماً؟ سيتم إلغاء تعيين الموظفين في '{name}'.",
+    "subscriptionError": "خطأ في الاشتراك",
+    "paymentError": "خطأ في الدفع",
+    "connectionError": "خطأ في الاتصال. يرجى المحاولة مرة أخرى.",
+    "errorSavingCreds": "خطأ في حفظ بيانات الاعتماد",
+    "enterLabelValue": "أدخل الاسم والقيمة",
+    "sourceUpdated": "تم تحديث المصدر",
+    "failedToSend": "فشل الإرسال",
+    "deleteLead": "حذف العميل المحتمل \"{name}\" نهائياً؟\n\nسيُحذف من كل مكان — الإحصاءات وإجماليات المبيعات واللوحات. لا يمكن التراجع عن ذلك.",
+    "callingLead": "جاري الاتصال بـ {name}... سارة تتصل الآن",
+    "uploading": "جاري رفع {name}...",
+    "deleteFile": "حذف \"{name}\" نهائياً؟\n\nلا يمكن التراجع عن ذلك."
   }
 }
