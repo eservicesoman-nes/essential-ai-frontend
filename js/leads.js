@@ -63,7 +63,7 @@ function renderLeadRows(leads){
 }
 
 async function deleteLead(leadId, leadName){
-  if(!confirm(`Permanently delete lead "${leadName}"?\n\nThis removes it everywhere — lead stats, pipeline totals, and any dashboards. This cannot be undone.`)) return;
+  if(!confirm(t('popup.deleteLead').replace('{name}',leadName))) return;
   try{
     const{error}=await sb.from('leads').delete().eq('id',leadId);
     if(error)throw error;
@@ -85,7 +85,7 @@ async function callWithSara(leadId, phone, name){
   if(!code) return;
   if(code !== '4321'){ showToast(t('toast.incorrectCodeCallCancelled')); return; }
   const decoded = decodeURIComponent(phone);
-  showToast(`Calling ${name}... Sara is dialing`);
+  showToast(t('popup.callingLead').replace('{name}',name));
   try {
     const res = await fetch(`${API_URL}/api/leads/${leadId}/call`, {
       method: 'POST',
@@ -96,7 +96,7 @@ async function callWithSara(leadId, phone, name){
     if(data.success){
       showToast(`✅ Sara is calling ${name} now`);
     } else {
-      showToast('❌ Call failed: ' + (data.error||'Unknown error'));
+      showToast('❌ Call failed: ' + (data.error||t('popup.unknownError')));
     }
   } catch(e) {
     showToast('❌ Call failed: ' + e.message);
