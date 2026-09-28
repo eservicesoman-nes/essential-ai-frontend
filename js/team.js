@@ -1,3 +1,5 @@
+// Default department names shown in the user's language; custom names stay as typed
+function deptLabel(n){ const k='dept.'+String(n||'').replace(/\s+/g,''); const v=t(k); return (typeof v==='string'&&v&&v!==k)?v:n; }
 // team.js — extracted from index.html, NES Locale Phase 0
 // 19 functions, zero logic changes
 
@@ -193,7 +195,7 @@ async function loadTeam(){
     const depts = deptsRes.data || [];
 
     const roleColors = {nesadmin:'#f85149',ceo:'#d29922',manager:'#409cff',staff:'#8b949e',nes_partner:'#7f77dd'};
-    const deptOptions = depts.map(d=>`<option value="${d.id}">${d.name}</option>`).join('');
+    const deptOptions = depts.map(d=>`<option value="${d.id}">${deptLabel(d.name)}</option>`).join('');
     window._deptOptions = deptOptions;
 
     // Stats row
@@ -224,8 +226,8 @@ async function loadTeam(){
         ${depts.map(d=>`
           <div onclick="filterByDept('${d.id}')" data-dept-badge="${d.id}" style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 14px;display:flex;align-items:center;gap:8px;cursor:pointer;">
             <i class="ti ti-building" style="color:#409cff;font-size:13px;"></i>
-            <span style="font-size:.78rem;color:#e6edf3;font-weight:500;">${d.name}</span>
-            <span style="font-size:.65rem;color:var(--muted);">${users.filter(u=>u.department_id===d.id).length} ${t('team.staffCount')}</span>
+            <span style="font-size:.78rem;color:#e6edf3;font-weight:500;">${deptLabel(d.name)}</span>
+            <span style="font-size:.65rem;color:var(--muted);">${users.filter(u=>u.department_id===d.id).length} ${users.filter(u=>u.department_id===d.id).length===1?t('team.staffCountOne'):t('team.staffCount')}</span>
             <i onclick="event.stopPropagation();deleteDept('${d.id}','${d.name.replace(/'/g,"\\'")}')" class="ti ti-x" style="color:var(--muted);font-size:13px;cursor:pointer;margin-inline-start:4px;" title="Delete department"></i>
           </div>`).join('')}
         <div onclick="showAddDeptModal()" style="background:rgba(64,156,255,0.05);border:1px dashed rgba(64,156,255,0.3);border-radius:8px;padding:8px 14px;display:flex;align-items:center;gap:6px;cursor:pointer;color:#409cff;font-size:.75rem;">
@@ -263,7 +265,7 @@ async function loadTeam(){
             <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
               <select onchange="updateUserDept('${u.id}','${clientId}',this.value)" style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:4px 8px;color:var(--muted);font-size:.7rem;cursor:pointer;">
                 <option value="">${t('team.noDept')}</option>
-                ${depts.map(d=>`<option value="${d.id}" ${u.department_id===d.id?'selected':''}>${d.name}</option>`).join('')}
+                ${depts.map(d=>`<option value="${d.id}" ${u.department_id===d.id?'selected':''}>${deptLabel(d.name)}</option>`).join('')}
               </select>
               <select onchange="updateUserRole('${u.id}','${clientId}',this.value)" style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:4px 8px;color:var(--muted);font-size:.7rem;cursor:pointer;">
                 <option value="ceo" ${u.role==='ceo'?'selected':''}>${t('team.roleCeo')}</option>
