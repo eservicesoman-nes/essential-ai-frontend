@@ -614,7 +614,7 @@ function saveRecentChat(label){
 function loadRecentChats(){
   let rc=[];try{rc=JSON.parse(localStorage.getItem(STORAGE_KEYS.rc)||'[]');}catch(e){}
   const el=document.getElementById('recentChats');if(!el)return;
-  if(!rc.length){el.innerHTML=`<div style="padding:4px 10px;font-family:var(--mono);font-size:.65rem;color:#484f58">${t('empty.noRecentChats')}</div>`;return;}
+  if(!rc.length){el.innerHTML=`<div data-i18n="empty.noRecentChats" style="padding:4px 10px;font-family:var(--mono);font-size:.65rem;color:#484f58">${t('empty.noRecentChats')}</div>`;return;}
   const today=new Date().toDateString();
   const yesterday=new Date(Date.now()-86400000).toDateString();
   el.innerHTML=rc.map(r=>{
