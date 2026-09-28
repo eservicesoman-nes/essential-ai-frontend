@@ -70,7 +70,7 @@ function renderMyCredsForm(creds, client){
   const pct=total?Math.round((connected/total)*100):0;
   let html=trialHtml;
   html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">';
-  html+='<div style="font-size:.8rem;color:var(--muted);">'+connected+' / '+total+' connected</div>';
+  html+='<div style="font-size:.8rem;color:var(--muted);">'+connected+' / '+total+' '+t('itsetup.connected')+'</div>';
   html+='<div style="font-size:.8rem;color:var(--nes-blue);font-family:var(--mono);font-weight:700;">'+pct+'%</div></div>';
   html+='<div style="background:var(--surface);border-radius:6px;height:6px;margin-bottom:20px;overflow:hidden;">';
   html+='<div style="height:100%;width:'+pct+'%;background:'+(pct===100?'#3fb950':'#409cff')+';border-radius:6px;transition:width .4s;"></div></div>';
@@ -83,42 +83,42 @@ function renderMyCredsForm(creds, client){
       html+='<div style="flex:1;"><div style="font-size:.82rem;color:var(--text);font-weight:500;">'+(item.labelKey?t(item.labelKey,item.label):item.label)+'</div>';
       html+='<div style="font-size:.72rem;color:var(--muted);">'+(item.descKey?t(item.descKey,item.desc):item.desc)+'</div></div>';
       html+='<div style="display:flex;align-items:center;gap:8px;">';
-      html+='<span style="font-size:.68rem;font-family:var(--mono);padding:3px 10px;border-radius:12px;background:'+(isConnected?'#0d2818':'#2d1f00')+';color:'+(isConnected?'#3fb950':'#d29922')+';">'+(isConnected?'Connected':'Missing')+'</span>';
-      html+='<button onclick="editItCred(\''+item.keys.join(',')+'\',\''+item.label+'\')" style="background:none;border:1px solid var(--border);border-radius:6px;padding:4px 10px;color:var(--muted);cursor:pointer;font-size:.72rem;">'+(isConnected?'Edit':'Connect')+'</button>';
+      html+='<span style="font-size:.68rem;font-family:var(--mono);padding:3px 10px;border-radius:12px;background:'+(isConnected?'#0d2818':'#2d1f00')+';color:'+(isConnected?'#3fb950':'#d29922')+';">'+(isConnected?t('itsetup.statusConnected'):t('itsetup.statusMissing'))+'</span>';
+      html+='<button onclick="editItCred(\''+item.keys.join(',')+'\',\''+item.label+'\')" style="background:none;border:1px solid var(--border);border-radius:6px;padding:4px 10px;color:var(--muted);cursor:pointer;font-size:.72rem;">'+(isConnected?t('itsetup.edit'):t('itsetup.connect'))+'</button>';
       html+='</div></div>';
     });
   });
   const isPro=(client.plan==='operations'||client.plan==='workforce'||client.plan==='infrastructure');
   const maxSources=isPro?10:5;
-  html+='<div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;margin-top:20px;">NES Pulse — Feed Sources</div>';
+  html+='<div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;margin-top:20px;">'+t('itsetup.feedTitle')+'</div>';
   html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:16px;">';
-  html+='<div style="font-size:.75rem;color:var(--muted);margin-bottom:10px;">Your NES Pulse intelligence feed pulls from these sources daily. Add a topic to search (e.g. "Pakistan logistics reform") or a specific website\'s RSS feed URL.</div>';
-  html+='<div id="feedSourcesList" style="margin-bottom:10px;"><div style="color:var(--muted);font-size:.72rem;">Loading…</div></div>';
+  html+='<div style="font-size:.75rem;color:var(--muted);margin-bottom:10px;">'+t('itsetup.feedIntro')+'</div>';
+  html+='<div id="feedSourcesList" style="margin-bottom:10px;"><div style="color:var(--muted);font-size:.72rem;">'+t('common.loading')+'</div></div>';
   html+='<div style="display:flex;gap:6px;margin-bottom:6px;">';
-  html+='<select id="newFeedSourceType" class="form-input" style="flex:0 0 90px;font-size:.72rem;"><option value="topic">Topic</option><option value="url">RSS URL</option></select>';
-  html+='<input id="newFeedSourceLabel" type="text" class="form-input" placeholder="Label (e.g. Pakistan Logistics)" style="font-size:.72rem;flex:1;">';
+  html+='<select id="newFeedSourceType" class="form-input" style="flex:0 0 90px;font-size:.72rem;"><option value="topic">'+t('itsetup.topic')+'</option><option value="url">RSS URL</option></select>';
+  html+='<input id="newFeedSourceLabel" type="text" class="form-input" placeholder="'+t('itsetup.labelPlaceholder')+'" style="font-size:.72rem;flex:1;">';
   html+='</div>';
   html+='<div style="display:flex;gap:6px;">';
-  html+='<input id="newFeedSourceValue" type="text" class="form-input" placeholder="Search topic or RSS URL" style="font-size:.72rem;flex:1;">';
-  html+=`<button id="feedSourceSubmitBtn" onclick="addFeedSource('${client.id}')" style="background:var(--nes-btn-grad);border:none;border-radius:7px;padding:7px 16px;color:#fff;font-size:.72rem;font-weight:700;cursor:pointer;white-space:nowrap;"><i class="ti ti-plus"></i> Add</button> <button onclick="cancelEditFeedSource()" id="feedSourceCancelBtn" style="display:none;background:none;border:1px solid var(--border);border-radius:7px;padding:7px 12px;color:var(--muted);font-size:.72rem;cursor:pointer;white-space:nowrap;">Cancel</button>`;
+  html+='<input id="newFeedSourceValue" type="text" class="form-input" placeholder="'+t('itsetup.valuePlaceholder')+'" style="font-size:.72rem;flex:1;">';
+  html+=`<button id="feedSourceSubmitBtn" onclick="addFeedSource('${client.id}')" style="background:var(--nes-btn-grad);border:none;border-radius:7px;padding:7px 16px;color:#fff;font-size:.72rem;font-weight:700;cursor:pointer;white-space:nowrap;"><i class="ti ti-plus"></i> ${t('itsetup.add')}</button> <button onclick="cancelEditFeedSource()" id="feedSourceCancelBtn" style="display:none;background:none;border:1px solid var(--border);border-radius:7px;padding:7px 12px;color:var(--muted);font-size:.72rem;cursor:pointer;white-space:nowrap;">Cancel</button>`;
   html+='</div>';
   html+='</div>';
   html+='<div id="it-cred-form" style="display:none;margin-top:16px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;">';
   html+='<div id="it-cred-title" style="font-family:var(--mono);font-size:.75rem;font-weight:700;color:var(--nes-blue);margin-bottom:12px;"></div>';
   html+='<div id="it-cred-fields"></div>';
   html+='<div style="display:flex;gap:8px;margin-top:12px;">';
-  html+='<button onclick="saveItCred()" class="form-submit" style="flex:1;"><i class="ti ti-device-floppy"></i> Save</button>';
+  html+='<button onclick="saveItCred()" class="form-submit" style="flex:1;"><i class="ti ti-device-floppy"></i> '+t('common.save','Save')+'</button>';
   html+=`<button onclick="document.getElementById('it-cred-form').style.display='none'" style="background:none;border:1px solid var(--border);border-radius:8px;padding:8px 14px;color:var(--muted);cursor:pointer;font-size:.8rem;">${t('common.cancel')}</button>`;
   html+='</div></div>';
 
-  html+='<div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;margin-top:20px;">Website Chat Widget</div>';
+  html+='<div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;margin-top:20px;">'+t('itsetup.widgetTitle')+'</div>';
   html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:16px;">';
-  html+='<div style="font-size:.75rem;color:var(--muted);margin-bottom:10px;">Add an AI chat widget to your website by pasting this one line before </head> on your site.</div>';
+  html+='<div style="font-size:.75rem;color:var(--muted);margin-bottom:10px;">'+t('itsetup.widgetIntro')+'</div>';
   html+='<div style="display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-family:var(--mono);font-size:.68rem;color:#409cff;word-break:break-all;">';
   html+='<span id="widget-snippet">&lt;script src=\"https://api.essential-services.org/widget.js?client_id='+client.id+'\"&gt;&lt;/script&gt;</span>';
   html+=`<button onclick="copyWidgetSnippet(this, '${client.id}')" style="background:var(--nes-btn-grad);border:none;border-radius:6px;padding:4px 12px;color:#fff;font-size:.68rem;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;">${t('chatUi.copy')}</button>`;
   html+='</div>';
-  html+='<div style="font-size:.68rem;color:var(--muted);margin-top:8px;"><i class="ti ti-info-circle"></i> Works on WordPress, Wix, Squarespace, or any HTML site.</div>';
+  html+='<div style="font-size:.68rem;color:var(--muted);margin-top:8px;"><i class="ti ti-info-circle"></i> '+t('itsetup.widgetWorks')+'</div>';
   html+='</div>';
   el.innerHTML=html;
   window._itCredsCache=creds;
@@ -208,11 +208,11 @@ async function loadFeedSources(clientId){
     const data=await r.json();
     const sources=data.sources||[];
     if(sources.length===0){
-      listEl.innerHTML='<div style="color:var(--muted);font-size:.72rem;padding:6px 0;">No feed sources yet — add one below.</div>';
+      listEl.innerHTML='<div style="color:var(--muted);font-size:.72rem;padding:6px 0;">'+t('itsetup.noSources')+'</div>';
       return;
     }
     listEl.innerHTML=sources.map(function(s){
-      const typeLabel=s.source_type==='url'?'RSS URL':'Topic';
+      const typeLabel=s.source_type==='url'?'RSS URL':t('itsetup.topic');
       return '<div style="display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 10px;margin-bottom:6px;">'
         +'<span style="font-size:.6rem;font-family:var(--mono);padding:2px 8px;border-radius:10px;background:#0d2818;color:#3fb950;flex-shrink:0;">'+typeLabel+'</span>'
         +'<div style="flex:1;min-width:0;"><div style="font-size:.75rem;font-weight:600;">'+s.label+'</div><div style="font-size:.68rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+s.search_query+'</div></div>'
