@@ -44,7 +44,7 @@ async function connectEmailAccount(){
     document.getElementById('em_password').value='';
     document.getElementById('em_label').value='';
   }catch(e){
-    if(status){status.style.color='#f85149';status.textContent='Error: '+e.message;}
+    if(status){status.style.color='#f85149';status.textContent=t('popup.error')+': '+e.message;}
   }
 }
 
@@ -81,7 +81,7 @@ async function deleteEmailAccount(id, clientId){
     showToast(t('toast.accountRemoved'));
     const cid = clientId || window._activeClientId || window._inboxClientId;
     if(cid) loadEmailAccounts(cid);
-  }catch(e){showToast('Error: '+e.message);}
+  }catch(e){showToast(t('popup.error')+': '+e.message);}
 }
 
 async function resaveEmailPassword(id, email, clientId){
@@ -93,7 +93,7 @@ async function resaveEmailPassword(id, email, clientId){
     showToast(t('toast.passwordUpdatedReconnecting'));
     const cid = clientId || window._activeClientId || window._inboxClientId;
     if(cid) loadEmailAccounts(cid);
-  }catch(e){showToast('Error: '+e.message);}
+  }catch(e){showToast(t('popup.error')+': '+e.message);}
 }
 
 async function showInbox(){
@@ -299,7 +299,7 @@ async function sendComposedEmail() {
     if(m) m.remove();
     showToast(t('toast.emailSentSuccessfully'));
   } catch(e) {
-    showToast('Failed to send: ' + e.message);
+    showToast(t('popup.failedToSend')+': ' + e.message);
   }
 }
 
@@ -442,7 +442,7 @@ async function sendReply(to, originalSubject){
     if(!res.ok){const e=await res.json();throw new Error(e.error||'Send failed');}
     showToast(t('toast.replySent'));
     document.getElementById('replyBody').value='';
-  }catch(e){showToast('Error: '+e.message);}
+  }catch(e){showToast(t('popup.error')+': '+e.message);}
 }
 
 function addEmailForm(){
@@ -541,7 +541,7 @@ async function connectEmailAccountExtra(idx){
     if(status){status.style.color='#3fb950';status.textContent='Connected successfully ✓';}
     showToast(t('toast.emailAccountConnected'));
     loadEmailAccounts(clientId);
-  }catch(e){if(status){status.style.color='#f85149';status.textContent='Error: '+e.message;}}
+  }catch(e){if(status){status.style.color='#f85149';status.textContent=t('popup.error')+': '+e.message;}}
 }
 
 function toggleInboxPanel(panel){
