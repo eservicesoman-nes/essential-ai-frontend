@@ -528,5 +528,37 @@
     "earlier": "Earlier",
     "empty": "No intelligence feed data yet. Check back after 6AM tomorrow.",
     "new": "NEW"
+  },
+  "leads": {
+    "exportCsv": "Export CSV",
+    "total": "total",
+    "today": "today",
+    "tabAll": "All",
+    "tabToday": "Today",
+    "tabWeek": "This week",
+    "tabRepeats": "Repeats"
+  },
+  "team": {
+    "members": "TEAM MEMBERS",
+    "departments": "DEPARTMENTS",
+    "seatsLeft": "SEATS LEFT",
+    "staff": "STAFF",
+    "staffCount": "staff",
+    "noDept": "No dept",
+    "noDepartment": "No department",
+    "roleCeo": "CEO",
+    "rolePartner": "Technology Partner",
+    "roleManager": "Manager",
+    "roleStaff": "Staff",
+    "role_ceo": "ceo",
+    "role_manager": "manager",
+    "role_staff": "staff",
+    "role_nes_partner": "partner",
+    "role_nesadmin": "nesadmin",
+    "access": "Access",
+    "remove": "Remove",
+    "accessNote": "Access enforcement coming in next update — this shows the planned permissions per department.",
+    "roleLabel": "ROLE",
+    "deptOptional": "DEPARTMENT (OPTIONAL)"
   }
 }
