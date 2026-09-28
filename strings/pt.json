@@ -503,5 +503,30 @@
     "callingLead": "A ligar a {name}... A Sara está a marcar",
     "uploading": "A carregar {name}...",
     "deleteFile": "Eliminar definitivamente \"{name}\"?\n\nEsta ação não pode ser anulada."
+  },
+  "usage": {
+    "saraCalls": "Chamadas da Sara",
+    "adamConsultations": "Consultas do Adam",
+    "chatMessages": "Mensagens Ask NES AI",
+    "imageTrial": "Geração de imagens (diária, teste)",
+    "briefcaseStorage": "Armazenamento da Pasta",
+    "imageGen": "Geração de imagens"
+  },
+  "weather": {
+    "humidity": "Humidade",
+    "sunny": "Sol",
+    "partlyCloudy": "Parcialmente nublado",
+    "foggy": "Nevoeiro",
+    "rainy": "Chuva",
+    "cloudy": "Nublado"
+  },
+  "feed": {
+    "tagBrief": "RESUMO",
+    "tagIntel": "INTEL",
+    "tagInfo": "INFO",
+    "today": "Hoje",
+    "earlier": "Anteriores",
+    "empty": "Ainda sem dados de inteligência. Volte amanhã depois das 6h.",
+    "new": "NOVOS"
   }
 }
