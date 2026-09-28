@@ -11,7 +11,7 @@ async function showBriefcasePage(){
     <div style="padding-block:11px;padding-inline-end:var(--header-clearance);padding-inline-start:60px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;">
       <div><div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;">${t('sectionTitle.briefcase')}</div><div style="font-family:var(--mono);font-size:.7rem;color:#3fb950;font-weight:700;" id="briefcaseSubtitle">${t('common.loading')}</div></div>
       <label style="font-size:.7rem;padding:5px 11px;border-radius:6px;border:1px solid rgba(64,156,255,0.4);background:rgba(64,156,255,0.15);color:var(--nes-blue);cursor:pointer;font-family:var(--mono);font-weight:700;display:flex;align-items:center;gap:5px;">
-        <i class="ti ti-upload" style="font-size:13px"></i> Upload
+        <i class="ti ti-upload" style="font-size:13px"></i> ${t('briefcase2.upload')}
         <input type="file" id="vaultUploadInput" style="display:none;" onchange="uploadVaultFile(this.files[0])" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.jpg,.jpeg,.png,.webp">
       </label>
     </div>
@@ -60,7 +60,7 @@ async function loadBriefcaseChatHistory(){
     const msgs = data.messages || [];
     window._briefcaseChatHistory = msgs.map(m => ({ role: m.role, content: m.content }));
     for(const m of msgs){
-      appendBriefcaseChatMsg(m.role === 'user' ? 'user' : 'ai', m.content);
+      appendBriefcaseChatMsg(m.role === 'user' ? 'user' : 'ai', m.role === 'user' ? stripLangDirective(m.content) : m.content);
     }
   }catch(e){
     console.error('Could not load Briefcase chat history', e);
@@ -80,7 +80,7 @@ async function loadVaultFiles(){
     const usedGB=(quota.usedBytes/1073741824).toFixed(2);
     const totalGB=(quota.totalBytes/1073741824).toFixed(1);
 
-    document.getElementById('briefcaseSubtitle').textContent=`${files?.length||0} ${t('briefcaseUi.filesUsage')} ${usedGB}GB of ${totalGB}GB used`;
+    document.getElementById('briefcaseSubtitle').textContent=`${files?.length||0} ${(files?.length||0)===1?t('briefcase2.file'):t('briefcase2.files')} · ${usedGB}GB ${t('briefcase2.of')} ${totalGB}GB ${t('briefcase2.used')}`;
     const listEl=document.getElementById('briefcaseFileList');
     if(listEl)listEl.innerHTML=renderVaultRows(files||[]);
   }catch(e){
@@ -295,14 +295,14 @@ async function sendBriefcaseChatMessage(){
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
       body: JSON.stringify({
-        message: contextPrefix + text,
+        message: contextPrefix + text + aiLangDirective(),
         mode:'docs', webSearch:false,
         history: window._briefcaseChatHistory.slice(-6)
       })
     });
     const data = await res.json();
-    const reply = res.ok ? (data.reply || 'No response.') : ('Error: '+(data.error||'Failed'));
-    typingBubble.textContent = reply;
+    const reply = res.ok ? (data.reply || t('briefcase2.noResponse')) : (t('popup.error')+': '+(data.error||t('popup.failed')));
+    typingBubble.innerHTML = md(reply);
     window._briefcaseChatHistory.push({role:'assistant', content:reply});
   }catch(e){
     typingBubble.textContent = t('popup.error')+': '+e.message;
@@ -311,7 +311,7 @@ async function sendBriefcaseChatMessage(){
 
 async function uploadVaultFile(file){
   if(!file)return;
-  if(file.size>25*1024*1024){showToast('❌ File exceeds 25MB limit');return;}
+  if(file.size>25*1024*1024){showToast('❌ '+t('briefcase2.tooLarge'));return;}
   showToast(t('popup.uploading').replace('{name}',file.name));
   try{
     const fd=new FormData();
@@ -333,10 +333,10 @@ async function uploadVaultFile(file){
       await loadVaultFiles();
       loadBriefcaseDocContext();
     }else{
-      showToast('❌ Upload failed: '+(data.error||t('popup.unknownError')));
+      showToast('❌ '+t('briefcase2.uploadFailed')+': '+(data.error||t('popup.unknownError')));
     }
   }catch(e){
-    showToast('❌ Upload failed: '+e.message);
+    showToast('❌ '+t('briefcase2.uploadFailed')+': '+e.message);
   }
   const inp=document.getElementById('vaultUploadInput');
   if(inp)inp.value='';
