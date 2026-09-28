@@ -7,7 +7,10 @@
     "forgotPassword": "Esqueceu-se da palavra-passe?",
     "signInButton": "Iniciar Sessão →",
     "changePassword": "Alterar Palavra-passe",
-    "logout": "Terminar Sessão"
+    "logout": "Terminar Sessão",
+    "sendResetLink": "Enviar link de redefinição",
+    "backToSignIn": "Voltar ao início de sessão",
+    "createAccount": "Criar conta →"
   },
   "nav": {
     "askNesai": "Perguntar à NESAI",
@@ -31,7 +34,15 @@
     "imageGen": "Geração de Imagens",
     "saraTopup": "Recarga Sara",
     "adamTopup": "Recarga Adam",
-    "briefcaseTopup": "Recarga da Pasta"
+    "briefcaseTopup": "Recarga da Pasta",
+    "sectionWorkspace": "Área de Trabalho",
+    "sectionIntelligence": "Inteligência",
+    "sectionRecent": "Recentes",
+    "waAutoReply": "Resposta Automática WA",
+    "dailyMessages": "Mensagens diárias",
+    "payg": "Pré-pago",
+    "live": "Ao vivo",
+    "myDashboard": "O Meu Painel"
   },
   "common": {
     "save": "Guardar",
