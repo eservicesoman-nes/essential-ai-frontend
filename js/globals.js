@@ -170,7 +170,7 @@ window.showEmail = async function(idx){
       });
       bodyEl.innerHTML = safeHtml && safeHtml.trim().length > 10
         ? '<div style="line-height:1.6;font-size:.82rem;color:var(--text);padding-bottom:20px;word-break:break-word;">'+safeHtml+'</div>'
-        : '<div style="color:var(--muted);font-family:var(--mono);font-size:.72rem;text-align:center;padding:20px;">No readable content</div>';
+        : '<div style="color:var(--muted);font-family:var(--mono);font-size:.72rem;text-align:center;padding:20px;">'+t('ui.mail.noReadable')+'</div>';
       DOMPurify.removeHook('afterSanitizeAttributes');
     } else {
     let cleaned = body || '';
@@ -208,7 +208,7 @@ window.showEmail = async function(idx){
       : '<p style="margin:0;">'+cleaned.replace(/\n/g,'<br>')+'</p>';
     bodyEl.innerHTML = cleaned && cleaned.length > 10
       ? '<div style="line-height:1.6;font-size:.82rem;color:var(--text);padding-bottom:20px;word-break:break-word;">'+htmlBody+'</div>'
-      : '<div style="color:var(--muted);font-family:var(--mono);font-size:.72rem;text-align:center;padding:20px;">No readable content</div>';
+      : '<div style="color:var(--muted);font-family:var(--mono);font-size:.72rem;text-align:center;padding:20px;">'+t('ui.mail.noReadable')+'</div>';
     }
   }
 };
