@@ -83,16 +83,15 @@ async function deleteLead(leadId, leadName){
 async function callWithSara(leadId, phone, name){
   const code = prompt(t('ui.leads.enterCode').replace('{name}',()=>name));
   if(!code) return;
-  if(code !== '4321'){ showToast(t('toast.incorrectCodeCallCancelled')); return; }
   const decoded = decodeURIComponent(phone);
-  showToast(t('popup.callingLead').replace('{name}',name));
   try {
     const res = await fetch(`${API_URL}/api/leads/${leadId}/call`, {
       method: 'POST',
       headers: {'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
-      body: JSON.stringify({ phone: decoded, name })
+      body: JSON.stringify({ phone: decoded, name, code: String(code).trim() })
     });
     const data = await res.json();
+    if(res.status===403 && data.error==='Incorrect code'){ showToast(t('toast.incorrectCodeCallCancelled')); return; }
     if(data.success){
       showToast('✅ '+t('ui.leads.saraCalling').replace('{name}',()=>name));
     } else {
