@@ -28,7 +28,7 @@ async function connectEmailAccount(){
   const smtp_port=parseInt(document.getElementById('em_smtp_port')?.value)||587;
   if(!address||!password){showToast(t('toast.emailPasswordRequired'));return;}
   const status=document.getElementById('em_status');
-  if(status){status.style.color='#d29922';status.textContent='Testing connection...';}
+  if(status){status.style.color='#d29922';status.textContent=t('ui.mail.testing');}
   try{
     const res=await fetch(API_URL+'/api/email/connect',{
       method:'POST',
@@ -36,8 +36,8 @@ async function connectEmailAccount(){
       body:JSON.stringify({client_id:clientId,email_address:address,app_password:password,provider,label:label||address,imap_server,imap_port,smtp_server,smtp_port})
     });
     const data=await res.json();
-    if(!res.ok)throw new Error(data.error||'Connection failed');
-    if(status){status.style.color='#3fb950';status.textContent='Connected successfully ✓';}
+    if(!res.ok)throw new Error(data.error||t('ui.mail.connFailed'));
+    if(status){status.style.color='#3fb950';status.textContent=t('ui.mail.connected');}
     showToast(t('toast.emailAccountConnected'));
     loadEmailAccounts(clientId);
     document.getElementById('em_address').value='';
@@ -65,19 +65,19 @@ async function loadEmailAccounts(clientId){
         <div style="width:8px;height:8px;border-radius:50%;background:${colors[i%5]};flex-shrink:0;"></div>
         <div style="flex:1;">
           <div style="font-size:.78rem;font-weight:600;color:var(--text);">${a.label||a.email_address}</div>
-          <div style="font-size:.65rem;color:var(--muted);font-family:var(--mono);">${a.email_address} · ${a.provider} · ${a.is_active?'Active':'Inactive'}</div>
+          <div style="font-size:.65rem;color:var(--muted);font-family:var(--mono);">${a.email_address} · ${a.provider} · ${a.is_active?t('ui.mail.active'):t('ui.mail.inactive')}</div>
         </div>
-        <button onclick="resaveEmailPassword('${a.id}','${a.email_address}','${clientId}')" style="background:none;border:1px solid #1a3a2a;border-radius:6px;padding:3px 8px;color:#3fb950;cursor:pointer;font-size:.65rem;margin-inline-end:4px;"><i class="ti ti-key"></i> Re-auth</button>
+        <button onclick="resaveEmailPassword('${a.id}','${a.email_address}','${clientId}')" style="background:none;border:1px solid #1a3a2a;border-radius:6px;padding:3px 8px;color:#3fb950;cursor:pointer;font-size:.65rem;margin-inline-end:4px;"><i class="ti ti-key"></i> ${t('ui.mail.reauth')}</button>
         <button onclick="deleteEmailAccount('${a.id}','${clientId}')" style="background:none;border:1px solid #2d0e0e;border-radius:6px;padding:3px 8px;color:#f85149;cursor:pointer;font-size:.65rem;"><i class="ti ti-trash"></i></button>
       </div>`).join('');
-  }catch(e){if(el)el.innerHTML='<div style="color:#f85149;font-size:.72rem;">Error loading accounts</div>';}
+  }catch(e){if(el)el.innerHTML='<div style="color:#f85149;font-size:.72rem;">'+t('ui.mail.accountsLoadFailed')+'</div>';}
 }
 
 async function deleteEmailAccount(id, clientId){
   if(!confirm(t('confirm.removeEmailAccount')))return;
   try{
     const r=await fetch(API_URL+'/api/email/account/'+id,{method:'DELETE',headers:{'Authorization':'Bearer '+session.access_token}});
-    if(!r.ok) throw new Error('Delete failed');
+    if(!r.ok) throw new Error(t('ui.shared.deleteFailed'));
     showToast(t('toast.accountRemoved'));
     const cid = clientId || window._activeClientId || window._inboxClientId;
     if(cid) loadEmailAccounts(cid);
@@ -85,11 +85,11 @@ async function deleteEmailAccount(id, clientId){
 }
 
 async function resaveEmailPassword(id, email, clientId){
-  const pwd = prompt('Re-enter password for '+email+':');
+  const pwd = prompt(t('ui.mail.reenterPwd').replace('{email}',()=>email));
   if(!pwd) return;
   try{
     const r=await fetch(API_URL+'/api/email/account/'+id+'/reauth',{method:'POST',headers:{'Authorization':'Bearer '+session.access_token,'Content-Type':'application/json'},body:JSON.stringify({password:pwd})});
-    if(!r.ok) throw new Error('Failed to update password');
+    if(!r.ok) throw new Error(t('ui.mail.pwdUpdateFailed'));
     showToast(t('toast.passwordUpdatedReconnecting'));
     const cid = clientId || window._activeClientId || window._inboxClientId;
     if(cid) loadEmailAccounts(cid);
@@ -122,11 +122,11 @@ async function showInbox(){
   }
   window._inboxClientId = clientId;
   // Store account count for after mc.innerHTML is set
-  let _inboxAccountText = 'Loading...';
+  let _inboxAccountText = t('common.loading');
   try {
     const {data:existingAccs} = await sb.from('email_accounts').select('id').eq('client_id', clientId).eq('is_active',true);
     const used = existingAccs?.length || 0;
-    _inboxAccountText = used + ' account' + (used !== 1 ? 's' : '') + ' connected';
+    _inboxAccountText = (used===1?t('ui.mail.accountConnectedOne'):t('ui.mail.accountsConnected')).replace('{n}',used);
   } catch(e) {}
   mc.innerHTML=`
     <div style="padding-block:11px;padding-inline-end:var(--header-clearance);padding-inline-start:60px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;">
@@ -138,7 +138,7 @@ async function showInbox(){
     </div>
 
     <div style="padding:8px 12px;border-bottom:1px solid var(--border);display:flex;gap:6px;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;" id="acctFilters">
-      <button onclick="filterInbox('all',this)" style="font-size:.65rem;padding:3px 10px;border-radius:20px;border:none;background:var(--nes-blue);color:#fff;cursor:pointer;white-space:nowrap;">All</button>
+      <button onclick="filterInbox('all',this)" style="font-size:.65rem;padding:3px 10px;border-radius:20px;border:none;background:var(--nes-blue);color:#fff;cursor:pointer;white-space:nowrap;">${t('leads.tabAll')}</button>
     </div>
     <div style="display:grid;grid-template-columns:280px 1fr;flex:1;overflow:hidden;height:calc(100% - 48px);" id="inboxGrid" class="inbox-grid-wrap">
       <div style="border-inline-end:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;background:var(--surface);">
@@ -199,7 +199,7 @@ async function loadInboxEmails(clientId){
     if(filters2) {
       const updatedAccounts = [...new Set(emails.map(function(e){return e.account_email;}))];
       filters2.innerHTML = `<button onclick="showComposeModal()" style="display:flex;align-items:center;gap:5px;font-size:.65rem;padding:4px 10px;border-radius:6px;border:none;background:linear-gradient(135deg,#1a56db,#2563eb);color:#fff;cursor:pointer;white-space:nowrap;flex-shrink:0;"><i class="ti ti-pencil" style="font-size:11px;"></i> ${t('inbox.compose')}</button>`
-        + '<button onclick="filterInbox(\'all\',this)" style="display:flex;align-items:center;gap:5px;font-size:.65rem;padding:4px 10px;border-radius:6px;border:none;background:var(--nes-blue);color:#fff;cursor:pointer;white-space:nowrap;flex-shrink:0;"><i class="ti ti-inbox" style="font-size:11px;"></i> All</button>'
+        + '<button onclick="filterInbox(\'all\',this)" style="display:flex;align-items:center;gap:5px;font-size:.65rem;padding:4px 10px;border-radius:6px;border:none;background:var(--nes-blue);color:#fff;cursor:pointer;white-space:nowrap;flex-shrink:0;"><i class="ti ti-inbox" style="font-size:11px;"></i> '+t('leads.tabAll')+'</button>'
         + updatedAccounts.map(function(a,i){
             const label = (window._accountLabels&&window._accountLabels[a])||a.split('@')[0];
             const clr = (window._inboxColors||['#409cff'])[i%5]||'#409cff';
@@ -210,7 +210,7 @@ async function loadInboxEmails(clientId){
     }
   }catch(e){
     const el=document.getElementById('emailList');
-    if(el)el.innerHTML='<div style="padding:20px;text-align:center;color:#f85149;font-family:var(--mono);font-size:.75rem;">Error loading emails</div>';
+    if(el)el.innerHTML='<div style="padding:20px;text-align:center;color:#f85149;font-family:var(--mono);font-size:.75rem;">'+t('ui.mail.emailsLoadFailed')+'</div>';
   }
 }
 
@@ -220,21 +220,21 @@ function renderEmailList(emails){
   window._renderedEmails=emails;
   const colors=window._inboxColors||['#409cff','#3fb950','#7f77dd','#d29922','#f85149'];
   const accounts=window._inboxAccounts||[];
-  if(emails.length===0){el.innerHTML='<div style="padding:20px;text-align:center;color:var(--muted);font-family:var(--mono);font-size:.75rem;">No emails found</div>';return;}
+  if(emails.length===0){el.innerHTML='<div style="padding:20px;text-align:center;color:var(--muted);font-family:var(--mono);font-size:.75rem;">'+t('ui.mail.noEmails')+'</div>';return;}
   el.innerHTML=emails.map((e,i)=>{
     const acctIdx=accounts.indexOf(e.account_email);
     const color=colors[acctIdx%5]||'#409cff';
     const date=e.received_at?new Date(e.received_at).toLocaleDateString(getDateLocale('en-GB'),{day:'numeric',month:'short'}):'';
     return`<div onclick="showEmail(${i})" style="padding:12px;border-bottom:1px solid rgba(26,35,50,.5);cursor:pointer;border-inline-start:3px solid ${color};-webkit-tap-highlight-color:transparent;${!e.is_read?'background:rgba(64,156,255,0.05);':''}" class="email-row-${i}">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;">
-        <div style="font-size:.75rem;font-weight:${e.is_read?'400':'600'};color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;">${e.from_name||e.from_address||'Unknown'}</div>
+        <div style="font-size:.75rem;font-weight:${e.is_read?'400':'600'};color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;">${e.from_name||e.from_address||t('ui.mail.unknown')}</div>
         <div style="font-size:.6rem;color:var(--muted);margin-inline-start:8px;flex-shrink:0;">${date}</div>
         ${!e.is_read?'<div style="width:6px;height:6px;border-radius:50%;background:'+color+';margin-inline-start:6px;flex-shrink:0;"></div>':''}
       </div>
-      <div style="font-size:.72rem;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:2px;">${e.subject||'(no subject)'}</div>
+      <div style="font-size:.72rem;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:2px;">${e.subject||t('ui.mail.noSubject')}</div>
       <div style="display:flex;align-items:center;justify-content:space-between;">
         <div style="font-size:.65rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${(window._accountLabels&&window._accountLabels[e.account_email])||e.account_label||e.account_email.split("@")[0]}</div>
-        <button onclick="event.stopPropagation();deleteEmail(${i})" style="background:none;border:none;color:var(--muted);cursor:pointer;padding:2px 4px;font-size:.65rem;flex-shrink:0;" title="Delete"><i class="ti ti-trash"></i></button>
+        <button onclick="event.stopPropagation();deleteEmail(${i})" style="background:none;border:none;color:var(--muted);cursor:pointer;padding:2px 4px;font-size:.65rem;flex-shrink:0;" title="${t('common.delete')}"><i class="ti ti-trash"></i></button>
       </div>
     </div>`;
   }).join('');
@@ -263,16 +263,16 @@ function showComposeModal() {
   accounts.forEach(function(a){ optionsHtml += '<option value="'+a+'">'+(labels[a]||a)+'</option>'; });
   modal.innerHTML = '<div style="background:var(--card);border:1px solid var(--border);border-radius:12px 12px 0 0;padding:20px;width:100%;max-width:640px;">'
     + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">'
-    + '<div style="font-size:.85rem;font-weight:700;color:var(--nes-blue);"><i class="ti ti-pencil"></i> New Email</div>'
+    + '<div style="font-size:.85rem;font-weight:700;color:var(--nes-blue);"><i class="ti ti-pencil"></i> '+t('ui.mail.newEmail')+'</div>'
     + '<button onclick="document.getElementById(\'compose-modal\').remove()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.1rem;">&#x2715;</button>'
     + '</div>'
     + '<select id="composeFrom" style="width:100%;padding:6px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:.75rem;margin-bottom:6px;">' + optionsHtml + '</select>'
-    + '<input id="composeTo" placeholder="To: recipient@email.com" style="width:100%;padding:6px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:.75rem;margin-bottom:6px;outline:none;">'
-    + '<input id="composeSubject" placeholder="Subject" style="width:100%;padding:6px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:.75rem;margin-bottom:6px;outline:none;">'
-    + '<textarea id="composeBody" placeholder="Write your message..." style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:.75rem;resize:none;height:120px;outline:none;font-family:var(--ui);"></textarea>'
+    + '<input id="composeTo" placeholder="'+t('ui.mail.toPlaceholder')+'" style="width:100%;padding:6px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:.75rem;margin-bottom:6px;outline:none;">'
+    + '<input id="composeSubject" placeholder="'+t('ui.mail.subject')+'" style="width:100%;padding:6px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:.75rem;margin-bottom:6px;outline:none;">'
+    + '<textarea id="composeBody" placeholder="'+t('ui.mail.writeMessage')+'" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:.75rem;resize:none;height:120px;outline:none;font-family:var(--ui);"></textarea>'
     + '<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px;">'
     + `<button onclick="document.getElementById('compose-modal').remove()" style="padding:6px 16px;border-radius:6px;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer;font-size:.75rem;">${t('common.cancel')}</button>`
-    + '<button onclick="sendComposedEmail()" style="padding:6px 16px;border-radius:6px;border:none;background:linear-gradient(135deg,#1a56db,#2563eb);color:#fff;cursor:pointer;font-size:.75rem;font-weight:600;"><i class="ti ti-send"></i> Send</button>'
+    + '<button onclick="sendComposedEmail()" style="padding:6px 16px;border-radius:6px;border:none;background:linear-gradient(135deg,#1a56db,#2563eb);color:#fff;cursor:pointer;font-size:.75rem;font-weight:600;"><i class="ti ti-send"></i> '+t('ui.mail.send')+'</button>'
     + '</div></div>';
   document.body.appendChild(modal);
   modal.addEventListener('click', function(e){ if(e.target===modal) modal.remove(); });
@@ -294,7 +294,7 @@ async function sendComposedEmail() {
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token },
       body: JSON.stringify({ account_id: account.id, to: to, subject: subject, body: body })
     });
-    if (!r.ok) throw new Error('Send failed');
+    if (!r.ok) throw new Error(t('popup.failedToSend'));
     const m = document.getElementById('compose-modal');
     if(m) m.remove();
     showToast(t('toast.emailSentSuccessfully'));
@@ -372,7 +372,7 @@ function showEmail(idx){
       const activeBtn = filters.querySelector('button[style*="var(--nes-blue)"]');
       const activeAcct = activeBtn ? activeBtn.getAttribute('data-acct') : 'all';
       filters.innerHTML = `<button onclick="showComposeModal()" style="display:flex;align-items:center;gap:5px;font-size:.65rem;padding:4px 10px;border-radius:6px;border:none;background:linear-gradient(135deg,#1a56db,#2563eb);color:#fff;cursor:pointer;white-space:nowrap;flex-shrink:0;"><i class="ti ti-pencil" style="font-size:11px;"></i> ${t('inbox.compose')}</button>`
-        + '<button onclick="filterInbox(\'all\',this)" data-acct="all" style="display:flex;align-items:center;gap:5px;font-size:.65rem;padding:4px 10px;border-radius:6px;border:none;background:var(--nes-blue);color:#fff;cursor:pointer;white-space:nowrap;flex-shrink:0;"><i class=\"ti ti-inbox\" style=\"font-size:11px;\"></i> All</button>'
+        + '<button onclick="filterInbox(\'all\',this)" data-acct="all" style="display:flex;align-items:center;gap:5px;font-size:.65rem;padding:4px 10px;border-radius:6px;border:none;background:var(--nes-blue);color:#fff;cursor:pointer;white-space:nowrap;flex-shrink:0;"><i class=\"ti ti-inbox\" style=\"font-size:11px;\"></i> '+t('leads.tabAll')+'</button>'
         + accounts.map(function(a,i){
             const label = labels[a]||a.split('@')[0];
             const unread = allEmails.filter(function(m){return m.account_email===a&&!m.is_read;}).length;
@@ -392,31 +392,31 @@ function showEmail(idx){
   }
   panel.innerHTML=`
     <div style="padding:14px 18px;border-bottom:1px solid var(--border);">
-      <div style="font-size:.9rem;font-weight:600;color:var(--text);margin-bottom:6px;">${e.subject||'(no subject)'}</div>
+      <div style="font-size:.9rem;font-weight:600;color:var(--text);margin-bottom:6px;">${e.subject||t('ui.mail.noSubject')}</div>
       <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
         <span style="font-size:.65rem;padding:2px 8px;border-radius:12px;color:#fff;background:${color};">${e.account_email}</span>
-        <span style="font-size:.72rem;color:var(--muted);">From: ${e.from_name?e.from_name+' &lt;'+e.from_address+'&gt;':e.from_address}</span>
+        <span style="font-size:.72rem;color:var(--muted);">${t('ui.mail.from')} ${e.from_name?e.from_name+' &lt;'+e.from_address+'&gt;':e.from_address}</span>
         <span style="font-size:.65rem;color:var(--muted);margin-inline-start:auto;">${e.received_at?new Date(e.received_at).toLocaleString(getDateLocale('en-GB'),{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):''}</span>
       </div>
     </div>
     <div style="flex:1;padding:18px;overflow-y:auto;font-size:.82rem;color:var(--text);line-height:1.7;" id="emailBodyPanel">
-      <div style="color:var(--muted);font-family:var(--mono);font-size:.72rem;text-align:center;padding:20px;"><i class="ti ti-loader-2 ti-spin"></i> Loading...</div>
+      <div style="color:var(--muted);font-family:var(--mono);font-size:.72rem;text-align:center;padding:20px;"><i class="ti ti-loader-2 ti-spin"></i> ${t('common.loading')}</div>
     </div>
     <div style="border-top:1px solid var(--border);padding:12px 18px;">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-        <span style="font-size:.65rem;color:var(--muted);">Reply from:</span>
+        <span style="font-size:.65rem;color:var(--muted);">${t('ui.mail.replyFrom')}</span>
         <select id="replyFrom" style="font-size:.65rem;padding:3px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;">
-          ${accounts.map(a=>`<option value="${a}" ${a===e.account_email?'selected':''}>${(window._accountLabels&&window._accountLabels[a])||a.split('@')[0]}${a===e.account_email?' · default':''}</option>`).join('')}
+          ${accounts.map(a=>`<option value="${a}" ${a===e.account_email?'selected':''}>${(window._accountLabels&&window._accountLabels[a])||a.split('@')[0]}${a===e.account_email?' · '+t('ui.mail.defaultLower'):''}</option>`).join('')}
         </select>
-        <span style="font-size:.6rem;padding:2px 6px;border-radius:6px;background:#0d2818;color:#3fb950;">Default</span>
+        <span style="font-size:.6rem;padding:2px 6px;border-radius:6px;background:#0d2818;color:#3fb950;">${t('ui.mail.default')}</span>
       </div>
-      <textarea id="replyBody" placeholder="Write your reply..." style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:8px 12px;font-size:.75rem;color:var(--text);resize:none;height:64px;outline:none;font-family:var(--ui);"></textarea>
+      <textarea id="replyBody" placeholder="${t('ui.mail.writeReply')}" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:8px 12px;font-size:.75rem;color:var(--text);resize:none;height:64px;outline:none;font-family:var(--ui);"></textarea>
       <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px;">
         <div style="display:flex;gap:6px;">
-          <button onclick="sendReply('${e.from_address}','${(e.subject||'').replace(/'/g,'')}')" style="background:var(--nes-btn-grad);border:none;color:#fff;font-size:.72rem;padding:6px 16px;border-radius:6px;cursor:pointer;display:flex;align-items:center;gap:5px;"><i class="ti ti-send"></i> Send</button>
-          <button style="background:none;border:1px solid var(--border);color:var(--muted);font-size:.72rem;padding:6px 12px;border-radius:6px;cursor:pointer;display:flex;align-items:center;gap:5px;"><i class="ti ti-paperclip"></i> ${t('chatUi.attach')}</button>
+          <button onclick="sendReply('${e.from_address}','${(e.subject||'').replace(/'/g,'')}')" style="background:var(--nes-btn-grad);border:none;color:#fff;font-size:.72rem;padding:6px 16px;border-radius:6px;cursor:pointer;display:flex;align-items:center;gap:5px;"><i class="ti ti-send"></i> ${t('ui.mail.send')}</button>
+          <button disabled title="${t('ui.mail.comingSoon')}" style="background:none;border:1px solid var(--border);color:var(--muted);font-size:.72rem;padding:6px 12px;border-radius:6px;cursor:not-allowed;opacity:.5;display:flex;align-items:center;gap:5px;"><i class="ti ti-paperclip"></i> ${t('chatUi.attach')}</button>
         </div>
-        <span style="font-size:.65rem;color:var(--muted);">Encrypted · SMTP</span>
+        <span style="font-size:.65rem;color:var(--muted);">${t('ui.mail.encrypted')}</span>
       </div>
     </div>`;
 }
@@ -433,13 +433,13 @@ async function sendReply(to, originalSubject){
   if(!clientId||!fromAccount)return;
   try{
     const {data:accounts}=await sb.from('email_accounts').select('id').eq('client_id',clientId).eq('email_address',fromAccount).single();
-    if(!accounts)throw new Error('Account not found');
+    if(!accounts)throw new Error(t('toast.accountNotFound'));
     const res=await fetch(API_URL+'/api/email/send',{
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
       body:JSON.stringify({account_id:accounts.id,to,subject:'Re: '+originalSubject,body})
     });
-    if(!res.ok){const e=await res.json();throw new Error(e.error||'Send failed');}
+    if(!res.ok){const e=await res.json();throw new Error(e.error||t('popup.failedToSend'));}
     showToast(t('toast.replySent'));
     document.getElementById('replyBody').value='';
   }catch(e){showToast(t('popup.error')+': '+e.message);}
@@ -447,7 +447,7 @@ async function sendReply(to, originalSubject){
 
 function addEmailForm(){
   const clientId = window._activeClientId;
-  const planLimits = {presence:2, operations:5, workforce:10, infrastructure:99};
+  const planLimits = {presence:3, operations:5, workforce:10, infrastructure:99};
   const client = (window._clients||[]).find(c=>c.id===clientId);
   const plan = (client?.plan||'presence').toLowerCase();
   const limit = planLimits[plan]||2;
@@ -456,7 +456,7 @@ function addEmailForm(){
     const btn = document.getElementById('em_add_btn');
     if(btn) btn.style.display='none';
     const lim = document.getElementById('em_plan_limit');
-    if(lim) lim.textContent='Plan limit reached — '+limit+'/'+limit+' accounts ('+plan+' plan)';
+    if(lim) lim.textContent=t('ui.mail.planLimit').replace('{n}',limit+'/'+limit).replace('{plan}',plan);
     return;
   }
   const container = document.getElementById('em_extra_forms');
@@ -467,28 +467,28 @@ function addEmailForm(){
   div.style.cssText='background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-top:8px;';
   div.innerHTML=`
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-      <div style="font-family:var(--mono);font-size:.68rem;color:var(--nes-blue);font-weight:700;">Account ${existing+1}</div>
-      <button onclick="this.closest('.em-extra-form').remove();updateAddBtn();" style="background:none;border:none;color:#f85149;cursor:pointer;font-size:.72rem;"><i class="ti ti-x"></i> Remove</button>
+      <div style="font-family:var(--mono);font-size:.68rem;color:var(--nes-blue);font-weight:700;">${t('ui.mail.account')} ${existing+1}</div>
+      <button onclick="this.closest('.em-extra-form').remove();updateAddBtn();" style="background:none;border:none;color:#f85149;cursor:pointer;font-size:.72rem;"><i class="ti ti-x"></i> ${t('team.remove')}</button>
     </div>
     <div class="creds-grid">
-      <div class="cred-field"><div class="cf-lbl">Email Address</div><input class="cf-input" type="email" id="em_address_${idx}" placeholder="email@company.com"></div>
-      <div class="cred-field"><div class="cf-lbl">App Password</div><input class="cf-input" type="password" id="em_password_${idx}" placeholder="App password"></div>
-      <div class="cred-field"><div class="cf-lbl">Provider</div>
+      <div class="cred-field"><div class="cf-lbl">${t('auth.emailAddress')}</div><input class="cf-input" type="email" id="em_address_${idx}" placeholder="email@company.com"></div>
+      <div class="cred-field"><div class="cf-lbl">${t('ui.mail.appPassword')}</div><input class="cf-input" type="password" id="em_password_${idx}" placeholder="${t('ui.mail.appPasswordPh')}"></div>
+      <div class="cred-field"><div class="cf-lbl">${t('ui.mail.provider')}</div>
         <select class="cf-input" id="em_provider_${idx}" onchange="autoFillImapSettings2(this.value,'${idx}')">
           <option value="gmail">Gmail</option>
           <option value="outlook">Outlook</option>
           <option value="yahoo">Yahoo</option>
           <option value="cpanel">cPanel</option>
-          <option value="other">Other</option>
+          <option value="other">${t('ui.country.Other')}</option>
         </select>
       </div>
-      <div class="cred-field"><div class="cf-lbl">Label</div><input class="cf-input" type="text" id="em_label_${idx}" placeholder="e.g. Sales inbox"></div>
-      <div class="cred-field"><div class="cf-lbl">IMAP Server</div><input class="cf-input" type="text" id="em_imap_${idx}" value="imap.gmail.com"></div>
-      <div class="cred-field"><div class="cf-lbl">IMAP Port</div><input class="cf-input" type="number" id="em_imap_port_${idx}" value="993"></div>
-      <div class="cred-field"><div class="cf-lbl">SMTP Server</div><input class="cf-input" type="text" id="em_smtp_${idx}" value="smtp.gmail.com"></div>
-      <div class="cred-field"><div class="cf-lbl">SMTP Port</div><input class="cf-input" type="number" id="em_smtp_port_${idx}" value="587"></div>
+      <div class="cred-field"><div class="cf-lbl">${t('ui.mail.label')}</div><input class="cf-input" type="text" id="em_label_${idx}" placeholder="${t('ui.mail.labelPh')}"></div>
+      <div class="cred-field"><div class="cf-lbl">${t('ui.mail.imapServer')}</div><input class="cf-input" type="text" id="em_imap_${idx}" value="imap.gmail.com"></div>
+      <div class="cred-field"><div class="cf-lbl">${t('ui.mail.imapPort')}</div><input class="cf-input" type="number" id="em_imap_port_${idx}" value="993"></div>
+      <div class="cred-field"><div class="cf-lbl">${t('ui.mail.smtpServer')}</div><input class="cf-input" type="text" id="em_smtp_${idx}" value="smtp.gmail.com"></div>
+      <div class="cred-field"><div class="cf-lbl">${t('ui.mail.smtpPort')}</div><input class="cf-input" type="number" id="em_smtp_port_${idx}" value="587"></div>
     </div>
-    <button onclick="connectEmailAccountExtra('${idx}')" style="background:var(--nes-btn-grad);border:none;border-radius:7px;padding:7px 16px;color:#fff;font-size:.72rem;font-weight:700;cursor:pointer;margin-top:8px;width:100%;"><i class="ti ti-plug"></i> Test & Connect</button>
+    <button onclick="connectEmailAccountExtra('${idx}')" style="background:var(--nes-btn-grad);border:none;border-radius:7px;padding:7px 16px;color:#fff;font-size:.72rem;font-weight:700;cursor:pointer;margin-top:8px;width:100%;"><i class="ti ti-plug"></i> ${t('ui.mail.testConnect')}</button>
     <div id="em_status_${idx}" style="font-family:var(--mono);font-size:.7rem;margin-top:6px;min-height:16px;"></div>
   `;
   container.appendChild(div);
@@ -497,7 +497,7 @@ function addEmailForm(){
 
 function updateAddBtn(){
   const clientId = window._activeClientId;
-  const planLimits = {presence:2, operations:5, workforce:10, infrastructure:99};
+  const planLimits = {presence:3, operations:5, workforce:10, infrastructure:99};
   const client = (window._clients||[]).find(c=>c.id===clientId);
   const plan = (client?.plan||'presence').toLowerCase();
   const limit = planLimits[plan]||2;
@@ -506,7 +506,7 @@ function updateAddBtn(){
   const lim = document.getElementById('em_plan_limit');
   if(existing >= limit){
     if(btn) btn.style.display='none';
-    if(lim) lim.textContent='Plan limit reached — '+limit+'/'+limit+' accounts ('+plan+' plan)';
+    if(lim) lim.textContent=t('ui.mail.planLimit').replace('{n}',limit+'/'+limit).replace('{plan}',plan);
   } else {
     if(btn) btn.style.display='flex';
     if(lim) lim.textContent='';
@@ -533,12 +533,12 @@ async function connectEmailAccountExtra(idx){
   const smtp_port=parseInt(document.getElementById('em_smtp_port_'+idx)?.value)||587;
   if(!address||!password){showToast(t('toast.emailPasswordRequired'));return;}
   const status=document.getElementById('em_status_'+idx);
-  if(status){status.style.color='#d29922';status.textContent='Testing connection...';}
+  if(status){status.style.color='#d29922';status.textContent=t('ui.mail.testing');}
   try{
     const res=await fetch(API_URL+'/api/email/connect',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify({client_id:clientId,email_address:address,app_password:password,provider,label:label||address,imap_server,imap_port,smtp_server,smtp_port})});
     const data=await res.json();
-    if(!res.ok)throw new Error(data.error||'Connection failed');
-    if(status){status.style.color='#3fb950';status.textContent='Connected successfully ✓';}
+    if(!res.ok)throw new Error(data.error||t('ui.mail.connFailed'));
+    if(status){status.style.color='#3fb950';status.textContent=t('ui.mail.connected');}
     showToast(t('toast.emailAccountConnected'));
     loadEmailAccounts(clientId);
   }catch(e){if(status){status.style.color='#f85149';status.textContent=t('popup.error')+': '+e.message;}}
