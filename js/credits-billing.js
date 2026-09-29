@@ -1,520 +1,283 @@
-// credits-billing.js — extracted from index.html, NES Locale Phase 0
-// 16 functions, zero logic changes
+// my-credentials.js — extracted from index.html, NES Locale Phase 0
+// 7 functions, zero logic changes
 
-async function showApiCredits(){
-  if(userRole!=='nesadmin')return;
+async function showMyCredentials(){
+  if(!userClientId){addAiMsg(t('ui.creds.noClient'));return;}
   const mc=document.getElementById('mainContent');
   mc.style.overflow='auto';
   mc.innerHTML=`
-    <div style="padding-block:11px;padding-inline-end:var(--header-clearance);padding-inline-start:60px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;" class="an-hdr">
+    <div style="padding-block:11px;padding-inline-end:var(--header-clearance);padding-inline-start:60px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;">
       <div>
-        <div style="font-family:var(--mono);font-size:.8rem;color:#7f77dd;font-weight:800;">API CREDITS</div>
-        <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">${t('pageSubtitle.apiCredits')}</div>
+        <div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;">${t('sectionTitle.itSetup')}</div>
+        <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">${t('pageSubtitle.itSetup')}</div>
       </div>
+      <button onclick="showView('chat')" style="background:none;border:1px solid var(--border);border-radius:6px;padding:5px 12px;color:var(--muted);cursor:pointer;font-size:.72rem;font-family:var(--mono);margin-inline-end:12px;"><i class="ti ti-arrow-left"></i> ${t('common.back')}</button>
     </div>
-    <div class="page" id="apiCreditsContent" style="overflow-y:auto;flex:1;">
-      <div style="color:var(--muted);font-family:var(--mono);font-size:.8rem;padding:20px 0;">Loading API credits...</div>
-    </div>`;
-  await loadApiCredits();
+    <div class="page" style="overflow-y:auto;flex:1;"><div style="max-width:640px;padding-bottom:40px;" id="myCredsContent">
+      <div style="color:var(--muted);font-family:var(--mono);font-size:.8rem;padding:20px 0;">${t('common.loading')}</div>
+    </div></div>`;
+  try{
+    const [credsRes, clientRes] = await Promise.all([
+      fetch(API_URL+'/api/client/'+userClientId+'/credentials', {headers:{'Authorization':'Bearer '+session.access_token}}),
+      fetch(API_URL+'/api/client/'+userClientId, {headers:{'Authorization':'Bearer '+session.access_token}})
+    ]);
+    const credsJson=await credsRes.json();
+    const clientJson=await clientRes.json();
+    window._itClientCache=clientJson.client||{};
+    renderMyCredsForm(credsJson.credentials||{}, window._itClientCache);
+  }catch(e){
+    const el=document.getElementById('myCredsContent');
+    if(el)el.innerHTML='<div style="color:var(--red);font-family:var(--mono);font-size:.8rem;">'+t('popup.error')+': '+e.message+'</div>';
+  }
 }
 
-async function loadApiCredits(){
-  const el=document.getElementById('apiCreditsContent');
-  if(!el)return;
-  const apis=[
-    {id:'anthropic',name:'Anthropic (Claude)',icon:'ti-brain',color:'#d29922',note:'n8n workflows + fallback chat'},
-    {id:'gemini',name:'Google Gemini',icon:'ti-sparkles',color:'#409cff',note:'Primary chat model'},
-    {id:'openai',name:'OpenAI (DALL-E)',icon:'ti-photo-ai',color:'#3fb950',note:'Image generation fallback'},
-    {id:'deepseek',name:'DeepSeek',icon:'ti-robot',color:'#7f77dd',note:'Chat fallback 2'},
-    {id:'fal',name:'Flux (FAL)',icon:'ti-wand',color:'#f0883e',note:'Primary image generation'},
-    {id:'tavily',name:'Tavily Search',icon:'ti-search',color:'#8b949e',note:'Retired Jun 2026 — replaced by Gemini grounding',retired:true},
-    {id:'apex_connect',name:'Apex Connect (Sara)',icon:'ti-phone',color:'#3fb950',note:'60-sec callback — Apex Connect'},
-    {id:'apex_outreach',name:'Apex Outreach (Layla)',icon:'ti-headset',color:'#7f77dd',note:'3-day follow-up — Apex Outreach'},
-    {id:'apex_advisory',name:'Apex Advisory (Adam)',icon:'ti-phone-call',color:'#f0883e',note:'Enterprise consultant — Apex Advisory'},
-    {id:'twilio',name:'Twilio',icon:'ti-message-dots',color:'#f85149',note:'WhatsApp & SMS'},
+function renderMyCredsForm(creds, client){
+  const el=document.getElementById('myCredsContent');
+  let trialHtml='';
+  if(client.trial_start){
+    const trialEnd=new Date(new Date(client.trial_start).getTime()+((client.trial_duration_days||7)*86400000));
+    const daysLeft=Math.ceil((trialEnd-new Date())/86400000);
+    const expired=daysLeft<=0;
+    const urgent=daysLeft<=2&&!expired;
+    const color=expired?'#f85149':urgent?'#d29922':'#3fb950';
+    const bg=expired?'#2d0e0e':urgent?'#2d1f00':'#0d2818';
+    const border=expired?'#f8514940':urgent?'#d2992240':'#3fb95040';
+    trialHtml='<div style="padding:12px 16px;border-radius:10px;margin-bottom:16px;background:'+bg+';border:1px solid '+border+';">'+
+      '<div style="font-family:var(--mono);font-size:.7rem;font-weight:800;color:'+color+';margin-bottom:4px;">'+(expired?t('ui.creds.trialExpired'):t('ui.creds.trialActive'))+'</div>'+
+      '<div style="font-size:.8rem;color:var(--muted);">'+(expired?t('ui.creds.trialEnded').replace('{date}',trialEnd.toLocaleDateString(getDateLocale('en-GB'))):(daysLeft===1?t('ui.creds.dayLeftOne'):t('ui.creds.daysLeft')).replace('{n}',daysLeft).replace('{date}',trialEnd.toLocaleDateString(getDateLocale('en-GB'))))+'</div>'+
+      (urgent&&!expired?'<div style="font-size:.75rem;color:'+color+';margin-top:4px;font-weight:600;">'+t('ui.creds.connectNow')+'</div>':'')+'</div>';
+  }
+  const sections=[
+    {title:'Social media',titleKey:'itSetupItem.socialMedia',items:[
+      {label:'Facebook',labelKey:'itSetupItem.facebook',desc:'Page token + Page ID',descKey:'itSetupItem.facebookDesc',keys:['facebook_token','facebook_page_id'],icon:'ti-brand-facebook'},
+      {label:'Instagram',labelKey:'itSetupItem.instagram',desc:'Business Account ID',descKey:'itSetupItem.instagramDesc',keys:['instagram_business_id'],icon:'ti-brand-instagram'},
+      {label:'LinkedIn',labelKey:'itSetupItem.linkedin',desc:'Access token',descKey:'itSetupItem.linkedinDesc',keys:['linkedin_token'],icon:'ti-brand-linkedin'},
+    ]},
+    {title:'Messaging & leads',titleKey:'itSetupItem.messagingLeads',items:[
+      {label:'WhatsApp',labelKey:'itSetupItem.whatsapp',desc:'Phone ID + API token',descKey:'itSetupItem.whatsappDesc',keys:['whatsapp_phone_id','whatsapp_token'],icon:'ti-brand-whatsapp'},
+      {label:'Lead alerts email',labelKey:'itSetupItem.leadAlertsEmail',desc:'Where new leads are sent',descKey:'itSetupItem.leadAlertsEmailDesc',keys:['lead_email'],icon:'ti-mail'},
+      {label:'Website',labelKey:'itSetupItem.website',desc:'Your website URL',descKey:'itSetupItem.websiteDesc',keys:['website'],icon:'ti-world'},
+    ]},
+    {title:'Inbox & Email',titleKey:'itSetupItem.inboxEmail',items:[
+      {label:'Email Account',labelKey:'itSetupItem.emailAccount',desc:'Connect your inbox (IMAP/SMTP)',descKey:'itSetupItem.emailAccountDesc',keys:['imap_email','imap_password','imap_host','smtp_host','smtp_port'],icon:'ti-inbox'},
+    ]},
   ];
-  let thresholds={};
-  try{const{data}=await sb.from('api_credits').select('*');if(data)data.forEach(r=>{thresholds[r.service_name?.toLowerCase().replace(/[^a-z]/g,'')]=r;});}catch(e){}
-  const alertCount=Object.values(thresholds).filter(t=>t.status==='low'||t.status==='critical').length;
-  let html='';
-  if(alertCount>0){html+=`<div style="background:rgba(248,81,73,.1);border:1px solid rgba(248,81,73,.3);border-radius:8px;padding:10px 14px;margin-bottom:16px;display:flex;align-items:center;gap:8px;font-size:.78rem;font-weight:600;color:#f85149;"><i class="ti ti-alert-triangle" style="font-size:16px;"></i>${alertCount} API${alertCount>1?'s':''} below threshold</div>`;}
-  html+=`<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;">
-    <div style="background:var(--surface);border-radius:8px;padding:12px;border:1px solid var(--border);"><div style="font-size:.7rem;color:var(--muted);margin-bottom:4px;font-family:var(--mono);">${t('apiCreditsLabel.apisMonitored')}</div><div style="font-size:1.4rem;font-weight:700;color:var(--text);">${apis.length}</div></div>
-    <div style="background:var(--surface);border-radius:8px;padding:12px;border:1px solid var(--border);"><div style="font-size:.7rem;color:var(--muted);margin-bottom:4px;font-family:var(--mono);">${t('apiCreditsLabel.alertsActive')}</div><div style="font-size:1.4rem;font-weight:700;color:${alertCount>0?'#f85149':'#3fb950'};">${alertCount}</div></div>
-    <div style="background:var(--surface);border-radius:8px;padding:12px;border:1px solid var(--border);"><div style="font-size:.7rem;color:var(--muted);margin-bottom:4px;font-family:var(--mono);">${t('apiCreditsLabel.autoRecharge')}</div><div style="font-size:1.4rem;font-weight:700;color:#7f77dd;">${Object.values(thresholds).filter(t=>t.recharge_amount>0).length}</div></div>
-    <div style="background:var(--surface);border-radius:8px;padding:12px;border:1px solid var(--border);"><div style="font-size:.7rem;color:var(--muted);margin-bottom:4px;font-family:var(--mono);">${t('apiCreditsLabel.estMonthly')}</div><div style="font-size:1.4rem;font-weight:700;color:var(--nes-blue);">~$25</div></div>
-  </div>`;
-  html+=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;"><div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;">API Credit Status</div><div style="display:flex;gap:8px;"><button onclick="saveAllThresholds()" style="background:var(--nes-btn-grad);border:none;border-radius:6px;padding:4px 12px;color:#fff;font-size:.72rem;font-weight:700;cursor:pointer;font-family:var(--mono);"><i class="ti ti-device-floppy"></i> Save Thresholds</button><button onclick="addApiService()" style="background:none;border:1px solid var(--border);border-radius:6px;padding:4px 10px;color:var(--muted);cursor:pointer;font-size:.72rem;font-family:var(--mono);"><i class="ti ti-plus"></i> Add API</button></div></div>`;
-  html+=`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:10px;margin-bottom:20px;">`;
-  apis.forEach(function(api){
-    const th=thresholds[api.id]||{};
-    const balance=th.current_balance||0;const threshold=th.alert_threshold||5;const rechargeAt=th.recharge_at||5;const rechargeAmt=th.recharge_amount||20;const usage=th.monthly_usage||0;
-    const status=balance===0?'unknown':balance<threshold?'low':'healthy';
-    const statusColor=status==='healthy'?'#3fb950':status==='low'?'#f85149':'#d29922';
-    const statusBg=status==='healthy'?'#0d2818':status==='low'?'#2d0e0e':'#2d1f00';
-    const pct=balance+usage>0?Math.round((usage/(balance+usage))*100):0;
-    const barColor=pct>80?'#f85149':pct>60?'#d29922':'#409cff';
-    html+=`<div style="background:var(--surface);border:1px solid ${status==='low'?'rgba(248,81,73,.3)':'var(--border)'};border-radius:12px;padding:14px 16px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;"><div style="display:flex;align-items:center;gap:8px;"><i class="ti ${api.icon}" style="font-size:16px;color:${api.color};"></i><span style="font-size:.82rem;font-weight:600;color:var(--text);">${api.name}</span></div><span style="font-size:.65rem;padding:2px 8px;border-radius:20px;font-weight:600;background:${statusBg};color:${statusColor};">${status==='unknown'?t('pricingPage.notSet'):status==='healthy'?t('pricingPage.healthy'):t('pricingPage.low')}</span></div>
-      <div style="font-size:.68rem;color:var(--muted);font-family:var(--mono);margin-bottom:10px;">${api.note}</div>
-      <div style="font-size:1.5rem;font-weight:700;color:${status==='low'?'#f85149':'var(--text)'};margin-bottom:3px;">${balance===0?'—':'$'+balance.toFixed(2)}</div>
-      <div style="font-size:.68rem;color:var(--muted);font-family:var(--mono);margin-bottom:10px;">${t('apiCreditsLabel.currentBalance')}</div>
-      <div style="display:flex;justify-content:space-between;font-size:.65rem;color:var(--muted);font-family:var(--mono);margin-bottom:4px;"><span>${t('apiCreditsLabel.usedThisMonth')}</span><span>$${usage.toFixed(2)}</span></div>
-      <div style="height:4px;background:var(--border);border-radius:4px;overflow:hidden;margin-bottom:10px;"><div style="height:100%;width:${pct}%;background:${barColor};border-radius:4px;"></div></div>
-      <div style="border-top:1px solid var(--border);padding-top:10px;display:flex;align-items:center;justify-content:space-between;"><span style="font-size:.65rem;color:var(--muted);">Balance $</span><input id="bal_${api.id}" type="number" value="${balance}" step="0.01" min="0" style="background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:3px 7px;color:var(--text);font-family:var(--mono);font-size:.7rem;width:80px;text-align:right;"></div>
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px;"><span style="font-size:.65rem;color:var(--muted);">Alert at $</span><input id="thr_${api.id}" type="number" value="${threshold}" min="0" style="background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:3px 7px;color:var(--text);font-family:var(--mono);font-size:.7rem;width:80px;text-align:right;"></div>
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px;"><span style="font-size:.65rem;color:var(--muted);">Recharge at $</span><input id="rat_${api.id}" type="number" value="${rechargeAt}" min="0" style="background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:3px 7px;color:var(--text);font-family:var(--mono);font-size:.7rem;width:80px;text-align:right;"></div>
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px;"><span style="font-size:.65rem;color:var(--muted);">Add $</span><input id="ram_${api.id}" type="number" value="${rechargeAmt}" min="0" style="background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:3px 7px;color:var(--text);font-family:var(--mono);font-size:.7rem;width:80px;text-align:right;"></div>
-    </div>`;
+  let connected=0,total=0;
+  sections.forEach(s=>s.items.forEach(item=>{
+    total++;
+    if(item.keys.some(k=>creds[k]&&creds[k].trim()))connected++;
+  }));
+  const pct=total?Math.round((connected/total)*100):0;
+  let html=trialHtml;
+  html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">';
+  html+='<div style="font-size:.8rem;color:var(--muted);">'+connected+' / '+total+' '+t('itsetup.connected')+'</div>';
+  html+='<div style="font-size:.8rem;color:var(--nes-blue);font-family:var(--mono);font-weight:700;">'+pct+'%</div></div>';
+  html+='<div style="background:var(--surface);border-radius:6px;height:6px;margin-bottom:20px;overflow:hidden;">';
+  html+='<div style="height:100%;width:'+pct+'%;background:'+(pct===100?'#3fb950':'#409cff')+';border-radius:6px;transition:width .4s;"></div></div>';
+  sections.forEach(function(sec){
+    html+='<div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;margin-top:16px;">'+(sec.titleKey?t(sec.titleKey,sec.title):sec.title)+'</div>';
+    sec.items.forEach(function(item){
+      const isConnected=item.keys.some(k=>creds[k]&&creds[k].trim());
+      html+='<div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:6px;">';
+      html+='<div style="width:34px;height:34px;border-radius:8px;background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti '+item.icon+'" style="font-size:16px;color:var(--nes-blue);"></i></div>';
+      html+='<div style="flex:1;"><div style="font-size:.82rem;color:var(--text);font-weight:500;">'+(item.labelKey?t(item.labelKey,item.label):item.label)+'</div>';
+      html+='<div style="font-size:.72rem;color:var(--muted);">'+(item.descKey?t(item.descKey,item.desc):item.desc)+'</div></div>';
+      html+='<div style="display:flex;align-items:center;gap:8px;">';
+      html+='<span style="font-size:.68rem;font-family:var(--mono);padding:3px 10px;border-radius:12px;background:'+(isConnected?'#0d2818':'#2d1f00')+';color:'+(isConnected?'#3fb950':'#d29922')+';">'+(isConnected?t('itsetup.statusConnected'):t('itsetup.statusMissing'))+'</span>';
+      html+='<button onclick="editItCred(\''+item.keys.join(',')+'\',\''+item.label+'\')" style="background:none;border:1px solid var(--border);border-radius:6px;padding:4px 10px;color:var(--muted);cursor:pointer;font-size:.72rem;">'+(isConnected?t('itsetup.edit'):t('itsetup.connect'))+'</button>';
+      html+='</div></div>';
+    });
   });
+  const isPro=(client.plan==='operations'||client.plan==='workforce'||client.plan==='infrastructure');
+  const maxSources=isPro?10:5;
+  html+='<div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;margin-top:20px;">'+t('itsetup.feedTitle')+'</div>';
+  html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:16px;">';
+  html+='<div style="font-size:.75rem;color:var(--muted);margin-bottom:10px;">'+t('itsetup.feedIntro')+'</div>';
+  html+='<div id="feedSourcesList" style="margin-bottom:10px;"><div style="color:var(--muted);font-size:.72rem;">'+t('common.loading')+'</div></div>';
+  html+='<div style="display:flex;gap:6px;margin-bottom:6px;">';
+  html+='<select id="newFeedSourceType" class="form-input" style="flex:0 0 90px;font-size:.72rem;"><option value="topic">'+t('itsetup.topic')+'</option><option value="url">RSS URL</option></select>';
+  html+='<input id="newFeedSourceLabel" type="text" class="form-input" placeholder="'+t('itsetup.labelPlaceholder')+'" style="font-size:.72rem;flex:1;">';
   html+='</div>';
-  html+=`<div id="addApiForm" style="display:none;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:20px;"><div style="font-family:var(--mono);font-size:.72rem;color:var(--nes-blue);font-weight:700;margin-bottom:12px;">Add New API</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"><div><div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);margin-bottom:4px;">Service name</div><input id="new_api_name" class="form-input" placeholder="e.g. Stripe" style="font-size:.78rem;"></div><div><div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);margin-bottom:4px;">Balance ($)</div><input id="new_api_balance" class="form-input" type="number" placeholder="0.00" style="font-size:.78rem;"></div><div><div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);margin-bottom:4px;">Alert threshold ($)</div><input id="new_api_threshold" class="form-input" type="number" placeholder="5" style="font-size:.78rem;"></div><div><div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);margin-bottom:4px;">Notes</div><input id="new_api_notes" class="form-input" placeholder="What it is used for" style="font-size:.78rem;"></div></div><div style="display:flex;gap:8px;margin-top:10px;"><button onclick="saveNewApiService()" style="background:var(--nes-btn-grad);border:none;border-radius:7px;padding:7px 16px;color:#fff;font-size:.75rem;font-weight:700;cursor:pointer;"><i class="ti ti-plus"></i>${t('common.add')}</button><button onclick="document.getElementById('addApiForm').style.display='none'" style="background:none;border:1px solid var(--border);border-radius:7px;padding:7px 14px;color:var(--muted);cursor:pointer;font-size:.75rem;">${t('common.cancel')}</button></div></div>`;
+  html+='<div style="display:flex;gap:6px;">';
+  html+='<input id="newFeedSourceValue" type="text" class="form-input" placeholder="'+t('itsetup.valuePlaceholder')+'" style="font-size:.72rem;flex:1;">';
+  html+=`<button id="feedSourceSubmitBtn" onclick="addFeedSource('${client.id}')" style="background:var(--nes-btn-grad);border:none;border-radius:7px;padding:7px 16px;color:#fff;font-size:.72rem;font-weight:700;cursor:pointer;white-space:nowrap;"><i class="ti ti-plus"></i> ${t('itsetup.add')}</button> <button onclick="cancelEditFeedSource()" id="feedSourceCancelBtn" style="display:none;background:none;border:1px solid var(--border);border-radius:7px;padding:7px 12px;color:var(--muted);font-size:.72rem;cursor:pointer;white-space:nowrap;">${t('common.cancel')}</button>`;
+  html+='</div>';
+  html+='</div>';
+  html+='<div id="it-cred-form" style="display:none;margin-top:16px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;">';
+  html+='<div id="it-cred-title" style="font-family:var(--mono);font-size:.75rem;font-weight:700;color:var(--nes-blue);margin-bottom:12px;"></div>';
+  html+='<div id="it-cred-fields"></div>';
+  html+='<div style="display:flex;gap:8px;margin-top:12px;">';
+  html+='<button onclick="saveItCred()" class="form-submit" style="flex:1;"><i class="ti ti-device-floppy"></i> '+t('common.save','Save')+'</button>';
+  html+=`<button onclick="document.getElementById('it-cred-form').style.display='none'" style="background:none;border:1px solid var(--border);border-radius:8px;padding:8px 14px;color:var(--muted);cursor:pointer;font-size:.8rem;">${t('common.cancel')}</button>`;
+  html+='</div></div>';
+
+  html+='<div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;margin-top:20px;">'+t('itsetup.widgetTitle')+'</div>';
+  html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:16px;">';
+  html+='<div style="font-size:.75rem;color:var(--muted);margin-bottom:10px;">'+t('itsetup.widgetIntro')+'</div>';
+  html+='<div style="display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-family:var(--mono);font-size:.68rem;color:#409cff;word-break:break-all;">';
+  html+='<span id="widget-snippet">&lt;script src=\"https://api.essential-services.org/widget.js?client_id='+client.id+'\"&gt;&lt;/script&gt;</span>';
+  html+=`<button onclick="copyWidgetSnippet(this, '${client.id}')" style="background:var(--nes-btn-grad);border:none;border-radius:6px;padding:4px 12px;color:#fff;font-size:.68rem;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;">${t('chatUi.copy')}</button>`;
+  html+='</div>';
+  html+='<div style="font-size:.68rem;color:var(--muted);margin-top:8px;"><i class="ti ti-info-circle"></i> '+t('itsetup.widgetWorks')+'</div>';
+  html+='</div>';
   el.innerHTML=html;
-  window._apisList=apis;
+  window._itCredsCache=creds;
+  loadFeedSources(client.id);
 }
 
-function addApiService(){const f=document.getElementById('addApiForm');if(f)f.style.display=f.style.display==='none'?'block':'none';}
-
-async function saveNewApiService(){
-  const name=document.getElementById('new_api_name')?.value.trim();
-  const balance=parseFloat(document.getElementById('new_api_balance')?.value)||0;
-  const threshold=parseFloat(document.getElementById('new_api_threshold')?.value)||5;
-  const notes=document.getElementById('new_api_notes')?.value.trim();
-  if(!name){showToast(t('toast.serviceNameRequired'));return;}
-  try{{const{error:_e}=await sb.from('api_credits').insert([{service_name:name,current_balance:balance,alert_threshold:threshold,notes,status:balance<threshold?'low':'healthy'}]);if(_e)throw _e;}showToast(t('pricingPage.apiAdded'));document.getElementById('addApiForm').style.display='none';await loadApiCredits();}catch(e){showToast(t('popup.error')+': '+e.message);}
+function copyWidgetSnippet(btn, clientId){
+  const snippet='<script src="https://api.essential-services.org/widget.js?client_id='+clientId+'"><\/script>';
+  navigator.clipboard.writeText(snippet).then(function(){
+    btn.textContent=t('chatUtilsUi.copied');
+    setTimeout(function(){btn.textContent=t('chatUi.copy')},2000);
+  });
 }
 
-async function updateApiBalance(id,val){
-  const balance=parseFloat(val)||0;const threshold=parseFloat(document.getElementById('thr_'+id)?.value)||5;
-  try{{const{error:_e}=await sb.from('api_credits').upsert({service_name:id,current_balance:balance,status:balance<threshold?'low':'healthy'},{onConflict:'service_name'});if(_e)throw _e;}}catch(e){showToast(t('popup.error')+': '+e.message);}
+function editItCred(keysStr, label){
+  const keys=keysStr.split(',');
+  const creds=window._itCredsCache||{};
+  const _lk={facebook_token:'itSetupItem.facebook',instagram_business_id:'itSetupItem.instagram',linkedin_token:'itSetupItem.linkedin',whatsapp_phone_id:'itSetupItem.whatsapp',lead_email:'itSetupItem.leadAlertsEmail',website:'itSetupItem.website',imap_email:'itSetupItem.emailAccount'}[keys[0]];
+  document.getElementById('it-cred-title').textContent=_lk?t(_lk,label):label;
+  const fieldLabels={
+    facebook_token:t('ui.creds.pageToken'),facebook_page_id:t('ui.creds.pageId'),
+    instagram_business_id:t('ui.creds.businessId'),
+    whatsapp_phone_id:t('ui.creds.phoneId'),whatsapp_token:t('ui.creds.apiToken'),
+    linkedin_token:t('ui.creds.accessToken'),
+    lead_email:t('auth.emailAddress'),website:t('ui.creds.websiteUrl'),
+    imap_email:t('auth.emailAddress'),imap_password:t('ui.creds.emailPassword'),
+    imap_host:t('ui.creds.imapHost'),smtp_host:t('ui.creds.smtpHost'),smtp_port:t('ui.mail.smtpPort')
+  };
+  let html='';
+  keys.forEach(function(k){
+    const val=(creds[k]||'').replace(/"/g,'&quot;');
+    const isPwd=k.includes('token')||k.includes('password');
+    html+='<div style="margin-bottom:8px;"><div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);margin-bottom:4px;">'+(fieldLabels[k]||k)+'</div>';
+    html+='<input id="itf_'+k+'" type="'+(isPwd?'password':'text')+'" class="form-input" value="'+val+'" placeholder="'+t('ui.creds.enterValue')+'"'+(isPwd?' autocomplete="new-password"':'')+' style="font-family:var(--mono);font-size:.75rem;"></div>';
+  });
+  document.getElementById('it-cred-fields').innerHTML=html;
+  document.getElementById('it-cred-form').style.display='block';
+  window._itActiveKeys=keys;
+  document.querySelector('#it-cred-fields input')?.focus();
 }
 
-async function saveAllThresholds(){
-  const apis=window._apisList||[];
-  const btn=document.querySelector('[onclick="saveAllThresholds()"]');
-  if(btn){btn.disabled=true;btn.textContent=t('pricingPage.saving');}
+async function saveItCred(){
+  const keys=window._itActiveKeys||[];
+  const creds=window._itCredsCache||{};
+  keys.forEach(function(k){
+    const el=document.getElementById('itf_'+k);
+    if(el&&el.value.trim())creds[k]=el.value.trim();
+  });
+  window._itCredsCache=creds;
   try{
-    for(const api of apis){
-      const balance=parseFloat(document.getElementById('bal_'+api.id)?.value)||0;
-      const threshold=parseFloat(document.getElementById('thr_'+api.id)?.value)||5;
-      const rechargeAt=parseFloat(document.getElementById('rat_'+api.id)?.value)||5;
-      const rechargeAmt=parseFloat(document.getElementById('ram_'+api.id)?.value)||20;
-      {const{error:_e}=await sb.from('api_credits').upsert({service_name:api.id,current_balance:balance,alert_threshold:threshold,recharge_at:rechargeAt,recharge_amount:rechargeAmt,status:balance===0?'unknown':balance<threshold?'low':'healthy'},{onConflict:'service_name'});if(_e)throw _e;}
+    const res=await fetch(API_URL+'/api/client/'+userClientId+'/credentials',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
+      body:JSON.stringify({credentials:creds})
+    });
+    if(!res.ok)throw new Error(await res.text());
+    showToast(t('toast.saved'));
+    document.getElementById('it-cred-form').style.display='none';
+    renderMyCredsForm(creds, window._itClientCache||{});
+  }catch(e){alert(t('popup.error')+': '+e.message);}
+}
+
+async function saveMyCredentials(){
+  const fields=['facebook_token','facebook_page_id','instagram_business_id','whatsapp_phone_id','whatsapp_token','linkedin_token','calcom_link','lead_email','website','vapi_assistant_id'];
+  const creds={};
+  fields.forEach(function(k){
+    const el=document.getElementById('mycred_'+k);
+    if(el&&el.value.trim())creds[k]=el.value.trim();
+  });
+  try{
+    const res=await fetch(API_URL+'/api/client/'+userClientId+'/credentials',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({credentials:creds})
+    });
+    if(!res.ok)throw new Error(await res.text());
+    showToast(t('toast.credentialsSavedSecurely'));
+  }catch(e){
+    alert(t('popup.errorSavingCreds')+': '+e.message);
+  }
+}
+
+async function loadFeedSources(clientId){
+  const listEl=document.getElementById('feedSourcesList');
+  if(!listEl)return;
+  try{
+    const r=await fetch(API_URL+'/api/client/'+clientId+'/feed-sources',{headers:{'Authorization':'Bearer '+session.access_token}});
+    const data=await r.json();
+    const sources=data.sources||[];
+    if(sources.length===0){
+      listEl.innerHTML='<div style="color:var(--muted);font-size:.72rem;padding:6px 0;">'+t('itsetup.noSources')+'</div>';
+      return;
     }
-    showToast(t('toast.thresholdsSaved'));await loadApiCredits();
+    listEl.innerHTML=sources.map(function(s){
+      const typeLabel=s.source_type==='url'?'RSS URL':t('itsetup.topic');
+      return '<div style="display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 10px;margin-bottom:6px;">'
+        +'<span style="font-size:.6rem;font-family:var(--mono);padding:2px 8px;border-radius:10px;background:#0d2818;color:#3fb950;flex-shrink:0;">'+typeLabel+'</span>'
+        +'<div style="flex:1;min-width:0;"><div style="font-size:.75rem;font-weight:600;">'+s.label+'</div><div style="font-size:.68rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+s.search_query+'</div></div>'
+        +'<button onclick="editFeedSource(\''+clientId+'\',\''+s.id+'\',\''+s.label.replace(/'/g,"\\'")+'\',\''+s.search_query.replace(/'/g,"\\'")+'\',\''+s.source_type+'\')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:.9rem;flex-shrink:0;"><i class="ti ti-pencil"></i></button>'
+        +'<button onclick="deleteFeedSource(\''+clientId+'\',\''+s.id+'\')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:.9rem;flex-shrink:0;"><i class="ti ti-trash"></i></button>'
+        +'</div>';
+    }).join('');
+  }catch(e){
+    listEl.innerHTML='<div style="color:var(--muted);font-size:.72rem;">'+t('ui.creds.sourcesLoadFailed')+'</div>';
+  }
+}
+async function addFeedSource(clientId){
+  const type=document.getElementById('newFeedSourceType').value;
+  const label=document.getElementById('newFeedSourceLabel').value.trim();
+  const value=document.getElementById('newFeedSourceValue').value.trim();
+  if(!label||!value){showToast(t('popup.enterLabelValue'));return;}
+  try{
+    const r=await fetch(API_URL+'/api/client/'+clientId+'/feed-sources',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify({label,search_query:value,source_type:type})});
+    const data=await r.json();
+    if(!r.ok)throw new Error(data.error||t('ui.creds.addSourceFailed'));
+    document.getElementById('newFeedSourceLabel').value='';
+    document.getElementById('newFeedSourceValue').value='';
+    showToast(t('toast.feedSourcesSaved'));
+    loadFeedSources(clientId);
   }catch(e){showToast(t('popup.error')+': '+e.message);}
-  finally{if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-device-floppy"></i> Save Thresholds';}}
 }
-
-function showUpgradePopup(){ showPricing(); }
-
-function openSubscribeModal(plan,planLabel){
-  const html=`<div style="padding:4px 0;">
-    <p style="color:var(--muted);font-size:.85rem;margin-bottom:16px;">Choose your billing cycle for ${planLabel}. Annual billing includes a 15% discount.</p>
-    <button class="act-btn" style="width:100%;margin-bottom:8px;background:#003087;" onclick="startSubscription('${plan}','monthly')">Monthly — Pay with PayPal</button>
-    <button class="act-btn" style="width:100%;background:linear-gradient(135deg,#1a7f37,#3fb950);" onclick="startSubscription('${plan}','annual')">Annual — 15% off — Pay with PayPal</button>
-    <p style="color:var(--muted);font-size:.68rem;margin-top:10px;text-align:center;">You'll be redirected to PayPal to complete your subscription.</p>
-  </div>`;
-  showModal('Subscribe to '+planLabel,html);
+let _editingSourceId=null;
+function editFeedSource(clientId,sourceId,label,searchQuery,sourceType){
+  _editingSourceId=sourceId;
+  document.getElementById('newFeedSourceType').value=sourceType;
+  document.getElementById('newFeedSourceLabel').value=label;
+  document.getElementById('newFeedSourceValue').value=searchQuery;
+  const btn=document.getElementById('feedSourceSubmitBtn');
+  if(btn){btn.textContent=t('ui.creds.saveChanges');btn.setAttribute('onclick',"saveEditedFeedSource('"+clientId+"')");}
+  const cancelBtn=document.getElementById('feedSourceCancelBtn');
+  if(cancelBtn)cancelBtn.style.display='inline-block';
 }
-async function startSubscription(plan,cycle){
-  const btn=event.target;
-  btn.disabled=true;btn.textContent='Processing...';
+async function saveEditedFeedSource(clientId){
+  const type=document.getElementById('newFeedSourceType').value;
+  const label=document.getElementById('newFeedSourceLabel').value.trim();
+  const value=document.getElementById('newFeedSourceValue').value.trim();
+  if(!label||!value){showToast(t('popup.enterLabelValue'));return;}
   try{
-    const res=await fetch(API_URL+'/api/paypal/create-subscription',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
-      body:JSON.stringify({plan,cycle})
-    });
-    const data=await res.json();
-    if(data.checkout_url){
-      window.location.href=data.checkout_url;
-    } else {
-      alert(t('popup.subscriptionError')+': '+(data.error||t('popup.unknownError')));
-      btn.disabled=false;btn.textContent=cycle==='monthly'?'Monthly':'Annual — 15% off';
-    }
-  }catch(e){
-    alert(t('popup.connectionError'));
-    btn.disabled=false;btn.textContent=cycle==='monthly'?'Monthly':'Annual — 15% off';
-  }
+    const r=await fetch(API_URL+'/api/client/'+clientId+'/feed-sources/'+_editingSourceId,{method:'PATCH',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify({label,search_query:value,source_type:type})});
+    const data=await r.json();
+    if(!r.ok)throw new Error(data.error||t('ui.creds.saveFailed'));
+    cancelEditFeedSource();
+    showToast(t('popup.sourceUpdated'));
+    loadFeedSources(clientId);
+  }catch(e){showToast(t('popup.error')+': '+e.message);}
 }
-function showPricing(){
-  const mc=document.getElementById('mainContent');
-  mc.style.overflow='auto';
-  mc.innerHTML=`
-    <div class="pricing-wrap">
-      <a href="#" onclick="showView('chat');return false;" style="color:var(--nes-blue);text-decoration:none;display:inline-block;margin-bottom:22px;font-family:var(--mono);font-size:.8rem;">← ${t('common.back','Back')}</a>
-      <div style="text-align:center;margin-bottom:8px;"><h1 style="font-size:1.7rem;font-weight:700;font-family:'Syne',sans-serif;">${t('pricingPage.chooseYourPlan')}</h1></div>
-      <div style="text-align:center;margin-bottom:6px;font-family:var(--mono);font-size:.75rem;color:var(--muted);">NES AI — Unified Business Platform · Oman Pricing</div>
-      <div style="text-align:center;margin-bottom:16px;font-family:var(--mono);font-size:.68rem;color:var(--muted);">All plans include a 7-day trial · Cancel anytime</div>
-      <div style="background:#0c1f3a;border:1px solid #1a3a5e;border-radius:10px;padding:11px 20px;display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
-        <div><div style="font-family:'Syne',sans-serif;font-size:.78rem;color:var(--nes-blue);font-weight:700;">${t('pricingPage.founderPricingTitle')}</div><div style="font-size:.65rem;color:var(--muted);margin-top:2px;">${t('pricingPage.founderPricingDetail')}</div></div>
-        <div style="font-family:var(--mono);font-size:.68rem;color:#3fb950;display:flex;align-items:center;gap:5px;"><div style="width:6px;height:6px;border-radius:50%;background:#3fb950;"></div>38 spots remaining</div>
-      </div>
-
-      <div class="plan-grid">
-
-        <div class="plan-card">
-          <div style="font-family:'Syne',sans-serif;font-size:.65rem;color:var(--nes-blue);text-transform:uppercase;letter-spacing:.1em;text-align:center;margin-bottom:4px;">${t('plan.aiPresence')}</div>
-          <div style="text-align:center;font-size:.72rem;color:var(--red);text-decoration:line-through;font-family:var(--mono);margin-bottom:2px;">OMR 59/mo (~$153)</div>
-          <div class="plan-price">OMR 29</div>
-          <div class="plan-period">per month · ~$75 USD · founder price for first quarter</div>
-          <ul class="plan-features-list">
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>150 AI messages/day</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>AI Chatbot (24/7)</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Lead Capture + WhatsApp alerts</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i><b style="color:var(--nes-blue);">Sara AI — 30 calls/mo</b></li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Email notifications</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>3 team users</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Deen NES AI — free globally</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>7-day trial</li>
-          </ul>
-          <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);margin-bottom:8px;padding:6px 8px;background:var(--accent-lo);border-radius:6px;">
-            + Apex Connect upgrade OMR 15/mo
-          </div>
-          <button class="plan-action-btn" onclick="openSubscribeModal('presence','AI Presence')">Subscribe with PayPal</button>
-        </div>
-
-        <div class="plan-card" style="border-color:var(--nes-blue);position:relative;">
-          <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--nes-btn-grad);color:#fff;font-size:.65rem;font-weight:700;padding:3px 12px;border-radius:20px;font-family:'Syne',sans-serif;">${t('pricingPage.popular')}</div>
-          <div style="font-family:'Syne',sans-serif;font-size:.65rem;color:var(--nes-blue);text-transform:uppercase;letter-spacing:.1em;text-align:center;margin-bottom:4px;">${t('plan.aiOperations')}</div>
-          <div style="text-align:center;font-size:.72rem;color:var(--red);text-decoration:line-through;font-family:var(--mono);margin-bottom:2px;">OMR 159/mo (~$413)</div>
-          <div class="plan-price">OMR 79</div>
-          <div class="plan-period">per month · ~$205 USD · founder price for first quarter</div>
-          <div style="font-family:var(--mono);font-size:.62rem;color:var(--muted);text-align:center;margin-bottom:4px;">Standard: OMR 159/mo after first quarter</div>
-          <ul class="plan-features-list">
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>500 AI messages/day</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Everything in AI Presence</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>CEO Dashboard + NES Pulse</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i><b style="color:var(--nes-blue);">Sara AI — 60 calls/mo</b></li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Social Media — 3x/day</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>WhatsApp Alerts — leads + team</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Sales Portal (CRM)</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>10 team users</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Priority email support</li>
-          </ul>
-          <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);margin-bottom:8px;padding:6px 8px;background:var(--accent-lo);border-radius:6px;">
-            + Apex Outreach OMR 15/mo
-          </div>
-          <button class="plan-action-btn" onclick="openSubscribeModal('operations','AI Operations')">Subscribe with PayPal</button>
-        </div>
-
-        <div class="plan-card" style="border-color:#3fb950;position:relative;">
-          <div style="font-family:'Syne',sans-serif;font-size:.65rem;color:#3fb950;text-transform:uppercase;letter-spacing:.1em;text-align:center;margin-bottom:4px;">${t('plan.aiWorkforce')}</div>
-          <div style="text-align:center;font-size:.72rem;color:var(--red);text-decoration:line-through;font-family:var(--mono);margin-bottom:2px;">OMR 299/mo (~$777)</div>
-          <div class="plan-price" style="color:#3fb950;">OMR 149</div>
-          <div class="plan-period">per month · ~$387 USD · founder price for first quarter</div>
-          <div style="font-family:var(--mono);font-size:.62rem;color:var(--muted);text-align:center;margin-bottom:4px;">Standard: OMR 299/mo after first quarter</div>
-          <ul class="plan-features-list">
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>1,500 AI messages/day</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Everything in AI Operations</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i><b style="color:#3fb950;">Sara AI — 150 calls/mo</b></li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Apex Outreach — Layla AI</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Social Media — 3x/day</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>25 team users</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>WhatsApp support</li>
-          </ul>
-          <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);margin-bottom:8px;padding:6px 8px;background:rgba(63,185,80,.08);border-radius:6px;">
-            + Apex Advisory OMR 20/mo<br>+ Extra social posts OMR 8/mo
-          </div>
-          <button class="plan-action-btn" style="background:linear-gradient(135deg,#1a7f37,#3fb950);" onclick="openSubscribeModal('workforce','AI Workforce')">Subscribe with PayPal</button>
-        </div>
-
-        <div class="plan-card" style="border-color:#d29922;position:relative;">
-          <div style="font-family:var(--mono);font-size:.65rem;color:#d29922;text-transform:uppercase;letter-spacing:.1em;text-align:center;margin-bottom:4px;">AI Infrastructure</div>
-          <div class="plan-price" style="color:#d29922;">Custom</div>
-          <div class="plan-period">OMR 599–1000+ / month</div>
-          <ul class="plan-features-list">
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Unlimited everything</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Full Apex Suite included</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Real-time alerts (2hrs)</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Multiple social posts/day</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>White label branding</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Custom AI agents</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>90 days lead history</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>SLA guarantee</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Dedicated account manager</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Custom integrations</li>
-          </ul>
-          <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);margin-bottom:8px;padding:6px 8px;background:rgba(210,153,34,.08);border-radius:6px;">
-            Tailored to your requirements
-          </div>
-          <button class="plan-action-btn" style="background:linear-gradient(135deg,#92610a,#d29922);" onclick="window.open('https://nes-ai.com/register.html?plan=infrastructure','_blank')">${t('pricingCta.contactUs')}</button>
-        </div>
-
-      </div>
-
-      <div style="text-align:center;margin-top:16px;font-family:var(--mono);font-size:.68rem;color:var(--muted);">Annual prepay available — 15% discount · Setup fee OMR 99 waived for first 50 clients</div>
-        <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:16px;">Apex Suite — AI Voice Agents</div>
-        <div class="ph-tiers" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;max-width:700px;margin:0 auto;">
-          <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center;">
-            <i class="ti ti-phone" style="font-size:24px;color:#3fb950;display:block;margin-bottom:8px;"></i>
-            <div style="font-weight:700;margin-bottom:4px;">Apex Connect</div>
-            <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);margin-bottom:8px;">60-sec callback on every lead</div>
-            <div style="font-size:1.1rem;font-weight:700;color:#3fb950;">+OMR 15/mo</div>
-          </div>
-          <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center;">
-            <i class="ti ti-headset" style="font-size:24px;color:#7f77dd;display:block;margin-bottom:8px;"></i>
-            <div style="font-weight:700;margin-bottom:4px;">Apex Outreach</div>
-            <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);margin-bottom:8px;">3-day follow-up re-engagement</div>
-            <div style="font-size:1.1rem;font-weight:700;color:#7f77dd;">+OMR 15/mo</div>
-          </div>
-          <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center;">
-            <i class="ti ti-phone-call" style="font-size:24px;color:#f0883e;display:block;margin-bottom:8px;"></i>
-            <div style="font-weight:700;margin-bottom:4px;">Apex Advisory</div>
-            <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);margin-bottom:8px;">Enterprise voice consultant</div>
-            <div style="font-size:1.1rem;font-weight:700;color:#f0883e;">+OMR 20/mo</div>
-          </div>
-        </div>
-      </div>
-
-      <div style="text-align:center;margin-top:28px;font-family:var(--mono);font-size:.72rem;color:var(--muted);">
-        All prices in Omani Rial (OMR) · 1 USD ≈ 0.385 OMR · UAE/KSA/EU pricing available on request<br>
-        <a href="mailto:office@essential-services.org" style="color:var(--nes-blue);text-decoration:none;">office@essential-services.org</a>
-      </div>
-    </div>`;
-  addLocalCurrencyToPricing();
+function cancelEditFeedSource(){
+  _editingSourceId=null;
+  document.getElementById('newFeedSourceLabel').value='';
+  document.getElementById('newFeedSourceValue').value='';
+  const btn=document.getElementById('feedSourceSubmitBtn');
+  if(btn){btn.innerHTML='<i class="ti ti-plus"></i> '+t('itsetup.add');btn.setAttribute('onclick',"addFeedSource('"+((window._itClientCache&&window._itClientCache.id)||userClientId||'')+"')");}
+  const cancelBtn=document.getElementById('feedSourceCancelBtn');
+  if(cancelBtn)cancelBtn.style.display='none';
 }
-
-// Purely additive: for non-Oman clients, appends a small local-currency equivalent
-// under each OMR price. Never modifies the existing OMR/USD text. No-ops silently
-// on any error or for OMR clients, so it can never break pricing display.
-async function addLocalCurrencyToPricing(){
+async function deleteFeedSource(clientId,sourceId){
   try{
-    if(!window.clientCurrency || window.clientCurrency==='OMR') return;
-    const {data:rates} = await sb.from('currency_rates').select('currency_code,rate_to_omr');
-    if(!rates) return;
-    const rateRow = rates.find(r=>r.currency_code===window.clientCurrency);
-    if(!rateRow) return;
-    document.querySelectorAll('.plan-price').forEach(el=>{
-      const match = el.textContent.match(/OMR\s*([\d.]+)/);
-      if(!match) return;
-      const omr = parseFloat(match[1]);
-      const converted = (omr*rateRow.rate_to_omr).toFixed(2);
-      const note=document.createElement('div');
-      note.style.cssText='font-family:var(--mono);font-size:.65rem;color:var(--muted);margin-top:2px;';
-      note.textContent=`≈ ${window.clientCurrency} ${converted}`;
-      el.insertAdjacentElement('afterend', note);
-    });
-  }catch(e){ console.error('addLocalCurrencyToPricing error:', e.message); }
-}
-
-async function payWithPayPal(amountOMR,description){
-  const btn=event.target;
-  btn.disabled=true;btn.textContent=t('pricingPage.processing');
-  const totalOMR=Math.round(amountOMR*1.05*1000)/1000;
-  const amountUSD=Math.round((totalOMR/0.385)*100)/100;
-  try{
-    const res=await fetch(API_URL+'/api/paypal/create-order',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
-      body:JSON.stringify({amount:amountUSD,currency:'USD',description})
-    });
-    const data=await res.json();
-    if(data.checkout_url){
-      window.location.href=data.checkout_url;
-    } else {
-      alert(t('popup.paymentError')+': '+(data.error||t('popup.unknownError')));
-      btn.disabled=false;btn.textContent='PayPal';
-    }
-  }catch(e){
-    alert(t('popup.connectionError'));
-    btn.disabled=false;btn.textContent='PayPal';
-  }
-}
-function openVoiceTopupModal(){
-  const packs=[
-    {min:50,p:18,label:t('pricingPage.starterBundle')},
-    {min:150,p:45,label:t('pricingPage.standardBundle')},
-    {min:400,p:99,label:t('pricingPage.powerBundle')}
-  ];
-  const packsHtml=packs.map(pk=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px;">
-    <div><div style="font-weight:700;font-size:.85rem;">${pk.label}</div><div style="font-size:.75rem;color:var(--muted);">${pk.min} ${t('topup.minutes')} · ${t('topup.neverExpire')}</div><div style="font-size:.7rem;color:var(--muted);">OMR ${pk.p} + 5% VAT = OMR ${(pk.p*1.05).toFixed(3)}</div></div>
-    <button class="act-btn" onclick="buyVoiceTopup(${pk.min},${pk.p},'${pk.label}')">${t('topup.buyNow')}</button>
-    <button class="act-btn" style="margin-inline-start:6px;background:#003087;" onclick="payWithPayPal(${pk.p},'Sara Top-up ${pk.min}min')">PayPal</button>
-  </div>`).join('');
-  const html=`<div style="padding:4px 0;">
-    <p style="color:var(--muted);font-size:.85rem;margin-bottom:14px;">${t('topup.saraIntro')}</p>
-    ${packsHtml}
-    <p style="color:var(--muted);font-size:.75rem;margin-top:10px;">${t('topup.payNoteMinutes')}</p>
-  </div>`;
-  showModal(t('pricingPage.saraVoiceTopup'),html);
-}
-
-async function buyVoiceTopup(minutes,price,label){
-  const btn=event.target;
-  btn.disabled=true;btn.textContent=t('pricingPage.processing');
-  const vatAmount=Math.round(price*0.05*100)/100;
-  const totalAmount=Math.round((price+vatAmount)*100)/100;
-  try{
-    const res=await fetch(API_URL+'/api/thawani/create-session',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
-      body:JSON.stringify({
-        amount:totalAmount,
-        clientName:document.getElementById('userEmail')?.textContent||'Client',
-        clientId:userClientId,
-        description:`Sara Top-up ${minutes}min`,
-        metadata:{type:'voice_topup',minutes,clientId:userClientId}
-      })
-    });
-    const data=await res.json();
-    if(data.checkout_url){
-      window.location.href=data.checkout_url;
-    } else {
-      alert(t('popup.paymentError')+': '+(data.error||t('popup.unknownError')));
-      btn.disabled=false;btn.textContent=t('topup.buyNow');
-    }
-  }catch(e){
-    alert(t('popup.connectionError'));
-    btn.disabled=false;btn.textContent=t('topup.buyNow');
-  }
-}
-
-function openAdamTopupModal(){
-  const packs=[
-    {credits:5,p:8,label:t('pricingPage.starterBundle')},
-    {credits:10,p:15,label:t('pricingPage.standardBundle')},
-    {credits:25,p:35,label:t('pricingPage.powerBundle')}
-  ];
-  const packsHtml=packs.map(pk=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px;">
-    <div><div style="font-weight:700;font-size:.85rem;">${pk.label}</div><div style="font-size:.75rem;color:var(--muted);">${pk.credits} ${t('topup.consultations')} · ${t('topup.neverExpire')}</div><div style="font-size:.7rem;color:var(--muted);">OMR ${pk.p} + 5% VAT = OMR ${(pk.p*1.05).toFixed(3)}</div></div>
-    <button class="act-btn" onclick="buyAdamTopup(${pk.credits},${pk.p},'${pk.label}')">${t('topup.buyNow')}</button>
-    <button class="act-btn" style="margin-inline-start:6px;background:#003087;" onclick="payWithPayPal(${pk.p},'Adam Top-up ${pk.credits} credits')">PayPal</button>
-  </div>`).join('');
-  const html=`<div style="padding:4px 0;">
-    <p style="color:var(--muted);font-size:.85rem;margin-bottom:14px;">${t('topup.adamIntro')}</p>
-    ${packsHtml}
-    <p style="color:var(--muted);font-size:.75rem;margin-top:10px;">${t('topup.payNoteCredits')}</p>
-  </div>`;
-  showModal(t('topup.adamTitle'),html);
-}
-
-async function buyAdamTopup(credits,price,label){
-  const btn=event.target;
-  btn.disabled=true;btn.textContent=t('pricingPage.processing');
-  const vatAmount=Math.round(price*0.05*100)/100;
-  const totalAmount=Math.round((price+vatAmount)*100)/100;
-  try{
-    const res=await fetch(API_URL+'/api/thawani/create-session',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
-      body:JSON.stringify({
-        amount:totalAmount,
-        clientName:document.getElementById('userEmail')?.textContent||'Client',
-        clientId:userClientId,
-        description:`Adam Top-up ${credits} credits`,
-        metadata:{type:'adam_topup',credits,clientId:userClientId}
-      })
-    });
-    const data=await res.json();
-    if(data.checkout_url){
-      window.location.href=data.checkout_url;
-    } else {
-      alert(t('popup.paymentError')+': '+(data.error||t('popup.unknownError')));
-      btn.disabled=false;btn.textContent=t('topup.buyNow');
-    }
-  }catch(e){
-    alert(t('popup.connectionError'));
-    btn.disabled=false;btn.textContent=t('topup.buyNow');
-  }
-}
-
-function openBriefcaseTopupModal(){
-  const packs=[
-    {gb:20,p:8,label:t('pricingPage.starterBundle')},
-    {gb:50,p:18,label:t('pricingPage.standardBundle')},
-    {gb:100,p:30,label:t('pricingPage.powerBundle')}
-  ];
-  const packsHtml=packs.map(pk=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px;">
-    <div><div style="font-weight:700;font-size:.85rem;">${pk.label}</div><div style="font-size:.75rem;color:var(--muted);">${pk.gb}GB ${t('topup.extraStorage')}</div><div style="font-size:.7rem;color:var(--muted);">OMR ${pk.p} + 5% VAT = OMR ${(pk.p*1.05).toFixed(3)}/mo</div></div>
-    <button class="act-btn" onclick="buyBriefcaseTopup(${pk.gb},${pk.p},'${pk.label}')">${t('topup.buyNow')}</button>
-    <button class="act-btn" style="margin-inline-start:6px;background:#003087;" onclick="payWithPayPal(${pk.p},'Briefcase Top-up ${pk.gb}GB')">PayPal</button>
-  </div>`).join('');
-  const html=`<div style="padding:4px 0;">
-    <p style="color:var(--muted);font-size:.85rem;margin-bottom:14px;">${t('topup.storageIntro')}</p>
-    ${packsHtml}
-    <p style="color:var(--muted);font-size:.75rem;margin-top:10px;">${t('topup.payNoteStorage')}</p>
-  </div>`;
-  showModal(t('topup.storageTitle'),html);
-}
-
-async function buyBriefcaseTopup(gb,price,label){
-  const btn=event.target;
-  btn.disabled=true;btn.textContent=t('pricingPage.processing');
-  const vatAmount=Math.round(price*0.05*100)/100;
-  const totalAmount=Math.round((price+vatAmount)*100)/100;
-  try{
-    const res=await fetch(API_URL+'/api/thawani/create-session',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
-      body:JSON.stringify({
-        amount:totalAmount,
-        clientName:document.getElementById('userEmail')?.textContent||'Client',
-        clientId:userClientId,
-        description:`Briefcase Top-up ${gb}GB`,
-        metadata:{type:'storage_topup',gb,clientId:userClientId}
-      })
-    });
-    const data=await res.json();
-    if(data.checkout_url){
-      window.location.href=data.checkout_url;
-    } else {
-      alert(t('popup.paymentError')+': '+(data.error||t('popup.unknownError')));
-      btn.disabled=false;btn.textContent=t('topup.buyNow');
-    }
-  }catch(e){
-    alert(t('popup.connectionError'));
-    btn.disabled=false;btn.textContent=t('topup.buyNow');
-  }
-}
-
-function openCreditsModal(){
-  const packs=[{n:50,p:5,label:t('pricingPage.starterBundle')},{n:200,p:18,label:t('pricingPage.standardBundle')},{n:500,p:40,label:t('pricingPage.powerBundle')}];
-  const packsHtml=packs.map(pk=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px;">
-    <div><div style="font-weight:700;font-size:.85rem;">${pk.label}</div><div style="font-size:.75rem;color:var(--muted);">${pk.n} ${t('topup.credits')} · ${t('topup.neverExpire')}</div><div style="font-size:.7rem;color:var(--muted);">OMR ${pk.p} + 5% VAT = OMR ${(pk.p*1.05).toFixed(3)}</div></div>
-    <button class="act-btn" onclick="buyImageCredits(${pk.n},${pk.p},'${pk.label}')">${t('topup.buyNow')}</button>
-    <button class="act-btn" style="margin-inline-start:6px;background:#003087;" onclick="payWithPayPal(${pk.p},'Image Credits ${pk.n}cr')">PayPal</button>
-  </div>`).join('');
-  const trialEnded=imageCredits.freeAllowanceActive===false;
-  const statusHtml=trialEnded
-    ? `<p style="font-size:.8rem;margin-bottom:14px;color:#f85149;"><b>${t('topup.trialEnded')}</b> ${imageCredits.balance>0?`${t('topup.youHave')} <b>${imageCredits.balance}</b> ${t('topup.creditsRemaining')}`:t('topup.topUpBelow')}</p>`
-    : `<p style="font-size:.8rem;margin-bottom:14px;">${t('topup.youHave')} <b>${imageCredits.dailyFreeRemaining}</b> ${t('topup.freeImagesLeft')}${imageCredits.balance>0?` ${t('topup.and')} <b>${imageCredits.balance}</b> ${t('topup.creditsInBalance')}`:''}.</p>`;
-  const html=`<div style="padding:4px 0;">
-    <p style="color:var(--muted);font-size:.85rem;margin-bottom:14px;">${t('topup.imageIntro')}</p>
-    ${statusHtml}
-    ${packsHtml}
-    <p style="color:var(--muted);font-size:.75rem;margin-top:10px;">${t('topup.payNoteCredits')}</p>
-  </div>`;
-  showModal(t('topup.imageTitle'),html);
-}
-
-async function buyImageCredits(credits,price,label){
-  const btn=event.target;
-  btn.disabled=true;btn.textContent=t('pricingPage.processing');
-  const vatAmount=Math.round(price*0.05*100)/100;
-  const totalAmount=Math.round((price+vatAmount)*100)/100;
-  try{
-    const res=await fetch(API_URL+'/api/thawani/create-session',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
-      body:JSON.stringify({
-        amount:totalAmount,
-        clientName:document.getElementById('userEmail')?.textContent||'Client',
-        clientId:userClientId,
-        description:`Image Credits ${credits}cr`,
-        metadata:{type:'image_credits',credits,clientId:userClientId}
-      })
-    });
-    const data=await res.json();
-    if(data.checkout_url){
-      window.location.href=data.checkout_url;
-    } else {
-      alert(t('popup.paymentError')+': '+(data.error||t('popup.unknownError')));
-      btn.disabled=false;btn.textContent=t('topup.buyNow');
-    }
-  }catch(e){
-    alert(t('popup.connectionError'));
-    btn.disabled=false;btn.textContent=t('topup.buyNow');
-  }
+    const r=await fetch(API_URL+'/api/client/'+clientId+'/feed-sources/'+sourceId,{method:'DELETE',headers:{'Authorization':'Bearer '+session.access_token}});
+    if(!r.ok)throw new Error(t('ui.creds.deleteSourceFailed'));
+    loadFeedSources(clientId);
+  }catch(e){showToast(t('popup.error')+': '+e.message);}
 }
