@@ -85,7 +85,7 @@ async function loadVaultFiles(){
     if(listEl)listEl.innerHTML=renderVaultRows(files||[]);
   }catch(e){
     const listEl=document.getElementById('briefcaseFileList');
-    if(listEl)listEl.innerHTML=`<div style="text-align:center;padding:20px 0;color:#f85149;font-family:var(--mono);font-size:.7rem;">Error loading files</div>`;
+    if(listEl)listEl.innerHTML=`<div style="text-align:center;padding:20px 0;color:#f85149;font-family:var(--mono);font-size:.7rem;">${t('ui.brief.loadError')}</div>`;
   }
 }
 
@@ -114,9 +114,9 @@ function renderVaultRows(files){
       <div style="font-size:.66rem;color:var(--text);margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${f.file_name}">${f.file_name}</div>
       <div style="font-size:.58rem;color:var(--muted);margin-bottom:6px;">${formatBytes(f.file_size_bytes)}</div>
       <div style="display:flex;gap:3px;">
-        <button onclick="openShareModal('${f.id}','${(f.file_name||'').replace(/'/g,'')}','${(f.shared_with_roles||[]).join(',')}','${(f.shared_with_users||[]).join(',')}')" title="Share" style="flex:1;font-size:.55rem;padding:3px 0;border-radius:4px;background:rgba(127,119,221,0.1);color:#7f77dd;border:1px solid rgba(127,119,221,0.3);cursor:pointer;"><i class="ti ti-share-2"></i></button>
-        <button onclick="downloadVaultFile('${f.id}')" title="Download" style="flex:1;font-size:.55rem;padding:3px 0;border-radius:4px;background:rgba(64,156,255,0.1);color:var(--nes-blue);border:1px solid rgba(64,156,255,0.3);cursor:pointer;"><i class="ti ti-download"></i></button>
-        <button onclick="deleteVaultFile('${f.id}','${(f.file_name||'this file').replace(/'/g,'')}')" title="Delete" style="flex:1;font-size:.55rem;padding:3px 0;border-radius:4px;background:rgba(248,81,73,0.1);color:#f85149;border:1px solid rgba(248,81,73,0.3);cursor:pointer;"><i class="ti ti-trash"></i></button>
+        <button onclick="openShareModal('${f.id}','${(f.file_name||'').replace(/'/g,'')}','${(f.shared_with_roles||[]).join(',')}','${(f.shared_with_users||[]).join(',')}')" title="${t('ui.brief.share')}" style="flex:1;font-size:.55rem;padding:3px 0;border-radius:4px;background:rgba(127,119,221,0.1);color:#7f77dd;border:1px solid rgba(127,119,221,0.3);cursor:pointer;"><i class="ti ti-share-2"></i></button>
+        <button onclick="downloadVaultFile('${f.id}')" title="${t('ui.brief.download')}" style="flex:1;font-size:.55rem;padding:3px 0;border-radius:4px;background:rgba(64,156,255,0.1);color:var(--nes-blue);border:1px solid rgba(64,156,255,0.3);cursor:pointer;"><i class="ti ti-download"></i></button>
+        <button onclick="deleteVaultFile('${f.id}','${(f.file_name||'this file').replace(/'/g,'')}')" title="${t('common.delete')}" style="flex:1;font-size:.55rem;padding:3px 0;border-radius:4px;background:rgba(248,81,73,0.1);color:#f85149;border:1px solid rgba(248,81,73,0.3);cursor:pointer;"><i class="ti ti-trash"></i></button>
       </div>
     </div>`;
   }).join('');
@@ -126,22 +126,22 @@ async function openShareModal(fileId, fileName, currentRolesStr, currentUsersStr
   const currentRoles = currentRolesStr ? currentRolesStr.split(',') : [];
   const currentUsers = currentUsersStr ? currentUsersStr.split(',') : [];
 
-  let peopleHtml = '<p style="color:var(--muted);font-size:.7rem;padding:8px 0;">Loading team members...</p>';
-  showModal('Share Document', `
-    <p style="color:var(--muted);font-size:.85rem;margin-bottom:14px;">Choose which roles can see "${esc(fileName)}". CEO always has full access; the uploader always sees their own files.</p>
-    <div style="font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">Roles</div>
+  let peopleHtml = '<p style="color:var(--muted);font-size:.7rem;padding:8px 0;">'+t('ui.brief.loadingMembers')+'</p>';
+  showModal(t('ui.brief.shareDoc'), `
+    <p style="color:var(--muted);font-size:.85rem;margin-bottom:14px;">${t('ui.brief.shareIntro').replace('{name}',()=>esc(fileName))}</p>
+    <div style="font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">${t('ui.brief.roles')}</div>
     <label style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--card);border:1px solid var(--border);border-radius:8px;margin-bottom:8px;cursor:pointer;">
       <input type="checkbox" id="shareRoleManager" ${currentRoles.includes('manager')?'checked':''} style="width:16px;height:16px;">
-      <span>Manager</span>
+      <span>${t('team.roleManager')}</span>
     </label>
     <label style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--card);border:1px solid var(--border);border-radius:8px;margin-bottom:16px;cursor:pointer;">
       <input type="checkbox" id="shareRoleStaff" ${currentRoles.includes('staff')?'checked':''} style="width:16px;height:16px;">
-      <span>Staff</span>
+      <span>${t('team.roleStaff')}</span>
     </label>
     <div style="border-top:1px solid var(--border);margin-bottom:14px;"></div>
-    <div style="font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">Specific people (confidential — bypasses roles)</div>
+    <div style="font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">${t('ui.brief.specificPeople')}</div>
     <div id="sharePeopleList">${peopleHtml}</div>
-    <button onclick="saveFileShare('${fileId}')" class="form-submit" style="margin-top:14px;"><i class="ti ti-check"></i> Save Sharing</button>
+    <button onclick="saveFileShare('${fileId}')" class="form-submit" style="margin-top:14px;"><i class="ti ti-check"></i> ${t('ui.brief.saveSharing')}</button>
   `);
 
   try{
@@ -160,12 +160,12 @@ async function openShareModal(fileId, fileName, currentRolesStr, currentUsersStr
       <label style="display:flex;align-items:center;gap:10px;padding:9px 10px;background:var(--card);border:1px solid var(--border);border-radius:8px;margin-bottom:6px;cursor:pointer;">
         <input type="checkbox" class="sharePersonCheck" value="${m.id}" ${currentUsers.includes(m.id)?'checked':''} style="width:16px;height:16px;">
         <span style="flex:1;font-size:.8rem;">${esc(m.email||'—')}</span>
-        <span style="font-size:.62rem;padding:2px 7px;border-radius:4px;background:rgba(64,156,255,0.1);color:var(--nes-blue);text-transform:capitalize;">${m.role||''}</span>
+        <span style="font-size:.62rem;padding:2px 7px;border-radius:4px;background:rgba(64,156,255,0.1);color:var(--nes-blue);text-transform:capitalize;">${m.role?t('team.role_'+m.role,m.role):''}</span>
       </label>
     `).join('');
   }catch(e){
     const listEl = document.getElementById('sharePeopleList');
-    if(listEl) listEl.innerHTML = '<p style="color:#f85149;font-size:.75rem;">Could not load team members.</p>';
+    if(listEl) listEl.innerHTML = '<p style="color:#f85149;font-size:.75rem;">'+t('ui.brief.membersLoadFailed')+'</p>';
   }
 }
 
@@ -186,7 +186,7 @@ async function saveFileShare(fileId){
       document.getElementById('genericModalOverlay')?.remove();
       await loadVaultFiles();
     }else{
-      showToast('❌ '+(data.error||'Failed to update sharing'));
+      showToast('❌ '+(data.error||t('ui.brief.shareFailed')));
     }
   }catch(e){
     showToast('❌ '+e.message);
@@ -267,22 +267,22 @@ async function sendBriefcaseChatMessage(){
 
   if(!window._vaultFiles || !window._vaultFiles.length){
     appendBriefcaseChatMsg('user', text);
-    appendBriefcaseChatMsg('ai', 'No documents in Briefcase yet — upload a file first.');
+    appendBriefcaseChatMsg('ai', t('ui.brief.noDocs'));
     return;
   }
 
   appendBriefcaseChatMsg('user', text);
-  const typingBubble = appendBriefcaseChatMsg('ai', 'Thinking...');
+  const typingBubble = appendBriefcaseChatMsg('ai', t('chatUtilsUi.thinking'));
 
   if(!window._briefcaseDocContextReady){
-    typingBubble.textContent = 'Still preparing your documents, one moment...';
+    typingBubble.textContent = t('ui.brief.preparing');
     await new Promise(resolve=>{
       const check = setInterval(()=>{
         if(window._briefcaseDocContextReady){ clearInterval(check); resolve(); }
       }, 400);
       setTimeout(()=>{ clearInterval(check); resolve(); }, 15000);
     });
-    typingBubble.textContent = 'Thinking...';
+    typingBubble.textContent = t('chatUtilsUi.thinking');
   }
 
   window._briefcaseChatHistory.push({role:'user', content:text});
@@ -323,7 +323,7 @@ async function uploadVaultFile(file){
     });
     const data=await res.json();
     if(data.success){
-      showToast(`✅ ${file.name} uploaded`);
+      showToast('✅ '+t('ui.brief.uploaded').replace('{name}',()=>file.name));
       try{
         const text = await extractText(file);
         if(text.trim() && data.file && data.file.id){
@@ -351,10 +351,10 @@ async function downloadVaultFile(fileId){
     if(data.url){
       window.open(data.url,'_blank');
     }else{
-      showToast('❌ Could not generate download link');
+      showToast('❌ '+t('ui.brief.linkFailed'));
     }
   }catch(e){
-    showToast('❌ Download failed: '+e.message);
+    showToast('❌ '+t('ui.brief.downloadFailed')+': '+e.message);
   }
 }
 
@@ -374,9 +374,9 @@ async function deleteVaultFile(fileId, fileName){
       await loadVaultFiles();
       loadBriefcaseDocContext();
     }else{
-      showToast('❌ Delete failed: '+(data.error||t('popup.unknownError')));
+      showToast('❌ '+t('ui.shared.deleteFailed')+': '+(data.error||t('popup.unknownError')));
     }
   }catch(e){
-    showToast('❌ Delete failed: '+e.message);
+    showToast('❌ '+t('ui.shared.deleteFailed')+': '+e.message);
   }
 }
