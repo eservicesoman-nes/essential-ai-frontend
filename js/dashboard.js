@@ -348,15 +348,17 @@ async function showCEODashboard(){
   let leads=[],leadsToday=0,totalLeads=0;
   try{
     const today=new Date().toISOString().split('T')[0];
-    let leadsQ2=sb.from('leads').select('*').order('created_at',{ascending:false}).limit(100);
-    if(userClientId && userRole !== 'nesadmin')leadsQ2=leadsQ2.eq('client_id',userClientId);
-    const{data:allLeads}=await leadsQ2;
-    leads=allLeads||[];totalLeads=leads.length;
+    const ownOnly=!!(userClientId && userRole !== 'nesadmin');
+    let leadsQ2=sb.from('leads').select('id,email,phone,country,industry,status,created_at').order('created_at',{ascending:false}).limit(1000);
+    let countQ=sb.from('leads').select('id',{count:'exact',head:true});
+    if(ownOnly){leadsQ2=leadsQ2.eq('client_id',userClientId);countQ=countQ.eq('client_id',userClientId);}
+    const[{data:allLeads},{count:exactTotal}]=await Promise.all([leadsQ2,countQ]);
+    leads=allLeads||[];totalLeads=(typeof exactTotal==='number')?exactTotal:leads.length;
     leadsToday=leads.filter(l=>l.created_at?.startsWith(today)).length;
   }catch(e){}
   const countries={};
   leads.forEach(l=>{
-    const c=l.country||detectCountry(l.email||'Other');
+    const c=leadCountry(l);
     countries[c]=(countries[c]||0)+1;
   });
   const hotLeads=leads.filter(l=>['Government','Ports & Customs','Aviation & Airports'].includes(l.industry)).length;
@@ -364,7 +366,7 @@ async function showCEODashboard(){
   const uncontacted=leads.filter(l=>l.created_at<fortyEightHrsAgo&&l.status!=='contacted').length;
   const colors=['var(--nes-blue)','#7f77dd','#3fb950','#d29922','#484f58'];
   const geoRows=Object.entries(countries).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([c,n],i)=>`
-    <div class="geo-row"><div class="geo-name">${t('ui.country.'+c,c)}</div><div class="geo-track"><div class="geo-fill" style="width:${Math.round(n/totalLeads*100)||0}%;background:${colors[i%5]};box-shadow:0 0 4px ${colors[i%5]}"></div></div><div class="geo-n">${n}</div></div>`).join('');
+    <div class="geo-row"><div class="geo-name">${t('ui.country.'+c,c)}</div><div class="geo-track"><div class="geo-fill" style="width:${Math.round(n/(leads.length||1)*100)||0}%;background:${colors[i%5]};box-shadow:0 0 4px ${colors[i%5]}"></div></div><div class="geo-n">${n}</div></div>`).join('');
   const stageCounts={new:0,contacted:0,qualified:0,closed:0};
   leads.forEach(l=>{
     const s=(l.status||'new').toLowerCase();
@@ -921,7 +923,23 @@ function toggleFeedItem(idx){
   if(chevron)chevron.style.transform=isOpen?'':'rotate(180deg)';
 }
 
+// Lead country: stored value, else international dial code, else email domain, else the client's own country
+const LEAD_DIAL_CODES=[['351','Portugal'],['968','Oman'],['971','UAE'],['966','Saudi Arabia'],['965','Kuwait'],['973','Bahrain'],['974','Qatar'],['962','Jordan'],['20','Egypt'],['92','Pakistan'],['91','India'],['44','UK'],['49','Germany'],['33','France'],['34','Spain'],['55','Brazil'],['1','USA']];
+function leadCountry(l){
+  if(l&&l.country&&String(l.country).trim())return String(l.country).trim();
+  let p=String((l&&l.phone)||'').replace(/[^0-9+]/g,'');
+  if(p.startsWith('00'))p='+'+p.slice(2);
+  if(p.startsWith('+')){const d=p.slice(1);const m=LEAD_DIAL_CODES.find(([code])=>d.startsWith(code));if(m)return m[1];}
+  const byEmail=detectCountry((l&&l.email)||'');
+  if(byEmail)return byEmail;
+  return window.clientCountryName||'Other';
+}
 function detectCountry(email){
+  email=String(email||'').toLowerCase();
+  if(!email.includes('@'))return null;
+  if(email.endsWith('.pt'))return'Portugal';
+  if(email.endsWith('.es'))return'Spain';
+  if(email.endsWith('.br'))return'Brazil';
   if(email.endsWith('.om')||email.includes('oman'))return'Oman';
   if(email.endsWith('.ae')||email.includes('uae')||email.includes('dubai'))return'UAE';
   if(email.endsWith('.sa')||email.includes('saudi'))return'Saudi Arabia';
@@ -937,7 +955,7 @@ function detectCountry(email){
   if(email.endsWith('.jo'))return'Jordan';
   if(email.endsWith('.eg'))return'Egypt';
   if(email.endsWith('.us'))return'USA';
-  return'Oman';
+  return null;
 }
 
 function showCommandCentre(){
