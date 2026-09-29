@@ -36,7 +36,7 @@ async function showLeadsPage(){
         <div id="leadsRows">${renderLeadRows(leads||[])}</div>
       </div>`;
     window._allLeads=leads||[];
-  }catch(e){document.getElementById('leadsContent').innerHTML=`<div style="text-align:center;padding:40px;color:#f85149;font-family:var(--mono);">Error: ${e.message}</div>`;}
+  }catch(e){document.getElementById('leadsContent').innerHTML=`<div style="text-align:center;padding:40px;color:#f85149;font-family:var(--mono);">${t('popup.error')}: ${e.message}</div>`;}
 }
 
 function getRepeatPhones(){
@@ -57,8 +57,8 @@ function renderLeadRows(leads){
     const date=new Date(l.created_at);const timeAgo=getTimeAgo(date);const badge=getBadge(l,date);
     const _msg=(l.message||'').trim();const _msgId='msg-'+l.id;
     const isRepeat=l.phone&&repeatPhones.has(l.phone.trim());
-    const repeatDot=isRepeat?`<span title="Repeat inquiry — same phone number seen before" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#d29922;margin-inline-end:5px;flex-shrink:0;animation:pulse 1.5s infinite;"></span>`:'';
-    return`<div class="lt-row" id="lead-row-${l.id}"><div style="display:flex;align-items:flex-start;">${repeatDot}<div><div class="lead-name">${esc(l.name)||'—'}</div><div class="lead-email">${esc(l.email)||'—'}</div>${_msg?`<div><button onclick="const el=document.getElementById('${_msgId}');el.style.display=el.style.display==='none'?'block':'none';" style="font-size:.58rem;padding:1px 6px;border-radius:4px;background:rgba(64,156,255,.08);color:var(--nes-blue);border:1px solid rgba(64,156,255,.2);cursor:pointer;margin-top:3px;"><i class='ti ti-message'></i> Message</button><div id="${_msgId}" style="display:none;font-size:.68rem;color:var(--muted);margin-top:4px;padding:6px 8px;background:var(--card);border-radius:5px;border:1px solid var(--border);font-style:italic;">${esc(_msg)}</div></div>`:''}</div></div><div class="lead-industry">${esc(l.industry)||'General'}</div><div class="lead-email">${esc(l.phone)||'—'}</div><div class="lead-time">${timeAgo}</div><div style="display:flex;align-items:center;gap:6px;"><span class="lead-badge ${badge.cls}">${badge.label}</span>${(userRole==='nesadmin'||userRole==='ceo'||userRole==='nes_partner')&&l.phone?`<button onclick="callWithSara('${l.id}','${(l.phone||'').replace(/['"\\<>\r\n]/g,'').replace(/\+/g,'%2B')}','${(l.name||'Lead').replace(/['"\\<>\r\n]/g,'')}')" style="font-size:.6rem;padding:2px 8px;border-radius:5px;background:rgba(63,185,80,0.1);color:#3fb950;border:1px solid rgba(63,185,80,0.3);cursor:pointer;white-space:nowrap;"><i class="ti ti-phone"></i> Sara</button>`:''}<button onclick="deleteLead('${l.id}','${(l.name||'this lead').replace(/['"\\<>\r\n]/g,'')}')" title="Delete permanently" style="font-size:.6rem;padding:2px 7px;border-radius:5px;background:rgba(248,81,73,0.1);color:#f85149;border:1px solid rgba(248,81,73,0.3);cursor:pointer;"><i class="ti ti-trash"></i></button></div></div>`;
+    const repeatDot=isRepeat?`<span title="${t('ui.leads.repeatTip')}" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#d29922;margin-inline-end:5px;flex-shrink:0;animation:pulse 1.5s infinite;"></span>`:'';
+    return`<div class="lt-row" id="lead-row-${l.id}"><div style="display:flex;align-items:flex-start;">${repeatDot}<div><div class="lead-name">${esc(l.name)||'—'}</div><div class="lead-email">${esc(l.email)||'—'}</div>${_msg?`<div><button onclick="const el=document.getElementById('${_msgId}');el.style.display=el.style.display==='none'?'block':'none';" style="font-size:.58rem;padding:1px 6px;border-radius:4px;background:rgba(64,156,255,.08);color:var(--nes-blue);border:1px solid rgba(64,156,255,.2);cursor:pointer;margin-top:3px;"><i class='ti ti-message'></i> Message</button><div id="${_msgId}" style="display:none;font-size:.68rem;color:var(--muted);margin-top:4px;padding:6px 8px;background:var(--card);border-radius:5px;border:1px solid var(--border);font-style:italic;">${esc(_msg)}</div></div>`:''}</div></div><div class="lead-industry">${esc(l.industry)||'General'}</div><div class="lead-email">${esc(l.phone)||'—'}</div><div class="lead-time">${timeAgo}</div><div style="display:flex;align-items:center;gap:6px;"><span class="lead-badge ${badge.cls}">${badge.label}</span>${(userRole==='nesadmin'||userRole==='ceo'||userRole==='nes_partner')&&l.phone?`<button onclick="callWithSara('${l.id}','${(l.phone||'').replace(/['"\\<>\r\n]/g,'').replace(/\+/g,'%2B')}','${(l.name||'Lead').replace(/['"\\<>\r\n]/g,'')}')" style="font-size:.6rem;padding:2px 8px;border-radius:5px;background:rgba(63,185,80,0.1);color:#3fb950;border:1px solid rgba(63,185,80,0.3);cursor:pointer;white-space:nowrap;"><i class="ti ti-phone"></i> Sara</button>`:''}<button onclick="deleteLead('${l.id}','${(l.name||'this lead').replace(/['"\\<>\r\n]/g,'')}')" title="${t('ui.leads.deletePerm')}" style="font-size:.6rem;padding:2px 7px;border-radius:5px;background:rgba(248,81,73,0.1);color:#f85149;border:1px solid rgba(248,81,73,0.3);cursor:pointer;"><i class="ti ti-trash"></i></button></div></div>`;
   }).join('');
 }
 
@@ -76,12 +76,12 @@ async function deleteLead(leadId, leadName){
     if(subEl)subEl.textContent=`${window._allLeads.length} ${t('leads.total')} · ${todayLeads} ${t('leads.today')}`;
     showToast(t('toast.leadDeleted'));
   }catch(e){
-    showToast('❌ Delete failed: '+e.message);
+    showToast('❌ '+t('ui.shared.deleteFailed')+': '+e.message);
   }
 }
 
 async function callWithSara(leadId, phone, name){
-  const code = prompt(`Enter confirmation code to call ${name}:`);
+  const code = prompt(t('ui.leads.enterCode').replace('{name}',()=>name));
   if(!code) return;
   if(code !== '4321'){ showToast(t('toast.incorrectCodeCallCancelled')); return; }
   const decoded = decodeURIComponent(phone);
@@ -94,27 +94,27 @@ async function callWithSara(leadId, phone, name){
     });
     const data = await res.json();
     if(data.success){
-      showToast(`✅ Sara is calling ${name} now`);
+      showToast('✅ '+t('ui.leads.saraCalling').replace('{name}',()=>name));
     } else {
-      showToast('❌ Call failed: ' + (data.error||t('popup.unknownError')));
+      showToast('❌ '+t('ui.leads.callFailed')+': ' + (data.error||t('popup.unknownError')));
     }
   } catch(e) {
-    showToast('❌ Call failed: ' + e.message);
+    showToast('❌ '+t('ui.leads.callFailed')+': ' + e.message);
   }
 }
 
 function getBadge(lead,date){
   const hrs=(Date.now()-date.getTime())/3600000;
   const highValue=['Government','Ports & Customs','Aviation & Airports'].includes(lead.industry);
-  if(highValue&&hrs<24)return{cls:'lbhot',label:'Hot'};
-  if(hrs<24)return{cls:'lbnew',label:'New'};
-  return{cls:'lbwarm',label:'Warm'};
+  if(highValue&&hrs<24)return{cls:'lbhot',label:t('ui.leads.hot')};
+  if(hrs<24)return{cls:'lbnew',label:t('ui.leads.new')};
+  return{cls:'lbwarm',label:t('ui.leads.warm')};
 }
 
 function getTimeAgo(date){
   const hrs=Math.floor((Date.now()-date.getTime())/3600000);
-  if(hrs<1)return'Just now';if(hrs<24)return hrs+'h ago';
-  return Math.floor(hrs/24)+'d ago';
+  if(hrs<1)return t('ui.leads.justNow');if(hrs<24)return t('ui.leads.hAgo').replace('{n}',hrs);
+  return t('ui.leads.dAgo').replace('{n}',Math.floor(hrs/24));
 }
 
 function filterLeads(filter,btn){
