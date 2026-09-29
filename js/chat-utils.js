@@ -103,21 +103,21 @@ function cleanDisplay(text){
   }).join('\n').trim();
 }
 
-function userBubble(text){return`<div class="msg user"><div class="user-av-msg">${session?.user?.email?.[0]?.toUpperCase()||'U'}</div><div class="msg-body"><div class="msg-role">You</div><div class="msg-bubble">${esc(text)}</div></div></div>`;}
+function userBubble(text){return`<div class="msg user"><div class="user-av-msg">${session?.user?.email?.[0]?.toUpperCase()||'U'}</div><div class="msg-body"><div class="msg-role">${t('ui.chat.you')}</div><div class="msg-bubble">${esc(text)}</div></div></div>`;}
 
 function aiBubble(text,sources=[]){
-  const src=sources.length?'<div class="sources-block">Sources: '+sources.map(s=>'<a href="'+esc(s.url)+'" target="_blank">'+esc(s.title||s.url)+'</a>').join(' · ')+'</div>':''
+  const src=sources.length?'<div class="sources-block">'+t('ui.dash.sources')+': '+sources.map(s=>'<a href="'+esc(s.url)+'" target="_blank">'+esc(s.title||s.url)+'</a>').join(' · ')+'</div>':''
   return`<div class="msg ai"><div class="chat-av-wrap"><div class="chat-av-ring"><div class="chat-av-mid"><div class="chat-av-dot"></div></div></div><div class="chat-av-online"></div></div><div class="msg-body"><div class="msg-role">NES AI</div><div class="msg-bubble">${md(text)}${src}</div><button class="copy-btn" onclick="copyMsg(this)">${t('chatUi.copy')}</button></div></div>`;
 }
 
-function imgBubble(url){return`<div class="msg ai"><div class="chat-av-wrap"><div class="chat-av-ring"><div class="chat-av-mid"><div class="chat-av-dot"></div></div></div><div class="chat-av-online"></div></div><div class="msg-body"><div class="msg-role">NES AI · Image Gen</div><div class="msg-bubble"><img src="${esc(url)}" style="max-width:100%;border-radius:10px;margin-top:4px;"></div></div></div>`;}
+function imgBubble(url){return`<div class="msg ai"><div class="chat-av-wrap"><div class="chat-av-ring"><div class="chat-av-mid"><div class="chat-av-dot"></div></div></div><div class="chat-av-online"></div></div><div class="msg-body"><div class="msg-role">NES AI · ${t('usage.imageGen')}</div><div class="msg-bubble"><img src="${esc(url)}" style="max-width:100%;border-radius:10px;margin-top:4px;"></div></div></div>`;}
 
 function addAiMsg(text,sources=[]){appendMsg(aiBubble(text,sources));saveHistory();}
 
 function addTyping(){
   const el=document.createElement('div');el.className='msg ai';el.id='typing';
   el.innerHTML=`<div class="chat-av-wrap"><div class="chat-av-ring"><div class="chat-av-mid"><div class="chat-av-dot"></div></div></div><div class="chat-av-online"></div></div><div class="msg-body"><div class="msg-role">NES AI</div><div class="msg-bubble" id="typingBubble"><div style="display:flex;gap:5px;">${[0,.2,.4].map(d=>`<div style="width:7px;height:7px;background:var(--nes-blue);border-radius:50%;animation:bounce 1.4s ${d}s infinite;"></div>`).join('')}</div></div></div>`;
-  setTimeout(()=>{const b=document.getElementById('typingBubble');if(b)b.innerHTML='<span style="font-size:.78rem;color:var(--muted);font-style:italic;">Thinking...</span>';},2500);
+  setTimeout(()=>{const b=document.getElementById('typingBubble');if(b)b.innerHTML='<span style="font-size:.78rem;color:var(--muted);font-style:italic;">'+t('chatUtilsUi.thinking')+'</span>';},2500);
   document.getElementById('messages')?.appendChild(el);scroll();
 }
 
