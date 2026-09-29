@@ -364,7 +364,7 @@ async function showCEODashboard(){
   const uncontacted=leads.filter(l=>l.created_at<fortyEightHrsAgo&&l.status!=='contacted').length;
   const colors=['var(--nes-blue)','#7f77dd','#3fb950','#d29922','#484f58'];
   const geoRows=Object.entries(countries).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([c,n],i)=>`
-    <div class="geo-row"><div class="geo-name">${c}</div><div class="geo-track"><div class="geo-fill" style="width:${Math.round(n/totalLeads*100)||0}%;background:${colors[i%5]};box-shadow:0 0 4px ${colors[i%5]}"></div></div><div class="geo-n">${n}</div></div>`).join('');
+    <div class="geo-row"><div class="geo-name">${t('ui.country.'+c,c)}</div><div class="geo-track"><div class="geo-fill" style="width:${Math.round(n/totalLeads*100)||0}%;background:${colors[i%5]};box-shadow:0 0 4px ${colors[i%5]}"></div></div><div class="geo-n">${n}</div></div>`).join('');
   const stageCounts={new:0,contacted:0,qualified:0,closed:0};
   leads.forEach(l=>{
     const s=(l.status||'new').toLowerCase();
@@ -378,7 +378,7 @@ async function showCEODashboard(){
     qualified:Math.round(stageCounts.qualified/totalLeads*100)||0,
     closed:Math.round(stageCounts.closed/totalLeads*100)||0
   };
-  if(window._weatherCache){setTimeout(()=>{const w=window._weatherCache;const wi=document.getElementById('weatherIcon');const wd=document.getElementById('weatherDesc');const wt=document.getElementById('weatherTemp');const wf=document.getElementById('weatherFeels');if(wi){wi.className='ti '+w.icon;wi.style.cssText='font-size:22px;color:var(--nes-blue);filter:drop-shadow(0 0 4px var(--nes-blue))';}if(wd)wd.textContent=w.desc;if(wt)wt.textContent=w.temp;if(wf)wf.textContent=w.feels;const wl=document.getElementById('weatherLocLabel');if(wl)wl.textContent=(window.userRegion||'Muscat').toUpperCase();},50);}else{setTimeout(()=>{fetch('https://wttr.in/'+encodeURIComponent(window.userRegion||'Muscat')+'?format=j1&lang='+(window.clientLocale||'en')).then(r=>r.json()).then(w=>{const c=w.current_condition[0];const desc=c.weatherDesc[0].value;const temp=c.temp_C;const feels=c.FeelsLikeC;const humidity=c.humidity;const icons={'Sunny':'ti-sun','Clear':'ti-moon-stars','Partly cloudy':'ti-cloud-sun','Cloudy':'ti-cloud','Overcast':'ti-cloud','Mist':'ti-mist','Fog':'ti-mist','Rain':'ti-cloud-rain','Drizzle':'ti-cloud-drizzle','Thunderstorm':'ti-storm','Snow':'ti-snowflake','Blizzard':'ti-snowflake'};const iconKey=Object.keys(icons).find(k=>desc.includes(k))||'Sunny';const icon=icons[iconKey]||'ti-sun';const locDesc=(window.clientLocale&&c['lang_'+window.clientLocale]&&c['lang_'+window.clientLocale][0]&&c['lang_'+window.clientLocale][0].value)||desc;const descTxt=locDesc+' · '+t('weather.humidity')+' '+humidity+'%';const tempTxt=temp+'°C';const feelsTxt=t('ceoDashboardSection.feelsLike')+' '+feels+'°C';window._weatherCache={icon,desc:descTxt,temp:tempTxt,feels:feelsTxt};const wi=document.getElementById('weatherIcon');const wd=document.getElementById('weatherDesc');const wt=document.getElementById('weatherTemp');const wf=document.getElementById('weatherFeels');if(wi){wi.className='ti '+icon;wi.style.cssText='font-size:22px;color:var(--nes-blue);filter:drop-shadow(0 0 4px var(--nes-blue))';}if(wd)wd.textContent=descTxt;if(wt)wt.textContent=tempTxt;if(wf)wf.textContent=feelsTxt;const wl=document.getElementById('weatherLocLabel');if(wl)wl.textContent=(window.userRegion||'Muscat').toUpperCase();}).catch(()=>{const wd=document.getElementById('weatherDesc');if(wd)wd.textContent='Weather unavailable';});},100);}
+  if(window._weatherCache){setTimeout(()=>{const w=window._weatherCache;const wi=document.getElementById('weatherIcon');const wd=document.getElementById('weatherDesc');const wt=document.getElementById('weatherTemp');const wf=document.getElementById('weatherFeels');if(wi){wi.className='ti '+w.icon;wi.style.cssText='font-size:22px;color:var(--nes-blue);filter:drop-shadow(0 0 4px var(--nes-blue))';}if(wd)wd.textContent=w.desc;if(wt)wt.textContent=w.temp;if(wf)wf.textContent=w.feels;const wl=document.getElementById('weatherLocLabel');if(wl)wl.textContent=(window.userRegion||'Muscat').toUpperCase();},50);}else{setTimeout(()=>{fetch('https://wttr.in/'+encodeURIComponent(window.userRegion||'Muscat')+'?format=j1&lang='+(window.clientLocale||'en')).then(r=>r.json()).then(w=>{const c=w.current_condition[0];const desc=c.weatherDesc[0].value;const temp=c.temp_C;const feels=c.FeelsLikeC;const humidity=c.humidity;const icons={'Sunny':'ti-sun','Clear':'ti-moon-stars','Partly cloudy':'ti-cloud-sun','Cloudy':'ti-cloud','Overcast':'ti-cloud','Mist':'ti-mist','Fog':'ti-mist','Rain':'ti-cloud-rain','Drizzle':'ti-cloud-drizzle','Thunderstorm':'ti-storm','Snow':'ti-snowflake','Blizzard':'ti-snowflake'};const iconKey=Object.keys(icons).find(k=>desc.includes(k))||'Sunny';const icon=icons[iconKey]||'ti-sun';const locDesc=(window.clientLocale&&c['lang_'+window.clientLocale]&&c['lang_'+window.clientLocale][0]&&c['lang_'+window.clientLocale][0].value)||desc;const descTxt=locDesc+' · '+t('weather.humidity')+' '+humidity+'%';const tempTxt=temp+'°C';const feelsTxt=t('ceoDashboardSection.feelsLike')+' '+feels+'°C';window._weatherCache={icon,desc:descTxt,temp:tempTxt,feels:feelsTxt};const wi=document.getElementById('weatherIcon');const wd=document.getElementById('weatherDesc');const wt=document.getElementById('weatherTemp');const wf=document.getElementById('weatherFeels');if(wi){wi.className='ti '+icon;wi.style.cssText='font-size:22px;color:var(--nes-blue);filter:drop-shadow(0 0 4px var(--nes-blue))';}if(wd)wd.textContent=descTxt;if(wt)wt.textContent=tempTxt;if(wf)wf.textContent=feelsTxt;const wl=document.getElementById('weatherLocLabel');if(wl)wl.textContent=(window.userRegion||'Muscat').toUpperCase();}).catch(()=>{const wd=document.getElementById('weatherDesc');if(wd)wd.textContent=t('ui.dash.weatherUnavailable');});},100);}
 
   document.getElementById('ceoDashContent').innerHTML=`
     <div class="ceo-panel-toggle" style="display:none!important;padding:6px 12px;border-bottom:1px solid var(--border);gap:6px;flex-shrink:0;">
@@ -494,7 +494,7 @@ async function showCEODashboard(){
           <div style="display:flex;align-items:center;gap:8px;padding:8px 11px;background:var(--card);border:1px solid var(--border);border-radius:7px;">
             <div style="width:7px;height:7px;border-radius:50%;background:#3fb950;flex-shrink:0;"></div>
             <div style="font-size:.75rem;flex:1;">${t('ceoDashboardSection.platformRunning')}</div>
-            <div style="font-size:.58rem;font-family:var(--mono);padding:2px 7px;border-radius:7px;background:#0d2818;color:#3fb950;">OK</div>
+            <div style="font-size:.58rem;font-family:var(--mono);padding:2px 7px;border-radius:7px;background:#0d2818;color:#3fb950;">${t('ceoDashboardSection.ok')}</div>
           </div>
           ${(function(){
             const paidMap = window.clientApexPaidUntil || {};
@@ -506,12 +506,12 @@ async function showCEODashboard(){
               if(!mods[k]) return;
               const dateStr = paidMap[k];
               let status='ok', label='', badge='';
-              if(!dateStr){ status='warn'; label=labels[k]+' — renewal date not set'; badge='SET DATE'; }
+              if(!dateStr){ status='warn'; label=labels[k]+' — '+t('ui.dash.renewalNotSet'); badge=t('ui.dash.setDate'); }
               else{
                 const paidUntil = new Date(dateStr); paidUntil.setHours(0,0,0,0);
                 const diffDays = Math.round((paidUntil - today) / (1000*60*60*24));
-                if(diffDays < 0){ status='overdue'; label=labels[k]+' — renewal overdue'; badge='OVERDUE'; }
-                else if(diffDays <= 7){ status='warn'; label=labels[k]+' — renews in '+diffDays+'d'; badge='DUE SOON'; }
+                if(diffDays < 0){ status='overdue'; label=labels[k]+' — '+t('ui.dash.renewalOverdue'); badge=t('ui.dash.overdue'); }
+                else if(diffDays <= 7){ status='warn'; label=labels[k]+' — '+t('ui.dash.renewsIn').replace('{n}',diffDays); badge=t('ui.dash.dueSoon'); }
                 else { return; }
               }
               const color = status==='overdue' ? '#f85149' : '#d29922';
@@ -540,14 +540,14 @@ async function showCEODashboard(){
         `:''}\n      </div>
       </div>
     </div>
-      <div id="ceoResizer" title="Drag to resize"></div>
+      <div id="ceoResizer" title="${t('ui.dash.dragResize')}"></div>
       <div style="display:flex;flex-direction:column;overflow:hidden;">
         <div style="padding:9px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
           <div style="font-family:var(--mono);font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;display:flex;align-items:center;gap:5px;"><i class="ti ti-radar" style="font-size:11px;color:var(--nes-blue);"></i>${t('ceoDashboardSection.marketIntelligence')}</div>
           <div id="feedUnreadBadge" style="font-size:.58rem;font-family:var(--mono);padding:2px 7px;border-radius:8px;background:#1a3a6e;color:#409cff;font-weight:700;display:none;">0 NEW</div>
         </div>
         <div id="ceoFeedItems" style="overflow-y:auto;flex:1;padding:10px 14px;">
-          <div style="color:var(--muted);font-family:var(--mono);font-size:.7rem;padding:10px 0;">Loading intelligence feed...</div>
+          <div style="color:var(--muted);font-family:var(--mono);font-size:.7rem;padding:10px 0;">${t('loading.feed')}</div>
         </div>
       </div>
     `;
@@ -738,22 +738,22 @@ async function loadUsageSummary(){
       </div>`;
     }
     if(u.sara&&u.sara.limit>0)rows.push(bar(t('usage.saraCalls'),u.sara.used,u.sara.limit));
-    else if(u.sara&&u.sara.limit===-1)rows.push(`<div style="display:flex;align-items:center;justify-content:space-between;"><span style="font-size:.72rem;color:var(--text);">${t('usage.saraCalls')}</span><span style="font-size:.7rem;color:var(--muted);">${u.sara.used} · Unlimited</span></div>`);
+    else if(u.sara&&u.sara.limit===-1)rows.push(`<div style="display:flex;align-items:center;justify-content:space-between;"><span style="font-size:.72rem;color:var(--text);">${t('usage.saraCalls')}</span><span style="font-size:.7rem;color:var(--muted);">${u.sara.used} · ${t('ui.dash.unlimited')}</span></div>`);
     if(u.adam&&u.adam.enabled)rows.push(bar(t('usage.adamConsultations'),u.adam.used,u.adam.included));
     if(u.chat)rows.push(bar(t('usage.chatMessages'),u.chat.used,u.chat.limit));
     if(u.image){
       if(u.image.freeAllowanceActive){
         rows.push(bar(t('usage.imageTrial'),u.image.dailyUsed,u.image.dailyLimit));
       }else{
-        rows.push(`<div style="display:flex;align-items:center;justify-content:space-between;"><span style="font-size:.72rem;color:var(--text);">${t('usage.imageGen')}</span><span style="font-size:.7rem;color:var(--muted);">${u.image.creditBalance} credits remaining · PAYG</span></div>`);
+        rows.push(`<div style="display:flex;align-items:center;justify-content:space-between;"><span style="font-size:.72rem;color:var(--text);">${t('usage.imageGen')}</span><span style="font-size:.7rem;color:var(--muted);">${u.image.creditBalance} ${t('ui.dash.creditsPayg')}</span></div>`);
       }
     }
     if(u.storage)rows.push(bar(t('usage.briefcaseStorage'),u.storage.usedBytes,u.storage.quotaBytes,'GB'));
     const el=document.getElementById('usageSummaryContent');
-    if(el)el.innerHTML=rows.length?rows.join(''):'<div style="color:var(--muted);font-family:var(--mono);font-size:.7rem;">No usage data available</div>';
+    if(el)el.innerHTML=rows.length?rows.join(''):'<div style="color:var(--muted);font-family:var(--mono);font-size:.7rem;">'+t('empty.noUsageData')+'</div>';
   }catch(e){
     const el=document.getElementById('usageSummaryContent');
-    if(el)el.innerHTML='<div style="color:var(--muted);font-family:var(--mono);font-size:.7rem;">Could not load usage data</div>';
+    if(el)el.innerHTML='<div style="color:var(--muted);font-family:var(--mono);font-size:.7rem;">'+t('ui.dash.usageLoadFailed')+'</div>';
   }
 }
 
@@ -864,7 +864,7 @@ async function loadCeoFeed(){
         '</div></div>'+
         '<div style="font-size:.8rem;font-weight:600;color:var(--text);margin-bottom:4px;">'+
         (function(){
-          if(!item.content)return item.title||'Intelligence Update';
+          if(!item.content)return item.title||t('ui.dash.intelUpdate');
           var lines=item.content.split('\n').map(function(l){return l.trim();});
           var skipWords=['NES INTELLIGENCE','NES AI','Oman •','GCC •','Global Tech','AST','━','OMAN & GCC','AI & TECH','BUSINESS & ECO','MARKET INSIGHT','MORNING BRIEF','Intelligence Feed','CEO Briefing','---','http','🌐','📰','🔵','•'];
           for(var i=0;i<lines.length;i++){
@@ -878,14 +878,14 @@ async function loadCeoFeed(){
               }
             }
           }
-          return item.title||'Intelligence Update';
+          return item.title||t('ui.dash.intelUpdate');
         }())+alertIcon+'</div>'+
         '<div class="feed-preview-'+idx+'" style="font-size:.75rem;color:var(--muted);line-height:1.5;">'+preview+'</div>'+
         (isAlert?'':sourceHtml)+
         '</div></div>'+
         '<div class="feed-expanded-'+idx+'" style="display:none;padding:0 14px 14px 56px;border-top:1px solid var(--border);">'+
         '<div style="padding-top:12px;">'+expandedHtml+'</div>'+
-        (uniqueUrls.length?'<div style="font-family:var(--mono);font-size:.62rem;color:var(--muted);margin-top:8px;margin-bottom:4px;text-transform:uppercase;letter-spacing:.08em;">Sources</div>'+
+        (uniqueUrls.length?'<div style="font-family:var(--mono);font-size:.62rem;color:var(--muted);margin-top:8px;margin-bottom:4px;text-transform:uppercase;letter-spacing:.08em;">'+t('ui.dash.sources')+'</div>'+
         '<div style="display:flex;flex-wrap:wrap;gap:5px;">'+
         uniqueUrls.map(function(u){
           var label=u;try{label=new URL(u).hostname.replace('www.','');}catch(e){}
@@ -906,7 +906,7 @@ async function loadCeoFeed(){
     }
   }catch(e){
     const el=document.getElementById('ceoFeedItems');
-    if(el)el.innerHTML='<div style="color:var(--muted);font-family:var(--mono);font-size:.7rem;padding:10px 0;">Feed unavailable.</div>';
+    if(el)el.innerHTML='<div style="color:var(--muted);font-family:var(--mono);font-size:.7rem;padding:10px 0;">'+t('ui.dash.feedUnavailable')+'</div>';
   }
 }
 
@@ -949,7 +949,7 @@ function showCommandCentre(){
     hub.id='teamHubWrapper';
     hub.style.cssText='position:absolute;top:0;inset-inline-start:228px;inset-inline-end:0;bottom:0;background:var(--bg);z-index:50;display:flex;flex-direction:column;';
     hub.style.overflow='hidden';
-hub.innerHTML=`<div style="padding-block:11px;padding-inline-end:var(--header-clearance);padding-inline-start:60px;border-bottom:1px solid var(--border);flex-shrink:0;"><div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;">${t('sectionTitle.teamHub')}</div><div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">Internal team communications</div></div><div class="command-wrap" style="width:100%;flex:1;"><iframe id="teamHubIframe" class="command-iframe" src="${ROCKET_URL}" title="NES Team Hub" allow="microphone; camera" style="width:100%;height:100%;border:none;"></iframe></div>`;
+hub.innerHTML=`<div style="padding-block:11px;padding-inline-end:var(--header-clearance);padding-inline-start:60px;border-bottom:1px solid var(--border);flex-shrink:0;"><div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;">${t('sectionTitle.teamHub')}</div><div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">${t('ui.dash.teamHubSub')}</div></div><div class="command-wrap" style="width:100%;flex:1;"><iframe id="teamHubIframe" class="command-iframe" src="${ROCKET_URL}" title="NES Team Hub" allow="microphone; camera" style="width:100%;height:100%;border:none;"></iframe></div>`;
     document.getElementById('app').appendChild(hub);
   }
   hub.style.display='flex';
