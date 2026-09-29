@@ -356,6 +356,7 @@ async function showClientBrandingChip(){
     window.userRegion = (data.region || data.country || '').trim();
     window.clientAccountStatus = data.status || 'active';
     window.clientCurrency = data.currency || 'OMR';
+    window.clientCountryName = data.country || '';
     window.clientLocale = (userRole === 'nesadmin') ? 'en' : (data.locale || 'en');
     // One-time browser-language auto-detection: only runs once ever per browser,
     // before any manual language choice has been made. Never overrides a later manual choice.
