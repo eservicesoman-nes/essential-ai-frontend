@@ -2,7 +2,7 @@
 // 7 functions, zero logic changes
 
 async function showMyCredentials(){
-  if(!userClientId){addAiMsg('No client account linked.');return;}
+  if(!userClientId){addAiMsg(t('ui.creds.noClient'));return;}
   const mc=document.getElementById('mainContent');
   mc.style.overflow='auto';
   mc.innerHTML=`
@@ -11,7 +11,7 @@ async function showMyCredentials(){
         <div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;">${t('sectionTitle.itSetup')}</div>
         <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">${t('pageSubtitle.itSetup')}</div>
       </div>
-      <button onclick="showView('chat')" style="background:none;border:1px solid var(--border);border-radius:6px;padding:5px 12px;color:var(--muted);cursor:pointer;font-size:.72rem;font-family:var(--mono);margin-inline-end:12px;"><i class="ti ti-arrow-left"></i> Back</button>
+      <button onclick="showView('chat')" style="background:none;border:1px solid var(--border);border-radius:6px;padding:5px 12px;color:var(--muted);cursor:pointer;font-size:.72rem;font-family:var(--mono);margin-inline-end:12px;"><i class="ti ti-arrow-left"></i> ${t('common.back')}</button>
     </div>
     <div class="page" style="overflow-y:auto;flex:1;"><div style="max-width:640px;padding-bottom:40px;" id="myCredsContent">
       <div style="color:var(--muted);font-family:var(--mono);font-size:.8rem;padding:20px 0;">${t('common.loading')}</div>
@@ -27,7 +27,7 @@ async function showMyCredentials(){
     renderMyCredsForm(credsJson.credentials||{}, window._itClientCache);
   }catch(e){
     const el=document.getElementById('myCredsContent');
-    if(el)el.innerHTML='<div style="color:var(--red);font-family:var(--mono);font-size:.8rem;">Error: '+e.message+'</div>';
+    if(el)el.innerHTML='<div style="color:var(--red);font-family:var(--mono);font-size:.8rem;">'+t('popup.error')+': '+e.message+'</div>';
   }
 }
 
@@ -43,9 +43,9 @@ function renderMyCredsForm(creds, client){
     const bg=expired?'#2d0e0e':urgent?'#2d1f00':'#0d2818';
     const border=expired?'#f8514940':urgent?'#d2992240':'#3fb95040';
     trialHtml='<div style="padding:12px 16px;border-radius:10px;margin-bottom:16px;background:'+bg+';border:1px solid '+border+';">'+
-      '<div style="font-family:var(--mono);font-size:.7rem;font-weight:800;color:'+color+';margin-bottom:4px;">'+(expired?'TRIAL EXPIRED':'TRIAL ACTIVE')+'</div>'+
-      '<div style="font-size:.8rem;color:var(--muted);">'+(expired?'Your trial ended on '+trialEnd.toLocaleDateString()+'. Contact support to continue.':daysLeft+' day'+(daysLeft===1?'':'s')+' remaining — trial ends '+trialEnd.toLocaleDateString())+'</div>'+
-      (urgent&&!expired?'<div style="font-size:.75rem;color:'+color+';margin-top:4px;font-weight:600;">Connect your credentials now to avoid interruption.</div>':'')+'</div>';
+      '<div style="font-family:var(--mono);font-size:.7rem;font-weight:800;color:'+color+';margin-bottom:4px;">'+(expired?t('ui.creds.trialExpired'):t('ui.creds.trialActive'))+'</div>'+
+      '<div style="font-size:.8rem;color:var(--muted);">'+(expired?t('ui.creds.trialEnded').replace('{date}',trialEnd.toLocaleDateString(getDateLocale('en-GB'))):(daysLeft===1?t('ui.creds.dayLeftOne'):t('ui.creds.daysLeft')).replace('{n}',daysLeft).replace('{date}',trialEnd.toLocaleDateString(getDateLocale('en-GB'))))+'</div>'+
+      (urgent&&!expired?'<div style="font-size:.75rem;color:'+color+';margin-top:4px;font-weight:600;">'+t('ui.creds.connectNow')+'</div>':'')+'</div>';
   }
   const sections=[
     {title:'Social media',titleKey:'itSetupItem.socialMedia',items:[
@@ -100,7 +100,7 @@ function renderMyCredsForm(creds, client){
   html+='</div>';
   html+='<div style="display:flex;gap:6px;">';
   html+='<input id="newFeedSourceValue" type="text" class="form-input" placeholder="'+t('itsetup.valuePlaceholder')+'" style="font-size:.72rem;flex:1;">';
-  html+=`<button id="feedSourceSubmitBtn" onclick="addFeedSource('${client.id}')" style="background:var(--nes-btn-grad);border:none;border-radius:7px;padding:7px 16px;color:#fff;font-size:.72rem;font-weight:700;cursor:pointer;white-space:nowrap;"><i class="ti ti-plus"></i> ${t('itsetup.add')}</button> <button onclick="cancelEditFeedSource()" id="feedSourceCancelBtn" style="display:none;background:none;border:1px solid var(--border);border-radius:7px;padding:7px 12px;color:var(--muted);font-size:.72rem;cursor:pointer;white-space:nowrap;">Cancel</button>`;
+  html+=`<button id="feedSourceSubmitBtn" onclick="addFeedSource('${client.id}')" style="background:var(--nes-btn-grad);border:none;border-radius:7px;padding:7px 16px;color:#fff;font-size:.72rem;font-weight:700;cursor:pointer;white-space:nowrap;"><i class="ti ti-plus"></i> ${t('itsetup.add')}</button> <button onclick="cancelEditFeedSource()" id="feedSourceCancelBtn" style="display:none;background:none;border:1px solid var(--border);border-radius:7px;padding:7px 12px;color:var(--muted);font-size:.72rem;cursor:pointer;white-space:nowrap;">${t('common.cancel')}</button>`;
   html+='</div>';
   html+='</div>';
   html+='<div id="it-cred-form" style="display:none;margin-top:16px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;">';
@@ -128,30 +128,31 @@ function renderMyCredsForm(creds, client){
 function copyWidgetSnippet(btn, clientId){
   const snippet='<script src="https://api.essential-services.org/widget.js?client_id='+clientId+'"><\/script>';
   navigator.clipboard.writeText(snippet).then(function(){
-    btn.textContent='Copied!';
-    setTimeout(function(){btn.textContent='Copy'},2000);
+    btn.textContent=t('chatUtilsUi.copied');
+    setTimeout(function(){btn.textContent=t('chatUi.copy')},2000);
   });
 }
 
 function editItCred(keysStr, label){
   const keys=keysStr.split(',');
   const creds=window._itCredsCache||{};
-  document.getElementById('it-cred-title').textContent=label;
+  const _lk={facebook_token:'itSetupItem.facebook',instagram_business_id:'itSetupItem.instagram',linkedin_token:'itSetupItem.linkedin',whatsapp_phone_id:'itSetupItem.whatsapp',lead_email:'itSetupItem.leadAlertsEmail',website:'itSetupItem.website',imap_email:'itSetupItem.emailAccount'}[keys[0]];
+  document.getElementById('it-cred-title').textContent=_lk?t(_lk,label):label;
   const fieldLabels={
-    facebook_token:'Page token',facebook_page_id:'Page ID',
-    instagram_business_id:'Business Account ID',
-    whatsapp_phone_id:'Phone ID',whatsapp_token:'API token',
-    linkedin_token:'Access token',
-    lead_email:'Email address',website:'Website URL',
-    imap_email:'Email address',imap_password:'Email password',
-    imap_host:'Incoming server (IMAP)',smtp_host:'Outgoing server (SMTP)',smtp_port:'SMTP port'
+    facebook_token:t('ui.creds.pageToken'),facebook_page_id:t('ui.creds.pageId'),
+    instagram_business_id:t('ui.creds.businessId'),
+    whatsapp_phone_id:t('ui.creds.phoneId'),whatsapp_token:t('ui.creds.apiToken'),
+    linkedin_token:t('ui.creds.accessToken'),
+    lead_email:t('auth.emailAddress'),website:t('ui.creds.websiteUrl'),
+    imap_email:t('auth.emailAddress'),imap_password:t('ui.creds.emailPassword'),
+    imap_host:t('ui.creds.imapHost'),smtp_host:t('ui.creds.smtpHost'),smtp_port:t('ui.mail.smtpPort')
   };
   let html='';
   keys.forEach(function(k){
     const val=(creds[k]||'').replace(/"/g,'&quot;');
     const isPwd=k.includes('token')||k.includes('password');
     html+='<div style="margin-bottom:8px;"><div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);margin-bottom:4px;">'+(fieldLabels[k]||k)+'</div>';
-    html+='<input id="itf_'+k+'" type="'+(isPwd?'password':'text')+'" class="form-input" value="'+val+'" placeholder="Enter value"'+(isPwd?' autocomplete="new-password"':'')+' style="font-family:var(--mono);font-size:.75rem;"></div>';
+    html+='<input id="itf_'+k+'" type="'+(isPwd?'password':'text')+'" class="form-input" value="'+val+'" placeholder="'+t('ui.creds.enterValue')+'"'+(isPwd?' autocomplete="new-password"':'')+' style="font-family:var(--mono);font-size:.75rem;"></div>';
   });
   document.getElementById('it-cred-fields').innerHTML=html;
   document.getElementById('it-cred-form').style.display='block';
@@ -221,7 +222,7 @@ async function loadFeedSources(clientId){
         +'</div>';
     }).join('');
   }catch(e){
-    listEl.innerHTML='<div style="color:var(--muted);font-size:.72rem;">Could not load feed sources.</div>';
+    listEl.innerHTML='<div style="color:var(--muted);font-size:.72rem;">'+t('ui.creds.sourcesLoadFailed')+'</div>';
   }
 }
 async function addFeedSource(clientId){
@@ -232,7 +233,7 @@ async function addFeedSource(clientId){
   try{
     const r=await fetch(API_URL+'/api/client/'+clientId+'/feed-sources',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify({label,search_query:value,source_type:type})});
     const data=await r.json();
-    if(!r.ok)throw new Error(data.error||'Failed to add source');
+    if(!r.ok)throw new Error(data.error||t('ui.creds.addSourceFailed'));
     document.getElementById('newFeedSourceLabel').value='';
     document.getElementById('newFeedSourceValue').value='';
     showToast(t('toast.feedSourcesSaved'));
@@ -246,7 +247,7 @@ function editFeedSource(clientId,sourceId,label,searchQuery,sourceType){
   document.getElementById('newFeedSourceLabel').value=label;
   document.getElementById('newFeedSourceValue').value=searchQuery;
   const btn=document.getElementById('feedSourceSubmitBtn');
-  if(btn){btn.textContent='Save Changes';btn.setAttribute('onclick',"saveEditedFeedSource('"+clientId+"')");}
+  if(btn){btn.textContent=t('ui.creds.saveChanges');btn.setAttribute('onclick',"saveEditedFeedSource('"+clientId+"')");}
   const cancelBtn=document.getElementById('feedSourceCancelBtn');
   if(cancelBtn)cancelBtn.style.display='inline-block';
 }
@@ -258,7 +259,7 @@ async function saveEditedFeedSource(clientId){
   try{
     const r=await fetch(API_URL+'/api/client/'+clientId+'/feed-sources/'+_editingSourceId,{method:'PATCH',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify({label,search_query:value,source_type:type})});
     const data=await r.json();
-    if(!r.ok)throw new Error(data.error||'Failed to save changes');
+    if(!r.ok)throw new Error(data.error||t('ui.creds.saveFailed'));
     cancelEditFeedSource();
     showToast(t('popup.sourceUpdated'));
     loadFeedSources(clientId);
@@ -269,14 +270,14 @@ function cancelEditFeedSource(){
   document.getElementById('newFeedSourceLabel').value='';
   document.getElementById('newFeedSourceValue').value='';
   const btn=document.getElementById('feedSourceSubmitBtn');
-  if(btn){btn.innerHTML='<i class="ti ti-plus"></i> Add';btn.setAttribute('onclick',"addFeedSource('"+(window._itCredsCache&&window._itCredsCache.clientId||'')+"')");}
+  if(btn){btn.innerHTML='<i class="ti ti-plus"></i> '+t('itsetup.add');btn.setAttribute('onclick',"addFeedSource('"+((window._itClientCache&&window._itClientCache.id)||userClientId||'')+"')");}
   const cancelBtn=document.getElementById('feedSourceCancelBtn');
   if(cancelBtn)cancelBtn.style.display='none';
 }
 async function deleteFeedSource(clientId,sourceId){
   try{
     const r=await fetch(API_URL+'/api/client/'+clientId+'/feed-sources/'+sourceId,{method:'DELETE',headers:{'Authorization':'Bearer '+session.access_token}});
-    if(!r.ok)throw new Error('Failed to delete source');
+    if(!r.ok)throw new Error(t('ui.creds.deleteSourceFailed'));
     loadFeedSources(clientId);
   }catch(e){showToast(t('popup.error')+': '+e.message);}
 }
