@@ -74,7 +74,7 @@ async function sendClientInvite(clientId){
       body:JSON.stringify({email,role})
     });
     const json=await res.json();
-    if(!res.ok)throw new Error(json.error||'Failed');
+    if(!res.ok)throw new Error(json.error||t('popup.failed'));
     document.getElementById('inviteModal')?.remove();
     showToast(t('popup.inviteSent').replace('{email}',email)+' ✓');
     loadClientUsers(clientId);
@@ -89,7 +89,7 @@ async function removeClientUser(clientId,userId){
   try{
     const res=await fetch(API_URL+'/api/client/'+clientId+'/user/'+userId,{method:'DELETE',headers:{'Authorization':'Bearer '+session.access_token}});
     const json=await res.json();
-    if(!res.ok)throw new Error(json.error||'Failed');
+    if(!res.ok)throw new Error(json.error||t('popup.failed'));
     showToast(t('toast.userRemoved'));
     loadClientUsers(clientId);
   }catch(e){alert(t('popup.error')+': '+e.message);}
@@ -234,7 +234,7 @@ async function loadTeam(){
           <i class="ti ti-plus"></i> ${t('teamInvite.addDepartment')}
         </div>
         <div id="deptFilterClear" onclick="filterByDept(null)" style="display:none;background:rgba(248,81,73,0.08);border:1px solid rgba(248,81,73,0.25);border-radius:8px;padding:8px 14px;align-items:center;gap:6px;cursor:pointer;color:#f85149;font-size:.75rem;">
-          <i class="ti ti-x"></i> Clear filter
+          <i class="ti ti-x"></i> ${t('ui.team.clearFilter')}
         </div>
       </div>
     </div>`;
@@ -245,7 +245,7 @@ async function loadTeam(){
 
     if(users.length === 0){
       html += `<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:32px;text-align:center;color:var(--muted);font-size:.8rem;">
-        No team members yet. <span style="color:#409cff;cursor:pointer;" onclick="showInviteModal()">Invite your first staff member →</span>
+        ${t('ui.team.noMembers')} <span style="color:#409cff;cursor:pointer;" onclick="showInviteModal()">${t('ui.team.inviteFirst')}</span>
       </div>`;
     } else {
       html += `<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;">`;
@@ -283,7 +283,7 @@ async function loadTeam(){
     html += `</div>`;
     el.innerHTML = html;
   }catch(e){
-    if(el) el.innerHTML=`<div style="color:var(--red);padding:20px;font-size:.8rem;">Error loading team: ${e.message}</div>`;
+    if(el) el.innerHTML=`<div style="color:var(--red);padding:20px;font-size:.8rem;">${t('ui.team.loadError')}: ${e.message}</div>`;
   }
 }
 
@@ -295,11 +295,11 @@ function showEditAccessModal(userId, clientId, currentModules){
   modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;display:flex;align-items:center;justify-content:center;';
   modal.innerHTML = `
     <div style="background:#161b22;border:1px solid #1a2332;border-radius:14px;padding:28px;width:320px;max-width:90vw;">
-      <div style="font-size:16px;font-weight:700;margin-bottom:6px;color:#e6edf3;">Edit Access</div>
-      <div style="font-size:12px;color:#8b949e;margin-bottom:20px;">Grant or remove access to specific features</div>
-      <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#e6edf3;margin-bottom:8px;cursor:pointer;"><input type="checkbox" id="editGrantItSetup" ${currentModules.includes('it_setup')?'checked':''} style="width:16px;height:16px;"> IT Setup</label>
-      <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#e6edf3;margin-bottom:8px;cursor:pointer;"><input type="checkbox" id="editGrantBriefcase" ${currentModules.includes('briefcase')?'checked':''} style="width:16px;height:16px;"> Briefcase</label>
-      <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#e6edf3;margin-bottom:20px;cursor:pointer;"><input type="checkbox" id="editGrantWhatsapp" ${currentModules.includes('whatsapp_autoreply')?'checked':''} style="width:16px;height:16px;"> WhatsApp Auto-Reply</label>
+      <div style="font-size:16px;font-weight:700;margin-bottom:6px;color:#e6edf3;">${t('ui.team.editAccess')}</div>
+      <div style="font-size:12px;color:#8b949e;margin-bottom:20px;">${t('ui.team.grantRemove')}</div>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#e6edf3;margin-bottom:8px;cursor:pointer;"><input type="checkbox" id="editGrantItSetup" ${currentModules.includes('it_setup')?'checked':''} style="width:16px;height:16px;"> ${t('ui.team.itSetup')}</label>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#e6edf3;margin-bottom:8px;cursor:pointer;"><input type="checkbox" id="editGrantBriefcase" ${currentModules.includes('briefcase')?'checked':''} style="width:16px;height:16px;"> ${t('nav.briefcase')}</label>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#e6edf3;margin-bottom:20px;cursor:pointer;"><input type="checkbox" id="editGrantWhatsapp" ${currentModules.includes('whatsapp_autoreply')?'checked':''} style="width:16px;height:16px;"> ${t('ui.team.waAutoReply')}</label>
       <div id="accessErr" style="font-size:12px;color:#f85149;margin-bottom:10px;display:none;"></div>
       <div style="display:flex;gap:8px;">
         <button onclick="document.getElementById('accessModal').remove()" style="flex:1;background:none;border:1px solid #1a2332;border-radius:8px;padding:10px;color:#8b949e;cursor:pointer;font-size:13px;">${t('common.cancel')}</button>
@@ -316,7 +316,7 @@ async function saveUserAccess(userId, clientId){
   if(document.getElementById('editGrantWhatsapp')?.checked) granted_modules.push('whatsapp_autoreply');
   const err = document.getElementById('accessErr');
   const btn = document.querySelector('#accessModal button:last-child');
-  btn.textContent='Saving...'; btn.disabled=true;
+  btn.textContent=t('authFlow.saving'); btn.disabled=true;
   try{
     const res = await fetch(API_URL+'/api/client/'+clientId+'/user/'+userId+'/modules',{
       method:'PATCH',
@@ -324,13 +324,13 @@ async function saveUserAccess(userId, clientId){
       body:JSON.stringify({granted_modules})
     });
     const data = await res.json();
-    if(!res.ok) throw new Error(data.error||'Failed');
+    if(!res.ok) throw new Error(data.error||t('popup.failed'));
     document.getElementById('accessModal').remove();
     showToast(t('toast.accessUpdated'));
     loadTeam();
   }catch(e){
     err.textContent=e.message; err.style.display='block';
-    btn.textContent='Save'; btn.disabled=false;
+    btn.textContent=t('common.save'); btn.disabled=false;
   }
 }
 
@@ -343,8 +343,8 @@ function showInviteModal(){
   modal.innerHTML = `
     <div style="background:#161b22;border:1px solid #1a2332;border-radius:14px;padding:28px;width:360px;max-width:90vw;">
       <div style="font-size:16px;font-weight:700;margin-bottom:6px;color:#e6edf3;">${t('teamSection.inviteStaffMember')}</div>
-      <div style="font-size:12px;color:#8b949e;margin-bottom:20px;">They'll receive an email to set up their account</div>
-      <label style="font-size:11px;color:#8b949e;font-weight:600;display:block;margin-bottom:5px;">WORK EMAIL</label>
+      <div style="font-size:12px;color:#8b949e;margin-bottom:20px;">${t('ui.team.inviteSub')}</div>
+      <label style="font-size:11px;color:#8b949e;font-weight:600;display:block;margin-bottom:5px;">${t('ui.team.workEmail')}</label>
       <input id="inviteEmail" type="email" placeholder="ahmed@company.com" style="width:100%;background:#0a0f1e;border:1px solid #1a2332;border-radius:8px;padding:10px 12px;color:#e6edf3;font-size:13px;margin-bottom:12px;outline:none;box-sizing:border-box;">
       <label style="font-size:11px;color:#8b949e;font-weight:600;display:block;margin-bottom:5px;">${t('team.roleLabel')}</label>
       <select id="inviteRole" style="width:100%;background:#0a0f1e;border:1px solid #1a2332;border-radius:8px;padding:10px 12px;color:#e6edf3;font-size:13px;margin-bottom:12px;outline:none;box-sizing:border-box;">
@@ -356,11 +356,11 @@ function showInviteModal(){
         <option value="">${t('team.noDepartment')}</option>
         ${window._deptOptions || ''}
       </select>
-      <label style="font-size:11px;color:#8b949e;font-weight:600;display:block;margin-bottom:5px;">GRANT ACCESS TO (OPTIONAL)</label>
+      <label style="font-size:11px;color:#8b949e;font-weight:600;display:block;margin-bottom:5px;">${t('ui.team.grantAccess')}</label>
       <div style="margin-bottom:20px;">
-        <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#e6edf3;margin-bottom:8px;cursor:pointer;"><input type="checkbox" id="grantItSetup" style="width:16px;height:16px;"> IT Setup</label>
-        <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#e6edf3;margin-bottom:8px;cursor:pointer;"><input type="checkbox" id="grantBriefcase" style="width:16px;height:16px;"> Briefcase</label>
-        <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#e6edf3;cursor:pointer;"><input type="checkbox" id="grantWhatsapp" style="width:16px;height:16px;"> WhatsApp Auto-Reply</label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#e6edf3;margin-bottom:8px;cursor:pointer;"><input type="checkbox" id="grantItSetup" style="width:16px;height:16px;"> ${t('ui.team.itSetup')}</label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#e6edf3;margin-bottom:8px;cursor:pointer;"><input type="checkbox" id="grantBriefcase" style="width:16px;height:16px;"> ${t('nav.briefcase')}</label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#e6edf3;cursor:pointer;"><input type="checkbox" id="grantWhatsapp" style="width:16px;height:16px;"> ${t('ui.team.waAutoReply')}</label>
       </div>
       <div id="inviteErr" style="font-size:12px;color:#f85149;margin-bottom:10px;display:none;"></div>
       <div style="display:flex;gap:8px;">
@@ -377,14 +377,14 @@ async function sendTeamInvite(){
   const role = document.getElementById('inviteRole').value;
   const err = document.getElementById('inviteErr');
   err.style.display='none';
-  if(!email){ err.textContent='Email is required.'; err.style.display='block'; return; }
+  if(!email){ err.textContent=t('ui.team.emailRequired'); err.style.display='block'; return; }
   const granted_modules = [];
   if(document.getElementById('grantItSetup')?.checked) granted_modules.push('it_setup');
   if(document.getElementById('grantBriefcase')?.checked) granted_modules.push('briefcase');
   if(document.getElementById('grantWhatsapp')?.checked) granted_modules.push('whatsapp_autoreply');
   const department_id = document.getElementById('inviteDept')?.value || null;
   const btn = document.querySelector('#inviteModal button:last-child');
-  btn.textContent='Sending...'; btn.disabled=true;
+  btn.textContent=t('ui.team.sending'); btn.disabled=true;
   try{
     const res = await fetch(API_URL+'/api/client/'+window.userClientId+'/invite',{
       method:'POST',
@@ -392,7 +392,7 @@ async function sendTeamInvite(){
       body:JSON.stringify({email,role,granted_modules,department_id})
     });
     const data = await res.json();
-    if(!res.ok) throw new Error(data.error||'Failed');
+    if(!res.ok) throw new Error(data.error||t('popup.failed'));
     document.getElementById('inviteModal').remove();
     showToast(t('popup.inviteSent').replace('{email}',email)+' ✓');
     loadTeam();
