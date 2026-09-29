@@ -57,21 +57,21 @@ function showAgreementModal(userId){
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px;max-width:560px;width:100%;max-height:90vh;overflow-y:auto;">
       <div style="text-align:center;margin-bottom:24px;">
         <div style="font-size:1.6rem;font-weight:800;margin-bottom:4px;"><span style="color:var(--nes-blue);">NES</span> <span style="color:#fff;">AI</span></div>
-        <div style="font-family:var(--mono);font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;">Terms & Conditions</div>
+        <div style="font-family:var(--mono);font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;">${t('ui.core.terms')}</div>
       </div>
-      <p style="font-size:.85rem;color:var(--muted);margin-bottom:24px;line-height:1.6;">Before accessing the platform, please read and accept the following terms.</p>
+      <p style="font-size:.85rem;color:var(--muted);margin-bottom:24px;line-height:1.6;">${t('ui.core.termsIntro')}</p>
 
       <label style="display:flex;align-items:center;gap:12px;padding:14px;background:var(--card);border:1px solid var(--border);border-radius:10px;cursor:pointer;margin-bottom:20px;">
         <input type="checkbox" id="agreeAll" onchange="toggleAllTerms(this.checked)" style="width:18px;height:18px;accent-color:var(--nes-blue);cursor:pointer;">
-        <span style="font-weight:700;font-size:.9rem;">Accept all terms and conditions</span>
+        <span style="font-weight:700;font-size:.9rem;">${t('ui.core.acceptAll')}</span>
       </label>
 
       <div style="border:1px solid var(--border);border-radius:10px;margin-bottom:12px;overflow:hidden;">
         <label style="display:flex;align-items:flex-start;gap:12px;padding:14px;cursor:pointer;">
           <input type="checkbox" id="agree1" onchange="updateAgreeAll()" style="width:16px;height:16px;margin-top:2px;accent-color:var(--nes-blue);cursor:pointer;flex-shrink:0;">
           <div>
-            <div style="font-weight:600;font-size:.85rem;margin-bottom:4px;">Acceptable Use</div>
-            <div style="font-size:.78rem;color:var(--muted);line-height:1.5;">I agree to use NES AI only for lawful, ethical business purposes. I will not use the platform for illegal, harmful, discriminatory, or misleading activities. I understand that violation may result in immediate account termination.</div>
+            <div style="font-weight:600;font-size:.85rem;margin-bottom:4px;">${t('ui.core.acceptableUse')}</div>
+            <div style="font-size:.78rem;color:var(--muted);line-height:1.5;">${t('ui.core.acceptableUseText')}</div>
           </div>
         </label>
       </div>
@@ -80,8 +80,8 @@ function showAgreementModal(userId){
         <label style="display:flex;align-items:flex-start;gap:12px;padding:14px;cursor:pointer;">
           <input type="checkbox" id="agree2" onchange="updateAgreeAll()" style="width:16px;height:16px;margin-top:2px;accent-color:var(--nes-blue);cursor:pointer;flex-shrink:0;">
           <div>
-            <div style="font-weight:600;font-size:.85rem;margin-bottom:4px;">AI Limitations</div>
-            <div style="font-size:.78rem;color:var(--muted);line-height:1.5;">I understand that AI-generated content may not always be accurate, complete, or current. I agree to verify important information independently before acting on it. NES AI is a decision-support tool, not a replacement for professional advice.</div>
+            <div style="font-weight:600;font-size:.85rem;margin-bottom:4px;">${t('ui.core.aiLimits')}</div>
+            <div style="font-size:.78rem;color:var(--muted);line-height:1.5;">${t('ui.core.aiLimitsText')}</div>
           </div>
         </label>
       </div>
@@ -90,16 +90,16 @@ function showAgreementModal(userId){
         <label style="display:flex;align-items:flex-start;gap:12px;padding:14px;cursor:pointer;">
           <input type="checkbox" id="agree3" onchange="updateAgreeAll()" style="width:16px;height:16px;margin-top:2px;accent-color:var(--nes-blue);cursor:pointer;flex-shrink:0;">
           <div>
-            <div style="font-weight:600;font-size:.85rem;margin-bottom:4px;">Liability</div>
-            <div style="font-size:.78rem;color:var(--muted);line-height:1.5;">I acknowledge that New Essential Services is not liable for any losses, damages, or decisions arising from the use of AI-generated content, platform downtime, or data inaccuracies. Use of this platform constitutes acceptance of this limitation.</div>
+            <div style="font-weight:600;font-size:.85rem;margin-bottom:4px;">${t('ui.core.liability')}</div>
+            <div style="font-size:.78rem;color:var(--muted);line-height:1.5;">${t('ui.core.liabilityText')}</div>
           </div>
         </label>
       </div>
 
       <button id="agreeBtn" onclick="submitAgreement('${userId}')" disabled style="width:100%;padding:14px;border:none;border-radius:10px;background:#1a2332;color:#4a5568;font-weight:700;font-size:.9rem;cursor:not-allowed;transition:all .2s;">
-        Confirm & Continue →
+        ${t('ui.core.confirmContinue')}
       </button>
-      <div style="text-align:center;margin-top:12px;font-family:var(--mono);font-size:.65rem;color:var(--muted);">By continuing you agree to our <span id="tosLink" style="color:var(--nes-blue);cursor:pointer;text-decoration:underline;font-family:var(--mono);font-size:.65rem;">Terms of Service</span> and <span id="privLink" style="color:var(--nes-blue);cursor:pointer;text-decoration:underline;font-family:var(--mono);font-size:.65rem;">Privacy Policy</span></div>
+      <div style="text-align:center;margin-top:12px;font-family:var(--mono);font-size:.65rem;color:var(--muted);">${t('ui.core.byContinuing')} <span id="tosLink" style="color:var(--nes-blue);cursor:pointer;text-decoration:underline;font-family:var(--mono);font-size:.65rem;">${t('ui.core.tos')}</span> ${t('ui.core.and')} <span id="privLink" style="color:var(--nes-blue);cursor:pointer;text-decoration:underline;font-family:var(--mono);font-size:.65rem;">${t('ui.core.privacy')}</span></div>
     </div>`;
   document.body.appendChild(modal);
   const tosEl=document.getElementById('tosLink');
@@ -187,9 +187,9 @@ function showAccountBlockedScreen(){
   document.getElementById('mainContent').innerHTML=`
     <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:40px;text-align:center;">
       <i class="ti ti-lock" style="font-size:48px;color:#f85149;margin-bottom:16px;"></i>
-      <div style="font-family:var(--mono);font-size:1.1rem;font-weight:800;color:#f85149;margin-bottom:8px;">Account Not Active</div>
-      <div style="font-size:.9rem;color:var(--muted);max-width:420px;margin-bottom:24px;">This account is currently inactive. Please contact NES AI to restore access.</div>
-      <button onclick="sb.auth.signOut().then(()=>window.location.reload())" style="background:var(--nes-btn-grad);border:none;border-radius:8px;padding:10px 24px;color:#fff;font-weight:700;cursor:pointer;">Sign Out</button>
+      <div style="font-family:var(--mono);font-size:1.1rem;font-weight:800;color:#f85149;margin-bottom:8px;">${t('ui.core.notActive')}</div>
+      <div style="font-size:.9rem;color:var(--muted);max-width:420px;margin-bottom:24px;">${t('ui.core.notActiveText')}</div>
+      <button onclick="sb.auth.signOut().then(()=>window.location.reload())" style="background:var(--nes-btn-grad);border:none;border-radius:8px;padding:10px 24px;color:#fff;font-weight:700;cursor:pointer;">${t('ui.core.signOut')}</button>
     </div>`;
 }
 function updateLanguageSwitcherIcon(){
@@ -503,7 +503,7 @@ function buildProfileMenu(){
 
   // Change Password — all roles
   html += `<div class="profile-menu-item" onclick="event.stopPropagation();toggleProfileMenu();showChangePassword()">
-    <i class="ti ti-key"></i><span>Change Password</span>
+    <i class="ti ti-key"></i><span>${t('auth.changePassword')}</span>
   </div>`;
 
   // Admin-only items
@@ -526,7 +526,7 @@ function buildProfileMenu(){
   // Divider + sign out
   html += `<div class="profile-menu-divider"></div>`;
   html += `<div class="profile-menu-item danger" onclick="event.stopPropagation();doLogout()">
-    <i class="ti ti-logout"></i><span>Sign Out</span>
+    <i class="ti ti-logout"></i><span>${t('ui.core.signOut')}</span>
   </div>`;
 
   menu.innerHTML = html;
@@ -557,14 +557,14 @@ function showChangePassword(){
   const modal=document.createElement('div');modal.id='changePwdModal';
   modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;display:flex;align-items:center;justify-content:center;';
   modal.innerHTML=`<div style="background:#161b22;border:1px solid #1a2332;border-radius:14px;padding:28px;width:320px;max-width:90vw;">
-    <div style="font-family:var(--font-head);font-size:16px;font-weight:700;margin-bottom:6px;color:#e6edf3;">Change Password</div>
-    <div style="font-size:12px;color:#8b949e;margin-bottom:20px;">Enter your new password below</div>
-    <input id="newPwd1" type="password" placeholder="New password" style="width:100%;background:#0a0f1e;border:1px solid #1a2332;border-radius:8px;padding:10px 12px;color:#e6edf3;font-size:13px;margin-bottom:10px;outline:none;box-sizing:border-box;">
-    <input id="newPwd2" type="password" placeholder="Confirm new password" style="width:100%;background:#0a0f1e;border:1px solid #1a2332;border-radius:8px;padding:10px 12px;color:#e6edf3;font-size:13px;margin-bottom:14px;outline:none;box-sizing:border-box;">
+    <div style="font-family:var(--font-head);font-size:16px;font-weight:700;margin-bottom:6px;color:#e6edf3;">${t('auth.changePassword')}</div>
+    <div style="font-size:12px;color:#8b949e;margin-bottom:20px;">${t('ui.core.enterNewPwd')}</div>
+    <input id="newPwd1" type="password" placeholder="${t('ui.core.newPwd')}" style="width:100%;background:#0a0f1e;border:1px solid #1a2332;border-radius:8px;padding:10px 12px;color:#e6edf3;font-size:13px;margin-bottom:10px;outline:none;box-sizing:border-box;">
+    <input id="newPwd2" type="password" placeholder="${t('ui.core.confirmPwd')}" style="width:100%;background:#0a0f1e;border:1px solid #1a2332;border-radius:8px;padding:10px 12px;color:#e6edf3;font-size:13px;margin-bottom:14px;outline:none;box-sizing:border-box;">
     <div id="pwdErr" style="font-size:12px;color:#f85149;margin-bottom:10px;display:none;"></div>
     <div style="display:flex;gap:8px;">
       <button onclick="document.getElementById('changePwdModal').remove()" style="flex:1;background:none;border:1px solid #1a2332;border-radius:8px;padding:10px;color:#8b949e;cursor:pointer;font-size:13px;">${t('common.cancel')}</button>
-      <button onclick="doChangePassword()" style="flex:1;background:linear-gradient(135deg,#1a56db,#2563eb);border:none;border-radius:8px;padding:10px;color:#fff;cursor:pointer;font-size:13px;font-weight:600;">Update</button>
+      <button onclick="doChangePassword()" style="flex:1;background:linear-gradient(135deg,#1a56db,#2563eb);border:none;border-radius:8px;padding:10px;color:#fff;cursor:pointer;font-size:13px;font-weight:600;">${t('authFlow.update')}</button>
     </div>
   </div>`;
   document.body.appendChild(modal);
