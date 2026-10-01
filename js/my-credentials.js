@@ -62,6 +62,10 @@ function renderMyCredsForm(creds, client){
       {label:'Email Account',labelKey:'itSetupItem.emailAccount',desc:'Connect your inbox (IMAP/SMTP)',descKey:'itSetupItem.emailAccountDesc',keys:['imap_email','imap_password','imap_host','smtp_host','smtp_port'],icon:'ti-inbox'},
     ]},
   ];
+  // Portugal clients: LinkedIn posting not offered (backend unchanged)
+  if(String((client&&client.country)||window.clientCountryName||'').toLowerCase().includes('portugal')){
+    sections.forEach(s=>{s.items=s.items.filter(i=>!i.keys.includes('linkedin_token'));});
+  }
   let connected=0,total=0;
   sections.forEach(s=>s.items.forEach(item=>{
     total++;
