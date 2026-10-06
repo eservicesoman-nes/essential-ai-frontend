@@ -63,7 +63,7 @@ function renderMyCredsForm(creds, client){
     ]},
   ];
   // Portugal clients: LinkedIn posting not offered (backend unchanged)
-  if(String((client&&client.country)||window.clientCountryName||'').toLowerCase().includes('portugal')){
+  if(userRole!=='nesadmin'){
     sections.forEach(s=>{s.items=s.items.filter(i=>!i.keys.includes('linkedin_token'));});
   }
   let connected=0,total=0;
