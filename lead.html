@@ -39,7 +39,7 @@
     <label id="lEmail" for="email"></label><input id="email" type="email" autocomplete="email">
     <label id="lMsg" for="message"></label><textarea id="message"></textarea>
     <input class="hp" id="website" tabindex="-1" autocomplete="off">
-    <div class="consent"><input type="checkbox" id="consent"><span id="lConsent"></span></div>
+    <div class="consent"><input type="checkbox" id="consent"><span id="lConsent"></span></div>     <div id="lPriv" style="margin-top:10px;font-size:.75rem;color:var(--muted);line-height:1.4"></div>
     <button class="send" id="send" type="submit"></button>
     <div class="msg" id="msg"></div>
   </form>
@@ -59,7 +59,7 @@
     document.documentElement.lang = lang;
     $('title').textContent = t.title; $('sub').textContent = t.sub;
     $('lName').textContent = t.name; $('lPhone').textContent = t.phone; $('lEmail').textContent = t.email; $('lMsg').textContent = t.msg;
-    $('lConsent').textContent = t.consent; $('send').textContent = t.send; $('langBtn').textContent = t.toggle;
+    $('lConsent').textContent = t.consent; $('lPriv').innerHTML = t.priv; $('send').textContent = t.send; $('langBtn').textContent = t.toggle;
   }
   function show(kind, text) { const m = $('msg'); m.className = 'msg ' + kind; m.textContent = text; }
   $('langBtn').onclick = () => { lang = lang === 'pt' ? 'en' : 'pt'; render(); };
@@ -81,7 +81,7 @@
     if ($('name').value.trim().length < 2 || /^\+\d{8,15}$/.test(phone) === false || $('consent').checked === false) { show('err', t.invalid); return; }
     $('send').disabled = true; $('send').textContent = t.sending;
     try {
-      const r = await fetch(API + '/api/public/lead/' + encodeURIComponent(token), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: $('name').value.trim(), phone, email: $('email').value.trim(), message: $('message').value.trim(), consent: true, website: $('website').value }) });
+      const r = await fetch(API + '/api/public/lead/' + encodeURIComponent(token), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: $('name').value.trim(), phone, email: $('email').value.trim(), message: $('message').value.trim(), consent: true, lang: lang, website: $('website').value }) });
       if (r.ok) { show('ok', t.ok); $('f').reset(); } else { show('err', r.status === 400 ? t.invalid : t.fail); }
     } catch (e) { show('err', t.fail); }
     $('send').disabled = false; $('send').textContent = t.send;
