@@ -169,7 +169,7 @@ window.showEmail = async function(idx){
         if(node.tagName==='A'){ node.setAttribute('target','_blank'); node.setAttribute('rel','noopener noreferrer'); }
       });
       bodyEl.innerHTML = safeHtml && safeHtml.trim().length > 10
-        ? '<div style="line-height:1.6;font-size:.82rem;color:var(--text);padding-bottom:20px;word-break:break-word;">'+safeHtml+'</div>'
+        ? '<div style="line-height:1.6;font-size:.82rem;color:var(--text);padding-bottom:20px;word-break:break-word;">'   ? '<div style="line-height:1.6;font-size:.82rem;color:var(--text);padding-bottom:20px;word-break:break-word;">'+safeHtml+'</div>''</div>'
         : '<div style="color:var(--muted);font-family:var(--mono);font-size:.72rem;text-align:center;padding:20px;">'+t('ui.mail.noReadable')+'</div>';
       DOMPurify.removeHook('afterSanitizeAttributes');
     } else {
