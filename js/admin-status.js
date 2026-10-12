@@ -207,7 +207,7 @@ async function checkPlatformStatus(){
   const customServices=JSON.parse(localStorage.getItem('nes_custom_services')||'[]');
   const services=[...builtinServices,...customServices];
 
-  const [results, extraPings, apiCredits, platformStats] = await Promise.all([
+  const [results, extraPings, apiCredits, platformStats, costRes] = await Promise.all([
     Promise.all(services.map(async function(s){
       const start=Date.now();
       try{
@@ -235,8 +235,10 @@ async function checkPlatformStatus(){
       sb.from('leads').select('*',{count:'exact',head:true}),
       sb.from('profiles').select('*',{count:'exact',head:true}),
       sb.from('usage').select('chats_used,images_used,docs_used').eq('date',new Date().toISOString().split('T')[0]),
-    ])
+    ]),
+    Promise.resolve(sb.rpc('admin_cost_overview')).catch(e=>({data:null,error:e}))
   ]);
+  const cost=(costRes&&!costRes.error&&costRes.data)?costRes.data:null;
   const allOk=results.every(function(r){return r.ok;});
   const now=new Date().toLocaleTimeString(getDateLocale('en-GB'),{hour:'2-digit',minute:'2-digit',second:'2-digit'});
   const apis=apiCredits.data||[];
@@ -294,18 +296,21 @@ async function checkPlatformStatus(){
     const bg=r.status==='online'?'#0d2818':(r.status==='error'||r.status==='slow')?'#2d1f00':'#2d0e0e';
     html+='<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid rgba(26,35,50,.4);">';
     html+=pingDot(r.status, false);
-    html+='<div style="flex:1;min-width:0;"><div style="font-size:.78rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+r.label+'</div><div style="font-size:.6rem;color:var(--muted);font-family:var(--mono);">'+r.ms+'ms</div></div>';
+    html+='<div style="flex:1;min-width:0;"><div style="font-size:.78rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+_asEsc(r.label)+'</div><div style="font-size:.6rem;color:var(--muted);font-family:var(--mono);">'+r.ms+'ms</div>'+(r.name==='Supabase'&&cost&&cost.db_size_mb!=null?_asUsageLine(cost.db_size_mb,500,'MB',t('adminStatusUi.freeTier')):'')+'</div>';
     html+='<span style="font-size:.58rem;font-family:var(--mono);padding:2px 7px;border-radius:8px;background:'+bg+';color:'+color+';font-weight:700;flex-shrink:0;">'+r.status.toUpperCase()+'</span>';
     html+='</div>';
   });
   // PM2 ping row
   const pm2ping=extraPings[0];
-  const pm2color=pm2ping.online?'#3fb950':'#f85149';
-  const pm2bg=pm2ping.online?'#0d2818':'#2d0e0e';
+  const pm2list=Array.isArray(pm2ping.processes)?pm2ping.processes:[];
+  const pm2up=pm2list.filter(p=>p.status==='online').length;
+  const pm2ok=pm2ping.online&&pm2list.length>0&&pm2up===pm2list.length;
+  const pm2color=pm2ok?'#3fb950':'#f85149';
+  const pm2bg=pm2ok?'#0d2818':'#2d0e0e';
   html+='<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid rgba(26,35,50,.4);">';
-  html+=pingDot(pm2ping.online?'online':'error',false);
-  html+='<div style="flex:1;min-width:0;"><div style="font-size:.78rem;font-weight:600;color:var(--text);">PM2 Processes</div><div style="font-size:.6rem;color:var(--muted);font-family:var(--mono);">'+(pm2ping.count||0)+' processes</div></div>';
-  html+='<span style="font-size:.58rem;font-family:var(--mono);padding:2px 7px;border-radius:8px;background:'+pm2bg+';color:'+pm2color+';font-weight:700;flex-shrink:0;">'+(pm2ping.online?'ONLINE':'ERROR')+'</span>';
+  html+=pingDot(pm2ok?'online':'error',false);
+  html+='<div style="flex:1;min-width:0;"><div style="font-size:.78rem;font-weight:600;color:var(--text);">PM2 Processes</div><div style="font-size:.6rem;color:var(--muted);font-family:var(--mono);">'+pm2up+'/'+pm2list.length+' '+t('adminStatusUi.online')+'</div></div>';
+  html+='<span style="font-size:.58rem;font-family:var(--mono);padding:2px 7px;border-radius:8px;background:'+pm2bg+';color:'+pm2color+';font-weight:700;flex-shrink:0;">'+(pm2ok?'ONLINE':'ERROR')+'</span>';
   html+='</div>';
   // Backblaze ping row
   const b2ping=extraPings[1];
@@ -327,18 +332,32 @@ async function checkPlatformStatus(){
   html+='</div></div>';
   if(apis.length>0){
     html+='<div style="overflow-y:auto;flex:1;">';
-    html+='<div style="display:grid;grid-template-columns:1fr 70px 70px 60px;gap:4px;padding:6px 14px;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:.58rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;">';
-    html+='<div>Service</div><div>Balance</div><div>Used/mo</div><div>Status</div></div>';
+    html+='<div style="display:grid;grid-template-columns:1fr 60px 60px 88px 60px;gap:4px;padding:6px 14px;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:.58rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;">';
+    html+='<div>'+t('adminStatusUi.service')+'</div><div>'+t('adminStatusUi.left')+'</div><div>'+t('adminStatusUi.usedMonth')+'</div><div>'+t('adminStatusUi.updated')+'</div><div>Status</div></div>';
     apis.forEach(function(a){
       const color=a.status==='healthy'?'#3fb950':a.status==='low'?'#f85149':'#d29922';
       const bg=a.status==='healthy'?'#0d2818':a.status==='low'?'#2d0e0e':'#2d1f00';
       const bal=a.current_balance>0?'$'+parseFloat(a.current_balance).toFixed(2):'—';
-      const usage=a.monthly_usage>0?'$'+parseFloat(a.monthly_usage).toFixed(2):'—';
-      html+='<div style="display:grid;grid-template-columns:1fr 70px 70px 60px;gap:4px;padding:8px 14px;border-bottom:1px solid rgba(26,35,50,.4);align-items:center;">';
-      html+='<div style="font-size:.72rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+a.service_name+'</div>';
+      const svc=String(a.service_name||'').toLowerCase();
+      const lc=a.last_checked?new Date(a.last_checked):null;
+      const ageDays=lc?(Date.now()-lc.getTime())/86400000:999;
+      const stale=ageDays>7;
+      let usedNum=null, usedNote='';
+      if(cost&&cost.calls_mtd&&svc==='vapi'){usedNum=parseFloat(cost.calls_mtd.vapi_usd)||0;}
+      else if(cost&&cost.calls_mtd&&svc==='twilio'){usedNum=parseFloat(cost.calls_mtd.twilio_usd)||0;usedNote='~';}
+      else if(a.monthly_usage>0&&!stale){usedNum=parseFloat(a.monthly_usage);}
+      const usage=usedNum!==null?usedNote+'$'+usedNum.toFixed(2):'—';
+      const lcTxt=lc?lc.toLocaleDateString(getDateLocale('en-GB'),{day:'2-digit',month:'short'}):'—';
+      const updHtml='<span style="font-size:.6rem;font-family:var(--mono);color:'+(stale?'#d29922':'var(--muted)')+';" title="'+_asEsc(stale?t('adminStatusUi.staleHint'):'')+'">'+(stale?'⚠ '+t('adminStatusUi.manual')+' · ':'')+lcTxt+'</span>';
+      html+='<div style="padding:8px 14px;border-bottom:1px solid rgba(26,35,50,.4);">';
+      html+='<div style="display:grid;grid-template-columns:1fr 60px 60px 88px 60px;gap:4px;align-items:center;">';
+      html+='<div style="font-size:.72rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+_asEsc(a.service_name)+'</div>';
       html+='<div style="font-size:.72rem;font-weight:700;color:'+color+';">'+bal+'</div>';
       html+='<div style="font-size:.68rem;color:var(--muted);font-family:var(--mono);">'+usage+'</div>';
+      html+='<div>'+updHtml+'</div>';
       html+='<div><span style="font-size:.56rem;padding:2px 6px;border-radius:8px;font-family:var(--mono);font-weight:700;background:'+bg+';color:'+color+';">'+(a.status||'unknown').toUpperCase()+'</span></div>';
+      html+='</div>';
+      if(usedNum!==null&&a.current_balance>0){html+=_asUsageLine(usedNum,usedNum+parseFloat(a.current_balance),'$',t('adminStatusUi.usedOfTotal'),true);}
       html+='</div>';
     });
     html+='</div>';
@@ -347,6 +366,7 @@ async function checkPlatformStatus(){
   }
   html+='</div>';
   html+='</div></div>';
+  html+=_asCostTrackerHtml(cost, costRes&&costRes.error);
   html+='<div style="border:1px solid #7f77dd40;border-radius:12px;padding:14px;margin-top:4px;">';
   html+=`<div style="font-family:var(--mono);font-size:.65rem;color:#7f77dd;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;">${t('adminStatusUi.backupStatus')}</div>`;
   html+='<div id="backupStatusCard" style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;"><div style="font-size:.75rem;color:var(--muted);">Loading backup status...</div></div>';
@@ -360,4 +380,86 @@ async function checkPlatformStatus(){
     const grid=document.getElementById('statusPanelGrid');
     if(grid)grid.style.gridTemplateColumns='1fr';
   }
+}
+
+// ── Phase 2 (#12/#15): usage lines + cost tracker. Reads admin_cost_overview() (nesadmin-only RPC). ──
+function _asEsc(s){return String(s==null?'':s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]);}
+function _asUsageLine(used,total,unit,label,money){
+  used=parseFloat(used)||0; total=parseFloat(total)||0;
+  if(total<=0) return '';
+  const pct=Math.min(used/total*100,100);
+  const left=Math.max(total-used,0);
+  const col=pct>=80?'#f85149':pct>=50?'#d29922':'#3fb950';
+  const fmt=v=>money?'$'+v.toFixed(2):v.toFixed(0)+' '+unit;
+  return '<div style="margin-top:4px;">'+
+    '<div style="height:3px;background:var(--border);border-radius:2px;"><div style="height:3px;background:'+col+';border-radius:2px;width:'+pct.toFixed(1)+'%;"></div></div>'+
+    '<div style="font-size:.56rem;color:var(--muted);font-family:var(--mono);margin-top:2px;">'+fmt(used)+' / '+fmt(total)+' '+_asEsc(label)+' · '+t('adminStatusUi.leftLower')+' '+fmt(left)+'</div></div>';
+}
+function _asCostTrackerHtml(cost, err){
+  let h='<div style="border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:14px;background:var(--surface);">';
+  h+='<div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px;">'+t('adminStatusUi.costTracker')+'</div>';
+  if(!cost){
+    h+='<div style="font-size:.72rem;color:var(--muted);font-family:var(--mono);">'+t('adminStatusUi.costUnavailable')+'</div></div>';
+    if(err) console.log('admin_cost_overview:', err.message||err);
+    return h;
+  }
+  const c=cost.calls_mtd||{};
+  const kpi=(label,val,col)=>'<div style="background:#0d1117;border:1px solid var(--border);border-radius:8px;padding:8px 10px;text-align:center;"><div style="font-size:1rem;font-weight:700;color:'+col+';font-family:var(--mono);">'+val+'</div><div style="font-size:.56rem;color:var(--muted);font-family:var(--mono);text-transform:uppercase;">'+label+'</div></div>';
+  h+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px;">';
+  h+=kpi(t('adminStatusUi.callsMonth'),(c.count||0),'var(--nes-blue)');
+  h+=kpi('Vapi $','$'+(parseFloat(c.vapi_usd)||0).toFixed(2),'#7f77dd');
+  h+=kpi('Twilio $ (est.)','$'+(parseFloat(c.twilio_usd)||0).toFixed(2),'#3fb950');
+  h+=kpi(t('adminStatusUi.unassigned'),'$'+(parseFloat(cost.unassigned_spend_usd)||0).toFixed(2),'var(--muted)');
+  h+='</div>';
+  // per-client spend vs ceiling
+  h+='<div style="font-size:.6rem;color:var(--muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">'+t('adminStatusUi.spendVsCeiling')+'</div>';
+  const clients=(cost.clients||[]).filter(x=>x.status!=='suspended'||parseFloat(x.spend_usd)>0);
+  if(!clients.length){h+='<div style="font-size:.7rem;color:var(--muted);">—</div>';}
+  clients.forEach(function(cl){
+    const spend=parseFloat(cl.spend_usd)||0, ceil=cl.ceiling_usd!=null?parseFloat(cl.ceiling_usd):null;
+    const pct=ceil?Math.min(spend/ceil*100,100):0;
+    const col=pct>=100?'#f85149':pct>=80?'#f0883e':pct>=50?'#d29922':'#3fb950';
+    h+='<div style="display:grid;grid-template-columns:160px 1fr 130px;gap:8px;align-items:center;margin-bottom:5px;">';
+    h+='<div style="font-size:.7rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="'+_asEsc(cl.name)+'">'+_asEsc(cl.name)+' <span style="color:var(--muted);font-size:.58rem;">'+_asEsc(cl.plan||'')+'</span></div>';
+    h+='<div style="height:6px;background:var(--border);border-radius:3px;">'+(ceil?'<div style="height:6px;background:'+col+';border-radius:3px;width:'+pct.toFixed(1)+'%;"></div>':'')+'</div>';
+    h+='<div style="font-size:.62rem;color:var(--muted);font-family:var(--mono);text-align:end;">$'+spend.toFixed(2)+' / '+(ceil?'$'+ceil.toFixed(2):t('adminStatusUi.ceilingTbd'))+'</div>';
+    h+='</div>';
+  });
+  // 30-day daily spend chart (inline SVG, no library)
+  const daily=cost.daily||[];
+  h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;">';
+  h+='<div><div style="font-size:.6rem;color:var(--muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">'+t('adminStatusUi.dailySpend')+'</div>'+_asBars(daily)+'</div>';
+  h+='<div><div style="font-size:.6rem;color:var(--muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">'+t('adminStatusUi.balanceHistory')+'</div>'+_asBalanceLines(cost.balance_history||[])+'</div>';
+  h+='</div></div>';
+  return h;
+}
+function _asBars(daily){
+  const days=[];const today=new Date();
+  for(let i=29;i>=0;i--){const d=new Date(today);d.setDate(d.getDate()-i);days.push(d.toISOString().slice(0,10));}
+  const map={};daily.forEach(r=>{map[String(r.day).slice(0,10)]=parseFloat(r.usd)||0;});
+  const vals=days.map(d=>map[d]||0);const max=Math.max(...vals,0.01);
+  const W=300,H=70,bw=W/30;
+  let svg='<svg viewBox="0 0 '+W+' '+(H+12)+'" width="100%" style="max-height:120px;display:block;" role="img" aria-label="'+_asEsc(t('adminStatusUi.dailySpend'))+'">';
+  vals.forEach((v,i)=>{const bh=v>0?Math.max(v/max*H,2):0;svg+='<rect x="'+(i*bw+1).toFixed(1)+'" y="'+(H-bh).toFixed(1)+'" width="'+(bw-2).toFixed(1)+'" height="'+bh.toFixed(1)+'" rx="1" fill="#409cff"><title>'+days[i]+': $'+v.toFixed(2)+'</title></rect>';});
+  svg+='<line x1="0" y1="'+H+'" x2="'+W+'" y2="'+H+'" stroke="currentColor" stroke-opacity=".2"/>';
+  svg+='<text x="0" y="'+(H+10)+'" font-size="7" fill="currentColor" fill-opacity=".5">'+days[0].slice(5)+'</text><text x="'+W+'" y="'+(H+10)+'" font-size="7" text-anchor="end" fill="currentColor" fill-opacity=".5">'+days[29].slice(5)+' · max $'+max.toFixed(2)+'</text></svg>';
+  return '<div style="color:var(--text);">'+svg+'</div>';
+}
+function _asBalanceLines(hist){
+  const by={};hist.forEach(r=>{(by[r.service]=by[r.service]||[]).push(r);});
+  const names=Object.keys(by).sort();
+  if(!names.length) return '<div style="font-size:.66rem;color:var(--muted);font-family:var(--mono);">'+t('adminStatusUi.historyBuilding')+'</div>';
+  let h='';
+  names.forEach(function(n){
+    const pts=by[n].map(r=>parseFloat(r.balance)||0);
+    const last=pts[pts.length-1];
+    let spark='';
+    if(pts.length>=2){
+      const mx=Math.max(...pts),mn=Math.min(...pts),rg=(mx-mn)||1,W=120,H=18;
+      const d=pts.map((v,i)=>(i/(pts.length-1)*W).toFixed(1)+','+(H-(v-mn)/rg*H).toFixed(1)).join(' ');
+      spark='<svg viewBox="0 0 '+W+' '+H+'" width="120" height="18"><polyline points="'+d+'" fill="none" stroke="#409cff" stroke-width="1.5"/></svg>';
+    } else { spark='<span style="font-size:.56rem;color:var(--muted);">'+t('adminStatusUi.onePoint')+'</span>'; }
+    h+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;"><span style="font-size:.66rem;color:var(--text);width:70px;">'+_asEsc(n)+'</span>'+spark+'<span style="font-size:.62rem;color:var(--muted);font-family:var(--mono);margin-inline-start:auto;">$'+last.toFixed(2)+'</span></div>';
+  });
+  return h;
 }
