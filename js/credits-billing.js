@@ -32,23 +32,35 @@ async function loadApiCredits(){
     {id:'apex_outreach',name:'Apex Outreach (Layla)',icon:'ti-headset',color:'#7f77dd',note:'3-day follow-up — Apex Outreach'},
     {id:'apex_advisory',name:'Apex Advisory (Adam)',icon:'ti-phone-call',color:'#f0883e',note:'Enterprise consultant — Apex Advisory'},
     {id:'twilio',name:'Twilio',icon:'ti-message-dots',color:'#f85149',note:'WhatsApp & SMS'},
+    {id:'vapi',name:'Vapi (voice calls)',icon:'ti-phone',color:'#409cff',note:'Sara / Adam / Layla calls'},
   ];
   let thresholds={};
   try{const{data}=await sb.from('api_credits').select('*');if(data)data.forEach(r=>{thresholds[r.service_name?.toLowerCase().replace(/[^a-z]/g,'')]=r;});}catch(e){}
+  // Fix 318: real usage this month (calls + AI) from admin_cost_overview()
+  let _cost=null;try{const{data:_c,error:_ce}=await sb.rpc('admin_cost_overview');if(!_ce)_cost=_c;}catch(e){}
+  const _aiRe={gemini:/^gemini/i,anthropic:/^claude/i,deepseek:/^deepseek/i,openai:/^(gpt|o\d|text-embedding|dall)/i,fal:/^(flux|fal)/i};
+  const _usedOf=function(id){if(!_cost)return null;const c=_cost.calls_mtd||{};if(id==='vapi')return parseFloat(c.vapi_usd)||0;if(id==='twilio')return parseFloat(c.twilio_usd)||0;if(_aiRe[id])return((_cost.ai_mtd||{}).by_model||[]).filter(m=>_aiRe[id].test(m.model)).reduce((a,m)=>a+(parseFloat(m.usd)||0),0);return null;};
+  const _spendMtd=_cost?((parseFloat((_cost.calls_mtd||{}).vapi_usd)||0)+(parseFloat((_cost.calls_mtd||{}).twilio_usd)||0)+(parseFloat((_cost.ai_mtd||{}).usd)||0)):null;
+  const _fmt=function(v){return '$'+v.toFixed(v>0&&v<0.01?4:2);};
+  const _d=function(x){return x?new Date(x).toLocaleDateString(getDateLocale('en-GB'),{day:'2-digit',month:'short'}):'';};
+  window._apiLoaded={};
   const alertCount=Object.values(thresholds).filter(t=>t.status==='low'||t.status==='critical').length;
   let html='';
   if(alertCount>0){html+=`<div style="background:rgba(248,81,73,.1);border:1px solid rgba(248,81,73,.3);border-radius:8px;padding:10px 14px;margin-bottom:16px;display:flex;align-items:center;gap:8px;font-size:.78rem;font-weight:600;color:#f85149;"><i class="ti ti-alert-triangle" style="font-size:16px;"></i>${alertCount} API${alertCount>1?'s':''} below threshold</div>`;}
   html+=`<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;">
     <div style="background:var(--surface);border-radius:8px;padding:12px;border:1px solid var(--border);"><div style="font-size:.7rem;color:var(--muted);margin-bottom:4px;font-family:var(--mono);">${t('apiCreditsLabel.apisMonitored')}</div><div style="font-size:1.4rem;font-weight:700;color:var(--text);">${apis.length}</div></div>
     <div style="background:var(--surface);border-radius:8px;padding:12px;border:1px solid var(--border);"><div style="font-size:.7rem;color:var(--muted);margin-bottom:4px;font-family:var(--mono);">${t('apiCreditsLabel.alertsActive')}</div><div style="font-size:1.4rem;font-weight:700;color:${alertCount>0?'#f85149':'#3fb950'};">${alertCount}</div></div>
-    <div style="background:var(--surface);border-radius:8px;padding:12px;border:1px solid var(--border);"><div style="font-size:.7rem;color:var(--muted);margin-bottom:4px;font-family:var(--mono);">${t('apiCreditsLabel.autoRecharge')}</div><div style="font-size:1.4rem;font-weight:700;color:#7f77dd;">${Object.values(thresholds).filter(t=>t.recharge_amount>0).length}</div></div>
-    <div style="background:var(--surface);border-radius:8px;padding:12px;border:1px solid var(--border);"><div style="font-size:.7rem;color:var(--muted);margin-bottom:4px;font-family:var(--mono);">${t('apiCreditsLabel.estMonthly')}</div><div style="font-size:1.4rem;font-weight:700;color:var(--nes-blue);">~$25</div></div>
+    <div style="background:var(--surface);border-radius:8px;padding:12px;border:1px solid var(--border);"><div style="font-size:.7rem;color:var(--muted);margin-bottom:4px;font-family:var(--mono);">${t('apiCreditsLabel.liveOrComputed','Live / computed')}</div><div style="font-size:1.4rem;font-weight:700;color:#7f77dd;">${Object.values(thresholds).filter(x=>x.balance_source==='api'||x.balance_source==='computed').length}</div></div>
+    <div style="background:var(--surface);border-radius:8px;padding:12px;border:1px solid var(--border);"><div style="font-size:.7rem;color:var(--muted);margin-bottom:4px;font-family:var(--mono);">${t('apiCreditsLabel.spendMonth','Spend this month')}</div><div style="font-size:1.4rem;font-weight:700;color:var(--nes-blue);">${_spendMtd===null?'—':_fmt(_spendMtd)}</div></div>
   </div>`;
   html+=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;"><div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;">API Credit Status</div><div style="display:flex;gap:8px;"><button onclick="saveAllThresholds()" style="background:var(--nes-btn-grad);border:none;border-radius:6px;padding:4px 12px;color:#fff;font-size:.72rem;font-weight:700;cursor:pointer;font-family:var(--mono);"><i class="ti ti-device-floppy"></i> Save Thresholds</button><button onclick="addApiService()" style="background:none;border:1px solid var(--border);border-radius:6px;padding:4px 10px;color:var(--muted);cursor:pointer;font-size:.72rem;font-family:var(--mono);"><i class="ti ti-plus"></i> Add API</button></div></div>`;
   html+=`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:10px;margin-bottom:20px;">`;
   apis.forEach(function(api){
     const th=thresholds[api.id]||{};
-    const balance=th.current_balance||0;const threshold=th.alert_threshold||5;const rechargeAt=th.recharge_at||5;const rechargeAmt=th.recharge_amount||20;const usage=th.monthly_usage||0;
+    const balance=th.current_balance||0;const threshold=th.alert_threshold||5;const rechargeAt=th.recharge_at||5;const _u=_usedOf(api.id);const usage=_u===null?0:_u;window._apiLoaded[api.id]=balance;
+    const _src=th.balance_source||'manual';
+    const _srcTxt=_src==='api'?t('apiCreditsLabel.srcLive','live from provider'):_src==='computed'?t('apiCreditsLabel.srcComputed','computed')+' · '+t('apiCreditsLabel.since','since')+' '+_d(th.base_at):t('apiCreditsLabel.srcManual','manual');
+    const _topTxt=th.last_topup_at?t('apiCreditsLabel.lastTopup','Last top-up')+': '+_d(th.last_topup_at)+' · $'+(parseFloat(th.last_topup_amount)||0).toFixed(2):t('apiCreditsLabel.noTopup','No top-up recorded');
     const status=balance===0?'unknown':balance<threshold?'low':'healthy';
     const statusColor=status==='healthy'?'#3fb950':status==='low'?'#f85149':'#d29922';
     const statusBg=status==='healthy'?'#0d2818':status==='low'?'#2d0e0e':'#2d1f00';
@@ -58,13 +70,14 @@ async function loadApiCredits(){
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;"><div style="display:flex;align-items:center;gap:8px;"><i class="ti ${api.icon}" style="font-size:16px;color:${api.color};"></i><span style="font-size:.82rem;font-weight:600;color:var(--text);">${api.name}</span></div><span style="font-size:.65rem;padding:2px 8px;border-radius:20px;font-weight:600;background:${statusBg};color:${statusColor};">${status==='unknown'?t('pricingPage.notSet'):status==='healthy'?t('pricingPage.healthy'):t('pricingPage.low')}</span></div>
       <div style="font-size:.68rem;color:var(--muted);font-family:var(--mono);margin-bottom:10px;">${api.note}</div>
       <div style="font-size:1.5rem;font-weight:700;color:${status==='low'?'#f85149':'var(--text)'};margin-bottom:3px;">${balance===0?'—':'$'+balance.toFixed(2)}</div>
-      <div style="font-size:.68rem;color:var(--muted);font-family:var(--mono);margin-bottom:10px;">${t('apiCreditsLabel.currentBalance')}</div>
-      <div style="display:flex;justify-content:space-between;font-size:.65rem;color:var(--muted);font-family:var(--mono);margin-bottom:4px;"><span>${t('apiCreditsLabel.usedThisMonth')}</span><span>$${usage.toFixed(2)}</span></div>
+      <div style="font-size:.68rem;color:var(--muted);font-family:var(--mono);margin-bottom:2px;">${t('apiCreditsLabel.currentBalance')} · <span style="color:${_src==='manual'?'#d29922':'#3fb950'};">${_srcTxt}</span></div>
+      <div style="font-size:.62rem;color:var(--muted);font-family:var(--mono);margin-bottom:10px;">${_topTxt}</div>
+      <div style="display:flex;justify-content:space-between;font-size:.65rem;color:var(--muted);font-family:var(--mono);margin-bottom:4px;"><span>${t('apiCreditsLabel.usedThisMonth')}</span><span>${_u===null?'—':_fmt(usage)}</span></div>
       <div style="height:4px;background:var(--border);border-radius:4px;overflow:hidden;margin-bottom:10px;"><div style="height:100%;width:${pct}%;background:${barColor};border-radius:4px;"></div></div>
       <div style="border-top:1px solid var(--border);padding-top:10px;display:flex;align-items:center;justify-content:space-between;"><span style="font-size:.65rem;color:var(--muted);">Balance $</span><input id="bal_${api.id}" type="number" value="${balance}" step="0.01" min="0" style="background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:3px 7px;color:var(--text);font-family:var(--mono);font-size:.7rem;width:80px;text-align:right;"></div>
       <div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px;"><span style="font-size:.65rem;color:var(--muted);">Alert at $</span><input id="thr_${api.id}" type="number" value="${threshold}" min="0" style="background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:3px 7px;color:var(--text);font-family:var(--mono);font-size:.7rem;width:80px;text-align:right;"></div>
       <div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px;"><span style="font-size:.65rem;color:var(--muted);">Recharge at $</span><input id="rat_${api.id}" type="number" value="${rechargeAt}" min="0" style="background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:3px 7px;color:var(--text);font-family:var(--mono);font-size:.7rem;width:80px;text-align:right;"></div>
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px;"><span style="font-size:.65rem;color:var(--muted);">Add $</span><input id="ram_${api.id}" type="number" value="${rechargeAmt}" min="0" style="background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:3px 7px;color:var(--text);font-family:var(--mono);font-size:.7rem;width:80px;text-align:right;"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px;gap:6px;"><span style="font-size:.65rem;color:var(--muted);">${t('apiCreditsLabel.topup','Top-up $')}</span><span style="display:flex;gap:6px;align-items:center;"><input id="top_${api.id}" type="number" value="0" step="0.01" min="0" style="background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:3px 7px;color:var(--text);font-family:var(--mono);font-size:.7rem;width:80px;text-align:right;"><button onclick="recordApiTopup('${api.id}')" style="background:var(--nes-btn-grad);border:none;border-radius:5px;padding:3px 8px;color:#fff;font-size:.62rem;font-weight:700;cursor:pointer;font-family:var(--mono);white-space:nowrap;">${t('apiCreditsLabel.recordTopup','Record top-up')}</button></span></div>
     </div>`;
   });
   html+='</div>';
@@ -98,12 +111,29 @@ async function saveAllThresholds(){
       const balance=parseFloat(document.getElementById('bal_'+api.id)?.value)||0;
       const threshold=parseFloat(document.getElementById('thr_'+api.id)?.value)||5;
       const rechargeAt=parseFloat(document.getElementById('rat_'+api.id)?.value)||5;
-      const rechargeAmt=parseFloat(document.getElementById('ram_'+api.id)?.value)||20;
-      {const{error:_e}=await sb.from('api_credits').upsert({service_name:api.id,current_balance:balance,alert_threshold:threshold,recharge_at:rechargeAt,recharge_amount:rechargeAmt,status:balance===0?'unknown':balance<threshold?'low':'healthy'},{onConflict:'service_name'});if(_e)throw _e;}
+      const _orig=(window._apiLoaded||{})[api.id];
+      const _row={service_name:api.id,alert_threshold:threshold,recharge_at:rechargeAt,status:balance===0?'unknown':balance<threshold?'low':'healthy'};
+      if(_orig===undefined||Math.abs(balance-_orig)>0.000001)_row.current_balance=balance; // edited -> becomes new starting point (DB trigger)
+      {const{error:_e}=await sb.from('api_credits').upsert(_row,{onConflict:'service_name'});if(_e)throw _e;}
     }
     showToast(t('toast.thresholdsSaved'));await loadApiCredits();
   }catch(e){showToast(t('popup.error')+': '+e.message);}
   finally{if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-device-floppy"></i> Save Thresholds';}}
+}
+
+// Fix 318: record a top-up -> adds to the (computed) balance, stamps the date, resets the field to 0
+async function recordApiTopup(id){
+  const inp=document.getElementById('top_'+id);
+  const amt=parseFloat(inp?.value);
+  if(!(amt>0)){showToast(t('apiCreditsLabel.enterTopup','Enter the top-up amount first'));return;}
+  if(!confirm(t('apiCreditsLabel.confirmTopup','Record a top-up of')+' $'+amt.toFixed(2)+' — '+id+'?'))return;
+  try{
+    const{data,error}=await sb.rpc('record_api_topup',{p_service:id,p_amount:amt});
+    if(error)throw error;
+    if(inp)inp.value='0';
+    showToast(t('apiCreditsLabel.topupSaved','Top-up recorded')+' · $'+(parseFloat(data&&data.balance)||0).toFixed(2));
+    await loadApiCredits();
+  }catch(e){showToast(t('popup.error')+': '+e.message);}
 }
 
 function showUpgradePopup(){ showPricing(); }
