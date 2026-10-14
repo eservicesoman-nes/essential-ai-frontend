@@ -205,7 +205,7 @@
     "platformStatus": "NES AI — Unified Business Platform · Live health check",
     "analytics": "Platform usage · All clients · Real-time",
     "clientManager": "NES Admin only · Manage all clients",
-    "apiCredits": "Balance · Usage · Auto-recharge thresholds",
+    "apiCredits": "Balance · Usage · Alerts · Top-ups",
     "incidents": "Backend uptime and auto-heal history · NES Admin only",
     "itSetup": "Integration checklist · Connect your services",
     "partnerHub": "NES · Incentive structure · Direct & partner clients"
@@ -306,7 +306,20 @@
     "autoRecharge": "Auto-recharge",
     "estMonthly": "Est. monthly",
     "currentBalance": "Current balance",
-    "usedThisMonth": "Used this month"
+    "usedThisMonth": "Used this month",
+    "liveOrComputed": "Live / computed",
+    "spendMonth": "Spend this month",
+    "srcLive": "live from provider",
+    "srcComputed": "computed",
+    "since": "since",
+    "srcManual": "manual",
+    "lastTopup": "Last top-up",
+    "noTopup": "No top-up recorded",
+    "topup": "Top-up $",
+    "recordTopup": "Record top-up",
+    "enterTopup": "Enter the top-up amount first",
+    "confirmTopup": "Record a top-up of",
+    "topupSaved": "Top-up recorded"
   },
   "inbox": {
     "title": "INBOX",
