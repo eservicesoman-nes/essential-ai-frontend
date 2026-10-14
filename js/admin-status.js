@@ -467,4 +467,4 @@ function _asBalanceLines(hist){
   return h;
 }
 
-const _AS_AI_MODELS={gemini:/^gemini/i,anthropic:/^claude/i,deepseek:/^deepseek/i,openai:/^(gpt|o\d|text-embedding)/i};
+const _AS_AI_MODELS={gemini:/^gemini/i,anthropic:/^claude/i,deepseek:/^deepseek/i,openai:/^(gpt|o\d|text-embedding)/i,fal:/^(flux|fal)/i};
