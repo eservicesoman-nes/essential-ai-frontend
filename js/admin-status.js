@@ -230,7 +230,7 @@ async function checkPlatformStatus(){
       ]);
     })(),
     // Fix 317: refresh DeepSeek's live balance first (max 6s), then read api_credits
-    (async()=>{try{const {data:_sd}=await sb.auth.getSession();const _tk=_sd?.session?.access_token||session.access_token;await Promise.race([fetch(API_URL+'/api/admin/balance/deepseek',{headers:{'Authorization':'Bearer '+_tk}}),new Promise(r=>setTimeout(r,6000))]);}catch(e){} return sb.from('api_credits').select('*').order('service_name');})(),
+    (async()=>{try{const {data:_sd}=await sb.auth.getSession();const _tk=_sd?.session?.access_token||session.access_token;await Promise.race([Promise.all(['deepseek','fal'].map(_s=>fetch(API_URL+'/api/admin/balance/'+_s,{headers:{'Authorization':'Bearer '+_tk}}).catch(()=>null))),new Promise(r=>setTimeout(r,6000))]);}catch(e){} return sb.from('api_credits').select('*').order('service_name');})(),
     Promise.all([
       sb.from('clients').select('*',{count:'exact',head:true}),
       sb.from('leads').select('*',{count:'exact',head:true}),
