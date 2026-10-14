@@ -383,7 +383,8 @@
     "dailySpend": "Daily call spend — last 30 days",
     "balanceHistory": "Balance history — last 30 days",
     "historyBuilding": "History is building — first snapshot today.",
-    "onePoint": "1 snapshot so far"
+    "onePoint": "1 snapshot so far",
+    "aiSpend": "AI $"
   },
   "systemLogsUi": {
     "subtitle": "Live backend error and output logs · NES Admin only",

@@ -383,7 +383,8 @@
     "dailySpend": "Gasto diário em chamadas — últimos 30 dias",
     "balanceHistory": "Histórico de saldos — últimos 30 dias",
     "historyBuilding": "Histórico em construção — primeiro registo hoje.",
-    "onePoint": "1 registo até agora"
+    "onePoint": "1 registo até agora",
+    "aiSpend": "IA $"
   },
   "systemLogsUi": {
     "subtitle": "Registos de erros e saída do backend em tempo real · Apenas NES Admin",
