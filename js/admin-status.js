@@ -345,8 +345,9 @@ async function checkPlatformStatus(){
       let usedNum=null, usedNote='';
       if(cost&&cost.calls_mtd&&svc==='vapi'){usedNum=parseFloat(cost.calls_mtd.vapi_usd)||0;}
       else if(cost&&cost.calls_mtd&&svc==='twilio'){usedNum=parseFloat(cost.calls_mtd.twilio_usd)||0;usedNote='~';}
+      else if(cost&&cost.ai_mtd&&_AS_AI_MODELS[svc]){usedNum=(cost.ai_mtd.by_model||[]).filter(m=>_AS_AI_MODELS[svc].test(m.model)).reduce((t,m)=>t+(parseFloat(m.usd)||0),0);}
       else if(a.monthly_usage>0&&!stale){usedNum=parseFloat(a.monthly_usage);}
-      const usage=usedNum!==null?usedNote+'$'+usedNum.toFixed(2):'—';
+      const usage=usedNum!==null?usedNote+'$'+usedNum.toFixed(usedNum>0&&usedNum<0.01?4:2):'—';
       const lcTxt=lc?lc.toLocaleDateString(getDateLocale('en-GB'),{day:'2-digit',month:'short'}):'—';
       const updHtml='<span style="font-size:.6rem;font-family:var(--mono);color:'+(stale?'#d29922':'var(--muted)')+';" title="'+_asEsc(stale?t('adminStatusUi.staleHint',"Not updated in 7+ days. Balance is entered by hand; update it in Manage."):'')+'">'+(stale?'⚠ '+t('adminStatusUi.manual',"manual")+' · ':'')+lcTxt+'</span>';
       html+='<div style="padding:8px 14px;border-bottom:1px solid rgba(26,35,50,.4);">';
@@ -405,10 +406,12 @@ function _asCostTrackerHtml(cost, err){
   }
   const c=cost.calls_mtd||{};
   const kpi=(label,val,col)=>'<div style="background:#0d1117;border:1px solid var(--border);border-radius:8px;padding:8px 10px;text-align:center;"><div style="font-size:1rem;font-weight:700;color:'+col+';font-family:var(--mono);">'+val+'</div><div style="font-size:.56rem;color:var(--muted);font-family:var(--mono);text-transform:uppercase;">'+label+'</div></div>';
-  h+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px;">';
+  h+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:12px;">';
   h+=kpi(t('adminStatusUi.callsMonth',"Calls this month"),(c.count||0),'var(--nes-blue)');
   h+=kpi('Vapi $','$'+(parseFloat(c.vapi_usd)||0).toFixed(2),'#7f77dd');
   h+=kpi('Twilio $ (est.)','$'+(parseFloat(c.twilio_usd)||0).toFixed(2),'#3fb950');
+  const ai=cost.ai_mtd||{};
+  h+=kpi(t('adminStatusUi.aiSpend','AI $')+' · '+(ai.calls||0),'$'+(parseFloat(ai.usd)||0).toFixed(ai.usd>0&&ai.usd<0.01?4:2),'#d29922');
   h+=kpi(t('adminStatusUi.unassigned',"Unassigned $"),'$'+(parseFloat(cost.unassigned_spend_usd)||0).toFixed(2),'var(--muted)');
   h+='</div>';
   // per-client spend vs ceiling
@@ -422,7 +425,7 @@ function _asCostTrackerHtml(cost, err){
     h+='<div style="display:grid;grid-template-columns:160px 1fr 130px;gap:8px;align-items:center;margin-bottom:5px;">';
     h+='<div style="font-size:.7rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="'+_asEsc(cl.name)+'">'+_asEsc(cl.name)+' <span style="color:var(--muted);font-size:.58rem;">'+_asEsc(cl.plan||'')+'</span></div>';
     h+='<div style="height:6px;background:var(--border);border-radius:3px;">'+(ceil?'<div style="height:6px;background:'+col+';border-radius:3px;width:'+pct.toFixed(1)+'%;"></div>':'')+'</div>';
-    h+='<div style="font-size:.62rem;color:var(--muted);font-family:var(--mono);text-align:end;">$'+spend.toFixed(2)+' / '+(ceil?'$'+ceil.toFixed(2):t('adminStatusUi.ceilingTbd',"ceiling TBD"))+'</div>';
+    h+='<div style="font-size:.62rem;color:var(--muted);font-family:var(--mono);text-align:end;" title="'+_asEsc('calls $'+(parseFloat(cl.calls_usd)||0).toFixed(4)+' · AI $'+(parseFloat(cl.ai_usd)||0).toFixed(4))+'">$'+spend.toFixed(spend>0&&spend<0.01?4:2)+' / '+(ceil?'$'+ceil.toFixed(2):t('adminStatusUi.ceilingTbd',"ceiling TBD"))+'</div>';
     h+='</div>';
   });
   // 30-day daily spend chart (inline SVG, no library)
@@ -463,3 +466,5 @@ function _asBalanceLines(hist){
   });
   return h;
 }
+
+const _AS_AI_MODELS={gemini:/^gemini/i,anthropic:/^claude/i,deepseek:/^deepseek/i,openai:/^(gpt|o\d|text-embedding)/i};
