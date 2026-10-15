@@ -178,23 +178,18 @@ function showPricing(){
       <div style="text-align:center;margin-bottom:8px;"><h1 style="font-size:1.7rem;font-weight:700;font-family:'Syne',sans-serif;">${t('pricingPage.chooseYourPlan')}</h1></div>
       <div style="text-align:center;margin-bottom:6px;font-family:var(--mono);font-size:.75rem;color:var(--muted);">${t('ui.bill.header')}</div>
       <div style="text-align:center;margin-bottom:16px;font-family:var(--mono);font-size:.68rem;color:var(--muted);">${t('ui.bill.trialCancel')}</div>
-      <div style="background:#0c1f3a;border:1px solid #1a3a5e;border-radius:10px;padding:11px 20px;display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
-        <div><div style="font-family:'Syne',sans-serif;font-size:.78rem;color:var(--nes-blue);font-weight:700;">${t('pricingPage.founderPricingTitle')}</div><div style="font-size:.65rem;color:var(--muted);margin-top:2px;">${t('pricingPage.founderPricingDetail')}</div></div>
-        <div style="font-family:var(--mono);font-size:.68rem;color:#3fb950;display:flex;align-items:center;gap:5px;"><div style="width:6px;height:6px;border-radius:50%;background:#3fb950;"></div>${t('ui.bill.spotsRemaining').replace('{n}','38')}</div>
-      </div>
 
       <div class="plan-grid">
 
         <div class="plan-card">
           <div style="font-family:'Syne',sans-serif;font-size:.65rem;color:var(--nes-blue);text-transform:uppercase;letter-spacing:.1em;text-align:center;margin-bottom:4px;">${t('plan.aiPresence')}</div>
-          <div style="text-align:center;font-size:.72rem;color:var(--red);text-decoration:line-through;font-family:var(--mono);margin-bottom:2px;">OMR 59${t('ui.bill.perMo')} (~$153)</div>
-          <div class="plan-price">OMR 29</div>
-          <div class="plan-period">${t('ui.bill.perMonthFounder').replace('{usd}','$75')}</div>
+          <div class="plan-price">OMR 59</div>
+          <div class="plan-period">${t('ui.bill.perMonthUsd').replace('{usd}','$153')}</div>
           <ul class="plan-features-list">
             <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>${t('ui.bill.aiMsgsDay').replace('{n}','150')}</li>
             <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>${t('ui.bill.fChatbot')}</li>
             <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>${t('ui.bill.fLeadCapture')}</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i><b style="color:var(--nes-blue);">Sara AI — ${t('ui.bill.callsMo').replace('{n}','30')}</b></li>
+            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i><b style="color:var(--nes-blue);">Sara AI — ${t('ui.bill.minsMo').replace('{n}','100')}</b></li>
             <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>${t('ui.bill.fEmailNotif')}</li>
             <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>${t('ui.bill.teamUsers').replace('{n}','3')}</li>
             <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Deen NES AI — ${t('ui.bill.freeGlobally')}</li>
@@ -209,15 +204,13 @@ function showPricing(){
         <div class="plan-card" style="border-color:var(--nes-blue);position:relative;">
           <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--nes-btn-grad);color:#fff;font-size:.65rem;font-weight:700;padding:3px 12px;border-radius:20px;font-family:'Syne',sans-serif;">${t('pricingPage.popular')}</div>
           <div style="font-family:'Syne',sans-serif;font-size:.65rem;color:var(--nes-blue);text-transform:uppercase;letter-spacing:.1em;text-align:center;margin-bottom:4px;">${t('plan.aiOperations')}</div>
-          <div style="text-align:center;font-size:.72rem;color:var(--red);text-decoration:line-through;font-family:var(--mono);margin-bottom:2px;">OMR 159${t('ui.bill.perMo')} (~$413)</div>
-          <div class="plan-price">OMR 79</div>
-          <div class="plan-period">${t('ui.bill.perMonthFounder').replace('{usd}','$205')}</div>
-          <div style="font-family:var(--mono);font-size:.62rem;color:var(--muted);text-align:center;margin-bottom:4px;">${t('ui.bill.standardAfter').replace('{price}','OMR 159')}</div>
+          <div class="plan-price">OMR 159</div>
+          <div class="plan-period">${t('ui.bill.perMonthUsd').replace('{usd}','$413')}</div>
           <ul class="plan-features-list">
             <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>${t('ui.bill.aiMsgsDay').replace('{n}','500')}</li>
             <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>${t('ui.bill.everythingIn').replace('{plan}',t('plan.aiPresence'))}</li>
             <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>${t('ui.bill.fCeoPulse')}</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i><b style="color:var(--nes-blue);">Sara AI — ${t('ui.bill.callsMo').replace('{n}','60')}</b></li>
+            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i><b style="color:var(--nes-blue);">Sara AI — ${t('ui.bill.minsMo').replace('{n}','250')}</b></li>
             <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>${t('ui.bill.fSocial3')}</li>
             <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>${t('ui.bill.fWaAlerts')}</li>
             <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>${t('ui.bill.fCrm')}</li>
@@ -232,14 +225,12 @@ function showPricing(){
 
         <div class="plan-card" style="border-color:#3fb950;position:relative;">
           <div style="font-family:'Syne',sans-serif;font-size:.65rem;color:#3fb950;text-transform:uppercase;letter-spacing:.1em;text-align:center;margin-bottom:4px;">${t('plan.aiWorkforce')}</div>
-          <div style="text-align:center;font-size:.72rem;color:var(--red);text-decoration:line-through;font-family:var(--mono);margin-bottom:2px;">OMR 299${t('ui.bill.perMo')} (~$777)</div>
-          <div class="plan-price" style="color:#3fb950;">OMR 149</div>
-          <div class="plan-period">${t('ui.bill.perMonthFounder').replace('{usd}','$387')}</div>
-          <div style="font-family:var(--mono);font-size:.62rem;color:var(--muted);text-align:center;margin-bottom:4px;">${t('ui.bill.standardAfter').replace('{price}','OMR 299')}</div>
+          <div class="plan-price" style="color:#3fb950;">OMR 299</div>
+          <div class="plan-period">${t('ui.bill.perMonthUsd').replace('{usd}','$777')}</div>
           <ul class="plan-features-list">
             <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>${t('ui.bill.aiMsgsDay').replace('{n}',(1500).toLocaleString(getDateLocale('en-GB')))}</li>
             <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>${t('ui.bill.everythingIn').replace('{plan}',t('plan.aiOperations'))}</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i><b style="color:#3fb950;">Sara AI — ${t('ui.bill.callsMo').replace('{n}','150')}</b></li>
+            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i><b style="color:#3fb950;">Sara AI — ${t('ui.bill.minsMo').replace('{n}','500')}</b></li>
             <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>${t('ui.bill.fLayla')}</li>
             <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>${t('ui.bill.fSocial3')}</li>
             <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>${t('ui.bill.teamUsers').replace('{n}','25')}</li>
