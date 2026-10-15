@@ -247,7 +247,7 @@ function showPricing(){
           <div class="plan-price" style="color:#d29922;">${t('ui.bill.custom')}</div>
           <div class="plan-period">${t('ui.bill.infraRange')}</div>
           <ul class="plan-features-list">
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>${t('ui.bill.fUnlimited')}</li>
+           <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>${t('ui.bill.fUnlimited')}</li>
             <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>${t('ui.bill.fFullApex')}</li>
             <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>${t('ui.bill.fRealtime')}</li>
             <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>${t('ui.bill.fMultiSocial')}</li>
