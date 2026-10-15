@@ -739,8 +739,8 @@ async function loadUsageSummary(){
         </div>
       </div>`;
     }
-    if(u.sara&&u.sara.limit>0)rows.push(bar(t('usage.saraCalls'),u.sara.used,u.sara.limit));
-    else if(u.sara&&u.sara.limit===-1)rows.push(`<div style="display:flex;align-items:center;justify-content:space-between;"><span style="font-size:.72rem;color:var(--text);">${t('usage.saraCalls')}</span><span style="font-size:.7rem;color:var(--muted);">${u.sara.used} · ${t('ui.dash.unlimited')}</span></div>`);
+    if(u.sara&&u.sara.limit>0)rows.push(bar(t('usage.saraMinutes'),u.sara.used,u.sara.limit));
+    else if(u.sara&&u.sara.limit===-1)rows.push(`<div style="display:flex;align-items:center;justify-content:space-between;"><span style="font-size:.72rem;color:var(--text);">${t('usage.saraMinutes')}</span><span style="font-size:.7rem;color:var(--muted);">${u.sara.used} · ${t('ui.dash.unlimited')}</span></div>`);
     if(u.adam&&u.adam.enabled)rows.push(bar(t('usage.adamConsultations'),u.adam.used,u.adam.included));
     if(u.chat)rows.push(bar(t('usage.chatMessages'),u.chat.used,u.chat.limit));
     if(u.image){
