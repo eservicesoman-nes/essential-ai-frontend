@@ -195,9 +195,6 @@ function showPricing(){
             <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Deen NES AI — ${t('ui.bill.freeGlobally')}</li>
             <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>${t('ui.bill.fTrial7')}</li>
           </ul>
-          <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);margin-bottom:8px;padding:6px 8px;background:var(--accent-lo);border-radius:6px;">
-            + Apex Connect ${t('ui.bill.upgrade')} OMR 15${t('ui.bill.perMo')}
-          </div>
           <button class="plan-action-btn" onclick="openSubscribeModal('presence','AI Presence')">${t('ui.bill.subscribePaypal')}</button>
         </div>
 
@@ -267,13 +264,7 @@ function showPricing(){
 
       <div style="text-align:center;margin-top:16px;font-family:var(--mono);font-size:.68rem;color:var(--muted);">${t('ui.bill.annualNote')}</div>
         <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:16px;">${t('ui.bill.apexSuite')}</div>
-        <div class="ph-tiers" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;max-width:700px;margin:0 auto;">
-          <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center;">
-            <i class="ti ti-phone" style="font-size:24px;color:#3fb950;display:block;margin-bottom:8px;"></i>
-            <div style="font-weight:700;margin-bottom:4px;">Apex Connect</div>
-            <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);margin-bottom:8px;">${t('ui.bill.apexConnectDesc')}</div>
-            <div style="font-size:1.1rem;font-weight:700;color:#3fb950;">+OMR 15${t('ui.bill.perMo')}</div>
-          </div>
+        <div class="ph-tiers" style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;max-width:480px;margin:0 auto;">
           <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center;">
             <i class="ti ti-headset" style="font-size:24px;color:#7f77dd;display:block;margin-bottom:8px;"></i>
             <div style="font-weight:700;margin-bottom:4px;">Apex Outreach</div>
