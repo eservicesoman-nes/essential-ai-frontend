@@ -330,7 +330,7 @@ async function addLocalCurrencyToPricing(){
   }catch(e){ console.error('addLocalCurrencyToPricing error:', e.message); }
 }
 
-async function payWithPayPal(amountOMR,description){
+async function payWithPayPal(amountOMR,description,metadata){
   const btn=event.target;
   btn.disabled=true;btn.textContent=t('pricingPage.processing');
   const totalOMR=Math.round(amountOMR*1.05*1000)/1000;
@@ -339,7 +339,7 @@ async function payWithPayPal(amountOMR,description){
     const res=await fetch(API_URL+'/api/paypal/create-order',{
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
-      body:JSON.stringify({amount:amountUSD,currency:'USD',description})
+      body:JSON.stringify({amount:amountUSD,currency:'USD',description,metadata})
     });
     const data=await res.json();
     if(data.checkout_url){
@@ -355,14 +355,14 @@ async function payWithPayPal(amountOMR,description){
 }
 function openVoiceTopupModal(){
   const packs=[
-    {min:50,p:18,label:t('pricingPage.starterBundle')},
-    {min:150,p:45,label:t('pricingPage.standardBundle')},
-    {min:400,p:99,label:t('pricingPage.powerBundle')}
+    {min:50,p:20,label:t('pricingPage.starterBundle')},
+    {min:150,p:55,label:t('pricingPage.standardBundle')},
+    {min:400,p:140,label:t('pricingPage.powerBundle')}
   ];
   const packsHtml=packs.map(pk=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px;">
     <div><div style="font-weight:700;font-size:.85rem;">${pk.label}</div><div style="font-size:.75rem;color:var(--muted);">${pk.min} ${t('topup.minutes')} · ${t('topup.neverExpire')}</div><div style="font-size:.7rem;color:var(--muted);">OMR ${pk.p} + 5% VAT = OMR ${(pk.p*1.05).toFixed(3)}</div></div>
     <button class="act-btn" onclick="buyVoiceTopup(${pk.min},${pk.p},'${pk.label}')">${t('topup.buyNow')}</button>
-    <button class="act-btn" style="margin-inline-start:6px;background:#003087;" onclick="payWithPayPal(${pk.p},'Sara Top-up ${pk.min}min')">PayPal</button>
+    <button class="act-btn" style="margin-inline-start:6px;background:#003087;" onclick="payWithPayPal(${pk.p},'Sara Top-up ${pk.min}min',{type:'voice_topup',minutes:${pk.min}})">PayPal</button>
   </div>`).join('');
   const html=`<div style="padding:4px 0;">
     <p style="color:var(--muted);font-size:.85rem;margin-bottom:14px;">${t('topup.saraIntro')}</p>
@@ -411,7 +411,7 @@ function openAdamTopupModal(){
   const packsHtml=packs.map(pk=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px;">
     <div><div style="font-weight:700;font-size:.85rem;">${pk.label}</div><div style="font-size:.75rem;color:var(--muted);">${pk.credits} ${t('topup.consultations')} · ${t('topup.neverExpire')}</div><div style="font-size:.7rem;color:var(--muted);">OMR ${pk.p} + 5% VAT = OMR ${(pk.p*1.05).toFixed(3)}</div></div>
     <button class="act-btn" onclick="buyAdamTopup(${pk.credits},${pk.p},'${pk.label}')">${t('topup.buyNow')}</button>
-    <button class="act-btn" style="margin-inline-start:6px;background:#003087;" onclick="payWithPayPal(${pk.p},'Adam Top-up ${pk.credits} credits')">PayPal</button>
+    <button class="act-btn" style="margin-inline-start:6px;background:#003087;" onclick="payWithPayPal(${pk.p},'Adam Top-up ${pk.credits} credits',{type:'adam_topup',credits:${pk.credits}})">PayPal</button>
   </div>`).join('');
   const html=`<div style="padding:4px 0;">
     <p style="color:var(--muted);font-size:.85rem;margin-bottom:14px;">${t('topup.adamIntro')}</p>
@@ -460,7 +460,7 @@ function openBriefcaseTopupModal(){
   const packsHtml=packs.map(pk=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px;">
     <div><div style="font-weight:700;font-size:.85rem;">${pk.label}</div><div style="font-size:.75rem;color:var(--muted);">${pk.gb}GB ${t('topup.extraStorage')}</div><div style="font-size:.7rem;color:var(--muted);">OMR ${pk.p} + 5% VAT = OMR ${(pk.p*1.05).toFixed(3)}/mo</div></div>
     <button class="act-btn" onclick="buyBriefcaseTopup(${pk.gb},${pk.p},'${pk.label}')">${t('topup.buyNow')}</button>
-    <button class="act-btn" style="margin-inline-start:6px;background:#003087;" onclick="payWithPayPal(${pk.p},'Briefcase Top-up ${pk.gb}GB')">PayPal</button>
+    <button class="act-btn" style="margin-inline-start:6px;background:#003087;" onclick="payWithPayPal(${pk.p},'Briefcase Top-up ${pk.gb}GB',{type:'storage_topup',gb:${pk.gb}})">PayPal</button>
   </div>`).join('');
   const html=`<div style="padding:4px 0;">
     <p style="color:var(--muted);font-size:.85rem;margin-bottom:14px;">${t('topup.storageIntro')}</p>
@@ -505,7 +505,7 @@ function openCreditsModal(){
   const packsHtml=packs.map(pk=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px;">
     <div><div style="font-weight:700;font-size:.85rem;">${pk.label}</div><div style="font-size:.75rem;color:var(--muted);">${pk.n} ${t('topup.credits')} · ${t('topup.neverExpire')}</div><div style="font-size:.7rem;color:var(--muted);">OMR ${pk.p} + 5% VAT = OMR ${(pk.p*1.05).toFixed(3)}</div></div>
     <button class="act-btn" onclick="buyImageCredits(${pk.n},${pk.p},'${pk.label}')">${t('topup.buyNow')}</button>
-    <button class="act-btn" style="margin-inline-start:6px;background:#003087;" onclick="payWithPayPal(${pk.p},'Image Credits ${pk.n}cr')">PayPal</button>
+    <button class="act-btn" style="margin-inline-start:6px;background:#003087;" onclick="payWithPayPal(${pk.p},'Image Credits ${pk.n}cr',{type:'image_credits',credits:${pk.n}})">PayPal</button>
   </div>`).join('');
   const trialEnded=imageCredits.freeAllowanceActive===false;
   const statusHtml=trialEnded
