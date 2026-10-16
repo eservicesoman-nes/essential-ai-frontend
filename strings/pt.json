@@ -685,7 +685,7 @@
       "chooseCycle": "Escolha o ciclo de faturação para {plan}. A faturação anual inclui 15% de desconto.",
       "monthlyPaypal": "Mensal — Pagar com PayPal",
       "annualPaypal": "Anual — 15% de desconto — Pagar com PayPal",
-      "redirectPaypal": "Será redirecionado para o PayPal para concluir a subscrição.",
+      "redirectPaypal": "Será redirecionado para o PayPal para concluir a subscrição. Prefere Thawani? Contacte-nos para receber um link de pagamento.",
       "subscribeTo": "Subscrever {plan}",
       "monthly": "Mensal",
       "annual15": "Anual — 15% de desconto",
