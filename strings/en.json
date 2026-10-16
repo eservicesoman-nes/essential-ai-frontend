@@ -698,7 +698,7 @@
       "chooseCycle": "Choose your billing cycle for {plan}. Annual billing includes a 15% discount.",
       "monthlyPaypal": "Monthly — Pay with PayPal",
       "annualPaypal": "Annual — 15% off — Pay with PayPal",
-      "redirectPaypal": "You'll be redirected to PayPal to complete your subscription.",
+      "redirectPaypal": "You'll be redirected to PayPal to complete your subscription. Prefer Thawani? Contact us for a payment link.",
       "subscribeTo": "Subscribe to {plan}",
       "monthly": "Monthly",
       "annual15": "Annual — 15% off",
