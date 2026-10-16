@@ -526,7 +526,7 @@
   },
   "usage": {
     "saraMinutes": "Minutos da Sara",
-    "adamConsultations": "Consultas do Adam",
+    "adamConsultations": "Minutos do Adam",
     "chatMessages": "Mensagens Ask NES AI",
     "imageTrial": "Geração de imagens (diária, teste)",
     "briefcaseStorage": "Armazenamento da Pasta",
@@ -607,13 +607,13 @@
     "extraStorage": "de armazenamento extra",
     "buyNow": "Comprar",
     "saraIntro": "Carregue minutos da Sara quando o limite mensal estiver a acabar. Os minutos são adicionados de imediato e não expiram.",
-    "adamIntro": "Carregue consultas do Adam quando as 20 consultas mensais incluídas acabarem. Os créditos são adicionados de imediato e não expiram.",
+    "adamIntro": "Carregue minutos do Adam quando os 100 minutos mensais incluídos acabarem. Os minutos são adicionados de imediato e não expiram.",
     "storageIntro": "Aumente o armazenamento da Pasta quando o espaço incluído no plano estiver a acabar. O espaço é adicionado de imediato.",
     "imageIntro": "Todos os planos incluem 3 imagens grátis por dia durante o período experimental. Precisa de mais? Compre um pacote — cada crédito gera uma imagem extra e os créditos não expiram.",
     "payNoteMinutes": "Pagamentos processados com segurança via Thawani ou PayPal. Os minutos são adicionados automaticamente após o pagamento.",
     "payNoteCredits": "Pagamentos processados com segurança via Thawani ou PayPal. Os créditos são adicionados automaticamente após o pagamento.",
     "payNoteStorage": "Pagamentos processados com segurança via Thawani ou PayPal. O espaço é adicionado automaticamente após o pagamento.",
-    "adamTitle": "Recarga de Consultas Adam",
+    "adamTitle": "Recarga de Minutos Adam",
     "storageTitle": "Recarga de Armazenamento da Pasta",
     "imageTitle": "Créditos de Imagem",
     "trialEnded": "O seu período experimental terminou.",
@@ -728,7 +728,7 @@
       "apexSuite": "Apex Suite — Agentes de voz IA",
       "apexConnectDesc": "Chamada de retorno em 60 s para cada lead",
       "apexOutreachDesc": "Acompanhamento e reativação em 3 dias",
-      "apexAdvisoryDesc": "Consultor de voz empresarial",
+      "apexAdvisoryDesc": "Consultor de voz para o negócio · 100 min/mês · ativação a pedido",
       "pricesNote": "Todos os preços em Rial Omanense (OMR) · 1 USD ≈ 0,385 OMR · Preços para EAU/KSA/UE disponíveis mediante pedido"
     },
     "mail": {
