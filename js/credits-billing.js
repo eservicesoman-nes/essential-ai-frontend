@@ -234,7 +234,7 @@ function showPricing(){
             <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>${t('ui.bill.fWaSupport')}</li>
           </ul>
           <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);margin-bottom:8px;padding:6px 8px;background:rgba(63,185,80,.08);border-radius:6px;">
-            + Apex Advisory OMR 20${t('ui.bill.perMo')}<br>+ ${t('ui.bill.extraSocial')} OMR 8${t('ui.bill.perMo')}
+            + Apex Advisory OMR 40${t('ui.bill.perMo')}<br>+ ${t('ui.bill.extraSocial')} OMR 8${t('ui.bill.perMo')}
           </div>
           <button class="plan-action-btn" style="background:linear-gradient(135deg,#1a7f37,#3fb950);" onclick="openSubscribeModal('workforce','AI Workforce')">${t('ui.bill.subscribePaypal')}</button>
         </div>
@@ -275,7 +275,7 @@ function showPricing(){
             <i class="ti ti-phone-call" style="font-size:24px;color:#f0883e;display:block;margin-bottom:8px;"></i>
             <div style="font-weight:700;margin-bottom:4px;">Apex Advisory</div>
             <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);margin-bottom:8px;">${t('ui.bill.apexAdvisoryDesc')}</div>
-            <div style="font-size:1.1rem;font-weight:700;color:#f0883e;">+OMR 20${t('ui.bill.perMo')}</div>
+            <div style="font-size:1.1rem;font-weight:700;color:#f0883e;">+OMR 40${t('ui.bill.perMo')}</div>
           </div>
         </div>
       </div>
@@ -383,26 +383,28 @@ async function buyVoiceTopup(minutes,price,label){
   }
 }
 
+// Adam minute top-ups are purchasable; clients on Apex Advisory ask NES first, then buy (backend packs + credit path wired for minutes).
+const ADAM_TOPUP_LIVE=true;
 function openAdamTopupModal(){
   const packs=[
-    {credits:5,p:8,label:t('pricingPage.starterBundle')},
-    {credits:10,p:15,label:t('pricingPage.standardBundle')},
-    {credits:25,p:35,label:t('pricingPage.powerBundle')}
+    {min:50,p:20,label:t('pricingPage.starterBundle')},
+    {min:150,p:55,label:t('pricingPage.standardBundle')},
+    {min:400,p:140,label:t('pricingPage.powerBundle')}
   ];
   const packsHtml=packs.map(pk=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px;">
-    <div><div style="font-weight:700;font-size:.85rem;">${pk.label}</div><div style="font-size:.75rem;color:var(--muted);">${pk.credits} ${t('topup.consultations')} · ${t('topup.neverExpire')}</div><div style="font-size:.7rem;color:var(--muted);">OMR ${pk.p} + 5% VAT = OMR ${(pk.p*1.05).toFixed(3)}</div></div>
-    <button class="act-btn" onclick="buyAdamTopup(${pk.credits},${pk.p},'${pk.label}')">${t('topup.buyNow')}</button>
-    <button class="act-btn" style="margin-inline-start:6px;background:#003087;" onclick="payWithPayPal(${pk.p},'Adam Top-up ${pk.credits} credits',{type:'adam_topup',credits:${pk.credits}})">PayPal</button>
+    <div><div style="font-weight:700;font-size:.85rem;">${pk.label}</div><div style="font-size:.75rem;color:var(--muted);">${pk.min} ${t('topup.minutes')} · ${t('topup.neverExpire')}</div><div style="font-size:.7rem;color:var(--muted);">OMR ${pk.p} + 5% VAT = OMR ${(pk.p*1.05).toFixed(3)}</div></div>
+    ${ADAM_TOPUP_LIVE?`<button class="act-btn" onclick="buyAdamTopup(${pk.min},${pk.p},'${pk.label}')">${t('topup.buyNow')}</button>
+    <button class="act-btn" style="margin-inline-start:6px;background:#003087;" onclick="payWithPayPal(${pk.p},'Adam Top-up ${pk.min}min',{type:'adam_topup',minutes:${pk.min}})">PayPal</button>`:`<span style="font-size:.75rem;color:var(--muted);">${t('ui.mail.comingSoon')}</span>`}
   </div>`).join('');
   const html=`<div style="padding:4px 0;">
     <p style="color:var(--muted);font-size:.85rem;margin-bottom:14px;">${t('topup.adamIntro')}</p>
     ${packsHtml}
-    <p style="color:var(--muted);font-size:.75rem;margin-top:10px;">${t('topup.payNoteCredits')}</p>
+    <p style="color:var(--muted);font-size:.75rem;margin-top:10px;">${t('topup.payNoteMinutes')}</p>
   </div>`;
   showModal(t('topup.adamTitle'),html);
 }
 
-async function buyAdamTopup(credits,price,label){
+async function buyAdamTopup(minutes,price,label){
   const btn=event.target;
   btn.disabled=true;btn.textContent=t('pricingPage.processing');
   const vatAmount=Math.round(price*0.05*100)/100;
@@ -415,8 +417,8 @@ async function buyAdamTopup(credits,price,label){
         amount:totalAmount,
         clientName:document.getElementById('userEmail')?.textContent||'Client',
         clientId:userClientId,
-        description:`Adam Top-up ${credits} credits`,
-        metadata:{type:'adam_topup',credits,clientId:userClientId}
+        description:`Adam Top-up ${minutes} min`,
+        metadata:{type:'adam_topup',minutes,clientId:userClientId}
       })
     });
     const data=await res.json();
