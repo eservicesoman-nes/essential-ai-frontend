@@ -315,7 +315,7 @@ async function loadFleetUsageRanking(){
         </div>
         <div style="display:flex;gap:14px;font-size:.65rem;color:var(--muted);font-family:var(--mono);flex-wrap:wrap;">
           <span>Sara: ${c.sara.used}/${c.sara.limit===-1?'∞':c.sara.limit}</span>
-          ${c.adam.enabled?`<span>Adam: ${c.adam.used}/${c.adam.included} (${c.adam.creditBalance} credits)</span>`:''}
+          ${c.adam.enabled?`<span>Adam: ${c.adam.used}/${c.adam.included===-1?'∞':c.adam.included} min (${c.adam.creditBalance} top-up min)</span>`:''}
           <span>Chat: ${c.chat.used}/${c.chat.limit}</span>
           <span>Storage: ${storagePct}%</span>
         </div>
