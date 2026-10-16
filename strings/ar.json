@@ -685,7 +685,7 @@
       "chooseCycle": "اختر دورة الفوترة لباقة {plan}. الفوترة السنوية تشمل خصماً بنسبة 15%.",
       "monthlyPaypal": "شهري — ادفع عبر PayPal",
       "annualPaypal": "سنوي — خصم 15% — ادفع عبر PayPal",
-      "redirectPaypal": "سيتم تحويلك إلى PayPal لإتمام الاشتراك.",
+      "redirectPaypal": "سيتم تحويلك إلى PayPal لإتمام الاشتراك. تفضّل Thawani؟ تواصل معنا للحصول على رابط الدفع.",
       "subscribeTo": "الاشتراك في {plan}",
       "monthly": "شهري",
       "annual15": "سنوي — خصم 15%",
