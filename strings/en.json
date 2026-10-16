@@ -539,7 +539,7 @@
   },
   "usage": {
     "saraMinutes": "Sara AI minutes",
-    "adamConsultations": "Adam consultations",
+    "adamConsultations": "Adam minutes",
     "chatMessages": "Ask NES AI messages",
     "imageTrial": "Image gen (daily, trial)",
     "briefcaseStorage": "Briefcase storage",
@@ -620,13 +620,13 @@
     "extraStorage": "extra storage",
     "buyNow": "Buy Now",
     "saraIntro": "Top up Sara's minutes when your monthly allowance runs low. Minutes are added instantly and never expire.",
-    "adamIntro": "Top up Adam's consultation allowance when your monthly 20 included consultations run out. Credits are added instantly and never expire.",
+    "adamIntro": "Top up Adam's minutes when your monthly 100 included minutes run out. Minutes are added instantly and never expire.",
     "storageIntro": "Top up your Briefcase storage when your plan's free allowance runs low. Storage is added instantly.",
     "imageIntro": "Every plan includes 3 free images per day during your trial. Need more? Top up with a credit pack — each credit generates one extra image, and credits never expire.",
     "payNoteMinutes": "Payments processed securely via Thawani or PayPal. Minutes added to your account automatically after payment.",
     "payNoteCredits": "Payments processed securely via Thawani or PayPal. Credits added to your account automatically after payment.",
     "payNoteStorage": "Payments processed securely via Thawani or PayPal. Storage added to your account automatically after payment.",
-    "adamTitle": "Adam Consultation Top-up",
+    "adamTitle": "Adam Minutes Top-up",
     "storageTitle": "Briefcase Storage Top-up",
     "imageTitle": "Image Credits",
     "trialEnded": "Your free trial has ended.",
@@ -741,7 +741,7 @@
       "apexSuite": "Apex Suite — AI Voice Agents",
       "apexConnectDesc": "60-sec callback on every lead",
       "apexOutreachDesc": "3-day follow-up re-engagement",
-      "apexAdvisoryDesc": "Enterprise voice consultant",
+      "apexAdvisoryDesc": "Voice business advisor · 100 min/mo · set up on request",
       "pricesNote": "All prices in Omani Rial (OMR) · 1 USD ≈ 0.385 OMR · UAE/KSA/EU pricing available on request"
     },
     "mail": {
