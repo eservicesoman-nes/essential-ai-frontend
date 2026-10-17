@@ -290,6 +290,8 @@ function setupNavForRole(){
     if(inboxNavEl) inboxNavEl.style.display = ['ceo','nesadmin'].includes(userRole) ? 'flex' : 'none';
     const briefcaseWorkspaceNavEl = document.getElementById('briefcaseWorkspaceNav');
     if(briefcaseWorkspaceNavEl) briefcaseWorkspaceNavEl.style.display = (userRole==='ceo' || userRole==='nesadmin' || (window.userGrantedModules||[]).includes('briefcase')) ? 'flex' : 'none';
+    const assessmentNavEl = document.getElementById('assessmentWorkspaceNav');
+    if(assessmentNavEl) assessmentNavEl.style.display = (userRole==='nesadmin' || userRole==='nes_partner' || (window.userGrantedModules||[]).includes('assessment')) ? 'flex' : 'none';
     const whatsappWorkspaceNavEl = document.getElementById('whatsappWorkspaceNav');
     if(whatsappWorkspaceNavEl) whatsappWorkspaceNavEl.style.display = (userRole==='ceo' || userRole==='nesadmin' || (window.userGrantedModules||[]).includes('whatsapp_autoreply')) ? 'flex' : 'none';
     showClientBrandingChip().then(()=>{
@@ -322,6 +324,8 @@ function setupNavForRole(){
     if(userRole==='nesadmin'){const phn=document.getElementById('partnerHubNav');if(phn)phn.style.display='block';
       const inboxNavAdmin=document.getElementById('inboxNav');
       if(inboxNavAdmin)inboxNavAdmin.style.display='flex';
+      const assessmentNavAdmin=document.getElementById('assessmentWorkspaceNav');
+      if(assessmentNavAdmin)assessmentNavAdmin.style.display='flex';
       const briefcaseNavAdmin=document.getElementById('briefcaseWorkspaceNav');
       if(briefcaseNavAdmin)briefcaseNavAdmin.style.display='flex';
       const deenNavAdmin=document.getElementById('deenNav');
@@ -704,6 +708,7 @@ function showView(view){
   else if(view==='clientmgr'){showClientManager();}
   else if(view==='sales'){showSalesPortal();}
   else if(view==='mycredentials'){showMyCredentials();}
+  else if(view==='assessment'){showAssessment();}
   else if(view==='analytics'){showAnalytics();}
   else if(view==='adminstatus'){showAdminStatus();}
   else if(view==='apicredits'){showApiCredits();}
