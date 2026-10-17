@@ -70,7 +70,7 @@ function asmRender(){
   const s=_asm.step,last=s===ASM_STEPS.length-1;
   const tabs=ASM_STEPS.map((n,i)=>'<div onclick="asmGo('+i+')" style="cursor:pointer;padding:8px 12px;font-family:var(--mono);font-size:.68rem;white-space:nowrap;border-bottom:2px solid '+(i===s?'var(--nes-blue,#409cff)':'transparent')+';color:'+(i===s?'var(--nes-blue,#409cff)':i<s?'var(--green,#3fb950)':'var(--muted)')+';">'+(i+1)+'. '+n+'</div>').join('');
   mc.style.overflow='auto';
-  mc.innerHTML='<div style="padding-block:11px;padding-inline-end:var(--header-clearance);padding-inline-start:60px;border-bottom:1px solid var(--border);flex-shrink:0;"><div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;">Client Assessment</div><div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">Step '+(s+1)+' of '+ASM_STEPS.length+' — '+ASM_STEPS[s]+'</div></div>'+
+  mc.innerHTML='<div style="padding-block:11px;padding-inline-end:var(--header-clearance);padding-inline-start:60px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;gap:10px;"><div><div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;">Client Assessment</div><div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">Step '+(s+1)+' of '+ASM_STEPS.length+' — '+ASM_STEPS[s]+'</div></div><button type="button" onclick="showAssessmentList()" style="background:none;border:1px solid var(--border);border-radius:8px;padding:6px 12px;color:var(--muted);cursor:pointer;font-family:var(--mono);font-size:.68rem;">Saved assessments</button></div>'+
     '<div style="display:flex;overflow-x:auto;border-bottom:1px solid var(--border);flex-shrink:0;">'+tabs+'</div>'+
     '<div class="page" style="overflow-y:auto;flex:1;"><div style="max-width:640px;padding:18px 0 60px;">'+asmStepHtml()+
     '<div id="asmErr" style="display:none;margin:10px 0;padding:10px 14px;border-radius:8px;font-size:.75rem;background:rgba(248,81,73,.1);border:1px solid rgba(248,81,73,.3);color:#f85149;"></div>'+
@@ -125,4 +125,72 @@ async function asmSave(){
     asmErr('Save failed: '+(e&&e.message?e.message:'unknown error')+'. Please try again.');
   }
 }
+
+// ---- Saved assessments list + Convert to client (nesadmin) ----
+async function showAssessmentList(){
+  const mc=document.getElementById('mainContent');
+  if(!asmCanUse()){showAssessment();return;}
+  mc.style.overflow='auto';
+  mc.innerHTML='<div style="padding:40px;text-align:center;color:var(--muted);font-family:var(--mono);font-size:.8rem;">Loading...</div>';
+  const{data,error}=await sb.from('client_assessments').select('id,created_at,company_name,decision_maker,email,plan_recommended,currency,trial_days,status,client_id,assessed_by').order('created_at',{ascending:false}).limit(100);
+  const isAdmin=userRole==='nesadmin';
+  const hdr='<div style="padding-block:11px;padding-inline-end:var(--header-clearance);padding-inline-start:60px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;gap:10px;"><div><div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;">Saved assessments</div><div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">'+(isAdmin?'All assessments':'Your assessments')+'</div></div><button type="button" onclick="showAssessment()" style="background:var(--nes-btn-grad,#1a56db);border:none;border-radius:8px;padding:7px 14px;color:#fff;cursor:pointer;font-family:var(--mono);font-size:.7rem;font-weight:700;">New assessment</button></div>';
+  if(error){mc.innerHTML=hdr+'<div style="padding:30px;color:#f85149;font-family:var(--mono);font-size:.8rem;">Error: '+asmEsc(error.message)+'</div>';return;}
+  const rows=(data||[]).map(a=>{
+    const name=a.company_name||a.decision_maker||'(no name)';
+    const st=a.status||'new';
+    const conv=st==='converted';
+    const btn=(isAdmin&&!conv)?'<button type="button" onclick="asmConvert(\''+a.id+'\')" style="background:none;border:1px solid var(--nes-blue,#409cff);border-radius:8px;padding:6px 12px;color:var(--nes-blue,#409cff);cursor:pointer;font-family:var(--mono);font-size:.68rem;white-space:nowrap;">Convert to client</button>':'';
+    return '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 0;border-bottom:1px solid var(--border);"><div style="min-width:0;"><div style="font-size:.85rem;font-weight:700;">'+asmEsc(name)+'</div><div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);margin-top:3px;">'+asmEsc((a.created_at||'').slice(0,10))+' · '+asmEsc(a.plan_recommended||'-')+' · '+asmEsc(a.currency||'OMR')+' · '+asmEsc(a.email||'')+(isAdmin?' · by '+asmEsc(a.assessed_by||'-'):'')+'</div></div><div style="display:flex;align-items:center;gap:10px;"><span style="font-family:var(--mono);font-size:.62rem;padding:3px 8px;border-radius:10px;border:1px solid var(--border);color:'+(conv?'#3fb950':'var(--muted)')+';">'+asmEsc(st)+'</span>'+btn+'</div></div>';
+  }).join('');
+  mc.innerHTML=hdr+'<div class="page" style="overflow-y:auto;flex:1;"><div style="max-width:760px;padding:8px 0 60px;">'+(rows||'<div style="padding:30px 0;color:var(--muted);font-size:.8rem;">No assessments yet.</div>')+'</div></div>';
+}
+
+async function asmConvert(id){
+  if(userRole!=='nesadmin')return;
+  const{data:a,error}=await sb.from('client_assessments').select('*').eq('id',id).single();
+  if(error||!a){showToast('Could not load assessment');return;}
+  if(!window._asmSaveWrapped&&typeof window.saveNewClient==='function'){
+    const orig=window.saveNewClient;
+    window.saveNewClient=async function(){
+      const cid=window._asmConvertId;
+      const nm=((document.getElementById('field_name')||{}).value||'').trim();
+      await orig();
+      if(cid)await asmLink(cid,nm);
+    };
+    window._asmSaveWrapped=true;
+  }
+  showAddClientForm();
+  const setF=(k,v)=>{const el=document.getElementById('field_'+k);if(el&&v!=null&&v!=='')el.value=v;};
+  const country=a.country||(a.currency==='EUR'?'Portugal':'Oman');
+  setF('name',a.company_name||a.decision_maker);
+  setF('email',a.email);
+  setF('website',a.website);
+  setF('industry',a.industry);
+  setF('region',country);
+  const cs=document.getElementById('field_country');
+  if(cs&&[].some.call(cs.options,o=>o.value===country))cs.value=country;
+  setF('language',a.language==='Arabic'?'Arabic':'English');
+  setF('lead_email',a.email);
+  const ps=document.getElementById('field_plan');
+  if(ps&&[].some.call(ps.options,o=>o.value===a.plan_recommended))ps.value=a.plan_recommended;
+  setF('trial_start',a.trial_start_date);
+  setF('trial_duration_days',a.trial_days);
+  window._asmConvertId=id;
+  showToast('Prefilled from assessment — review, then click Create Client');
+}
+
+async function asmLink(id,name){
+  try{
+    if(!name)return;
+    const since=new Date(Date.now()-5*60000).toISOString();
+    const{data}=await sb.from('clients').select('id,name,created_at').eq('name',name).gte('created_at',since).order('created_at',{ascending:false}).limit(1);
+    if(data&&data[0]){
+      const{error}=await sb.from('client_assessments').update({status:'converted',client_id:data[0].id}).eq('id',id);
+      if(!error)window._asmConvertId=null;
+    }
+  }catch(e){}
+}
 window.showAssessment=showAssessment;
+window.showAssessmentList=showAssessmentList;
+window.asmConvert=asmConvert;
