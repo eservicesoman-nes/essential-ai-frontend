@@ -65,6 +65,8 @@ function renderMyCredsForm(creds, client){
   // Portugal clients: LinkedIn posting not offered (backend unchanged)
   if(userRole!=='nesadmin'){
     sections.forEach(s=>{s.items=s.items.filter(i=>!i.keys.includes('linkedin_token'));});
+    // Clients give NES only the Page ID (the posting token is held by NES)
+    sections.forEach(s=>s.items.forEach(i=>{if(i.keys.includes('facebook_token'))i.keys=i.keys.filter(k=>k!=='facebook_token');}));
   }
   let connected=0,total=0;
   sections.forEach(s=>s.items.forEach(item=>{
