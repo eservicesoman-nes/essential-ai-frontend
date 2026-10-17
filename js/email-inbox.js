@@ -167,8 +167,11 @@ async function loadInboxEmails(clientId){
     const accounts=[...new Set(emails.map(e=>e.account_email))];
     let accountLabels = {};
     try{
-      const {data:accsData} = await sb.from('email_accounts').select('email_address,label').eq('client_id', window._inboxClientId||clientId);
-      (accsData||[]).forEach(a => accountLabels[a.email_address] = a.label||a.email_address);
+      const {data:accsData} = await sb.from('email_accounts').select('email_address,label,is_active').eq('client_id', window._inboxClientId||clientId);
+      (accsData||[]).forEach(a => {
+        accountLabels[a.email_address] = a.label||a.email_address;
+        if(a.is_active!==false && !accounts.includes(a.email_address)) accounts.push(a.email_address);
+      });
     }catch(e){}
     window._accountLabels = accountLabels;
 
@@ -197,7 +200,7 @@ async function loadInboxEmails(clientId){
     // Also rebuild badges with correct read counts
     const filters2 = document.getElementById('acctFilters');
     if(filters2) {
-      const updatedAccounts = [...new Set(emails.map(function(e){return e.account_email;}))];
+      const updatedAccounts = window._inboxAccounts||[...new Set(emails.map(function(e){return e.account_email;}))];
       filters2.innerHTML = `<button onclick="showComposeModal()" style="display:flex;align-items:center;gap:5px;font-size:.65rem;padding:4px 10px;border-radius:6px;border:none;background:linear-gradient(135deg,#1a56db,#2563eb);color:#fff;cursor:pointer;white-space:nowrap;flex-shrink:0;"><i class="ti ti-pencil" style="font-size:11px;"></i> ${t('inbox.compose')}</button>`
         + '<button onclick="filterInbox(\'all\',this)" style="display:flex;align-items:center;gap:5px;font-size:.65rem;padding:4px 10px;border-radius:6px;border:none;background:var(--nes-blue);color:#fff;cursor:pointer;white-space:nowrap;flex-shrink:0;"><i class="ti ti-inbox" style="font-size:11px;"></i> '+t('leads.tabAll')+'</button>'
         + updatedAccounts.map(function(a,i){
