@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>NES AI — Client Assessment</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+:root{
+  --bg:#0a0f1e;--surface:#0d1117;--card:#161b22;--border:#1a2332;--border2:#21262d;
+  --blue:#409cff;--blue-grad:linear-gradient(135deg,#1a56db,#1e6ef5);--blue-dim:#0c1f3a;
+  --white:#e6edf3;--muted:#8b949e;--green:#3fb950;--amber:#d29922;--red:#f85149;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--white);font-family:"DM Sans",sans-serif;min-height:100vh;padding-bottom:100px;}
+
+/* HEADER */
+.header{background:rgba(13,17,23,.97);border-bottom:1px solid var(--border);padding:16px 32px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;backdrop-filter:blur(20px);}
+.logo-txt{font-family:"Syne",sans-serif;font-size:1.1rem;font-weight:800;letter-spacing:.06em;}
+.logo-txt .n{color:var(--blue);}
+.header-right{display:flex;align-items:center;gap:12px;}
+.progress-wrap{display:flex;align-items:center;gap:8px;}
+.progress-bar{width:120px;height:4px;background:var(--border2);border-radius:2px;overflow:hidden;}
+.progress-fill{height:100%;background:var(--blue-grad);border-radius:2px;transition:width .4s ease;}
+.progress-txt{font-family:"Syne",sans-serif;font-size:.68rem;color:var(--blue);font-weight:700;}
+
+/* STEPS NAV */
+.steps-nav{display:flex;gap:0;border-bottom:1px solid var(--border);background:var(--surface);overflow-x:auto;scrollbar-width:none;}
+.steps-nav::-webkit-scrollbar{display:none;}
+.step-tab{flex-shrink:0;padding:12px 20px;font-family:"Syne",sans-serif;font-size:.68rem;font-weight:700;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;display:flex;align-items:center;gap:6px;white-space:nowrap;}
+.step-tab.active{color:var(--blue);border-bottom-color:var(--blue);}
+.step-tab.done{color:var(--green);}
+.step-tab i{font-size:14px;}
+
+/* CONTENT */
+.content{max-width:780px;margin:0 auto;padding:32px 24px;}
+.section-header{margin-bottom:28px;}
+.section-eye{font-family:"Syne",sans-serif;font-size:.6rem;color:var(--blue);letter-spacing:.15em;text-transform:uppercase;margin-bottom:6px;}
+.section-title{font-family:"Syne",sans-serif;font-size:1.4rem;font-weight:800;margin-bottom:6px;}
+.section-sub{font-size:.82rem;color:var(--muted);line-height:1.6;}
+
+/* CARDS */
+.q-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:22px;margin-bottom:14px;}
+.q-label{font-family:"Syne",sans-serif;font-size:.72rem;font-weight:700;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.q-label i{font-size:14px;color:var(--blue);}
+.q-label .req{color:var(--red);margin-left:2px;}
+
+/* INPUTS */
+input[type=text],input[type=email],input[type=tel],input[type=number],input[type=date],select,textarea{
+  width:100%;background:var(--bg);border:1px solid var(--border2);border-radius:8px;
+  padding:12px 16px;font-family:"DM Sans",sans-serif;font-size:.9rem;color:var(--white);
+  outline:none;transition:border-color .2s;-webkit-appearance:none;
+}
+input:focus,select:focus,textarea:focus{border-color:var(--blue);}
+input::placeholder,textarea::placeholder{color:var(--muted);}
+select option{background:var(--card);}
+textarea{resize:vertical;min-height:90px;line-height:1.6;}
+.input-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+
+/* TOGGLE BUTTONS */
+.toggle-group{display:flex;gap:8px;flex-wrap:wrap;}
+.tgl{padding:10px 18px;border:1px solid var(--border2);border-radius:8px;font-family:"Syne",sans-serif;font-size:.75rem;font-weight:700;color:var(--muted);cursor:pointer;transition:all .2s;user-select:none;}
+.tgl:hover{border-color:var(--blue);color:var(--white);}
+.tgl.active{background:var(--blue-dim);border-color:var(--blue);color:var(--blue);}
+.tgl.active.grn{background:rgba(63,185,80,.1);border-color:var(--green);color:var(--green);}
+.tgl.active.red{background:rgba(248,81,73,.1);border-color:var(--red);color:var(--red);}
+
+/* YES/NO */
+.yn-group{display:flex;gap:10px;}
+.yn{flex:1;padding:14px;border:1px solid var(--border2);border-radius:8px;font-family:"Syne",sans-serif;font-size:.82rem;font-weight:700;color:var(--muted);cursor:pointer;transition:all .2s;text-align:center;display:flex;align-items:center;justify-content:center;gap:6px;}
+.yn:hover{border-color:var(--blue);}
+.yn.yes.active{background:rgba(63,185,80,.1);border-color:var(--green);color:var(--green);}
+.yn.no.active{background:rgba(248,81,73,.1);border-color:var(--red);color:var(--red);}
+
+/* SCORE */
+.score-group{display:flex;gap:6px;}
+.score-btn{width:44px;height:44px;border:1px solid var(--border2);border-radius:8px;font-family:"Syne",sans-serif;font-size:.85rem;font-weight:800;color:var(--muted);cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;}
+.score-btn:hover{border-color:var(--blue);color:var(--white);}
+.score-btn.active{background:var(--blue-dim);border-color:var(--blue);color:var(--blue);}
+
+/* MODULE GRID */
+.module-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;}
+.mod-opt{background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:12px 14px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:10px;}
+.mod-opt:hover{border-color:var(--blue);}
+.mod-opt.active{background:var(--blue-dim);border-color:var(--blue);}
+.mod-opt i{font-size:18px;color:var(--muted);transition:color .2s;}
+.mod-opt.active i{color:var(--blue);}
+.mod-txt{font-family:"Syne",sans-serif;font-size:.74rem;font-weight:700;color:var(--muted);transition:color .2s;}
+.mod-opt.active .mod-txt{color:var(--white);}
+
+/* BOTTOM NAV */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:rgba(13,17,23,.97);border-top:1px solid var(--border);padding:16px 32px;display:flex;align-items:center;justify-content:space-between;backdrop-filter:blur(20px);z-index:100;}
+.btn-prev{background:none;border:1px solid var(--border2);color:var(--muted);font-family:"Syne",sans-serif;font-weight:700;font-size:.82rem;padding:12px 24px;border-radius:8px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px;}
+.btn-prev:hover{border-color:var(--white);color:var(--white);}
+.btn-next{background:var(--blue-grad);color:#fff;font-family:"Syne",sans-serif;font-weight:700;font-size:.82rem;padding:12px 28px;border-radius:8px;border:none;cursor:pointer;transition:opacity .2s;display:flex;align-items:center;gap:6px;}
+.btn-next:disabled{opacity:.5;cursor:not-allowed;}
+.btn-save{background:linear-gradient(135deg,#0d6b2e,#1a8c3e);color:#fff;font-family:"Syne",sans-serif;font-weight:700;font-size:.82rem;padding:12px 28px;border-radius:8px;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;}
+.spinner{width:15px;height:15px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:none;}
+.loading .spinner{display:inline-block;}
+.loading .btn-lbl{display:none;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* SUCCESS */
+.success-screen{display:none;text-align:center;padding:60px 24px;}
+.success-screen.show{display:block;}
+.success-icon{width:72px;height:72px;border-radius:50%;background:rgba(63,185,80,.15);border:2px solid var(--green);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;}
+.success-icon i{font-size:32px;color:var(--green);}
+
+/* SECTION PAGES */
+.page{display:none;}
+.page.active{display:block;}
+
+.msg{padding:12px 16px;border-radius:8px;font-size:.78rem;margin-top:12px;display:none;line-height:1.6;}
+.msg.error{background:rgba(248,81,73,.1);border:1px solid rgba(248,81,73,.3);color:var(--red);display:block;}
+
+@media(max-width:600px){
+  .content{padding:20px 16px;}
+  .input-row{grid-template-columns:1fr;}
+  .module-grid{grid-template-columns:1fr;}
+  .header{padding:14px 16px;}
+  .bottom-nav{padding:14px 16px;}
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="logo-txt"><span class="n">NES</span> AI &nbsp;<span style="font-size:.65rem;color:var(--muted);font-weight:400;">Client Assessment</span></div>
+  <div class="header-right">
+    <div class="progress-wrap">
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:20%"></div></div>
+      <div class="progress-txt" id="progress-txt">1 / 5</div>
+    </div>
+  </div>
+</div>
+
+<!-- STEPS NAV -->
+<div class="steps-nav">
+  <div class="step-tab active" data-step="0"><i class="ti ti-user"></i>Contact</div>
+  <div class="step-tab" data-step="1"><i class="ti ti-building"></i>Business</div>
+  <div class="step-tab" data-step="2"><i class="ti ti-device-desktop"></i>Technical</div>
+  <div class="step-tab" data-step="3"><i class="ti ti-currency-dollar"></i>Commercial</div>
+  <div class="step-tab" data-step="4"><i class="ti ti-clipboard-check"></i>Next Steps</div>
+</div>
+
+<div class="content">
+
+<!-- PAGE 0 — CONTACT -->
+<div class="page active" id="page-0">
+  <div class="section-header">
+    <div class="section-eye">Step 1 of 5</div>
+    <div class="section-title">Decision Maker</div>
+    <div class="section-sub">Who are we meeting with today?</div>
+  </div>
+
+  <div class="q-card">
+    <div class="q-label"><i class="ti ti-user"></i>Full name <span class="req">*</span></div>
+    <input type="text" id="decision_maker" placeholder="Ahmed Al Rashdi">
+  </div>
+  <div class="q-card">
+    <div class="q-label"><i class="ti ti-briefcase"></i>Job title <span class="req">*</span></div>
+    <input type="text" id="decision_maker_title" placeholder="CEO / Managing Director / IT Manager">
+  </div>
+  <div class="q-card">
+    <div class="q-label"><i class="ti ti-mail"></i>Company email <span class="req">*</span></div>
+    <input type="email" id="email" placeholder="ahmed@company.com">
+  </div>
+  <div class="q-card">
+    <div class="q-label"><i class="ti ti-users"></i>Who else is involved in this decision?</div>
+    <input type="text" id="other_decision_makers" placeholder="e.g. IT Manager, Finance Director">
+  </div>
+  <div class="q-card">
+    <div class="q-label"><i class="ti ti-id-badge"></i>Assessment conducted by <span class="req">*</span></div>
+    <input type="text" id="assessed_by" placeholder="NES team member name">
+  </div>
+</div>
+
+<!-- PAGE 1 — BUSINESS -->
+<div class="page" id="page-1">
+  <div class="section-header">
+    <div class="section-eye">Step 2 of 5</div>
+    <div class="section-title">Business Profile</div>
+    <div class="section-sub">Understanding their operations and pain points.</div>
+  </div>
+
+  <div class="q-card">
+    <div class="q-label"><i class="ti ti-layout-grid"></i>Number of departments</div>
+    <input type="number" id="departments" placeholder="e.g. 4" min="1">
+  </div>
+  <div class="q-card">
+    <div class="q-label"><i class="ti ti-tools"></i>Current tools they use</div>
+    <textarea id="current_tools" placeholder="e.g. WhatsApp, Excel, Outlook, custom CRM, QuickBooks..."></textarea>
+  </div>
+  <div class="q-card">
+    <div class="q-label"><i class="ti ti-alert-triangle"></i>Primary pain point <span class="req">*</span></div>
+    <textarea id="primary_pain" placeholder="e.g. Missing leads after hours, no visibility on sales pipeline, team spends too much time on follow-ups..."></textarea>
+  </div>
+  <div class="q-card">
+    <div class="q-label"><i class="ti ti-star"></i>Priority module — what matters most to them?</div>
+    <div class="module-grid">
+      <div class="mod-opt" data-val="AI Chatbot" onclick="toggleModule(this)"><i class="ti ti-message-chatbot"></i><div class="mod-txt">AI Chatbot</div></div>
+      <div class="mod-opt" data-val="Sara AI Receptionist" onclick="toggleModule(this)"><i class="ti ti-phone"></i><div class="mod-txt">Sara AI Receptionist</div></div>
+      <div class="mod-opt" data-val="CEO Dashboard" onclick="toggleModule(this)"><i class="ti ti-chart-bar"></i><div class="mod-txt">CEO Dashboard</div></div>
+      <div class="mod-opt" data-val="Social Media" onclick="toggleModule(this)"><i class="ti ti-social"></i><div class="mod-txt">Social Media</div></div>
+      <div class="mod-opt" data-val="Lead Capture" onclick="toggleModule(this)"><i class="ti ti-target"></i><div class="mod-txt">Lead Capture</div></div>
+      <div class="mod-opt" data-val="Intelligence Feed" onclick="toggleModule(this)"><i class="ti ti-news"></i><div class="mod-txt">Intelligence Feed</div></div>
+      <div class="mod-opt" data-val="WhatsApp Alerts" onclick="toggleModule(this)"><i class="ti ti-brand-whatsapp"></i><div class="mod-txt">WhatsApp Alerts</div></div>
+      <div class="mod-opt" data-val="Layla Follow-Up" onclick="toggleModule(this)"><i class="ti ti-repeat"></i><div class="mod-txt">Layla Follow-Up</div></div>
+      <div class="mod-opt" data-val="Adam Sales Agent" onclick="toggleModule(this)"><i class="ti ti-user-star"></i><div class="mod-txt">Adam Sales Agent</div></div>
+    </div>
+    <input type="hidden" id="priority_module" value="">
+  </div>
+  <div class="q-card">
+    <div class="q-label"><i class="ti ti-trending-up"></i>Expected monthly leads</div>
+    <div class="toggle-group">
+      <div class="tgl" data-val="1-10" onclick="selectToggle(this,'leads-grp')">1–10</div>
+      <div class="tgl" data-val="11-50" onclick="selectToggle(this,'leads-grp')">11–50</div>
+      <div class="tgl" data-val="51-100" onclick="selectToggle(this,'leads-grp')">51–100</div>
+      <div class="tgl" data-val="100+" onclick="selectToggle(this,'leads-grp')">100+</div>
+    </div>
+    <input type="hidden" id="expected_leads_txt" value="">
+  </div>
+  <div class="q-card">
+    <div class="q-label"><i class="ti ti-clock"></i>Expected response time to leads</div>
+    <div class="toggle-group">
+      <div class="tgl" data-val="Immediate (< 1 min)" onclick="selectToggle(this,'rt-grp')">Immediate</div>
+      <div class="tgl" data-val="Within 5 minutes" onclick="selectToggle(this,'rt-grp')">5 mins</div>
+      <div class="tgl" data-val="Within 1 hour" onclick="selectToggle(this,'rt-grp')">1 hour</div>
+      <div class="tgl" data-val="Same day" onclick="selectToggle(this,'rt-grp')">Same day</div>
+    </div>
+    <input type="hidden" id="response_time" value="">
+  </div>
+</div>
+
+<!-- PAGE 2 — TECHNICAL -->
+<div class="page" id="page-2">
+  <div class="section-header">
+    <div class="section-eye">Step 3 of 5</div>
+    <div class="section-title">Technical Readiness</div>
+    <div class="section-sub">What's already in place?</div>
+  </div>
+
+  <div class="q-card">
+    <div class="q-label"><i class="ti ti-brand-facebook"></i>Do they have a Facebook Business page (and Instagram)?</div>
+    <div class="yn-group">
+      <div class="yn yes" onclick="setYN(this,'has_facebook',true)"><i class="ti ti-check"></i>Yes</div>
+      <div class="yn no" onclick="setYN(this,'has_facebook',false)"><i class="ti ti-x"></i>No</div>
+    </div>
+    <input type="hidden" id="has_facebook" value="">
+  </div>
+  <div class="q-card">
+    <div class="q-label"><i class="ti ti-brand-whatsapp"></i>Do they have a WhatsApp Business number?</div>
+    <div class="yn-group">
+      <div class="yn yes" onclick="setYN(this,'has_whatsapp',true)"><i class="ti ti-check"></i>Yes</div>
+      <div class="yn no" onclick="setYN(this,'has_whatsapp',false)"><i class="ti ti-x"></i>No</div>
+    </div>
+    <input type="hidden" id="has_whatsapp" value="">
+  </div>
+  <div class="q-card">
+    <div class="q-label"><i class="ti ti-world"></i>Website URL</div>
+    <input type="text" id="website" placeholder="https://company.com">
+  </div>
+  <div class="q-card">
+    <div class="q-label"><i class="ti ti-database"></i>Do they use a CRM?</div>
+    <div class="yn-group">
+      <div class="yn yes" onclick="setYN(this,'has_crm',true)"><i class="ti ti-check"></i>Yes</div>
+      <div class="yn no" onclick="setYN(this,'has_crm',false)"><i class="ti ti-x"></i>No</div>
+    </div>
+    <input type="hidden" id="has_crm" value="">
+  </div>
+  <div class="q-card" id="crm-name-card" style="display:none;">
+    <div class="q-label"><i class="ti ti-database"></i>Which CRM?</div>
+    <input type="text" id="crm_name" placeholder="e.g. Salesforce, HubSpot, Zoho, custom...">
+  </div>
+</div>
+
+<!-- PAGE 3 — COMMERCIAL -->
+<div class="page" id="page-3">
+  <div class="section-header">
+    <div class="section-eye">Step 4 of 5</div>
+    <div class="section-title">Commercial</div>
+    <div class="section-sub">Budget, timeline and plan recommendation.</div>
+  </div>
+
+  <div class="q-card">
+    <div class="q-label"><i class="ti ti-currency-dollar"></i>Budget confirmed?</div>
+    <div class="yn-group">
+      <div class="yn yes" onclick="setYN(this,'budget_confirmed',true)"><i class="ti ti-check"></i>Yes — confirmed</div>
+      <div class="yn no" onclick="setYN(this,'budget_confirmed',false)"><i class="ti ti-x"></i>Not yet</div>
+    </div>
+    <input type="hidden" id="budget_confirmed" value="">
+  </div>
+  <div class="q-card">
+    <div class="q-label"><i class="ti ti-calendar"></i>Decision timeline</div>
+    <div class="toggle-group">
+      <div class="tgl" data-val="Immediately" onclick="selectToggle(this,'dt-grp')">Immediately</div>
+      <div class="tgl" data-val="Within 2 weeks" onclick="selectToggle(this,'dt-grp')">2 weeks</div>
+      <div class="tgl" data-val="1 month" onclick="selectToggle(this,'dt-grp')">1 month</div>
+      <div class="tgl" data-val="2-3 months" onclick="selectToggle(this,'dt-grp')">2–3 months</div>
+      <div class="tgl" data-val="6+ months" onclick="selectToggle(this,'dt-grp')">6+ months</div>
+    </div>
+    <input type="hidden" id="decision_timeline" value="">
+  </div>
+  <div class="q-card">
+    <div class="q-label"><i class="ti ti-package"></i>Plan recommended by NES <span class="req">*</span></div>
+    <select id="plan_recommended">
+      <option value="">— Select plan —</option>
+      <option value="presence">AI Presence — OMR 59/mo</option>
+      <option value="operations">AI Operations — OMR 159/mo</option>
+      <option value="workforce">AI Workforce — OMR 299/mo</option>
+      <option value="infrastructure">AI Infrastructure — Custom</option>
+    </select>
+    <div style="font-size:.7rem;color:var(--muted);margin-top:8px;line-height:1.6;">Prices before 5% VAT. State the one-time OMR 99 setup fee upfront; it is payable when the client continues after the trial. Any waiver needs an individual agreement with NES.</div>
+  </div>
+</div>
+
+<!-- PAGE 4 — NEXT STEPS -->
+<div class="page" id="page-4">
+  <div class="section-header">
+    <div class="section-eye">Step 5 of 5</div>
+    <div class="section-title">Next Steps</div>
+    <div class="section-sub">Agree on dates and capture any final notes.</div>
+  </div>
+
+  <div class="q-card">
+    <div class="q-label"><i class="ti ti-calendar-plus"></i>Trial start date agreed</div>
+    <div style="position:relative;">
+      <input type="date" id="trial_start_date" onchange="calcTrialEnd()" style="width:100%;background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:12px 16px;font-family:'DM Sans',sans-serif;font-size:.9rem;color:var(--white);outline:none;cursor:pointer;" onclick="this.showPicker()">
+    </div>
+  </div>
+  <div class="q-card">
+    <div class="q-label"><i class="ti ti-calendar-off"></i>Trial end date <span style="font-size:.65rem;color:var(--muted);">(auto — 7 days)</span></div>
+    <input type="date" id="trial_end_date" readonly style="width:100%;background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:12px 16px;font-family:'DM Sans',sans-serif;font-size:.9rem;color:var(--muted);outline:none;opacity:.7;cursor:not-allowed;">
+  </div>
+  <div class="q-card">
+    <div class="q-label"><i class="ti ti-calendar-event"></i>Follow-up date</div>
+    <input type="date" id="follow_up_date" style="width:100%;background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:12px 16px;font-family:'DM Sans',sans-serif;font-size:.9rem;color:var(--white);outline:none;cursor:pointer;" onclick="this.showPicker()">
+  </div>
+  <div class="q-card">
+    <div class="q-label"><i class="ti ti-notes"></i>Additional notes</div>
+    <textarea id="notes" placeholder="Any specific requirements, concerns, context or observations from the meeting..."></textarea>
+  </div>
+
+  <div id="err-msg" class="msg"></div>
+</div>
+
+<!-- SUCCESS -->
+<div class="success-screen" id="success-screen">
+  <div class="success-icon"><i class="ti ti-check"></i></div>
+  <h2 style="font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;margin-bottom:8px;">Assessment saved</h2>
+  <p style="color:var(--muted);font-size:.85rem;line-height:1.7;max-width:400px;margin:0 auto 28px;">The client assessment has been saved to the NES platform. You can now create the client account in Client Manager.</p>
+  <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+    <button onclick="newAssessment()" style="background:var(--blue-grad);color:#fff;font-family:'Syne',sans-serif;font-weight:700;font-size:.82rem;padding:12px 24px;border-radius:8px;border:none;cursor:pointer;">New assessment</button>
+    <button onclick="window.open('https://app.nes-ai.com','_blank')" style="background:none;border:1px solid var(--border2);color:var(--muted);font-family:'Syne',sans-serif;font-weight:700;font-size:.82rem;padding:12px 24px;border-radius:8px;cursor:pointer;">Open Client Manager</button>
+  </div>
+</div>
+
+</div><!-- end content -->
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav" id="bottom-nav">
+  <button class="btn-prev" id="btn-prev" onclick="prevPage()" style="visibility:hidden;"><i class="ti ti-arrow-left"></i> Back</button>
+  <button class="btn-next" id="btn-next" onclick="nextPage()">Next <i class="ti ti-arrow-right"></i></button>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://sfpfjjdtczvuxyhjievt.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_MH7rnJ7r8_-1TzGXcieNfA_NXoHQZbm';
+
+let currentPage = 0;
+const totalPages = 5;
+
+function updateProgress() {
+  const pct = ((currentPage + 1) / totalPages) * 100;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-txt').textContent = (currentPage + 1) + ' / ' + totalPages;
+  document.querySelectorAll('.step-tab').forEach((t, i) => {
+    t.classList.remove('active', 'done');
+    if (i === currentPage) t.classList.add('active');
+    if (i < currentPage) t.classList.add('done');
+  });
+  document.getElementById('btn-prev').style.visibility = currentPage === 0 ? 'hidden' : 'visible';
+  const nextBtn = document.getElementById('btn-next');
+  if (currentPage === totalPages - 1) {
+    nextBtn.innerHTML = '<div class="spinner"></div><span class="btn-lbl"><i class="ti ti-device-floppy"></i> Save Assessment</span>';
+    nextBtn.className = 'btn-save';
+  } else {
+    nextBtn.innerHTML = 'Next <i class="ti ti-arrow-right"></i>';
+    nextBtn.className = 'btn-next';
+  }
+}
+
+function showPage(n) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + n).classList.add('active');
+  window.scrollTo(0, 0);
+  updateProgress();
+}
+
+function nextPage() {
+  if (currentPage < totalPages - 1) {
+    currentPage++;
+    showPage(currentPage);
+  } else {
+    saveAssessment();
+  }
+}
+
+function prevPage() {
+  if (currentPage > 0) {
+    currentPage--;
+    showPage(currentPage);
+  }
+}
+
+// Step tab clicks
+document.querySelectorAll('.step-tab').forEach(t => {
+  t.addEventListener('click', () => {
+    currentPage = parseInt(t.dataset.step);
+    showPage(currentPage);
+  });
+});
+
+// Toggle helpers
+function selectToggle(el, grp) {
+  el.closest('.q-card').querySelectorAll('.tgl').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  // Update corresponding hidden field
+  const fieldMap = {
+    'leads-grp': 'expected_leads_txt',
+    'rt-grp': 'response_time',
+    'dt-grp': 'decision_timeline',
+    'plan-grp': 'plan_recommended'
+  };
+  if (fieldMap[grp]) {
+    document.getElementById(fieldMap[grp]).value = el.dataset.val;
+  }
+}
+
+function toggleModule(el) {
+  el.classList.toggle('active');
+  const selected = [...document.querySelectorAll('.mod-opt.active')].map(m => m.dataset.val);
+  document.getElementById('priority_module').value = selected.join(', ');
+}
+
+function setYN(el, field, val) {
+  const card = el.closest('.q-card');
+  card.querySelectorAll('.yn').forEach(y => y.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById(field).value = val;
+  if (field === 'has_crm') {
+    document.getElementById('crm-name-card').style.display = val ? 'block' : 'none';
+  }
+}
+
+async function saveAssessment() {
+  const btn = document.getElementById('btn-next');
+  const err = document.getElementById('err-msg');
+  err.className = 'msg';
+
+  const decision_maker = document.getElementById('decision_maker').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const assessed_by = document.getElementById('assessed_by').value.trim();
+  const primary_pain = document.getElementById('primary_pain').value.trim();
+  const plan_recommended = document.getElementById('plan_recommended').value;
+
+  if (!decision_maker || !email || !assessed_by) {
+    err.className = 'msg error';
+    err.textContent = 'Please go back and fill in: Decision maker name, email and assessed by fields.';
+    return;
+  }
+  if (!plan_recommended) {
+    err.className = 'msg error';
+    err.textContent = 'Please select a recommended plan in the Commercial tab.';
+    return;
+  }
+
+  btn.classList.add('loading');
+  btn.disabled = true;
+
+  const payload = {
+    email,
+    decision_maker,
+    decision_maker_title: document.getElementById('decision_maker_title').value.trim(),
+    other_decision_makers: document.getElementById('other_decision_makers').value.trim(),
+    assessed_by,
+    departments: parseInt(document.getElementById('departments').value) || null,
+    current_tools: document.getElementById('current_tools').value.trim(),
+    primary_pain,
+    priority_module: document.getElementById('priority_module').value,
+    response_time: document.getElementById('response_time').value,
+    has_facebook: document.getElementById('has_facebook').value === 'true' ? true : document.getElementById('has_facebook').value === 'false' ? false : null,
+    has_whatsapp: document.getElementById('has_whatsapp').value === 'true' ? true : document.getElementById('has_whatsapp').value === 'false' ? false : null,
+    website: document.getElementById('website').value.trim(),
+    has_crm: document.getElementById('has_crm').value === 'true' ? true : document.getElementById('has_crm').value === 'false' ? false : null,
+    crm_name: document.getElementById('crm_name').value.trim(),
+    budget_confirmed: document.getElementById('budget_confirmed').value === 'true' ? true : document.getElementById('budget_confirmed').value === 'false' ? false : null,
+    decision_timeline: document.getElementById('decision_timeline').value,
+    plan_recommended,
+    trial_start_date: document.getElementById('trial_start_date').value || null,
+    follow_up_date: document.getElementById('follow_up_date').value || null,
+    notes: document.getElementById('notes').value.trim()
+  };
+
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/client_assessments`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (res.status === 201) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById('bottom-nav').style.display = 'none';
+      document.querySelector('.steps-nav').style.display = 'none';
+      document.getElementById('success-screen').classList.add('show');
+    } else {
+      let errDetail = 'HTTP ' + res.status;
+      try {
+        const data = await res.json();
+        errDetail = JSON.stringify(data);
+      } catch(e) {
+        const txt = await res.text().catch(() => '');
+        errDetail = txt || errDetail;
+      }
+      err.className = 'msg error';
+      err.textContent = 'Save failed: ' + errDetail;
+    }
+  } catch(e) {
+    err.className = 'msg error';
+    err.textContent = 'Connection error. Please check your internet and try again.';
+  } finally {
+    btn.classList.remove('loading');
+    btn.disabled = false;
+  }
+}
+
+function newAssessment() {
+  window.location.reload();
+}
+
+function calcTrialEnd() {
+  const start = document.getElementById('trial_start_date').value;
+  if (start) {
+    const end = new Date(start);
+    end.setDate(end.getDate() + 7);
+    document.getElementById('trial_end_date').value = end.toISOString().split('T')[0];
+  }
+}
+
+// Set today as default for dates
+const today = new Date().toISOString().split('T')[0];
+document.getElementById('trial_start_date').value = today;
+</script>
+</body>
+</html>
