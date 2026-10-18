@@ -5,6 +5,99 @@ const ASM_STEPS=['Contact','Company','Needs','Technical','Commercial','Next step
 const ASM_MODULES=['AI Chatbot','Sara AI Receptionist','CEO Dashboard','Social Media','Lead Capture','Intelligence Feed','WhatsApp Alerts','Layla Follow-Up','Adam Sales Agent'];
 let _asm=null;
 
+const ASM_INTRO=[
+ 'Who are we speaking with, and how do we reach them?',
+ 'The business behind the conversation.',
+ 'What hurts today, and what should NES AI fix first?',
+ 'What they already run, so we know what to connect.',
+ 'The plan we recommend and the terms we discussed.',
+ 'Set the trial window and the next touchpoint.'
+];
+function asmStyle(){
+  if(document.getElementById('asm-style'))return;
+  const st=document.createElement('style');st.id='asm-style';
+  st.textContent=`
+  .asm-bar{padding-block:12px;padding-inline-end:var(--header-clearance);padding-inline-start:60px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;gap:12px;}
+  .asm-title{font-size:.95rem;font-weight:700;letter-spacing:.01em;color:var(--text);}
+  .asm-sub{font-family:var(--mono);font-size:.66rem;color:var(--muted);margin-top:2px;}
+  .asm-ghost{background:transparent;border:1px solid var(--border);border-radius:8px;padding:7px 13px;color:var(--muted);cursor:pointer;font-family:var(--mono);font-size:.7rem;transition:border-color .15s,color .15s;}
+  .asm-ghost:hover{border-color:var(--nes-blue);color:var(--nes-blue);}
+  .asm-primary{background:var(--nes-btn-grad);border:none;border-radius:9px;padding:10px 24px;color:#fff;cursor:pointer;font-family:var(--ui);font-size:.8rem;font-weight:700;letter-spacing:.01em;box-shadow:0 4px 14px -4px rgba(37,99,235,.55);transition:transform .12s,box-shadow .12s,opacity .15s;}
+  .asm-primary:hover{transform:translateY(-1px);box-shadow:0 8px 20px -6px rgba(37,99,235,.65);}
+  .asm-primary:disabled{opacity:.6;cursor:default;transform:none;}
+  .asm-ghost:focus-visible,.asm-primary:focus-visible,.asm-chip:focus-visible,.asm-rail-step:focus-visible,.asm-icon:focus-visible{outline:2px solid var(--nes-blue);outline-offset:2px;}
+  .asm-rail{display:flex;padding:16px 20px 14px;border-bottom:1px solid var(--border);flex-shrink:0;overflow-x:auto;gap:0;}
+  .asm-rail-step{flex:1 1 0;min-width:88px;display:flex;flex-direction:column;align-items:center;gap:7px;cursor:pointer;position:relative;background:none;border:none;padding:0;color:var(--muted);font-family:var(--ui);}
+  .asm-rail-step::after{content:'';position:absolute;top:13px;inset-inline-start:calc(50% + 17px);width:calc(100% - 34px);height:2px;background:var(--border);border-radius:2px;}
+  .asm-rail-step:last-child::after{display:none;}
+  .asm-rail-step.done::after{background:var(--green);}
+  .asm-node{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:.68rem;font-weight:700;border:2px solid var(--border);background:var(--bg);color:var(--muted);transition:all .2s;position:relative;z-index:1;}
+  .asm-rail-step.done .asm-node{background:var(--green);border-color:var(--green);color:#fff;}
+  .asm-rail-step.cur .asm-node{background:var(--nes-blue);border-color:var(--nes-blue);color:#fff;box-shadow:0 0 0 5px rgba(64,156,255,.18);}
+  .asm-rail-lbl{font-size:.7rem;font-weight:600;white-space:nowrap;}
+  .asm-rail-step.cur .asm-rail-lbl{color:var(--text);}
+  .asm-rail-step.done .asm-rail-lbl{color:var(--text);opacity:.8;}
+  .asm-wrap{max-width:700px;margin:0 auto;padding:26px 4px 70px;}
+  .asm-h{font-size:1.25rem;font-weight:700;letter-spacing:-.01em;color:var(--text);margin:0 0 4px;}
+  .asm-lead{font-size:.82rem;color:var(--muted);margin:0 0 22px;line-height:1.5;}
+  .asm-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:22px 22px 6px;box-shadow:0 1px 0 rgba(255,255,255,.03) inset,0 12px 32px -18px rgba(0,0,0,.55);}
+  .asm-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 16px;}
+  .asm-f{grid-column:1 / -1;margin-bottom:18px;min-width:0;}
+  .asm-f.half{grid-column:span 1;}
+  .asm-lbl{font-size:.74rem;font-weight:600;color:var(--text);margin-bottom:7px;display:block;opacity:.9;}
+  .asm-req{color:var(--red);margin-inline-start:3px;}
+  .asm-card .form-input{background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:10px 13px;font-size:.82rem;transition:border-color .15s,box-shadow .15s;}
+  .asm-card .form-input::placeholder{color:var(--muted);opacity:.55;}
+  .asm-card .form-input:focus{border-color:var(--nes-blue);box-shadow:0 0 0 3px rgba(64,156,255,.18);}
+  .asm-chips{display:flex;gap:8px;flex-wrap:wrap;}
+  .asm-chip{padding:8px 15px;border-radius:999px;cursor:pointer;font-size:.76rem;font-family:var(--ui);font-weight:600;border:1px solid var(--border);background:transparent;color:var(--muted);transition:all .15s;}
+  .asm-chip:hover{border-color:var(--nes-blue);color:var(--text);}
+  .asm-chip.on{border-color:var(--nes-blue);background:rgba(64,156,255,.14);color:var(--nes-blue);}
+  .asm-chip.mod{border-radius:10px;}
+  .asm-agree{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border:1px solid var(--border);border-radius:11px;background:var(--card2);font-size:.78rem;line-height:1.55;color:var(--text);cursor:pointer;}
+  .asm-agree input{margin-top:3px;accent-color:var(--nes-blue);width:16px;height:16px;flex-shrink:0;}
+  .asm-note{font-size:.7rem;color:var(--muted);line-height:1.5;}
+  .asm-end{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:.72rem;color:var(--muted);padding:7px 12px;border:1px dashed var(--border);border-radius:9px;}
+  .asm-end b{color:var(--text);font-weight:600;}
+  .asm-err{display:none;margin:4px 0 14px;padding:11px 14px;border-radius:10px;font-size:.78rem;background:rgba(248,81,73,.1);border:1px solid rgba(248,81,73,.35);color:var(--red);}
+  .asm-nav{display:flex;justify-content:space-between;align-items:center;margin:8px 0 0;padding:16px 0 20px;border-top:1px solid var(--border);}
+  .asm-ok{padding:70px 24px;text-align:center;}
+  .asm-ok-ic{width:64px;height:64px;border-radius:50%;margin:0 auto 18px;display:flex;align-items:center;justify-content:center;font-size:1.9rem;color:var(--green);background:rgba(63,185,80,.12);border:1px solid rgba(63,185,80,.35);animation:asmPop .35s ease-out;}
+  @keyframes asmPop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
+  .asm-list{max-width:780px;margin:0 auto;padding:22px 4px 70px;display:flex;flex-direction:column;gap:10px;}
+  .asm-row{display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--card);border:1px solid var(--border);border-radius:12px;transition:border-color .15s;}
+  .asm-row:hover{border-color:var(--border2);}
+  .asm-av{width:40px;height:40px;border-radius:11px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.95rem;color:var(--nes-blue);background:rgba(64,156,255,.12);border:1px solid rgba(64,156,255,.25);}
+  .asm-row.conv .asm-av{color:var(--green);background:rgba(63,185,80,.12);border-color:rgba(63,185,80,.3);}
+  .asm-main{min-width:0;flex:1;}
+  .asm-name{font-size:.88rem;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .asm-meta{font-family:var(--mono);font-size:.65rem;color:var(--muted);margin-top:4px;display:flex;flex-wrap:wrap;gap:4px 12px;}
+  .asm-tag{font-size:.64rem;font-weight:600;padding:3px 10px;border-radius:999px;border:1px solid var(--border);color:var(--muted);white-space:nowrap;}
+  .asm-tag.new{color:var(--nes-blue);border-color:rgba(64,156,255,.4);background:rgba(64,156,255,.1);}
+  .asm-tag.converted{color:var(--green);border-color:rgba(63,185,80,.4);background:rgba(63,185,80,.1);}
+  .asm-acts{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+  .asm-conv{background:transparent;border:1px solid var(--nes-blue);border-radius:8px;padding:7px 13px;color:var(--nes-blue);cursor:pointer;font-family:var(--ui);font-size:.72rem;font-weight:600;white-space:nowrap;transition:background .15s;}
+  .asm-conv:hover{background:rgba(64,156,255,.12);}
+  .asm-icon{background:transparent;border:1px solid var(--border);border-radius:8px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;color:var(--muted);cursor:pointer;transition:all .15s;}
+  .asm-icon:hover{border-color:var(--red);color:var(--red);background:rgba(248,81,73,.08);}
+  .asm-empty{text-align:center;padding:60px 20px;color:var(--muted);font-size:.85rem;border:1px dashed var(--border);border-radius:14px;}
+  .asm-empty b{display:block;color:var(--text);font-size:.95rem;margin-bottom:6px;}
+  @media (max-width:640px){
+    .asm-grid{grid-template-columns:1fr;}
+    .asm-f.half{grid-column:1 / -1;}
+    .asm-card{padding:18px 16px 4px;}
+    .asm-rail{padding:14px 12px 12px;}
+    .asm-rail-step{min-width:54px;}
+    .asm-rail-step:not(.cur) .asm-rail-lbl{display:none;}
+    .asm-row{flex-wrap:wrap;}
+    .asm-acts{width:100%;justify-content:flex-end;}
+    .asm-bar{padding-inline-start:56px;}
+  }
+  @media (prefers-reduced-motion:reduce){.asm-ok-ic{animation:none;}.asm-primary,.asm-node{transition:none;}}
+  `;
+  document.head.appendChild(st);
+}
+
 function asmCanUse(){return ['nesadmin','nes_partner'].includes(userRole)||(window.userGrantedModules||[]).includes('assessment');}
 function asmEsc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function asmToday(){return new Date().toISOString().slice(0,10);}
@@ -14,17 +107,18 @@ function asmSet(k,val){_asm.v[k]=val;}
 function asmField(k,label,o){
   o=o||{};
   const val=asmEsc(_asm.v[k]);
-  const req=o.req?' <span style="color:var(--red,#f85149);">*</span>':'';
+  const req=o.req?'<span class="asm-req">*</span>':'';
+  const id='asm_'+k;
   let inp;
-  if(o.area) inp='<textarea class="form-input" rows="3" placeholder="'+asmEsc(o.ph||'')+'" oninput="asmSet(\''+k+'\',this.value)" style="width:100%;resize:vertical;">'+val+'</textarea>';
-  else inp='<input class="form-input" type="'+(o.type||'text')+'" value="'+val+'" placeholder="'+asmEsc(o.ph||'')+'" '+(o.min!=null?'min="'+o.min+'" ':'')+(o.max!=null?'max="'+o.max+'" ':'')+'oninput="asmSet(\''+k+'\',this.value)" style="width:100%;">';
-  return '<div style="margin-bottom:14px;"><div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px;">'+label+req+'</div>'+inp+'</div>';
+  if(o.area) inp='<textarea id="'+id+'" class="form-input" rows="3" placeholder="'+asmEsc(o.ph||'')+'" oninput="asmSet(\''+k+'\',this.value)" style="resize:vertical;">'+val+'</textarea>';
+  else inp='<input id="'+id+'" class="form-input" type="'+(o.type||'text')+'" value="'+val+'" placeholder="'+asmEsc(o.ph||'')+'" '+(o.min!=null?'min="'+o.min+'" ':'')+(o.max!=null?'max="'+o.max+'" ':'')+'oninput="asmSet(\''+k+'\',this.value)">';
+  return '<div class="asm-f'+(o.half?' half':'')+'"><label class="asm-lbl" for="'+id+'">'+label+req+'</label>'+inp+'</div>';
 }
 function asmChoice(k,label,opts){
   const cur=_asm.v[k];
   const b=opts.map(o=>{const val=o[0],txt=o[1],on=String(cur)===String(val);
-    return '<button type="button" onclick="asmPick(\''+k+'\',\''+asmEsc(val)+'\')" style="padding:8px 14px;border-radius:8px;cursor:pointer;font-size:.75rem;font-family:var(--mono);border:1px solid '+(on?'var(--nes-blue,#409cff)':'var(--border)')+';background:'+(on?'rgba(64,156,255,.12)':'none')+';color:'+(on?'var(--nes-blue,#409cff)':'var(--muted)')+';">'+asmEsc(txt)+'</button>';}).join('');
-  return '<div style="margin-bottom:14px;"><div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px;">'+label+'</div><div style="display:flex;gap:8px;flex-wrap:wrap;">'+b+'</div></div>';
+    return '<button type="button" class="asm-chip'+(on?' on':'')+'" aria-pressed="'+on+'" onclick="asmPick(\''+k+'\',\''+asmEsc(val)+'\')">'+asmEsc(txt)+'</button>';}).join('');
+  return '<div class="asm-f"><span class="asm-lbl">'+label+'</span><div class="asm-chips">'+b+'</div></div>';
 }
 function asmPick(k,val){
   if(k==='has_facebook'||k==='has_whatsapp'||k==='has_crm'||k==='budget_confirmed'){_asm.v[k]=val==='true'?true:val==='false'?false:null;}
@@ -41,22 +135,22 @@ function asmYN(k,label){return asmChoice(k,label,[['true','Yes'],['false','No']]
 
 function asmStepHtml(){
   const s=_asm.step;
-  if(s===0) return asmField('decision_maker','Decision maker — full name',{req:1,ph:'Ahmed Al Rashdi'})+asmField('decision_maker_title','Job title',{ph:'CEO / Managing Director / IT Manager'})+asmField('email','Company email',{req:1,type:'email',ph:'ahmed@company.com'})+asmField('phone','Phone / WhatsApp',{type:'tel',ph:'+968 ...'})+asmField('other_decision_makers','Who else is involved in the decision?',{ph:'e.g. IT Manager, Finance Director'})+asmField('assessed_by','Assessment conducted by',{req:1,ph:'NES team member name'});
-  if(s===1) return asmField('company_name','Company name',{req:1})+asmField('website','Website',{ph:'https://company.com'})+asmField('country','Country',{ph:'Oman'})+asmChoice('language','Main customer language',[['Arabic','Arabic'],['English','English'],['Portuguese','Portuguese'],['Other','Other']])+asmField('industry','Industry',{ph:'e.g. construction, retail, logistics'})+asmField('departments','Number of departments',{type:'number',min:1,ph:'e.g. 4'});
+  if(s===0) return asmField('decision_maker','Decision maker — full name',{req:1,ph:'Ahmed Al Rashdi',half:1})+asmField('decision_maker_title','Job title',{ph:'CEO / Managing Director / IT Manager',half:1})+asmField('email','Company email',{req:1,type:'email',ph:'ahmed@company.com',half:1})+asmField('phone','Phone / WhatsApp',{type:'tel',ph:'+968 ...',half:1})+asmField('other_decision_makers','Who else is involved in the decision?',{ph:'e.g. IT Manager, Finance Director'})+asmField('assessed_by','Assessment conducted by',{req:1,ph:'NES team member name'});
+  if(s===1) return asmField('company_name','Company name',{req:1})+asmField('website','Website',{ph:'https://company.com',half:1})+asmField('country','Country',{ph:'Oman',half:1})+asmChoice('language','Main customer language',[['Arabic','Arabic'],['English','English'],['Portuguese','Portuguese'],['Other','Other']])+asmField('industry','Industry',{ph:'e.g. construction, retail, logistics',half:1})+asmField('departments','Number of departments',{type:'number',min:1,ph:'e.g. 4',half:1});
   if(s===2){
-    const mods=ASM_MODULES.map(m=>{const on=_asm.v.modules.indexOf(m)>=0;return '<button type="button" onclick="asmToggleModule(\''+asmEsc(m)+'\')" style="padding:8px 12px;border-radius:8px;cursor:pointer;font-size:.72rem;font-family:var(--mono);border:1px solid '+(on?'var(--nes-blue,#409cff)':'var(--border)')+';background:'+(on?'rgba(64,156,255,.12)':'none')+';color:'+(on?'var(--nes-blue,#409cff)':'var(--muted)')+';">'+asmEsc(m)+'</button>';}).join('');
-    return asmField('current_tools','Current tools they use',{area:1,ph:'e.g. WhatsApp, Excel, Outlook, custom CRM'})+asmField('primary_pain','Primary pain point',{area:1,ph:'e.g. missing leads after hours, no pipeline visibility'})+'<div style="margin-bottom:14px;"><div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px;">Priority modules</div><div style="display:flex;gap:8px;flex-wrap:wrap;">'+mods+'</div></div>'+asmChoice('expected_leads_range','Expected monthly leads',[['1-10','1–10'],['11-50','11–50'],['51-100','51–100'],['100+','100+']])+asmChoice('response_time','Expected response time to leads',[['Immediate (< 1 min)','Immediate'],['Within 5 minutes','5 mins'],['Within 1 hour','1 hour'],['Same day','Same day']]);
+    const mods=ASM_MODULES.map(m=>{const on=_asm.v.modules.indexOf(m)>=0;return '<button type="button" class="asm-chip mod'+(on?' on':'')+'" aria-pressed="'+on+'" onclick="asmToggleModule(\''+asmEsc(m)+'\')">'+asmEsc(m)+'</button>';}).join('');
+    return asmField('current_tools','Current tools they use',{area:1,ph:'e.g. WhatsApp, Excel, Outlook, custom CRM'})+asmField('primary_pain','Primary pain point',{area:1,ph:'e.g. missing leads after hours, no pipeline visibility'})+'<div class="asm-f"><span class="asm-lbl">Priority modules <span class="asm-note">(pick all that apply)</span></span><div class="asm-chips">'+mods+'</div></div>'+asmChoice('expected_leads_range','Expected monthly leads',[['1-10','1–10'],['11-50','11–50'],['51-100','51–100'],['100+','100+']])+asmChoice('response_time','Expected response time to leads',[['Immediate (< 1 min)','Immediate'],['Within 5 minutes','5 mins'],['Within 1 hour','1 hour'],['Same day','Same day']]);
   }
   if(s===3) return asmYN('has_facebook','Facebook Business page (and Instagram)?')+asmYN('has_whatsapp','WhatsApp Business number?')+asmYN('has_crm','Uses a CRM?')+(_asm.v.has_crm===true?asmField('crm_name','Which CRM?',{ph:'e.g. Salesforce, HubSpot, Zoho'}):'');
   if(s===4){
     const eur=_asm.v.currency==='EUR';
     const plans=[['presence','AI Presence',eur?'price as per NES proposal':'OMR 59/mo'],['operations','AI Operations',eur?'price as per NES proposal':'OMR 159/mo'],['workforce','AI Workforce',eur?'price as per NES proposal':'OMR 299/mo'],['infrastructure','AI Infrastructure','custom, per contract']];
     return asmChoice('currency','Currency',[['OMR','OMR (Oman)'],['EUR','EUR (Portugal)']])+asmChoice('plan_recommended','Plan recommended by NES *',plans.map(p=>[p[0],p[1]+' — '+p[2]]))+asmChoice('billing_cycle','Billing cycle',[['monthly','Monthly'],['annual','Annual (saves 15%)']])+asmYN('budget_confirmed','Budget confirmed?')+asmChoice('decision_timeline','Decision timeline',[['Immediately','Immediately'],['Within 2 weeks','2 weeks'],['1 month','1 month'],['2-3 months','2–3 months'],['6+ months','6+ months']])+
-      '<label style="display:flex;gap:10px;align-items:flex-start;font-size:.78rem;color:var(--text);cursor:pointer;margin-top:6px;"><input type="checkbox" '+(_asm.v.setup_fee_agreed?'checked ':'')+'onchange="asmSet(\'setup_fee_agreed\',this.checked)" style="margin-top:3px;"><span>I told the client about the one-time setup fee ('+(eur?'€230':'OMR 99')+') upfront. It is payable when they continue after the trial; any waiver needs an individual agreement with NES.</span></label>'+
-      '<div style="font-size:.68rem;color:var(--muted);margin-top:8px;">Prices before VAT. Social media account creation (Meta) is a paid extra, only on request after the trial.</div>';
+      '<div class="asm-f"><label class="asm-agree"><input type="checkbox" '+(_asm.v.setup_fee_agreed?'checked ':'')+'onchange="asmSet(\'setup_fee_agreed\',this.checked)"><span>I told the client about the one-time setup fee ('+(eur?'€230':'OMR 99')+') upfront. It is payable when they continue after the trial; any waiver needs an individual agreement with NES.</span></label></div>'+
+      '<div class="asm-f asm-note">Prices before VAT. Social media account creation (Meta) is a paid extra, only on request after the trial.</div>';
   }
   const end=asmTrialEnd();
-  return asmField('trial_start_date','Trial start date',{type:'date'})+asmChoice('trial_days','Trial length',[['7','7 days (default)'],['14','14 days'],['30','1 month']])+'<div style="font-size:.72rem;color:var(--muted);margin:-6px 0 14px;">Trial ends: '+(end||'—')+'</div>'+asmField('follow_up_date','Follow-up date',{type:'date'})+asmField('notes','Additional notes',{area:1,ph:'Requirements, concerns, observations from the meeting'});
+  return asmField('trial_start_date','Trial start date',{type:'date',half:1})+asmChoice('trial_days','Trial length',[['7','7 days (default)'],['14','14 days'],['30','1 month']])+'<div class="asm-f"><span class="asm-end"><i class="ti ti-calendar-event"></i>Trial ends <b>'+(end||'—')+'</b></span></div>'+asmField('follow_up_date','Follow-up date',{type:'date',half:1})+asmField('notes','Additional notes',{area:1,ph:'Requirements, concerns, observations from the meeting'});
 }
 function asmTrialEnd(){
   const s=_asm.v.trial_start_date;if(!s)return '';
@@ -66,23 +160,25 @@ function asmTrialEnd(){
 }
 
 function asmRender(){
+  asmStyle();
   const mc=document.getElementById('mainContent');
   const s=_asm.step,last=s===ASM_STEPS.length-1;
-  const tabs=ASM_STEPS.map((n,i)=>'<div onclick="asmGo('+i+')" style="cursor:pointer;padding:8px 12px;font-family:var(--mono);font-size:.68rem;white-space:nowrap;border-bottom:2px solid '+(i===s?'var(--nes-blue,#409cff)':'transparent')+';color:'+(i===s?'var(--nes-blue,#409cff)':i<s?'var(--green,#3fb950)':'var(--muted)')+';">'+(i+1)+'. '+n+'</div>').join('');
+  const rail=ASM_STEPS.map((n,i)=>'<button type="button" class="asm-rail-step'+(i<s?' done':i===s?' cur':'')+'" onclick="asmGo('+i+')"'+(i===s?' aria-current="step"':'')+'><span class="asm-node">'+(i<s?'<i class="ti ti-check"></i>':(i+1))+'</span><span class="asm-rail-lbl">'+n+'</span></button>').join('');
   mc.style.overflow='auto';
-  mc.innerHTML='<div style="padding-block:11px;padding-inline-end:var(--header-clearance);padding-inline-start:60px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;gap:10px;"><div><div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;">Client Assessment</div><div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">Step '+(s+1)+' of '+ASM_STEPS.length+' — '+ASM_STEPS[s]+'</div></div><button type="button" onclick="showAssessmentList()" style="background:none;border:1px solid var(--border);border-radius:8px;padding:6px 12px;color:var(--muted);cursor:pointer;font-family:var(--mono);font-size:.68rem;">Saved assessments</button></div>'+
-    '<div style="display:flex;overflow-x:auto;border-bottom:1px solid var(--border);flex-shrink:0;">'+tabs+'</div>'+
-    '<div class="page" style="overflow-y:auto;flex:1;"><div style="max-width:640px;padding:18px 0 60px;">'+asmStepHtml()+
-    '<div id="asmErr" style="display:none;margin:10px 0;padding:10px 14px;border-radius:8px;font-size:.75rem;background:rgba(248,81,73,.1);border:1px solid rgba(248,81,73,.3);color:#f85149;"></div>'+
-    '<div style="display:flex;justify-content:space-between;margin-top:18px;">'+
-    '<button type="button" onclick="asmGo('+(s-1)+')" style="visibility:'+(s===0?'hidden':'visible')+';background:none;border:1px solid var(--border);border-radius:8px;padding:9px 18px;color:var(--muted);cursor:pointer;font-family:var(--mono);font-size:.75rem;">Back</button>'+
-    '<button type="button" id="asmNext" onclick="'+(last?'asmSave()':'asmGo('+(s+1)+')')+'" style="background:var(--nes-btn-grad,#1a56db);border:none;border-radius:8px;padding:9px 22px;color:#fff;cursor:pointer;font-family:var(--mono);font-size:.75rem;font-weight:700;">'+(last?'Save assessment':'Next')+'</button></div></div></div>';
+  mc.innerHTML='<div class="asm-bar"><div><div class="asm-title">Client assessment</div><div class="asm-sub">Step '+(s+1)+' of '+ASM_STEPS.length+'</div></div><button type="button" class="asm-ghost" onclick="showAssessmentList()">Saved assessments</button></div>'+
+    '<div class="asm-rail">'+rail+'</div>'+
+    '<div class="page" style="overflow-y:auto;flex:1;"><div class="asm-wrap"><h2 class="asm-h">'+ASM_STEPS[s]+'</h2><p class="asm-lead">'+ASM_INTRO[s]+'</p>'+
+    '<div class="asm-card"><div class="asm-grid">'+asmStepHtml()+'</div></div>'+
+    '<div id="asmErr" class="asm-err" role="alert" style="margin-top:14px;"></div>'+
+    '<div class="asm-nav">'+
+    '<button type="button" class="asm-ghost" onclick="asmGo('+(s-1)+')" style="padding:10px 20px;visibility:'+(s===0?'hidden':'visible')+';">Back</button>'+
+    '<button type="button" class="asm-primary" id="asmNext" onclick="'+(last?'asmSave()':'asmGo('+(s+1)+')')+'">'+(last?'Save assessment':'Continue')+'</button></div></div></div>';
 }
 function asmGo(n){if(n<0||n>=ASM_STEPS.length)return;_asm.step=n;asmRender();const p=document.querySelector('#mainContent .page');if(p)p.scrollTop=0;}
 
 async function showAssessment(){
   const mc=document.getElementById('mainContent');
-  if(!asmCanUse()){mc.innerHTML='<div style="padding:40px;color:var(--muted);font-family:var(--mono);font-size:.8rem;">You do not have access to the assessment form. Ask NES to enable it for you.</div>';return;}
+  if(!asmCanUse()){asmStyle();mc.innerHTML='<div class="asm-wrap"><div class="asm-empty"><b>No access yet</b>The assessment form is not enabled for your account. Ask NES to turn it on.</div></div>';return;}
   if(!_asm)_asm=asmFresh();
   if(!_asm.v.assessed_by){
     try{const{data:{user}}=await sb.auth.getUser();
@@ -118,7 +214,7 @@ async function asmSave(){
     const{error}=await sb.from('client_assessments').insert(payload);
     if(error)throw error;
     const mc=document.getElementById('mainContent');
-    mc.innerHTML='<div style="padding:60px 24px;text-align:center;"><div style="font-size:2rem;color:#3fb950;margin-bottom:10px;"><i class="ti ti-circle-check"></i></div><div style="font-family:var(--mono);font-size:1rem;font-weight:800;margin-bottom:8px;">Assessment saved</div><div style="font-size:.8rem;color:var(--muted);max-width:420px;margin:0 auto 22px;line-height:1.6;">The assessment has been saved. NES will create the client account from it.</div><button onclick="_asm=null;showAssessment()" style="background:var(--nes-btn-grad,#1a56db);border:none;border-radius:8px;padding:10px 22px;color:#fff;cursor:pointer;font-family:var(--mono);font-size:.75rem;font-weight:700;">New assessment</button></div>';
+    mc.innerHTML='<div class="asm-ok"><div class="asm-ok-ic"><i class="ti ti-check"></i></div><h2 class="asm-h">Assessment saved</h2><p class="asm-lead" style="max-width:420px;margin:0 auto 24px;">NES will create the client account from it.</p><div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;"><button type="button" class="asm-primary" onclick="_asm=null;showAssessment()">New assessment</button><button type="button" class="asm-ghost" style="padding:10px 18px;" onclick="showAssessmentList()">Saved assessments</button></div></div>';
     _asm=null;
   }catch(e){
     if(btn){btn.disabled=false;btn.textContent='Save assessment';}
@@ -128,22 +224,26 @@ async function asmSave(){
 
 // ---- Saved assessments list + Convert to client (nesadmin) ----
 async function showAssessmentList(){
+  asmStyle();
   const mc=document.getElementById('mainContent');
   if(!asmCanUse()){showAssessment();return;}
   mc.style.overflow='auto';
-  mc.innerHTML='<div style="padding:40px;text-align:center;color:var(--muted);font-family:var(--mono);font-size:.8rem;">Loading...</div>';
+  mc.innerHTML='<div class="asm-wrap"><div class="asm-empty">Loading…</div></div>';
   const{data,error}=await sb.from('client_assessments').select('id,created_at,company_name,decision_maker,email,plan_recommended,currency,trial_days,status,client_id,assessed_by').order('created_at',{ascending:false}).limit(100);
   const isAdmin=userRole==='nesadmin';
-  const hdr='<div style="padding-block:11px;padding-inline-end:var(--header-clearance);padding-inline-start:60px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;gap:10px;"><div><div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;">Saved assessments</div><div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">'+(isAdmin?'All assessments':'Your assessments')+'</div></div><button type="button" onclick="showAssessment()" style="background:var(--nes-btn-grad,#1a56db);border:none;border-radius:8px;padding:7px 14px;color:#fff;cursor:pointer;font-family:var(--mono);font-size:.7rem;font-weight:700;">New assessment</button></div>';
-  if(error){mc.innerHTML=hdr+'<div style="padding:30px;color:#f85149;font-family:var(--mono);font-size:.8rem;">Error: '+asmEsc(error.message)+'</div>';return;}
+  const hdr='<div class="asm-bar"><div><div class="asm-title">Saved assessments</div><div class="asm-sub">'+(isAdmin?'All assessments':'Your assessments')+(data?' · '+data.length:'')+'</div></div><button type="button" class="asm-primary" style="padding:8px 16px;" onclick="showAssessment()">New assessment</button></div>';
+  if(error){mc.innerHTML=hdr+'<div class="asm-list"><div class="asm-err" style="display:block;">Could not load assessments: '+asmEsc(error.message)+'</div></div>';return;}
   const rows=(data||[]).map(a=>{
     const name=a.company_name||a.decision_maker||'(no name)';
     const st=a.status||'new';
     const conv=st==='converted';
-    const btn=(isAdmin&&!conv)?'<button type="button" onclick="asmConvert(\''+a.id+'\')" style="background:none;border:1px solid var(--nes-blue,#409cff);border-radius:8px;padding:6px 12px;color:var(--nes-blue,#409cff);cursor:pointer;font-family:var(--mono);font-size:.68rem;white-space:nowrap;">Convert to client</button>':'';
-    return '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 0;border-bottom:1px solid var(--border);"><div style="min-width:0;"><div style="font-size:.85rem;font-weight:700;">'+asmEsc(name)+'</div><div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);margin-top:3px;">'+asmEsc((a.created_at||'').slice(0,10))+' · '+asmEsc(a.plan_recommended||'-')+' · '+asmEsc(a.currency||'OMR')+' · '+asmEsc(a.email||'')+(isAdmin?' · by '+asmEsc(a.assessed_by||'-'):'')+'</div></div><div style="display:flex;align-items:center;gap:10px;"><span style="font-family:var(--mono);font-size:.62rem;padding:3px 8px;border-radius:10px;border:1px solid var(--border);color:'+(conv?'#3fb950':'var(--muted)')+';">'+asmEsc(st)+'</span>'+btn+'</div></div>';
+    const del=(isAdmin&&!conv)?'<button type="button" class="asm-icon" onclick="asmDelete(\''+a.id+'\')" title="Delete assessment" aria-label="Delete assessment"><i class="ti ti-trash"></i></button>':'';
+    const btn=(isAdmin&&!conv)?'<button type="button" class="asm-conv" onclick="asmConvert(\''+a.id+'\')">Convert to client</button>':'';
+    const meta=[(a.created_at||'').slice(0,10),a.email||'',isAdmin?'by '+(a.assessed_by||'-'):''].filter(Boolean).map(x=>'<span>'+asmEsc(x)+'</span>').join('');
+    return '<div class="asm-row'+(conv?' conv':'')+'"><div class="asm-av">'+asmEsc(name.trim().charAt(0).toUpperCase()||'?')+'</div><div class="asm-main"><div class="asm-name">'+asmEsc(name)+'</div><div class="asm-meta">'+meta+'</div></div><div class="asm-acts"><span class="asm-tag">'+asmEsc(a.plan_recommended||'-')+' · '+asmEsc(a.currency||'OMR')+'</span><span class="asm-tag '+asmEsc(st)+'">'+asmEsc(st)+'</span>'+btn+del+'</div></div>';
   }).join('');
-  mc.innerHTML=hdr+'<div class="page" style="overflow-y:auto;flex:1;"><div style="max-width:760px;padding:8px 0 60px;">'+(rows||'<div style="padding:30px 0;color:var(--muted);font-size:.8rem;">No assessments yet.</div>')+'</div></div>';
+  asmRefreshBadge();
+  mc.innerHTML=hdr+'<div class="page" style="overflow-y:auto;flex:1;"><div class="asm-list">'+(rows||'<div class="asm-empty"><b>No assessments yet</b>Run your first one from the form.</div>')+'</div></div>';
 }
 
 async function asmConvert(id){
@@ -187,10 +287,37 @@ async function asmLink(id,name){
     const{data}=await sb.from('clients').select('id,name,created_at').eq('name',name).gte('created_at',since).order('created_at',{ascending:false}).limit(1);
     if(data&&data[0]){
       const{error}=await sb.from('client_assessments').update({status:'converted',client_id:data[0].id}).eq('id',id);
-      if(!error)window._asmConvertId=null;
+      if(!error){window._asmConvertId=null;asmRefreshBadge();}
     }
   }catch(e){}
 }
+async function asmDelete(id){
+  if(userRole!=='nesadmin')return;
+  if(!confirm('Delete this assessment permanently? This cannot be undone.'))return;
+  const{data,error}=await sb.from('client_assessments').delete().eq('id',id).select('id');
+  if(error){showToast('Delete failed: '+error.message);return;}
+  if(!data||!data.length){showToast('Not deleted — converted assessments cannot be deleted');return;}
+  showToast('Assessment deleted');
+  showAssessmentList();
+}
+
+// ---- "New" counter on the sidebar item (nesadmin only; RLS also limits to what they may see) ----
+async function asmRefreshBadge(){
+  try{
+    const nav=document.getElementById('assessmentWorkspaceNav');
+    if(!nav||typeof sb==='undefined'||typeof userRole==='undefined'||userRole!=='nesadmin')return;
+    const{count,error}=await sb.from('client_assessments').select('id',{count:'exact',head:true}).eq('status','new');
+    if(error)return;
+    let b=document.getElementById('asmNavBadge');
+    if(!count){if(b)b.remove();return;}
+    if(!b){b=document.createElement('span');b.id='asmNavBadge';b.className='nav-badge';b.style.cssText='background:rgba(64,156,255,.18);color:var(--nes-blue);';nav.appendChild(b);}
+    b.textContent=count>99?'99+':String(count);
+    b.title=count+' new assessment'+(count===1?'':'s');
+  }catch(e){}
+}
+window.asmRefreshBadge=asmRefreshBadge;
+setTimeout(asmRefreshBadge,4000);setTimeout(asmRefreshBadge,12000);setInterval(asmRefreshBadge,60000);
+window.asmDelete=asmDelete;
 window.showAssessment=showAssessment;
 window.showAssessmentList=showAssessmentList;
 window.asmConvert=asmConvert;
