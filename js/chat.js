@@ -113,6 +113,7 @@ async function sendMsg(){
     const decoder=new TextDecoder();
     let fullReply='';
     let sources=[];
+    let suggestions='';
     let buffer='';
 
     while(true){
@@ -126,6 +127,7 @@ async function sendMsg(){
         try{
           const data=JSON.parse(line.slice(6));
           if(data.type==='sources'){sources=data.sources||[];}
+          else if(data.type==='suggestions'){suggestions=data.html||'';}
           else if(data.type==='chunk'){
             if(!fullReply && data.text){
               // first chunk - check if we need to show fallback notice
@@ -147,6 +149,17 @@ async function sendMsg(){
               if(el){
                 const src='<div class="sources-block">Sources: '+sources.map(s=>'<a href="'+esc(s.url)+'" target="_blank">'+esc(s.title||s.url)+'</a>').join(' · ')+'</div>';
                 el.innerHTML=md(cleanDisplay(fullReply))+src;
+              }
+            }
+            if(suggestions){
+              const el=document.getElementById(bubbleId+'-text');
+              if(el){
+                const fr=document.createElement('iframe');
+                fr.setAttribute('sandbox','allow-popups allow-popups-to-escape-sandbox');
+                fr.setAttribute('title','Google Search suggestions');
+                fr.srcdoc='<base target="_blank">'+suggestions;
+                fr.style.cssText='width:100%;height:64px;border:0;margin-top:8px;display:block;';
+                el.appendChild(fr);
               }
             }
             history.push({role:'assistant',content:fullReply,sources});
