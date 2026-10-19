@@ -199,9 +199,10 @@ async function loadTeam(){
     window._deptOptions = deptOptions;
 
     // Stats row
-    const planLimits = {presence:3,operations:10,workforce:999,infrastructure:999};
+    const planLimits = {presence:3,operations:10,workforce:25,infrastructure:999};
     const limit = planLimits[window.userPlan] || 3;
     const used = users.length;
+    window._teamCap = limit; window._teamUsed = used;
 
     let html = `
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;">
@@ -335,6 +336,7 @@ async function saveUserAccess(userId, clientId){
 }
 
 function showInviteModal(){
+  if(window._teamCap && window._teamUsed >= window._teamCap){ showToast('Team limit reached for your plan ('+window._teamUsed+' / '+window._teamCap+'). Remove a member or upgrade your plan.'); return; }
   const existing = document.getElementById('inviteModal');
   if(existing) existing.remove();
   const modal = document.createElement('div');
@@ -373,6 +375,7 @@ function showInviteModal(){
 }
 
 async function sendTeamInvite(){
+  if(window._teamCap && window._teamUsed >= window._teamCap){ showToast('Team limit reached for your plan.'); return; }
   const email = document.getElementById('inviteEmail').value.trim();
   const role = document.getElementById('inviteRole').value;
   const err = document.getElementById('inviteErr');
