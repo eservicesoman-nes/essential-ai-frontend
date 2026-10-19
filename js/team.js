@@ -268,9 +268,9 @@ async function loadTeam(){
                 <option value="">${t('team.noDept')}</option>
                 ${depts.map(d=>`<option value="${d.id}" ${u.department_id===d.id?'selected':''}>${deptLabel(d.name)}</option>`).join('')}
               </select>
-              <select onchange="updateUserRole('${u.id}','${clientId}',this.value)" style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:4px 8px;color:var(--muted);font-size:.7rem;cursor:pointer;">
-                <option value="ceo" ${u.role==='ceo'?'selected':''}>${t('team.roleCeo')}</option>
-                <option value="nes_partner" ${u.role==='nes_partner'?'selected':''}>${t('team.rolePartner')}</option>
+              <select onchange="updateUserRole('${u.id}','${clientId}',this.value)" ${(userRole!=='nesadmin' && (u.role==='ceo'||u.role==='nes_partner'))?'disabled':''} style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:4px 8px;color:var(--muted);font-size:.7rem;cursor:pointer;">
+                ${(userRole==='nesadmin'||u.role==='ceo')?`<option value="ceo" ${u.role==='ceo'?'selected':''}>${t('team.roleCeo')}</option>`:''}
+                ${u.role==='nes_partner'?`<option value="nes_partner" selected>${t('team.rolePartner')}</option>`:''}
                 <option value="manager" ${u.role==='manager'?'selected':''}>${t('team.roleManager')}</option>
                 <option value="staff" ${u.role==='staff'?'selected':''}>${t('team.roleStaff')}</option>
               </select>
