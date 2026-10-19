@@ -126,6 +126,7 @@ async function showInbox(){
   try {
     const {data:existingAccs} = await sb.from('email_accounts').select('id').eq('client_id', clientId).eq('is_active',true);
     const used = existingAccs?.length || 0;
+    window._inboxSavedAccounts = used;
     _inboxAccountText = (used===1?t('ui.mail.accountConnectedOne'):t('ui.mail.accountsConnected')).replace('{n}',used);
   } catch(e) {}
   mc.innerHTML=`
@@ -450,11 +451,11 @@ async function sendReply(to, originalSubject){
 
 function addEmailForm(){
   const clientId = window._activeClientId;
-  const planLimits = {presence:3, operations:5, workforce:10, infrastructure:99};
+  const planLimits = {presence:3, operations:5, workforce:10, infrastructure:20};
   const client = (window._clients||[]).find(c=>c.id===clientId);
   const plan = (client?.plan||'presence').toLowerCase();
   const limit = planLimits[plan]||2;
-  const existing = document.querySelectorAll('.em-extra-form').length + 1;
+  const existing = document.querySelectorAll('.em-extra-form').length + 1 + (window._inboxSavedAccounts||0);
   if(existing >= limit){
     const btn = document.getElementById('em_add_btn');
     if(btn) btn.style.display='none';
@@ -500,11 +501,11 @@ function addEmailForm(){
 
 function updateAddBtn(){
   const clientId = window._activeClientId;
-  const planLimits = {presence:3, operations:5, workforce:10, infrastructure:99};
+  const planLimits = {presence:3, operations:5, workforce:10, infrastructure:20};
   const client = (window._clients||[]).find(c=>c.id===clientId);
   const plan = (client?.plan||'presence').toLowerCase();
   const limit = planLimits[plan]||2;
-  const existing = document.querySelectorAll('.em-extra-form').length + 1;
+  const existing = document.querySelectorAll('.em-extra-form').length + 1 + (window._inboxSavedAccounts||0);
   const btn = document.getElementById('em_add_btn');
   const lim = document.getElementById('em_plan_limit');
   if(existing >= limit){
