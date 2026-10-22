@@ -289,6 +289,8 @@ async function loadTeam(){
 }
 
 function showEditAccessModal(userId, clientId, currentModules){
+  // keep the user's current grants so modules not shown as checkboxes (e.g. 'assessment') are preserved on save
+  window._editAccessCurrent = Array.isArray(currentModules) ? currentModules.slice() : [];
   const existing = document.getElementById('accessModal');
   if(existing) existing.remove();
   const modal = document.createElement('div');
@@ -311,7 +313,8 @@ function showEditAccessModal(userId, clientId, currentModules){
 }
 
 async function saveUserAccess(userId, clientId){
-  const granted_modules = [];
+  const _managed = ['it_setup','briefcase','whatsapp_autoreply'];
+  const granted_modules = (window._editAccessCurrent || []).filter(m => !_managed.includes(m));
   if(document.getElementById('editGrantItSetup')?.checked) granted_modules.push('it_setup');
   if(document.getElementById('editGrantBriefcase')?.checked) granted_modules.push('briefcase');
   if(document.getElementById('editGrantWhatsapp')?.checked) granted_modules.push('whatsapp_autoreply');
