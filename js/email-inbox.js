@@ -168,7 +168,8 @@ async function loadInboxEmails(clientId){
     const accounts=[...new Set(emails.map(e=>e.account_email))];
     let accountLabels = {};
     try{
-      const {data:accsData} = await sb.from('email_accounts').select('email_address,label,is_active').eq('client_id', window._inboxClientId||clientId);
+      const {data:accsData} = await sb.from('email_accounts').select('id,email_address,label,is_active').eq('client_id', window._inboxClientId||clientId);
+      window._inboxAccountObjects = accsData||[];
       (accsData||[]).forEach(a => {
         accountLabels[a.email_address] = a.label||a.email_address;
         if(a.is_active!==false && !accounts.includes(a.email_address)) accounts.push(a.email_address);
