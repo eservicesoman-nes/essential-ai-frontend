@@ -946,6 +946,7 @@ function getFormData(){
   const fields=['name','email','website','industry','region','country','language','lead_email','primary_color','logo_url','plan','status','trial_start','trial_duration_days'];
   const data={};
   fields.forEach(f=>{const el=document.getElementById('field_'+f);if(el)data[f]=el.value.trim();});
+  ['trial_start','trial_duration_days'].forEach(f=>{if(data[f]==='')delete data[f];}); // empty date/number must not be sent as '' (Postgres rejects it)
   const overrideEl=document.getElementById('field_full_access_override');
   if(overrideEl)data.full_access_override=overrideEl.checked;
   return data;
