@@ -339,6 +339,11 @@ function setupNavForRole(){
       const logsNav=document.getElementById('sysLogsNav');
       if(logsNav)logsNav.style.display='flex';
     }
+    // Users with no client (e.g. Technology Partner) still get the Assessment form
+    if(userRole!=='nesadmin' && (userRole==='nes_partner' || (window.userGrantedModules||[]).includes('assessment'))){
+      const assessmentNavNoClient=document.getElementById('assessmentWorkspaceNav');
+      if(assessmentNavNoClient)assessmentNavNoClient.style.display='flex';
+    }
   }
   loadLeadCount();
 }
