@@ -43,14 +43,7 @@ async function renderPartnerHub(){
   // Update pending badge
   setTimeout(()=>updatePendingBadge(pendingPartners.length), 100);
 
-  const getPlanVal = (plan, fee) => {
-    if(fee && fee > 0) return parseFloat(fee);
-    const p = (plan||'').toLowerCase();
-    if(p.includes('workforce')) return 149;
-    if(p.includes('operations')) return 79;
-    if(p.includes('presence')) return 29;
-    return 79;
-  };
+  const getPlanVal = (plan, fee) => clientMonthlyValue({ plan, monthly_fee: fee });
 
   // Stats
   const directClients = allClients.filter(c => !c.partner_ref);
