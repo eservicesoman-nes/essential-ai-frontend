@@ -993,7 +993,7 @@ async function updateClient(clientId){
 function showSignoff(clientId, clientName, plan, monthlyFee, trialStart, trialDays) {
   const planLabels = { presence: 'AI Presence', operations: 'AI Operations', workforce: 'AI Workforce', infrastructure: 'AI Infrastructure' };
   const planLabel = planLabels[plan] || plan || 'NES AI Plan';
-  const fee = parseFloat(monthlyFee) || (plan==='workforce' ? 149 : plan==='operations' ? 79 : plan==='infrastructure' ? 299 : 29);
+  const fee = parseFloat(monthlyFee) > 0 ? parseFloat(monthlyFee) : planListPrice(plan);
   const vat = (fee * 0.05).toFixed(3);
   const total = (fee + parseFloat(vat)).toFixed(3);
 
