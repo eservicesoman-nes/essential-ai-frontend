@@ -168,6 +168,20 @@ async function loadUserRole(user){
   document.getElementById('roleChip').textContent=userRole;
 }
 
+// Plan list prices (OMR/month, excl. VAT): single source for the sign-off and MRR estimates (W5, 11 Nov 2026)
+const PLAN_LIST_PRICES_OMR = { presence: 59, operations: 159, workforce: 299, infrastructure: 599 };
+function planListPrice(plan){
+  const p = String(plan || '').toLowerCase();
+  for (const k of Object.keys(PLAN_LIST_PRICES_OMR)) if (p.includes(k)) return PLAN_LIST_PRICES_OMR[k];
+  return PLAN_LIST_PRICES_OMR.presence;
+}
+// Monthly value for MRR: a set fee wins; 0 = internal/free entity (no revenue); empty = plan list price
+function clientMonthlyValue(c){
+  const raw = c ? c.monthly_fee : null;
+  if (raw === null || raw === undefined || raw === '') return planListPrice(c && c.plan);
+  const f = parseFloat(raw);
+  return f > 0 ? f : 0;
+}
 const BLOCKED_ACCOUNT_STATUSES = ['suspended', 'cancelled', 'inactive'];
 async function checkAccountBlocked(clientId){
   try{
