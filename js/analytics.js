@@ -40,7 +40,7 @@ async function loadAnalytics(days){
 
     const [leadsRes, clientsRes, feedRes] = await Promise.all([
       sb.from('leads').select('id,created_at,status,client_id,country').gte('created_at',since),
-      sb.from('clients').select('id,name,plan,status,created_at'),
+      sb.from('clients').select('id,name,plan,status,created_at,monthly_fee'),
       sb.from('ceo_feed').select('id,created_at,type,tag').gte('created_at',since)
     ]);
 
@@ -85,14 +85,7 @@ async function loadAnalytics(days){
     const feedByType = {};
     feed.forEach(f => { const t=f.type||'intel'; feedByType[t]=(feedByType[t]||0)+1; });
 
-    const planValues = {presence:29,operations:79,workforce:149,infrastructure:299};
-    const mrr = clients.filter(c=>c.status==='active').reduce((s,c) => {
-      const p=(c.plan||'').toLowerCase();
-      if(p.includes('operations')) return s+79;
-      if(p.includes('workforce')) return s+149;
-      if(p.includes('infrastructure')) return s+299;
-      return s+29;
-    }, 0);
+    const mrr = clients.filter(c=>c.status==='active').reduce((s,c) => s + clientMonthlyValue(c), 0);
 
     el.innerHTML = `
       <style>
