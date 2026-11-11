@@ -162,7 +162,7 @@ function renderClientDetail(c,colors,textColors,idx){
         <div class="cm-actions">
           <button class="cm-btn" onclick="showEditClientForm('${c.id}')"><i class="ti ti-edit" style="font-size:12px"></i> Edit</button>
           <button class="cm-btn" onclick="window._activeClientId='${c.id}';window._activeTab='billing';showClientManager()"><i class="ti ti-credit-card" style="font-size:12px"></i> Billing</button>
-          <button class="cm-btn" style="background:rgba(64,156,255,0.1);color:#409cff;border:1px solid rgba(64,156,255,0.3);" onclick="showSignoff('${c.id}','${(c.name||'').replace(/'/g,'')}','${c.plan||''}','${c.monthly_fee||''}','${c.trial_start||''}','${c.trial_duration_days||7}')"><i class="ti ti-file-text" style="font-size:12px"></i> ${t('button.signOff')}</button>
+          <button class="cm-btn" style="background:rgba(64,156,255,0.1);color:#409cff;border:1px solid rgba(64,156,255,0.3);" onclick="showSignoff('${c.id}','${(c.name||'').replace(/'/g,'')}','${c.plan||''}','${c.monthly_fee||''}','${c.trial_start||''}','${c.trial_duration_days||7}','${(c.currency||'OMR').replace(/[^A-Za-z]/g,'')}')"><i class="ti ti-file-text" style="font-size:12px"></i> ${t('button.signOff')}</button>
           <button class="cm-btn" style="background:rgba(210,153,34,0.15);color:#d29922;border:1px solid rgba(210,153,34,0.3);" onclick="requestCancellation('${c.id}','${(c.name||'').replace(/'/g,'')}')"><i class="ti ti-x" style="font-size:12px"></i> ${t('button.cancelSub')}</button>
           <button class="cm-btn danger" onclick="deleteClient('${c.id}')"><i class="ti ti-trash" style="font-size:12px"></i> Delete</button>
           <button class="cm-btn primary" onclick="saveClientModules('${c.id}')"><i class="ti ti-device-floppy" style="font-size:12px"></i> Save</button>
@@ -990,7 +990,7 @@ async function updateClient(clientId){
   catch(e){alert('Error: '+e.message);if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-device-floppy"></i> Save Changes';}}
 }
 
-function showSignoff(clientId, clientName, plan, monthlyFee, trialStart, trialDays) {
+function showSignoff(clientId, clientName, plan, monthlyFee, trialStart, trialDays, currency) {
   const planLabels = { presence: 'AI Presence', operations: 'AI Operations', workforce: 'AI Workforce', infrastructure: 'AI Infrastructure' };
   const planLabel = planLabels[plan] || plan || 'NES AI Plan';
   const fee = parseFloat(monthlyFee) > 0 ? parseFloat(monthlyFee) : planListPrice(plan);
@@ -1006,7 +1006,7 @@ function showSignoff(clientId, clientName, plan, monthlyFee, trialStart, trialDa
     billingStartStr = billing.toLocaleDateString(getDateLocale('en-GB'), {day:'numeric',month:'long',year:'numeric'});
   }
 
-  const waMsg = `As-salamu alaykum ${clientName} 👋
+  let waMsg = `As-salamu alaykum ${clientName} 👋
 
 Your NES AI platform is ready!
 
@@ -1022,7 +1022,7 @@ Any questions? Call or WhatsApp us anytime.
 NES Office Team
 +968 9584 9952`;
 
-  const emailMsg = `Subject: Your NES AI Platform is Ready — Action Required
+  let emailMsg = `Subject: Your NES AI Platform is Ready — Action Required
 
 Dear ${clientName},
 
@@ -1039,6 +1039,82 @@ Warm regards,
 NES Office Team
 New Essential Services
 office@essential-services.org`;
+
+  // W8 (11 Nov 2026): clients billed in EUR (Portugal) get a PT+EN sign-off in euros with 0% VAT
+  // (zero-rated export of services, Oman VAT Law Art. 52). The fee comes from the client's Monthly Fee (EUR);
+  // empty = "as per NES proposal". OMR clients are unchanged.
+  if (String(currency || '').toUpperCase() === 'EUR') {
+    const eurFee = parseFloat(monthlyFee) > 0 ? parseFloat(monthlyFee) : null;
+    const vatPt = 'IVA 0% (exportação de serviços sujeita a taxa zero, art. 52.º da Lei do IVA de Omã)';
+    const vatEn = 'VAT 0% (zero-rated export of services, Oman VAT Law Art. 52)';
+    const feePt = (eurFee ? eurFee.toLocaleString('pt-PT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €/mês' : 'conforme proposta da NES') + ' — ' + vatPt;
+    const feeEn = (eurFee ? '€' + eurFee.toFixed(2) + '/month' : 'as per NES proposal') + ' — ' + vatEn;
+    const ptDate = (d) => d.toLocaleDateString('pt-PT', { day: 'numeric', month: 'long', year: 'numeric' });
+    let trialEndPt = 'a definir', billingPt = 'a definir';
+    if (trialStart) {
+      const te = new Date(new Date(trialStart).getTime() + (parseInt(trialDays) || 7) * 24 * 60 * 60 * 1000);
+      trialEndPt = ptDate(te);
+      billingPt = ptDate(new Date(te.getTime() + 24 * 60 * 60 * 1000));
+    }
+    waMsg = `Olá ${clientName} 👋
+
+A sua plataforma NES AI está pronta!
+
+📦 Plano: ${planLabel}
+💰 Mensalidade: ${feePt}
+🗓 Fim do período experimental: ${trialEndPt}
+📅 Primeira faturação: ${billingPt}
+
+Responda *CONFIRMADO* para ativar a sua conta.
+
+Alguma dúvida? Ligue ou envie WhatsApp a qualquer momento.
+
+— — —
+
+Hello ${clientName} 👋
+
+Your NES AI platform is ready!
+
+📦 Plan: ${planLabel}
+💰 Fee: ${feeEn}
+🗓 Trial ends: ${trialEndStr}
+📅 First billing: ${billingStartStr}
+
+Please reply *CONFIRMED* to activate your account.
+
+NES Office Team
++968 9584 9952`;
+    emailMsg = `Subject: A sua plataforma NES AI está pronta / Your NES AI Platform is Ready — Action Required
+
+Caro(a) ${clientName},
+
+A configuração da sua plataforma NES AI está concluída. Confirme os dados abaixo para ativar a sua conta.
+
+Plano: ${planLabel}
+Mensalidade: ${feePt}
+Fim do período experimental: ${trialEndPt}
+Data da primeira faturação: ${billingPt}
+
+Para confirmar, responda a este email com a palavra CONFIRMADO ou envie WhatsApp para +968 9584 9952.
+
+— — —
+
+Dear ${clientName},
+
+Your NES AI platform setup is complete. Please confirm the details below to activate your account.
+
+Plan: ${planLabel}
+Monthly Fee: ${feeEn}
+Trial ends: ${trialEndStr}
+First Billing Date: ${billingStartStr}
+
+To confirm, simply reply to this email with the word CONFIRMED or WhatsApp us on +968 9584 9952.
+
+Com os melhores cumprimentos / Warm regards,
+NES Office Team
+New Essential Services
+office@essential-services.org`;
+  }
 
   // Remove existing modal if any
   const existing = document.getElementById('signoff-modal');
