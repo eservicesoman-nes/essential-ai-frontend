@@ -573,7 +573,7 @@ async function loadPartnerMrr(){
     // partners/partner_commissions are service_role_only (RLS) — read via backend admin routes, same as Partner Hub (Fix 215)
     const{data:{session}}=await sb.auth.getSession();if(!session)return;
     const _ah={headers:{'Authorization':'Bearer '+session.access_token}};
-    const getPV=c=>{const f=parseFloat(c.monthly_fee);if(f>0)return f;const p=(c.plan||'').toLowerCase();if(p.includes('workforce'))return 149;if(p.includes('operations'))return 79;return 29;};
+    const getPV=c=>clientMonthlyValue(c);
     const[{data:clients},{data:partners},{data:commissions}]=await Promise.all([
       sb.from('clients').select('id,name,plan,status,monthly_fee,partner_ref,founder_discount_expires_at'),
       fetch(API_URL+'/api/admin/partners',_ah).then(r=>r.json()).then(j=>({data:j.partners||[]})),
