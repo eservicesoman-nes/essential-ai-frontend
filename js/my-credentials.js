@@ -35,7 +35,7 @@ function renderMyCredsForm(creds, client){
   const el=document.getElementById('myCredsContent');
   let trialHtml='';
   if(client.trial_start){
-    const trialEnd=new Date(new Date(client.trial_start).getTime()+((client.trial_duration_days||7)*86400000));
+    const trialEnd=new Date(new Date(client.trial_start).getTime()+((client.trial_duration_days||trialDefaultDays())*86400000));
     const daysLeft=Math.ceil((trialEnd-new Date())/86400000);
     const expired=daysLeft<=0;
     const urgent=daysLeft<=2&&!expired;

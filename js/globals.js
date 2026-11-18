@@ -11,18 +11,18 @@ const ROCKET_URL='https://chat.essential-services.org';
 const LOGO_URL='https://files.catbox.moe/adhf8n.png';
 // ============================================================
 
-const PLAN_LIMITS={
-  free:{name:'Free',price:0,messages:50,images:3,docs:5},
-  starter:{name:'Starter',price:7,messages:150,images:10,docs:25},
-  pro:{name:'Pro',price:19,messages:500,images:25,docs:100},
-  enterprise:{name:'Enterprise',price:0,messages:-1,images:-1,docs:-1,isContact:true}
-};
+// Phase 4 (18 Nov 2026): plans, prices, limits and packs come from GET /api/catalogue
+// (window.NES_CATALOGUE, loaded in loadUserPlan). The backend enforces every limit.
+// Docs has no catalogue field yet, so its display value stays as it was.
+const DOCS_DAILY_DISPLAY=5;
+const DEFAULT_TRIAL_DAYS=7; // fallback only when the catalogue could not be loaded
+window.NES_CATALOGUE=null;
 
 const{createClient}=supabase;
 const sb=createClient(SUPABASE_URL,SUPABASE_ANON);
 let session=null,currentView='chat',history=[],busy=false;
 let chatUsed=0,imagesUsed=0,docsUsed=0;
-let userPlan='free',userRole='staff',allMsgsHTML='';
+let userRole='staff',allMsgsHTML='';
 let userClientId=null;
 const STORAGE_KEYS={h:'nesai_h',m:'nesai_m',u:'nesai_u',rc:'nesai_rc'};
 const MODE_LABELS={chat:'ASK NESAI',docs:'DOCUMENTS MODE',image:'IMAGE GEN MODE'};

@@ -122,7 +122,7 @@ function asmChoice(k,label,opts){
 }
 function asmPick(k,val){
   if(k==='has_facebook'||k==='has_whatsapp'||k==='has_crm'||k==='budget_confirmed'){_asm.v[k]=val==='true'?true:val==='false'?false:null;}
-  else if(k==='trial_days'){_asm.v[k]=parseInt(val,10)||7;}
+  else if(k==='trial_days'){_asm.v[k]=parseInt(val,10)||trialDefaultDays();}
   else{_asm.v[k]=val;}
   asmRender();
 }
@@ -144,8 +144,10 @@ function asmStepHtml(){
   if(s===3) return asmYN('has_facebook','Facebook Business page (and Instagram)?')+asmYN('has_whatsapp','WhatsApp Business number?')+asmYN('has_crm','Uses a CRM?')+(_asm.v.has_crm===true?asmField('crm_name','Which CRM?',{ph:'e.g. Salesforce, HubSpot, Zoho'}):'');
   if(s===4){
     const eur=_asm.v.currency==='EUR';
-    const plans=[['presence','AI Presence',eur?'price as per NES proposal':'OMR 59/mo'],['operations','AI Operations',eur?'price as per NES proposal':'OMR 159/mo'],['workforce','AI Workforce',eur?'price as per NES proposal':'OMR 299/mo'],['infrastructure','AI Infrastructure','custom, per contract']];
-    return asmChoice('currency','Currency',[['OMR','OMR (Oman)'],['EUR','EUR (Portugal)']])+asmChoice('plan_recommended','Plan recommended by NES *',plans.map(p=>[p[0],p[1]+' — '+p[2]]))+asmChoice('billing_cycle','Billing cycle',[['monthly','Monthly'],['annual','Annual (saves 15%)']])+asmYN('budget_confirmed','Budget confirmed?')+asmChoice('decision_timeline','Decision timeline',[['Immediately','Immediately'],['Within 2 weeks','2 weeks'],['1 month','1 month'],['2-3 months','2–3 months'],['6+ months','6+ months']])+
+    // Phase 4: prices from the catalogue; a plan without a public price shows "as per NES proposal".
+    const _pr=k=>{const r=cataloguePlan(k);if(!r)return 'price as per NES proposal';if(eur)return r.price_eur!=null?'EUR '+parseFloat(r.price_eur)+'/mo':'price as per NES proposal';if(r.price_omr!=null)return 'OMR '+parseFloat(r.price_omr)+'/mo';return r.price_from_omr!=null?'from OMR '+parseFloat(r.price_from_omr)+'/mo':'custom, per contract';};
+    const plans=[['presence','AI Presence',_pr('presence')],['operations','AI Operations',_pr('operations')],['workforce','AI Workforce',_pr('workforce')],['infrastructure','AI Infrastructure',_pr('infrastructure')]];
+    return asmChoice('currency','Currency',[['OMR','OMR (Oman)'],['EUR','EUR (Portugal)']])+asmChoice('plan_recommended','Plan recommended by NES *',plans.map(p=>[p[0],p[1]+' — '+p[2]]))+asmChoice('billing_cycle','Billing cycle',[['monthly','Monthly'],['annual','Annual (saves '+(annualDiscountPct()??15)+'%)']])+asmYN('budget_confirmed','Budget confirmed?')+asmChoice('decision_timeline','Decision timeline',[['Immediately','Immediately'],['Within 2 weeks','2 weeks'],['1 month','1 month'],['2-3 months','2–3 months'],['6+ months','6+ months']])+
       '<div class="asm-f"><label class="asm-agree"><input type="checkbox" '+(_asm.v.setup_fee_agreed?'checked ':'')+'onchange="asmSet(\'setup_fee_agreed\',this.checked)"><span>I told the client about the one-time setup fee ('+(eur?'€230':'OMR 99')+') upfront. It is payable when they continue after the trial; any waiver needs an individual agreement with NES.</span></label></div>'+
       '<div class="asm-f asm-note">Prices before VAT. Social media account creation (Meta) is a paid extra, only on request after the trial.</div>';
   }
@@ -155,7 +157,7 @@ function asmStepHtml(){
 function asmTrialEnd(){
   const s=_asm.v.trial_start_date;if(!s)return '';
   const d=new Date(s+'T00:00:00');if(isNaN(d))return '';
-  d.setDate(d.getDate()+(_asm.v.trial_days||7));
+  d.setDate(d.getDate()+(_asm.v.trial_days||trialDefaultDays()));
   return d.toISOString().slice(0,10);
 }
 
@@ -195,7 +197,7 @@ async function asmSave(){
   const req=[['decision_maker','Decision maker name',0],['email','Company email',0],['assessed_by','Assessed by',0],['company_name','Company name',1],['plan_recommended','Recommended plan',4]];
   for(const r of req){if(!String(v[r[0]]||'').trim()){asmGo(r[2]);setTimeout(()=>asmErr('Please fill in: '+r[1]+'.'),0);return;}}
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v.email).trim())){asmGo(0);setTimeout(()=>asmErr('Please enter a valid company email.'),0);return;}
-  const days=Math.min(60,Math.max(1,parseInt(v.trial_days,10)||7));
+  const days=Math.min(60,Math.max(1,parseInt(v.trial_days,10)||trialDefaultDays()));
   const txt=k=>(v[k]==null?'':String(v[k]).trim())||null;
   const payload={
     email:String(v.email).trim(),decision_maker:String(v.decision_maker).trim(),decision_maker_title:txt('decision_maker_title'),

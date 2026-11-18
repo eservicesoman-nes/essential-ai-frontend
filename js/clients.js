@@ -162,7 +162,7 @@ function renderClientDetail(c,colors,textColors,idx){
         <div class="cm-actions">
           <button class="cm-btn" onclick="showEditClientForm('${c.id}')"><i class="ti ti-edit" style="font-size:12px"></i> Edit</button>
           <button class="cm-btn" onclick="window._activeClientId='${c.id}';window._activeTab='billing';showClientManager()"><i class="ti ti-credit-card" style="font-size:12px"></i> Billing</button>
-          <button class="cm-btn" style="background:rgba(64,156,255,0.1);color:#409cff;border:1px solid rgba(64,156,255,0.3);" onclick="showSignoff('${c.id}','${(c.name||'').replace(/'/g,'')}','${c.plan||''}','${c.monthly_fee||''}','${c.trial_start||''}','${c.trial_duration_days||7}','${(c.currency||'OMR').replace(/[^A-Za-z]/g,'')}')"><i class="ti ti-file-text" style="font-size:12px"></i> ${t('button.signOff')}</button>
+          <button class="cm-btn" style="background:rgba(64,156,255,0.1);color:#409cff;border:1px solid rgba(64,156,255,0.3);" onclick="showSignoff('${c.id}','${(c.name||'').replace(/'/g,'')}','${c.plan||''}','${c.monthly_fee||''}','${c.trial_start||''}','${c.trial_duration_days||trialDefaultDays()}','${(c.currency||'OMR').replace(/[^A-Za-z]/g,'')}')"><i class="ti ti-file-text" style="font-size:12px"></i> ${t('button.signOff')}</button>
           <button class="cm-btn" style="background:rgba(210,153,34,0.15);color:#d29922;border:1px solid rgba(210,153,34,0.3);" onclick="requestCancellation('${c.id}','${(c.name||'').replace(/'/g,'')}')"><i class="ti ti-x" style="font-size:12px"></i> ${t('button.cancelSub')}</button>
           <button class="cm-btn danger" onclick="deleteClient('${c.id}')"><i class="ti ti-trash" style="font-size:12px"></i> Delete</button>
           <button class="cm-btn primary" onclick="saveClientModules('${c.id}')"><i class="ti ti-device-floppy" style="font-size:12px"></i> Save</button>
@@ -355,7 +355,7 @@ function renderClientDetail(c,colors,textColors,idx){
         <div id="cm-billing" style="display:none;">
           ${(()=>{
             const trialStart=c.trial_start?new Date(c.trial_start):null;
-            const trialDays=c.trial_duration_days||7;
+            const trialDays=c.trial_duration_days||trialDefaultDays();
             const trialEnd=trialStart?new Date(trialStart.getTime()+trialDays*86400000):null;
             const now=new Date();
             const daysLeft=trialEnd?Math.ceil((trialEnd-now)/86400000):null;
@@ -882,7 +882,7 @@ function clientFormFields(c={}){
         </select>
       </div>
       <div class="form-field"><label class="form-label">${t('formLabel.trialStartDate')}</label><input id="field_trial_start" type="date" value="${esc(c.trial_start||'')}" class="form-input"></div>
-      <div class="form-field"><label class="form-label">${t('formLabel.trialDurationDays')}</label><input id="field_trial_duration_days" type="number" value="${esc(String(c.trial_duration_days||7))}" class="form-input" placeholder="7"></div>
+      <div class="form-field"><label class="form-label">${t('formLabel.trialDurationDays')}</label><input id="field_trial_duration_days" type="number" value="${esc(String(c.trial_duration_days||trialDefaultDays()))}" class="form-input" placeholder="${trialDefaultDays()}"></div>
       <div class="form-field">
         <label class="form-label">${t('formLabel.paygFullAccess')}</label>
         <label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:8px 0;">
@@ -1000,7 +1000,7 @@ function showSignoff(clientId, clientName, plan, monthlyFee, trialStart, trialDa
   let trialEndStr = 'TBD';
   let billingStartStr = 'TBD';
   if (trialStart) {
-    const trialEnd = new Date(new Date(trialStart).getTime() + (parseInt(trialDays)||7) * 24*60*60*1000);
+    const trialEnd = new Date(new Date(trialStart).getTime() + (parseInt(trialDays)||trialDefaultDays()) * 24*60*60*1000);
     const billing = new Date(trialEnd.getTime() + 24*60*60*1000);
     trialEndStr = trialEnd.toLocaleDateString(getDateLocale('en-GB'), {day:'numeric',month:'long',year:'numeric'});
     billingStartStr = billing.toLocaleDateString(getDateLocale('en-GB'), {day:'numeric',month:'long',year:'numeric'});

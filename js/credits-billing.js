@@ -143,7 +143,7 @@ function openSubscribeModal(plan,planLabel){
   const html=`<div style="padding:4px 0;">
     <p style="color:var(--muted);font-size:.85rem;margin-bottom:16px;">${t('ui.bill.chooseCycle').replace('{plan}',planLabel)}</p>
     <button class="act-btn" style="width:100%;margin-bottom:8px;background:#003087;" onclick="startSubscription('${plan}','monthly')">${t('ui.bill.monthlyPaypal')}</button>
-    <button class="act-btn" style="width:100%;background:linear-gradient(135deg,#1a7f37,#3fb950);" onclick="startSubscription('${plan}','annual')">${t('ui.bill.annualPaypal')}</button>
+    <button class="act-btn" style="width:100%;background:linear-gradient(135deg,#1a7f37,#3fb950);" onclick="startSubscription('${plan}','annual')">${t('ui.bill.annualPaypal').replace('{pct}',annualDiscountPct()??15)}</button>
     <p style="color:var(--muted);font-size:.68rem;margin-top:10px;text-align:center;">${t('ui.bill.redirectPaypal')}</p>
   </div>`;
   showModal(t('ui.bill.subscribeTo').replace('{plan}',planLabel),html);
@@ -162,12 +162,67 @@ async function startSubscription(plan,cycle){
       window.location.href=data.checkout_url;
     } else {
       alert(t('popup.subscriptionError')+': '+(data.error||t('popup.unknownError')));
-      btn.disabled=false;btn.textContent=cycle==='monthly'?t('ui.bill.monthly'):t('ui.bill.annual15');
+      btn.disabled=false;btn.textContent=cycle==='monthly'?t('ui.bill.monthly'):t('ui.bill.annual15').replace('{pct}',annualDiscountPct()??15);
     }
   }catch(e){
     alert(t('popup.connectionError'));
-    btn.disabled=false;btn.textContent=cycle==='monthly'?t('ui.bill.monthly'):t('ui.bill.annual15');
+    btn.disabled=false;btn.textContent=cycle==='monthly'?t('ui.bill.monthly'):t('ui.bill.annual15').replace('{pct}',annualDiscountPct()??15);
   }
+}
+// Phase 4: plan cards rendered from the catalogue (public plans only). Numbers come from the DB;
+// the non-numeric feature lines are the existing claims per plan. Posts/day is not shown until the
+// posting counter is enforced (Phase 5). Team Hub is shown as "coming soon" when flagged.
+const PLAN_STYLE={
+  presence:{i18n:'plan.aiPresence',label:'AI Presence',color:'var(--nes-blue)',border:'',btn:''},
+  operations:{i18n:'plan.aiOperations',label:'AI Operations',color:'var(--nes-blue)',border:'var(--nes-blue)',btn:'',popular:true},
+  workforce:{i18n:'plan.aiWorkforce',label:'AI Workforce',color:'#3fb950',border:'#3fb950',btn:'linear-gradient(135deg,#1a7f37,#3fb950)'},
+  infrastructure:{i18n:'plan.aiInfrastructure',label:'AI Infrastructure',color:'#d29922',border:'#d29922',btn:'linear-gradient(135deg,#92610a,#d29922)'}
+};
+const PLAN_FEATURE_KEYS={
+  presence:['ui.bill.fChatbot','ui.bill.fLeadCapture','ui.bill.fEmailNotif'],
+  operations:['ui.bill.fCeoPulse','ui.bill.fWaAlerts','ui.bill.fCrm','ui.bill.fPriority'],
+  workforce:['ui.bill.fLayla','ui.bill.fWaSupport'],
+  infrastructure:['ui.bill.fFullApex','ui.bill.fRealtime','ui.bill.fMultiSocial','ui.bill.fWhiteLabel','ui.bill.fCustomAgents','ui.bill.fLeadHistory','ui.bill.fSla','ui.bill.fAccountMgr','ui.bill.fCustomInteg']
+};
+const PLAN_EVERYTHING_IN={operations:'plan.aiPresence',workforce:'plan.aiOperations'};
+const OMR_PER_USD=0.385;
+function renderPlanCards(){
+  const c=window.NES_CATALOGUE;
+  const plans=(c&&Array.isArray(c.plans))?c.plans:[];
+  if(!plans.length)return `<div style="grid-column:1/-1;text-align:center;color:var(--muted);font-size:.85rem;padding:24px;">${t('ui.bill.packsUnavailable')}</div>`;
+  const li=(html,muted)=>`<li><i class="ti ${muted?'ti-clock':'ti-check'}" style="color:${muted?'var(--muted)':'#3fb950'};font-size:13px;flex-shrink:0"></i>${html}</li>`;
+  const num=n=>(Number(n)).toLocaleString(getDateLocale('en-GB'));
+  return plans.map(p=>{
+    const st=PLAN_STYLE[p.plan]||{i18n:'',label:(p.display_name&&p.display_name.en)||p.plan,color:'var(--nes-blue)',border:'',btn:''};
+    const label=st.i18n?t(st.i18n,st.label):st.label;
+    const price=p.price_omr!=null?parseFloat(p.price_omr):null;
+    const custom=price==null;
+    const eur=(window.clientCurrency==='EUR'&&p.price_eur!=null)?parseFloat(p.price_eur):null;
+    const f=[];
+    if(PLAN_EVERYTHING_IN[p.plan])f.push(li(t('ui.bill.everythingIn').replace('{plan}',t(PLAN_EVERYTHING_IN[p.plan]))));
+    if(Number(p.daily_ai_messages)>0)f.push(li(t('ui.bill.aiMsgsDay').replace('{n}',num(p.daily_ai_messages))));
+    if(Number(p.sara_minutes_per_month)>0)f.push(li(`<b style="color:${st.color};">Sara AI — ${t('ui.bill.minsMo').replace('{n}',num(p.sara_minutes_per_month))}</b>`));
+    if(Number(p.team_user_limit)>0)f.push(li(t('ui.bill.teamUsers').replace('{n}',num(p.team_user_limit))));
+    (PLAN_FEATURE_KEYS[p.plan]||[]).forEach(k=>f.push(li(t(k))));
+    if(p.plan==='presence')f.push(li('Deen NES AI — '+t('ui.bill.freeGlobally')));
+    if(p.features&&p.features.team_hub==='coming_soon')f.push(li(t('ui.bill.teamHubSoon'),true));
+    if(!custom)f.push(li(t('ui.bill.fTrial7').replace('{n}',trialDefaultDays())));
+    const priceHtml=custom
+      ?`<div class="plan-price" style="color:${st.color};">${t('ui.bill.custom')}</div><div class="plan-period">${p.price_from_omr!=null?t('ui.bill.infraRange').replace('{n}',parseFloat(p.price_from_omr)):''}</div>`
+      :`<div class="plan-price"${st.border&&p.plan!=='operations'?` style="color:${st.color};"`:''}${eur!=null?' data-local-set="1"':''}>OMR ${price}</div>`
+        +(eur!=null?`<div style="font-family:var(--mono);font-size:.7rem;color:var(--muted);margin-top:2px;">EUR ${eur}</div>`:'')
+        +`<div class="plan-period">${t('ui.bill.perMonthUsd').replace('{usd}','$'+Math.round(price/OMR_PER_USD))}</div>`;
+    const btn=custom
+      ?`<button class="plan-action-btn" style="background:${st.btn||'var(--nes-btn-grad)'};" onclick="window.open('https://nes-ai.com/register.html?plan=${encodeURIComponent(p.plan)}','_blank')">${t('pricingCta.contactUs')}</button>`
+      :`<button class="plan-action-btn"${st.btn?` style="background:${st.btn};"`:''} onclick="openSubscribeModal('${esc(p.plan)}','${esc(st.label)}')">${t('ui.bill.subscribePaypal')}</button>`;
+    return `<div class="plan-card"${st.border?` style="border-color:${st.border};position:relative;"`:''}>
+      ${st.popular?`<div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--nes-btn-grad);color:#fff;font-size:.65rem;font-weight:700;padding:3px 12px;border-radius:20px;font-family:'Syne',sans-serif;">${t('pricingPage.popular')}</div>`:''}
+      <div style="font-family:'Syne',sans-serif;font-size:.65rem;color:${st.color};text-transform:uppercase;letter-spacing:.1em;text-align:center;margin-bottom:4px;">${label}</div>
+      ${priceHtml}
+      <ul class="plan-features-list">${f.join('')}</ul>
+      ${btn}
+    </div>`;
+  }).join('');
 }
 function showPricing(){
   const mc=document.getElementById('mainContent');
@@ -177,92 +232,11 @@ function showPricing(){
       <a href="#" onclick="showView('chat');return false;" style="color:var(--nes-blue);text-decoration:none;display:inline-block;margin-bottom:22px;font-family:var(--mono);font-size:.8rem;">← ${t('common.back','Back')}</a>
       <div style="text-align:center;margin-bottom:8px;"><h1 style="font-size:1.7rem;font-weight:700;font-family:'Syne',sans-serif;">${t('pricingPage.chooseYourPlan')}</h1></div>
       <div style="text-align:center;margin-bottom:6px;font-family:var(--mono);font-size:.75rem;color:var(--muted);">${t('ui.bill.header')}</div>
-      <div style="text-align:center;margin-bottom:16px;font-family:var(--mono);font-size:.68rem;color:var(--muted);">${t('ui.bill.trialCancel')}</div>
+      <div style="text-align:center;margin-bottom:16px;font-family:var(--mono);font-size:.68rem;color:var(--muted);">${t('ui.bill.trialCancel').replace('{n}',trialDefaultDays())}</div>
 
-      <div class="plan-grid">
+      <div class="plan-grid">${renderPlanCards()}</div>
 
-        <div class="plan-card">
-          <div style="font-family:'Syne',sans-serif;font-size:.65rem;color:var(--nes-blue);text-transform:uppercase;letter-spacing:.1em;text-align:center;margin-bottom:4px;">${t('plan.aiPresence')}</div>
-          <div class="plan-price">OMR 59</div>
-          <div class="plan-period">${t('ui.bill.perMonthUsd').replace('{usd}','$153')}</div>
-          <ul class="plan-features-list">
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>${t('ui.bill.aiMsgsDay').replace('{n}','150')}</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>${t('ui.bill.fChatbot')}</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>${t('ui.bill.fLeadCapture')}</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i><b style="color:var(--nes-blue);">Sara AI — ${t('ui.bill.minsMo').replace('{n}','100')}</b></li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>${t('ui.bill.fEmailNotif')}</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>${t('ui.bill.teamUsers').replace('{n}','3')}</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>Deen NES AI — ${t('ui.bill.freeGlobally')}</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>${t('ui.bill.fTrial7')}</li>
-          </ul>
-          <button class="plan-action-btn" onclick="openSubscribeModal('presence','AI Presence')">${t('ui.bill.subscribePaypal')}</button>
-        </div>
-
-        <div class="plan-card" style="border-color:var(--nes-blue);position:relative;">
-          <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--nes-btn-grad);color:#fff;font-size:.65rem;font-weight:700;padding:3px 12px;border-radius:20px;font-family:'Syne',sans-serif;">${t('pricingPage.popular')}</div>
-          <div style="font-family:'Syne',sans-serif;font-size:.65rem;color:var(--nes-blue);text-transform:uppercase;letter-spacing:.1em;text-align:center;margin-bottom:4px;">${t('plan.aiOperations')}</div>
-          <div class="plan-price">OMR 159</div>
-          <div class="plan-period">${t('ui.bill.perMonthUsd').replace('{usd}','$413')}</div>
-          <ul class="plan-features-list">
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>${t('ui.bill.aiMsgsDay').replace('{n}','500')}</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>${t('ui.bill.everythingIn').replace('{plan}',t('plan.aiPresence'))}</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>${t('ui.bill.fCeoPulse')}</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i><b style="color:var(--nes-blue);">Sara AI — ${t('ui.bill.minsMo').replace('{n}','250')}</b></li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>${t('ui.bill.fSocial3')}</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>${t('ui.bill.fWaAlerts')}</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>${t('ui.bill.fCrm')}</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>${t('ui.bill.teamUsers').replace('{n}','10')}</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>${t('ui.bill.fPriority')}</li>
-          </ul>
-          <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);margin-bottom:8px;padding:6px 8px;background:var(--accent-lo);border-radius:6px;">
-            + Apex Outreach OMR 15${t('ui.bill.perMo')}
-          </div>
-          <button class="plan-action-btn" onclick="openSubscribeModal('operations','AI Operations')">${t('ui.bill.subscribePaypal')}</button>
-        </div>
-
-        <div class="plan-card" style="border-color:#3fb950;position:relative;">
-          <div style="font-family:'Syne',sans-serif;font-size:.65rem;color:#3fb950;text-transform:uppercase;letter-spacing:.1em;text-align:center;margin-bottom:4px;">${t('plan.aiWorkforce')}</div>
-          <div class="plan-price" style="color:#3fb950;">OMR 299</div>
-          <div class="plan-period">${t('ui.bill.perMonthUsd').replace('{usd}','$777')}</div>
-          <ul class="plan-features-list">
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>${t('ui.bill.aiMsgsDay').replace('{n}',(1500).toLocaleString(getDateLocale('en-GB')))}</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>${t('ui.bill.everythingIn').replace('{plan}',t('plan.aiOperations'))}</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i><b style="color:#3fb950;">Sara AI — ${t('ui.bill.minsMo').replace('{n}','500')}</b></li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>${t('ui.bill.fLayla')}</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>${t('ui.bill.fSocial3')}</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>${t('ui.bill.teamUsers').replace('{n}','25')}</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>${t('ui.bill.fWaSupport')}</li>
-          </ul>
-          <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);margin-bottom:8px;padding:6px 8px;background:rgba(63,185,80,.08);border-radius:6px;">
-            + Apex Advisory OMR 40${t('ui.bill.perMo')}<br>+ ${t('ui.bill.extraSocial')} OMR 8${t('ui.bill.perMo')}
-          </div>
-          <button class="plan-action-btn" style="background:linear-gradient(135deg,#1a7f37,#3fb950);" onclick="openSubscribeModal('workforce','AI Workforce')">${t('ui.bill.subscribePaypal')}</button>
-        </div>
-
-        <div class="plan-card" style="border-color:#d29922;position:relative;">
-          <div style="font-family:var(--mono);font-size:.65rem;color:#d29922;text-transform:uppercase;letter-spacing:.1em;text-align:center;margin-bottom:4px;">${t('plan.aiInfrastructure')}</div>
-          <div class="plan-price" style="color:#d29922;">${t('ui.bill.custom')}</div>
-          <div class="plan-period">${t('ui.bill.infraRange')}</div>
-          <ul class="plan-features-list">
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>${t('ui.bill.fFullApex')}</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>${t('ui.bill.fRealtime')}</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>${t('ui.bill.fMultiSocial')}</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>${t('ui.bill.fWhiteLabel')}</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>${t('ui.bill.fCustomAgents')}</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>${t('ui.bill.fLeadHistory')}</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>${t('ui.bill.fSla')}</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>${t('ui.bill.fAccountMgr')}</li>
-            <li><i class="ti ti-check" style="color:#3fb950;font-size:13px;flex-shrink:0"></i>${t('ui.bill.fCustomInteg')}</li>
-          </ul>
-          <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);margin-bottom:8px;padding:6px 8px;background:rgba(210,153,34,.08);border-radius:6px;">
-            ${t('ui.bill.tailored')}
-          </div>
-          <button class="plan-action-btn" style="background:linear-gradient(135deg,#92610a,#d29922);" onclick="window.open('https://nes-ai.com/register.html?plan=infrastructure','_blank')">${t('pricingCta.contactUs')}</button>
-        </div>
-
-      </div>
-
-      <div style="text-align:center;margin-top:16px;font-family:var(--mono);font-size:.68rem;color:var(--muted);">${t('ui.bill.annualNote')}</div>
+      ${annualDiscountPct()!=null?`<div style="text-align:center;margin-top:16px;font-family:var(--mono);font-size:.68rem;color:var(--muted);">${t('ui.bill.annualNote').replace('{pct}',annualDiscountPct())}</div>`:''}
         <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:16px;">${t('ui.bill.apexSuite')}</div>
         <div class="ph-tiers" style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;max-width:480px;margin:0 auto;">
           <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center;">
@@ -299,6 +273,7 @@ async function addLocalCurrencyToPricing(){
     const rateRow = rates.find(r=>r.currency_code===window.clientCurrency);
     if(!rateRow) return;
     document.querySelectorAll('.plan-price').forEach(el=>{
+      if(el.dataset.localSet) return;
       const match = el.textContent.match(/OMR\s*([\d.]+)/);
       if(!match) return;
       const omr = parseFloat(match[1]);
@@ -334,12 +309,14 @@ async function payWithPayPal(amountOMR,description,metadata){
     btn.disabled=false;btn.textContent='PayPal';
   }
 }
+// Phase 4: top-up packs come from the catalogue (public plan_addons). Labels by position.
+const PACK_LABEL_KEYS=['pricingPage.starterBundle','pricingPage.standardBundle','pricingPage.powerBundle'];
+function packsFor(kind,qtyField){
+  return cataloguePacks(kind).map((a,i)=>({[qtyField]:a.q,p:a.p,label:t(PACK_LABEL_KEYS[Math.min(i,2)])}));
+}
+function packsUnavailableHtml(){return `<p style="color:var(--muted);font-size:.85rem;">${t('ui.bill.packsUnavailable')}</p>`;}
 function openVoiceTopupModal(){
-  const packs=[
-    {min:50,p:20,label:t('pricingPage.starterBundle')},
-    {min:150,p:55,label:t('pricingPage.standardBundle')},
-    {min:400,p:140,label:t('pricingPage.powerBundle')}
-  ];
+  const packs=packsFor('sara_minutes','min');
   const packsHtml=packs.map(pk=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px;">
     <div><div style="font-weight:700;font-size:.85rem;">${pk.label}</div><div style="font-size:.75rem;color:var(--muted);">${pk.min} ${t('topup.minutes')} · ${t('topup.neverExpire')}</div><div style="font-size:.7rem;color:var(--muted);">OMR ${pk.p} + 5% VAT = OMR ${(pk.p*1.05).toFixed(3)}</div></div>
     <button class="act-btn" onclick="buyVoiceTopup(${pk.min},${pk.p},'${pk.label}')">${t('topup.buyNow')}</button>
@@ -347,7 +324,7 @@ function openVoiceTopupModal(){
   </div>`).join('');
   const html=`<div style="padding:4px 0;">
     <p style="color:var(--muted);font-size:.85rem;margin-bottom:14px;">${t('topup.saraIntro')}</p>
-    ${packsHtml}
+    ${packsHtml||packsUnavailableHtml()}
     <p style="color:var(--muted);font-size:.75rem;margin-top:10px;">${t('topup.payNoteMinutes')}</p>
   </div>`;
   showModal(t('pricingPage.saraVoiceTopup'),html);
@@ -386,19 +363,15 @@ async function buyVoiceTopup(minutes,price,label){
 // Adam minute top-ups are purchasable; clients on Apex Advisory ask NES first, then buy (backend packs + credit path wired for minutes).
 const ADAM_TOPUP_LIVE=true;
 function openAdamTopupModal(){
-  const packs=[
-    {min:50,p:20,label:t('pricingPage.starterBundle')},
-    {min:150,p:55,label:t('pricingPage.standardBundle')},
-    {min:400,p:140,label:t('pricingPage.powerBundle')}
-  ];
+  const packs=packsFor('sara_minutes','min');
   const packsHtml=packs.map(pk=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px;">
     <div><div style="font-weight:700;font-size:.85rem;">${pk.label}</div><div style="font-size:.75rem;color:var(--muted);">${pk.min} ${t('topup.minutes')} · ${t('topup.neverExpire')}</div><div style="font-size:.7rem;color:var(--muted);">OMR ${pk.p} + 5% VAT = OMR ${(pk.p*1.05).toFixed(3)}</div></div>
     ${ADAM_TOPUP_LIVE?`<button class="act-btn" onclick="buyAdamTopup(${pk.min},${pk.p},'${pk.label}')">${t('topup.buyNow')}</button>
     <button class="act-btn" style="margin-inline-start:6px;background:#003087;" onclick="payWithPayPal(${pk.p},'Adam Top-up ${pk.min}min',{type:'adam_topup',minutes:${pk.min}})">PayPal</button>`:`<span style="font-size:.75rem;color:var(--muted);">${t('ui.mail.comingSoon')}</span>`}
   </div>`).join('');
   const html=`<div style="padding:4px 0;">
-    <p style="color:var(--muted);font-size:.85rem;margin-bottom:14px;">${t('topup.adamIntro')}</p>
-    ${packsHtml}
+    <p style="color:var(--muted);font-size:.85rem;margin-bottom:14px;">${t('topup.adamIntro').replace('{n}',catalogueSetting('adam_minutes_per_month')??'')}</p>
+    ${packsHtml||packsUnavailableHtml()}
     <p style="color:var(--muted);font-size:.75rem;margin-top:10px;">${t('topup.payNoteMinutes')}</p>
   </div>`;
   showModal(t('topup.adamTitle'),html);
@@ -435,11 +408,7 @@ async function buyAdamTopup(minutes,price,label){
 }
 
 function openBriefcaseTopupModal(){
-  const packs=[
-    {gb:20,p:8,label:t('pricingPage.starterBundle')},
-    {gb:50,p:18,label:t('pricingPage.standardBundle')},
-    {gb:100,p:30,label:t('pricingPage.powerBundle')}
-  ];
+  const packs=packsFor('storage_gb','gb');
   const packsHtml=packs.map(pk=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px;">
     <div><div style="font-weight:700;font-size:.85rem;">${pk.label}</div><div style="font-size:.75rem;color:var(--muted);">${pk.gb}GB ${t('topup.extraStorage')}</div><div style="font-size:.7rem;color:var(--muted);">OMR ${pk.p} + 5% VAT = OMR ${(pk.p*1.05).toFixed(3)}/mo</div></div>
     <button class="act-btn" onclick="buyBriefcaseTopup(${pk.gb},${pk.p},'${pk.label}')">${t('topup.buyNow')}</button>
@@ -447,7 +416,7 @@ function openBriefcaseTopupModal(){
   </div>`).join('');
   const html=`<div style="padding:4px 0;">
     <p style="color:var(--muted);font-size:.85rem;margin-bottom:14px;">${t('topup.storageIntro')}</p>
-    ${packsHtml}
+    ${packsHtml||packsUnavailableHtml()}
     <p style="color:var(--muted);font-size:.75rem;margin-top:10px;">${t('topup.payNoteStorage')}</p>
   </div>`;
   showModal(t('topup.storageTitle'),html);
@@ -484,7 +453,7 @@ async function buyBriefcaseTopup(gb,price,label){
 }
 
 function openCreditsModal(){
-  const packs=[{n:50,p:5,label:t('pricingPage.starterBundle')},{n:200,p:18,label:t('pricingPage.standardBundle')},{n:500,p:40,label:t('pricingPage.powerBundle')}];
+  const packs=packsFor('image_credits','n');
   const packsHtml=packs.map(pk=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px;">
     <div><div style="font-weight:700;font-size:.85rem;">${pk.label}</div><div style="font-size:.75rem;color:var(--muted);">${pk.n} ${t('topup.credits')} · ${t('topup.neverExpire')}</div><div style="font-size:.7rem;color:var(--muted);">OMR ${pk.p} + 5% VAT = OMR ${(pk.p*1.05).toFixed(3)}</div></div>
     <button class="act-btn" onclick="buyImageCredits(${pk.n},${pk.p},'${pk.label}')">${t('topup.buyNow')}</button>
@@ -497,7 +466,7 @@ function openCreditsModal(){
   const html=`<div style="padding:4px 0;">
     <p style="color:var(--muted);font-size:.85rem;margin-bottom:14px;">${t('topup.imageIntro')}</p>
     ${statusHtml}
-    ${packsHtml}
+    ${packsHtml||packsUnavailableHtml()}
     <p style="color:var(--muted);font-size:.75rem;margin-top:10px;">${t('topup.payNoteCredits')}</p>
   </div>`;
   showModal(t('topup.imageTitle'),html);

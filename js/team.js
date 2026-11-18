@@ -199,8 +199,10 @@ async function loadTeam(){
     window._deptOptions = deptOptions;
 
     // Stats row
-    const planLimits = {presence:3,operations:10,workforce:25,infrastructure:999};
-    const limit = planLimits[window.userPlan] || 3;
+    // Phase 4: team cap from the catalogue (caller's plan); -1 = no cap. Fallback 3 if catalogue missing.
+    const _cp = window.NES_CATALOGUE && window.NES_CATALOGUE.current_plan;
+    const _tl = _cp ? Number(_cp.team_user_limit) : NaN;
+    const limit = isNaN(_tl) ? 3 : (_tl === -1 ? 999 : _tl);
     const used = users.length;
     window._teamCap = limit; window._teamUsed = used;
 

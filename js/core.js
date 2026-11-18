@@ -168,12 +168,15 @@ async function loadUserRole(user){
   document.getElementById('roleChip').textContent=userRole;
 }
 
-// Plan list prices (OMR/month, excl. VAT): single source for the sign-off and MRR estimates (W5, 11 Nov 2026)
-const PLAN_LIST_PRICES_OMR = { presence: 59, operations: 159, workforce: 299, infrastructure: 599 };
+// Plan list price (OMR/month, excl. VAT) for sign-off and MRR estimates. Phase 4: read from the
+// catalogue (public plans + caller's own plan). Unknown plan or no catalogue = 0 (no guessed revenue).
 function planListPrice(plan){
   const p = String(plan || '').toLowerCase();
-  for (const k of Object.keys(PLAN_LIST_PRICES_OMR)) if (p.includes(k)) return PLAN_LIST_PRICES_OMR[k];
-  return PLAN_LIST_PRICES_OMR.presence;
+  const c = window.NES_CATALOGUE;
+  const rows = c ? [...(c.plans||[]), ...(c.current_plan?[c.current_plan]:[])] : [];
+  const row = rows.find(r => p.includes(r.plan));
+  const v = row ? parseFloat(row.price_omr != null ? row.price_omr : row.price_from_omr) : NaN;
+  return isNaN(v) ? 0 : v;
 }
 // Monthly value for MRR: a set fee wins; 0 = internal/free entity (no revenue); empty = plan list price
 function clientMonthlyValue(c){
@@ -189,7 +192,7 @@ async function checkAccountBlocked(clientId){
     if(!data) return false;
     if(BLOCKED_ACCOUNT_STATUSES.includes(data.status)) return true;
     if(data.status==='trial' && data.trial_start){
-      const trialEnd = new Date(data.trial_start).getTime() + (parseInt(data.trial_duration_days)||7) * 24*60*60*1000;
+      const trialEnd = new Date(data.trial_start).getTime() + (parseInt(data.trial_duration_days)||trialDefaultDays()) * 24*60*60*1000;
       if(Date.now() > trialEnd) return true;
     }
     return false;
@@ -441,9 +444,39 @@ async function loadLeadCount(){
 
 function showAuthScreen(){document.getElementById('app').style.display='none';document.getElementById('authScreen').style.display='flex';}
 
-async function loadUserPlan(){userPlan='free';updateStats();}
+// Phase 4: load the plan catalogue (public plans, caller's plan, packs, settings) from the backend.
+async function loadCatalogue(){
+  if(!session)return;
+  try{
+    const r=await fetch(API_URL+'/api/catalogue',{headers:{'Authorization':'Bearer '+session.access_token}});
+    if(r.ok)window.NES_CATALOGUE=await r.json();
+    else console.error('catalogue load failed:',r.status);
+  }catch(e){console.error('catalogue load error:',e.message);}
+}
+async function loadUserPlan(){await loadCatalogue();updateStats();}
+// Catalogue helpers. Missing catalogue = no client-side cap (-1); the backend still enforces.
+function catalogueSetting(key){const c=window.NES_CATALOGUE;return c&&c.settings?c.settings[key]:null;}
+function trialDefaultDays(){return parseInt(catalogueSetting('trial_default_days'),10)||DEFAULT_TRIAL_DAYS;}
+function annualDiscountPct(){const v=parseFloat(catalogueSetting('annual_discount_pct'));return isNaN(v)?null:v;}
+function cataloguePlan(plan){
+  const c=window.NES_CATALOGUE;if(!c)return null;
+  const k=String(plan||'').toLowerCase();
+  if(c.current_plan&&c.current_plan.plan===k)return c.current_plan;
+  return (c.plans||[]).find(p=>p.plan===k)||null;
+}
+function cataloguePacks(kind){
+  const c=window.NES_CATALOGUE;if(!c||!Array.isArray(c.addons))return [];
+  return c.addons.filter(a=>a.kind===kind&&Number(a.price_omr)>0&&Number(a.quantity)>0)
+    .map(a=>({key:a.key,q:Number(a.quantity),p:Number(a.price_omr)}));
+}
 
-function getCurrentLimits(){return PLAN_LIMITS[userPlan]||PLAN_LIMITS.free;}
+function getCurrentLimits(){
+  const cp=window.NES_CATALOGUE&&window.NES_CATALOGUE.current_plan;
+  if(!cp)return {messages:-1,images:-1,docs:DOCS_DAILY_DISPLAY};
+  const trial=window.clientAccountStatus==='trial';
+  const msgs=(trial&&cp.trial_daily_ai_messages!=null)?cp.trial_daily_ai_messages:cp.daily_ai_messages;
+  return {messages:(msgs==null?-1:Number(msgs)),images:(cp.daily_images==null?-1:Number(cp.daily_images)),docs:DOCS_DAILY_DISPLAY};
+}
 
 function switchTab(tab){
   ['login','signup'].forEach(t=>{

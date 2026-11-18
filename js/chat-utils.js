@@ -33,14 +33,15 @@ async function loadUsageFromServer(){
 function updateStats(){
   const limits=getCurrentLimits();
   const sm=document.getElementById('statMsgs');const sd=document.getElementById('statDocs');const sc=document.getElementById('statCredits');
-  if(sm)sm.textContent=Math.max(0,limits.messages-chatUsed);
+  const unl=limits.messages===-1;
+  if(sm)sm.textContent=unl?'∞':Math.max(0,limits.messages-chatUsed);
   if(sd)sd.textContent=Math.max(0,limits.docs-docsUsed);
   if(sc){
     sc.textContent=imageCredits.freeAllowanceActive===false?(imageCredits.balance>0?imageCredits.balance+' '+t('chatUtilsUi.credits'):t('chatUtilsUi.trialEnded')):imageCredits.dailyFreeRemaining+' '+t('chatUtilsUi.free')+(imageCredits.balance>0?' + '+imageCredits.balance+' '+t('chatUtilsUi.credits'):'');
   }
-  document.getElementById('usageTxt').textContent=chatUsed+' / '+limits.messages;
+  document.getElementById('usageTxt').textContent=chatUsed+' / '+(unl?'∞':limits.messages);
   const fill=document.getElementById('usageFill');
-  if(fill)fill.style.width=Math.min(100,(chatUsed/limits.messages)*100)+'%';
+  if(fill)fill.style.width=(unl||limits.messages<=0)?'0%':Math.min(100,(chatUsed/limits.messages)*100)+'%';
 }
 
 function showModal(title,bodyHtml){
