@@ -231,8 +231,9 @@ function getDateLocale(fallback){
 async function loadNesStrings(locale) {
   _nesLocale = locale || 'en';
   try {
-    const promises = [fetch('strings/en.json').then(r => r.json())];
-    if (_nesLocale !== 'en') promises.push(fetch('strings/' + _nesLocale + '.json').then(r => r.json()).catch(() => ({})));
+    // no-cache = revalidate with the server each load (ETag), so new wording shows without a hard refresh
+    const promises = [fetch('strings/en.json', { cache: 'no-cache' }).then(r => r.json())];
+    if (_nesLocale !== 'en') promises.push(fetch('strings/' + _nesLocale + '.json', { cache: 'no-cache' }).then(r => r.json()).catch(() => ({})));
     const results = await Promise.all(promises);
     if (_nesLocale === 'en') {
       _nesStrings = { en: results[0] || {} };
