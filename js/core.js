@@ -371,12 +371,32 @@ function hasTierModule(planKeys){
   return planKeys.includes(plan);
 }
 
+// Co-branding: NES AI stays the platform brand; the client's logo (or initials) and name show
+// in a workspace block under it. logo_url is set by NES staff in Client Manager; only https URLs load.
+function renderClientWorkspace(name, logoUrl, color){
+  const box=document.getElementById('sbWorkspace'), logo=document.getElementById('sbWsLogo'), nm=document.getElementById('sbWsName');
+  if(!box||!logo||!nm||!name) return;
+  const lbl=document.getElementById('sbWsLabel'); if(lbl) lbl.textContent=t('ui.core.workspace','Workspace');
+  nm.textContent=name; nm.title=name;
+  const initials=String(name).trim().split(/\s+/).slice(0,2).map(w=>w.charAt(0)).join('').toUpperCase()||'?';
+  const showInitials=()=>{logo.textContent=initials;};
+  if(/^#[0-9a-fA-F]{3,8}$/.test(String(color||''))) logo.style.background=color;
+  logo.textContent='';
+  const url=String(logoUrl||'').trim();
+  if(/^https:\/\/[^\s"'<>]+$/i.test(url)){
+    const img=document.createElement('img');
+    img.alt=name; img.referrerPolicy='no-referrer'; img.onerror=()=>{img.remove();showInitials();};
+    img.src=url; logo.appendChild(img);
+  } else showInitials();
+  box.style.display='flex';
+}
 async function showClientBrandingChip(){
   try{
     const{data}=await sb.from('clients').select('name,primary_color,logo_url,plan,modules,full_access_override,apex_connect_paid_until,apex_outreach_paid_until,apex_advisory_paid_until,region,country,status,locale,currency').eq('id',userClientId).single();
     if(!data)return;
     const chip=document.getElementById('roleChip');
     if(chip&&data.name)chip.textContent=data.name;
+    renderClientWorkspace(data.name, data.logo_url, data.primary_color);
     if(data.plan)window.clientPlan=data.plan;
     window.clientModules = data.modules || {};
     window.userRegion = (data.region || data.country || '').trim();

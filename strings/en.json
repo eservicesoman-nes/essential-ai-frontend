@@ -732,7 +732,7 @@
       "fFullApex": "Full Apex Suite included",
       "fRealtime": "Real-time alerts (2hrs)",
       "fMultiSocial": "Multiple social posts/day",
-      "fWhiteLabel": "White label branding",
+      "fWhiteLabel": "Your logo and brand colours (co-branded)",
       "fCustomAgents": "Custom AI agents",
       "fLeadHistory": "90 days lead history",
       "fSla": "SLA guarantee",
@@ -824,6 +824,7 @@
       "notActive": "Account Not Active",
       "notActiveText": "This account is currently inactive. Please contact NES AI to restore access.",
       "signOut": "Sign Out",
+      "workspace": "Workspace",
       "enterNewPwd": "Enter your new password below",
       "newPwd": "New password",
       "confirmPwd": "Confirm new password"

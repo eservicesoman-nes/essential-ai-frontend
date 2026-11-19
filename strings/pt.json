@@ -719,7 +719,7 @@
       "fFullApex": "Apex Suite completa incluída",
       "fRealtime": "Alertas em tempo real (2 h)",
       "fMultiSocial": "Várias publicações/dia",
-      "fWhiteLabel": "Marca própria (white label)",
+      "fWhiteLabel": "O seu logótipo e cores da marca (co-branding)",
       "fCustomAgents": "Agentes IA personalizados",
       "fLeadHistory": "Histórico de leads de 90 dias",
       "fSla": "Garantia de SLA",
@@ -811,6 +811,7 @@
       "notActive": "Conta inativa",
       "notActiveText": "Esta conta está inativa de momento. Contacte a NES AI para restabelecer o acesso.",
       "signOut": "Terminar sessão",
+      "workspace": "Espaço de trabalho",
       "enterNewPwd": "Introduza abaixo a nova palavra-passe",
       "newPwd": "Nova palavra-passe",
       "confirmPwd": "Confirmar nova palavra-passe"
