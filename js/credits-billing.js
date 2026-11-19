@@ -210,7 +210,7 @@ function renderPlanCards(){
     if(!custom&&p.features&&p.features.team_hub==='coming_soon')f.push(li(t('ui.bill.teamHubSoon'),true));
     if(!custom)f.push(li(t('ui.bill.fTrial7').replace('{n}',trialDefaultDays())));
     const priceHtml=custom
-      ?`<div class="plan-price" style="color:${st.color};">${t('ui.bill.custom')}</div><div class="plan-period">${p.price_from_omr!=null?t('ui.bill.infraRange').replace('{n}',parseFloat(p.price_from_omr)):''}</div>`
+      ?`<div class="plan-price" style="color:${st.color};">${t('ui.bill.custom')}</div><div class="plan-period">&nbsp;</div>`
       :`<div class="plan-price"${st.border&&p.plan!=='operations'?` style="color:${st.color};"`:''}${eur!=null?' data-local-set="1"':''}>OMR ${price}</div>`
         +(eur!=null?`<div style="font-family:var(--mono);font-size:.7rem;color:var(--muted);margin-top:2px;">EUR ${eur}</div>`:'')
         +`<div class="plan-period">${t('ui.bill.perMonthUsd').replace('{usd}','$'+Math.round(price/OMR_PER_USD))}</div>`;
