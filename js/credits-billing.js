@@ -199,13 +199,15 @@ function renderPlanCards(){
     const custom=price==null;
     const eur=(window.clientCurrency==='EUR'&&p.price_eur!=null)?parseFloat(p.price_eur):null;
     const f=[];
+    if(!custom){
     if(PLAN_EVERYTHING_IN[p.plan])f.push(li(t('ui.bill.everythingIn').replace('{plan}',t(PLAN_EVERYTHING_IN[p.plan]))));
     if(Number(p.daily_ai_messages)>0)f.push(li(t('ui.bill.aiMsgsDay').replace('{n}',num(p.daily_ai_messages))));
     if(Number(p.sara_minutes_per_month)>0)f.push(li(`<b style="color:${st.color};">Sara AI — ${t('ui.bill.minsMo').replace('{n}',num(p.sara_minutes_per_month))}</b>`));
     if(Number(p.team_user_limit)>0)f.push(li(t('ui.bill.teamUsers').replace('{n}',num(p.team_user_limit))));
+    }
     (PLAN_FEATURE_KEYS[p.plan]||[]).forEach(k=>f.push(li(t(k))));
     if(p.plan==='presence')f.push(li('Deen NES AI — '+t('ui.bill.freeGlobally')));
-    if(p.features&&p.features.team_hub==='coming_soon')f.push(li(t('ui.bill.teamHubSoon'),true));
+    if(!custom&&p.features&&p.features.team_hub==='coming_soon')f.push(li(t('ui.bill.teamHubSoon'),true));
     if(!custom)f.push(li(t('ui.bill.fTrial7').replace('{n}',trialDefaultDays())));
     const priceHtml=custom
       ?`<div class="plan-price" style="color:${st.color};">${t('ui.bill.custom')}</div><div class="plan-period">${p.price_from_omr!=null?t('ui.bill.infraRange').replace('{n}',parseFloat(p.price_from_omr)):''}</div>`
@@ -220,6 +222,7 @@ function renderPlanCards(){
       <div style="font-family:'Syne',sans-serif;font-size:.65rem;color:${st.color};text-transform:uppercase;letter-spacing:.1em;text-align:center;margin-bottom:4px;">${label}</div>
       ${priceHtml}
       <ul class="plan-features-list">${f.join('')}</ul>
+      ${custom?`<div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);margin-bottom:8px;padding:6px 8px;background:rgba(210,153,34,.08);border-radius:6px;">${t('ui.bill.tailored')}</div>`:''}
       ${btn}
     </div>`;
   }).join('');
