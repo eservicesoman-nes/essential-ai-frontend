@@ -227,6 +227,12 @@ function renderPlanCards(){
     </div>`;
   }).join('');
 }
+// Trial caps line, from the catalogue only; hidden if the catalogue does not send them (no unverified claim).
+function trialCapsLine(){
+  const c=window.NES_CATALOGUE;const p=(c&&Array.isArray(c.plans)?c.plans:[]).find(x=>x.trial_daily_ai_messages!=null&&x.trial_daily_sara_minutes!=null)||(c&&c.current_plan);
+  if(!p||p.trial_daily_ai_messages==null||p.trial_daily_sara_minutes==null)return '';
+  return `<div style="text-align:center;margin:-10px 0 16px;font-family:var(--mono);font-size:.68rem;color:var(--muted);">${t('ui.bill.trialCaps').replace('{m}',Number(p.trial_daily_ai_messages)).replace('{s}',Number(p.trial_daily_sara_minutes))}</div>`;
+}
 function showPricing(){
   const mc=document.getElementById('mainContent');
   mc.style.overflow='auto';
@@ -236,6 +242,7 @@ function showPricing(){
       <div style="text-align:center;margin-bottom:8px;"><h1 style="font-size:1.7rem;font-weight:700;font-family:'Syne',sans-serif;">${t('pricingPage.chooseYourPlan')}</h1></div>
       <div style="text-align:center;margin-bottom:6px;font-family:var(--mono);font-size:.75rem;color:var(--muted);">${t('ui.bill.header')}</div>
       <div style="text-align:center;margin-bottom:16px;font-family:var(--mono);font-size:.68rem;color:var(--muted);">${t('ui.bill.trialCancel').replace('{n}',trialDefaultDays())}</div>
+      ${trialCapsLine()}
 
       <div class="plan-grid">${renderPlanCards()}</div>
 

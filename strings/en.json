@@ -704,6 +704,7 @@
       "annual15": "Annual — {pct}% off",
       "header": "NES AI — Unified Business Platform · Oman Pricing",
       "trialCancel": "All plans include a {n}-day trial · Cancel anytime",
+      "trialCaps": "Trial: up to {m} AI messages and {s} Sara minutes a day",
       "perMo": "/mo",
       "perMonthUsd": "per month · ~{usd} USD",
       "aiMsgsDay": "{n} AI messages/day",

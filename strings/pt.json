@@ -691,6 +691,7 @@
       "annual15": "Anual — {pct}% de desconto",
       "header": "NES AI — Plataforma Empresarial Unificada · Preços para Omã",
       "trialCancel": "Todos os planos incluem {n} dias de teste · Cancele quando quiser",
+      "trialCaps": "Período experimental: até {m} mensagens IA e {s} minutos Sara por dia",
       "perMo": "/mês",
       "perMonthUsd": "por mês · ~{usd} USD",
       "aiMsgsDay": "{n} mensagens IA/dia",
