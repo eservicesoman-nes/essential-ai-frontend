@@ -182,7 +182,7 @@ const PLAN_FEATURE_KEYS={
   presence:['ui.bill.fChatbot','ui.bill.fLeadCapture','ui.bill.fEmailNotif'],
   operations:['ui.bill.fCeoPulse','ui.bill.fWaAlerts','ui.bill.fCrm','ui.bill.fPriority'],
   workforce:['ui.bill.fLayla','ui.bill.fWaSupport'],
-  infrastructure:['ui.bill.fFullApex','ui.bill.fRealtime','ui.bill.fMultiSocial','ui.bill.fWhiteLabel','ui.bill.fCustomAgents','ui.bill.fLeadHistory','ui.bill.fSla','ui.bill.fAccountMgr','ui.bill.fCustomInteg']
+  infrastructure:['ui.bill.fCustomAllow','ui.bill.fApexContract','ui.bill.fWhiteLabel','ui.bill.fCustomAgents','ui.bill.fAccountMgr']
 };
 const PLAN_EVERYTHING_IN={operations:'plan.aiPresence',workforce:'plan.aiOperations'};
 const OMR_PER_USD=0.385;
