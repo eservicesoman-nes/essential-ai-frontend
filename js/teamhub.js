@@ -46,25 +46,20 @@ const TH_CSS = `
 #teamHubWrapper .th-card{background:var(--card);border:1px solid var(--border);border-radius:12px}
 #teamHubWrapper .th-wx{display:flex;justify-content:space-between;align-items:center;padding:10px 16px}
 #teamHubWrapper .th-wx-l{display:flex;align-items:center;gap:12px}
-#teamHubWrapper .th-cap{font-family:var(--mono);font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+#teamHubWrapper .th-cap{font-family:var(--mono);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 #teamHubWrapper .th-box{flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden}
 #teamHubWrapper .th-top{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 14px;border-bottom:1px solid var(--border)}
-#teamHubWrapper .th-grid{flex:1;min-height:0;display:grid;grid-template-columns:190px minmax(0,1fr)}
-#teamHubWrapper .th-side{padding:8px;border-inline-end:1px solid var(--border);background:var(--card2);overflow-y:auto}
-#teamHubWrapper .th-lb{font-size:.62rem;color:var(--muted);margin:12px 8px 4px;text-transform:uppercase;letter-spacing:.06em}
-#teamHubWrapper .th-ci{font-size:.78rem;padding:6px 8px;border-radius:8px;color:var(--muted);display:flex;justify-content:space-between;align-items:center;gap:6px;cursor:pointer;user-select:none}
-#teamHubWrapper .th-ci:hover{background:var(--accent-lo);color:var(--text)}
-#teamHubWrapper .th-ci.on{background:var(--accent-md);color:var(--accent)}
-#teamHubWrapper .th-n{font-size:.62rem;background:var(--accent);color:#fff;border-radius:10px;padding:0 6px}
+#teamHubWrapper 
+#teamHubWrapper .th-n{font-size:.7rem;background:var(--accent);color:#fff;border-radius:10px;padding:0 6px}
 #teamHubWrapper .th-main{display:flex;flex-direction:column;min-width:0;min-height:0}
 #teamHubWrapper .th-mh{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 14px;border-bottom:1px solid var(--border)}
 #teamHubWrapper .th-body{flex:1;overflow-y:auto;padding:12px 14px}
 #teamHubWrapper .th-msg{display:flex;gap:8px;margin:0 0 12px}
 #teamHubWrapper .th-av{width:28px;height:28px;border-radius:50%;background:var(--accent-lo);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:.62rem;font-weight:700;flex:none}
 #teamHubWrapper .th-av.bot{background:rgba(210,153,34,.15);color:var(--amber)}
-#teamHubWrapper .th-meta{font-size:.66rem;color:var(--muted);margin:0 0 2px}
+#teamHubWrapper .th-meta{font-size:.72rem;color:var(--muted);margin:0 0 2px}
 #teamHubWrapper .th-txt{font-size:.82rem;line-height:1.5;color:var(--text);word-wrap:break-word;overflow-wrap:anywhere}
-#teamHubWrapper .th-act{font-size:.62rem;color:var(--muted);cursor:pointer;margin-inline-start:8px}
+#teamHubWrapper .th-act{font-size:.7rem;color:var(--muted);cursor:pointer;margin-inline-start:8px}
 #teamHubWrapper .th-act:hover{color:var(--accent)}
 #teamHubWrapper .th-comp{display:flex;gap:8px;padding:10px 14px;border-top:1px solid var(--border)}
 #teamHubWrapper textarea,#teamHubWrapper input,#teamHubWrapper select{background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:7px 10px;font-size:.8rem;font-family:inherit;box-sizing:border-box}
@@ -72,7 +67,7 @@ const TH_CSS = `
 #teamHubWrapper .th-btn{background:var(--nes-btn-grad);color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:.75rem;cursor:pointer;white-space:nowrap}
 #teamHubWrapper .th-btn2{background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:8px;padding:5px 10px;font-size:.7rem;cursor:pointer;white-space:nowrap}
 #teamHubWrapper .th-btn2:hover{color:var(--text);border-color:var(--accent)}
-#teamHubWrapper .th-chip{font-size:.68rem;padding:3px 10px;border-radius:14px;background:var(--accent-lo);color:var(--muted);display:inline-flex;gap:5px;align-items:center}
+#teamHubWrapper .th-chip{font-size:.74rem;padding:3px 10px;border-radius:14px;background:var(--accent-lo);color:var(--muted);display:inline-flex;gap:5px;align-items:center}
 #teamHubWrapper .th-pin{background:var(--accent-lo);border:1px solid var(--accent-md);border-radius:10px;padding:10px 12px;margin:0 0 10px}
 #teamHubWrapper .th-note{border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin:0 0 10px}
 #teamHubWrapper .th-alert{border:1px solid rgba(210,153,34,.4);background:rgba(210,153,34,.08);border-radius:10px;padding:8px 10px;margin:0 0 10px}
@@ -80,36 +75,74 @@ const TH_CSS = `
 #teamHubWrapper .th-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 #teamHubWrapper .th-cal{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;text-align:center;font-size:.72rem;margin:0 0 12px}
 #teamHubWrapper .th-cal span{padding:8px 0;border-radius:6px;color:var(--muted)}
-#teamHubWrapper .th-cal .h{font-size:.6rem}
-#teamHubWrapper .th-cal .wk{background:var(--card2)}
-#teamHubWrapper .th-cal .ev{background:var(--accent-md);color:var(--accent);font-weight:700}
-#teamHubWrapper .th-cal .td{outline:1px solid var(--accent)}
+#teamHubWrapper .th-cal .h{font-size:.68rem}
 #teamHubWrapper .th-empty{color:var(--muted);font-size:.78rem;text-align:center;padding:30px 10px}
-#teamHubWrapper .th-mini{font-size:.64rem;margin:0 0 6px}
-#teamHubWrapper .th-mini span{padding:4px 0}
-#teamHubWrapper .th-mini .wk{background:var(--card)}
-#teamHubWrapper .th-ov{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
-#teamHubWrapper .th-oc{--c:var(--accent);border:1px solid var(--border);border-top:2px solid var(--c);border-radius:12px;background:var(--card2);padding:12px 14px;display:flex;flex-direction:column;gap:6px;min-width:0}
-#teamHubWrapper .th-oc.warn{--c:var(--orange,#f0883e)}
-#teamHubWrapper .th-oc.amb{--c:var(--amber)}
-#teamHubWrapper .th-oc.ok{--c:var(--green)}
-#teamHubWrapper .th-oc h4{margin:0 0 2px;display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:.78rem;font-weight:600;color:var(--text)}
-#teamHubWrapper .th-oc h4 i{color:var(--c);margin-inline-end:5px}
-#teamHubWrapper .th-more{font-size:.64rem;font-weight:400;color:var(--c);cursor:pointer;white-space:nowrap}
-#teamHubWrapper .th-oi{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:6px 8px;border-radius:8px;cursor:pointer;font-size:.76rem}
-#teamHubWrapper .th-oi:hover{background:var(--accent-lo)}
-#teamHubWrapper .th-oi .t{min-width:0;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
-#teamHubWrapper .th-oi .m{color:var(--muted);font-size:.64rem;white-space:nowrap}
-#teamHubWrapper .th-ob{font-size:.62rem;background:var(--c);color:#fff;border-radius:10px;padding:0 6px}
+#teamHubWrapper .th-cal .ev-closed{background:rgba(240,136,62,.2);color:var(--orange,#f0883e)}
+#teamHubWrapper .th-cal .ev-holiday{background:rgba(63,185,80,.18);color:var(--green)}
 #teamHubWrapper .th-tbl{width:100%;border-collapse:collapse;font-size:.76rem}
 #teamHubWrapper .th-tbl td,#teamHubWrapper .th-tbl th{padding:6px 4px;border-bottom:1px solid var(--border);text-align:start}
+#teamHubWrapper{--th-panel:var(--card2);--th-line:var(--border);--th-soft:var(--card2)}
+html[data-theme="dark"] #teamHubWrapper{--th-panel:#111827;--th-line:#2a3447;--th-soft:#161e2e}
+#teamHubWrapper .th-card,#teamHubWrapper .th-top,#teamHubWrapper .th-mh,#teamHubWrapper .th-comp,#teamHubWrapper .th-form,#teamHubWrapper .th-note{border-color:var(--th-line)}
+#teamHubWrapper .th-grid{flex:1;min-height:0;display:grid;grid-template-columns:200px minmax(0,1fr)}
+#teamHubWrapper .th-grid.has-rail{grid-template-columns:200px minmax(0,1fr) 310px}
+#teamHubWrapper .th-side{padding:8px;border-inline-end:1px solid var(--th-line);background:var(--th-panel);overflow-y:auto}
+#teamHubWrapper .th-side,#teamHubWrapper .th-rail,#teamHubWrapper .th-rail *,#teamHubWrapper .th-ci,#teamHubWrapper .th-lb{box-sizing:border-box}
+#teamHubWrapper .th-rail{display:none;border-inline-start:1px solid var(--th-line);background:var(--th-panel);padding:12px;overflow-y:auto;flex-direction:column;gap:10px;min-width:0}
+#teamHubWrapper .th-grid.has-rail .th-rail{display:flex}
+#teamHubWrapper .th-lb{width:100%;display:flex;align-items:center;gap:6px;background:none;border:none;font:inherit;font-size:.7rem;text-transform:uppercase;letter-spacing:.07em;color:var(--text);margin:12px 0 6px;padding:4px 6px;border-radius:6px;cursor:pointer;text-align:start}
+#teamHubWrapper .th-lb:first-child{margin-top:2px}
+#teamHubWrapper .th-lb:hover{background:var(--accent-lo)}
+#teamHubWrapper .th-lb i{font-size:.8rem;color:var(--muted)}
+[dir=rtl] #teamHubWrapper .th-lb .ti-chevron-right{transform:scaleX(-1)}
+#teamHubWrapper .th-ci{width:100%;font:inherit;font-size:.82rem;text-align:start;padding:8px 10px;margin:0 0 5px;border-radius:9px;color:var(--muted);background:rgba(127,127,127,.06);border:1px solid var(--th-line);display:flex;justify-content:space-between;align-items:center;gap:6px;cursor:pointer;user-select:none}
+#teamHubWrapper .th-ci:hover{background:var(--accent-lo);border-color:var(--accent);color:var(--text)}
+#teamHubWrapper .th-ci.on{background:var(--accent-md);border-color:var(--accent);color:var(--text);box-shadow:inset 3px 0 0 var(--accent)}
+[dir=rtl] #teamHubWrapper .th-ci.on{box-shadow:inset -3px 0 0 var(--accent)}
+#teamHubWrapper .th-ci:focus-visible,#teamHubWrapper .th-lb:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+#teamHubWrapper .th-cal .wk{background:var(--th-soft)}
+#teamHubWrapper .th-cal .ev{background:var(--accent-md);color:var(--accent);font-weight:700}
+#teamHubWrapper .th-cal .td{outline:1px solid var(--accent)}
+#teamHubWrapper .th-cal .ev-closed{background:rgba(240,136,62,.2);color:var(--orange,#f0883e)}
+#teamHubWrapper .th-cal .ev-holiday{background:rgba(63,185,80,.18);color:var(--green)}
+#teamHubWrapper .th-mini{font-size:.72rem;margin:0 0 6px}
+#teamHubWrapper .th-mini span{padding:5px 0}
+#teamHubWrapper .th-mini .wk{background:var(--card)}
+#teamHubWrapper .th-rt{font-family:var(--mono);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:4px 2px -4px}
+#teamHubWrapper .th-cp{border:1px solid var(--th-line);border-top:2px solid var(--accent);background:var(--th-soft);border-radius:12px;padding:12px}
+#teamHubWrapper .th-cp .hd{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:0 0 8px;font-weight:600;font-size:.85rem}
+#teamHubWrapper .th-lg{display:flex;gap:10px;flex-wrap:wrap;font-size:.7rem;color:var(--muted);margin:2px 0 8px}
+#teamHubWrapper .th-lg b{display:inline-block;width:8px;height:8px;border-radius:2px;margin-inline-end:4px}
+#teamHubWrapper .th-ev{--c:var(--accent);display:block;width:100%;text-align:start;font:inherit;color:var(--text);border:none;border-inline-start:3px solid var(--c);background:color-mix(in srgb,var(--c) 10%,transparent);border-radius:8px;padding:6px 10px;margin:0 0 6px;font-size:.78rem;cursor:pointer}
+#teamHubWrapper .th-ev.closed{--c:var(--orange,#f0883e)}
+#teamHubWrapper .th-ev.holiday{--c:var(--green)}
+#teamHubWrapper .th-ev .m{display:block;color:var(--muted);font-size:.72rem}
+#teamHubWrapper .th-fc{--c:var(--accent);display:block;width:100%;text-align:start;font:inherit;color:var(--text);border:1px solid color-mix(in srgb,var(--c) 38%,transparent);background:color-mix(in srgb,var(--c) 9%,transparent);border-radius:12px;padding:10px 12px;min-width:0}
+#teamHubWrapper .th-fc.warn{--c:var(--orange,#f0883e)}
+#teamHubWrapper .th-fc.amb{--c:var(--amber)}
+#teamHubWrapper .th-fc.ok{--c:var(--green)}
+#teamHubWrapper .th-fc.plain{--c:var(--muted);cursor:default}
+#teamHubWrapper .th-fc .k{display:flex;justify-content:space-between;gap:8px;font-size:.72rem;color:var(--c);margin:0 0 3px}
+#teamHubWrapper .th-fc .k i{margin-inline-end:4px}
+#teamHubWrapper .th-fc .b{font-size:.82rem;line-height:1.45;color:var(--text);overflow-wrap:anywhere}
+#teamHubWrapper .th-fc .b+.b{margin-top:6px;padding-top:6px;border-top:1px solid color-mix(in srgb,var(--c) 22%,transparent)}
+#teamHubWrapper .th-fc .m{color:var(--muted);font-size:.72rem;margin-inline-start:6px;white-space:nowrap}
+#teamHubWrapper .th-fc .th-rb{display:block;width:100%;background:none;border:none;font:inherit;color:inherit;text-align:start;padding:0;cursor:pointer}
+#teamHubWrapper .th-fc .th-rb:hover{text-decoration:underline}
+#teamHubWrapper .th-more{background:none;border:none;font:inherit;font-size:.72rem;color:var(--c);cursor:pointer;padding:0;white-space:nowrap}
+#teamHubWrapper .th-ev:focus-visible,#teamHubWrapper .th-rb:focus-visible,#teamHubWrapper .th-more:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+#teamHubWrapper .th-ob{font-size:.7rem;background:var(--c);color:#fff;border-radius:10px;padding:0 6px}
 @media (max-width:900px){
   #teamHubWrapper{inset-inline-start:0 !important}
   #teamHubWrapper .th{padding:10px 8px 16px}
-  #teamHubWrapper .th-grid{grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr)}
-  #teamHubWrapper .th-side{border-inline-end:none;border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:4px;max-height:140px}
+  #teamHubWrapper .th-box{overflow-y:auto}
+  #teamHubWrapper .th-grid,#teamHubWrapper .th-grid.has-rail{grid-template-columns:1fr;display:block}
+  #teamHubWrapper .th-side{border-inline-end:none;border-bottom:1px solid var(--th-line);display:flex;flex-wrap:wrap;gap:4px;max-height:none}
   #teamHubWrapper .th-lb{display:none}
-  #teamHubWrapper .th-ci{border:1px solid var(--border);border-radius:16px;padding:3px 10px}
+  #teamHubWrapper .th-ci{width:auto;border-radius:16px;padding:4px 12px;margin:0;box-shadow:none !important}
+  #teamHubWrapper .th-main{height:72vh;min-height:420px}
+  #teamHubWrapper .th-rail{border-inline-start:none;border-top:1px solid var(--th-line)}
+  #teamHubWrapper .th-grid.has-rail .th-rail{display:flex}
 }`;
 
 function thInjectCss() {
@@ -139,7 +172,7 @@ async function thInit(root) {
     }
     thRenderShell();
     thApi('POST', '/team/usage', { event: 'open_hub' }).catch(() => {});
-    const first = TH.fullHub ? { type: 'overview' } : (TH.channels.find((c) => c.kind === 'team') ? { type: 'channel', id: TH.channels.find((c) => c.kind === 'team').id } : { type: 'empty' });
+    const first = TH.fullHub ? { type: 'home' } : (TH.channels.find((c) => c.kind === 'team') ? { type: 'channel', id: TH.channels.find((c) => c.kind === 'team').id } : { type: 'empty' });
     thSelect(first);
   } catch (e) {
     root.innerHTML = '<div class="th-empty">' + esc(tht('loadFail', 'Team Hub could not load')) + ': ' + esc(e.message) + '</div>';
@@ -147,6 +180,7 @@ async function thInit(root) {
 }
 
 function thTeardown() {
+  if (TH && TH.timer) clearInterval(TH.timer);
   if (TH && TH.rt) { try { sb.removeChannel(TH.rt); } catch (e) {} }
   TH = null;
 }
@@ -185,36 +219,46 @@ function thRenderShell() {
     + '<div class="th-top"><div style="display:flex;gap:6px;flex-wrap:wrap" id="thForYou"></div>'
     + '<div style="display:flex;gap:6px;align-items:center">' + legacy
     + '<button class="th-btn2" onclick="thSelect({type:\'prefs\'})"><i class="ti ti-bell-off"></i> ' + esc(tht('quietHours', 'Quiet hours')) + '</button></div></div>'
-    + '<div class="th-grid"><nav class="th-side" id="thSide"></nav><section class="th-main" id="thMain"></section></div>'
+    + '<div class="th-grid" id="thGrid"><nav class="th-side" id="thSide"></nav><section class="th-main" id="thMain"></section><aside class="th-rail" id="thRail"></aside></div>'
     + '</div></div>';
   thRenderSide();
   thForYou();
   if (TH.fullHub && TH.weather) thWeather();
+  // Keep the side panel and unread counts fresh while the hub is open.
+  TH.timer = setInterval(async () => { if (!TH) return; try { await thLoadUnread(); thRenderSide(); thRenderRail(); } catch (e) {} }, 60000);
 }
 
 // Muted channels show no unread badge.
 function thBadge(id) { const m = TH.mine.get(id); return m && !m.muted ? (TH.unread[id] || 0) : 0; }
 
+// Collapsed groups are remembered per browser (a convenience only; the page works without it).
+function thCollapsed() { try { return new Set(JSON.parse(localStorage.getItem('th_collapsed') || '[]')); } catch (e) { return new Set(); } }
+function thToggleGroup(g) {
+  const c = thCollapsed(); if (c.has(g)) c.delete(g); else c.add(g);
+  try { localStorage.setItem('th_collapsed', JSON.stringify([...c])); } catch (e) {}
+  thRenderSide();
+}
 function thRenderSide() {
   const el = document.getElementById('thSide');
   if (!el) return;
   const s = TH.sel || {};
-  const item = (key, icon, label, on, badge) => '<div class="th-ci' + (on ? ' on' : '') + '" onclick="' + key + '"><span><i class="ti ' + icon + '"></i> ' + esc(label) + '</span>' + (badge ? '<span class="th-n">' + badge + '</span>' : '') + '</div>';
+  const off = thCollapsed();
+  const item = (act, icon, label, on, badge) => '<button type="button" class="th-ci' + (on ? ' on' : '') + '"' + (on ? ' aria-current="page"' : '') + ' onclick="' + act + '"><span><i class="ti ' + icon + '"></i> ' + esc(label) + '</span>' + (badge ? '<span class="th-n">' + badge + '</span>' : '') + '</button>';
+  const group = (key, title, items) => items ? '<button type="button" class="th-lb" aria-expanded="' + (!off.has(key)) + '" onclick="thToggleGroup(\'' + key + '\')"><i class="ti ti-chevron-' + (off.has(key) ? 'right' : 'down') + '"></i>' + esc(title) + '</button>' + (off.has(key) ? '' : items) : '';
+  const chItem = (c, label) => item("thSelect({type:'channel',id:'" + c.id + "'})", 'ti-hash', label, s.type === 'channel' && s.id === c.id, thBadge(c.id));
   let h = '';
   if (TH.fullHub) {
-    h += item("thSelect({type:'overview'})", 'ti-layout-dashboard', tht('overview', 'Overview'), s.type === 'overview');
-    h += item("thSelect({type:'notices'})", 'ti-speakerphone', tht('noticeboard', 'Noticeboard'), s.type === 'notices');
-    h += item("thSelect({type:'calendar'})", 'ti-calendar', tht('calendar', 'Calendar'), s.type === 'calendar');
+    h += group('general', tht('generalGroup', 'General'),
+      item("thSelect({type:'home'})", 'ti-home', tht('home', 'Home'), s.type === 'home')
+      + item("thSelect({type:'notices'})", 'ti-speakerphone', tht('noticeboard', 'Noticeboard'), s.type === 'notices')
+      + item("thSelect({type:'calendar'})", 'ti-calendar', tht('calendar', 'Calendar'), s.type === 'calendar'));
   }
   const sys = TH.channels.filter((c) => c.kind !== 'team');
-  if (sys.length) {
-    h += '<p class="th-lb">' + esc(tht('management', 'Management')) + '</p>';
-    sys.forEach((c) => { h += item("thSelect({type:'channel',id:'" + c.id + "'})", 'ti-hash', thChannelLabel(c).slice(2), s.type === 'channel' && s.id === c.id, thBadge(c.id)); });
-  }
-  h += '<p class="th-lb">' + esc(tht('teams', 'Teams')) + '</p>';
-  TH.channels.filter((c) => c.kind === 'team').forEach((c) => { h += item("thSelect({type:'channel',id:'" + c.id + "'})", 'ti-hash', c.name, s.type === 'channel' && s.id === c.id, thBadge(c.id)); });
-  if (TH.owner) h += item("thSelect({type:'newchannel'})", 'ti-plus', tht('newChannel', 'New channel'), s.type === 'newchannel');
-  if (TH.fullHub && (TH.owner || TH.isManager)) h += item("thSelect({type:'access'})", 'ti-key', tht('access', 'Access'), s.type === 'access');
+  h += group('mgmt', tht('management', 'Management'), sys.map((c) => chItem(c, thChannelLabel(c).slice(2))).join(''));
+  let teams = TH.channels.filter((c) => c.kind === 'team').map((c) => chItem(c, c.name)).join('');
+  if (TH.owner) teams += item("thSelect({type:'newchannel'})", 'ti-plus', tht('newChannel', 'New channel'), s.type === 'newchannel');
+  if (TH.fullHub && (TH.owner || TH.isManager)) teams += item("thSelect({type:'access'})", 'ti-key', tht('access', 'Access'), s.type === 'access');
+  h += group('teams', tht('teams', 'Teams'), teams);
   el.innerHTML = h;
 }
 
@@ -255,15 +299,17 @@ async function thWeather() {
 async function thSelect(sel) {
   if (!TH) return;
   if (TH.rt) { try { sb.removeChannel(TH.rt); } catch (e) {} TH.rt = null; }
+  if (sel.type === 'home' && !sel.id) { const hc = thHomeChannel(); if (hc) sel = { type: 'home', id: hc }; }
   TH.sel = sel;
+  if (sel.type === 'channel') { try { localStorage.setItem('th_last_' + TH.me, sel.id); } catch (e) {} }
   thRenderSide();
+  thLayout();
   const main = document.getElementById('thMain');
   if (!main) return;
   main.innerHTML = '<div class="th-empty">' + esc(t('loading.default', 'Loading...')) + '</div>';
   try {
-    if (sel.type === 'channel') await thChannel(main, sel.id);
+    if (sel.type === 'channel' || (sel.type === 'home' && sel.id)) await thChannel(main, sel.id);
     else if (sel.type === 'members') await thMembers(main, sel.id);
-    else if (sel.type === 'overview') await thOverview(main);
     else if (sel.type === 'notices') await thNotices(main);
     else if (sel.type === 'calendar') await thCalendar(main);
     else if (sel.type === 'access') await thAccess(main);
@@ -273,6 +319,21 @@ async function thSelect(sel) {
   } catch (e) {
     main.innerHTML = '<div class="th-empty">' + esc(tht('loadFail', 'Could not load')) + ': ' + esc(e.message) + '</div>';
   }
+  thRenderRail();
+}
+
+// The right-hand panel shows on Home and on channels (Operations/Workforce only); other sections use the full width.
+function thLayout() {
+  const g = document.getElementById('thGrid');
+  if (g) g.classList.toggle('has-rail', !!(TH.fullHub && TH.sel && (TH.sel.type === 'home' || TH.sel.type === 'channel')));
+}
+// Home opens the channel you used last, else the first team channel, else the first channel. It never picks by unread, because opening a channel marks it read.
+function thHomeChannel() {
+  let last = null;
+  try { last = localStorage.getItem('th_last_' + TH.me); } catch (e) {}
+  if (last && TH.channels.some((c) => c.id === last)) return last;
+  const team = TH.channels.find((c) => c.kind === 'team');
+  return (team || TH.channels[0] || {}).id || null;
 }
 
 // ---------------- channel ----------------
@@ -417,48 +478,93 @@ async function thCreateChannel() {
 }
 
 // ---------------- noticeboard ----------------
-// ---------------- overview ----------------
-// One-screen summary. Reads only what the person is already allowed to see (same Row Level Security as the other sections).
-async function thOverview(main) {
-  const alertsCh = TH.channels.find((c) => c.kind === 'alerts');
-  const dayStart = new Date(); dayStart.setHours(0, 0, 0, 0);
-  const monthStart = new Date(dayStart.getFullYear(), dayStart.getMonth(), 1);
-  const [nq, eq, aq, rq] = await Promise.all([
-    sb.from('team_notices').select('id,channel_id,author_id,title,pinned,created_at').order('pinned', { ascending: false }).order('created_at', { ascending: false }).limit(3),
-    sb.from('team_events').select('id,title,kind,starts_at,all_day').gte('starts_at', monthStart.toISOString()).order('starts_at').limit(60),
-    alertsCh ? sb.from('team_messages').select('id,body,created_at').eq('channel_id', alertsCh.id).order('created_at', { ascending: false }).limit(3) : Promise.resolve({ data: [] }),
-    sb.from('team_notice_reads').select('notice_id').eq('user_id', TH.me),
-  ]);
-  if (nq.error) throw nq.error;
-  const allEv = eq.data || [];
-  const monthEnd = new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 1);
-  const evDays = new Set(allEv.filter((e) => new Date(e.starts_at) < monthEnd).map((e) => new Date(e.starts_at).getDate()));
-  const notes = (nq.data || []).slice(0, 3), evs = allEv.filter((e) => new Date(e.starts_at) >= dayStart).slice(0, 4), alerts = (aq.data || []).slice(0, 3);
-  const seen = new Set((rq.data || []).map((r) => r.notice_id));
-  const loc = getDateLocale();
-  const cut = (x) => { const v = String(x || '').replace(/\s+/g, ' ').trim(); return v.length > 110 ? v.slice(0, 110) + '…' : v; };
-  const more = (sel) => '<span class="th-more" onclick="thSelect(' + sel + ')">' + esc(tht('viewAll', 'View all')) + ' ›</span>';
-  const card = (cls, icon, title, moreSel, body) => '<div class="th-oc ' + cls + '"><h4><span><i class="ti ' + icon + '"></i>' + esc(title) + '</span>' + (moreSel ? more(moreSel) : '') + '</h4>' + body + '</div>';
-  const none = (k, f) => '<div class="th-cap" style="padding:6px 8px">' + esc(tht(k, f)) + '</div>';
+// ---------------- side panel (calendar, alerts, unread, notices, mentions, quotas) ----------------
+// Reads only what the person may already see (same Row Level Security as every other section). It is optional: if it fails, the chat still works.
+async function thRenderRail() {
+  const el = document.getElementById('thRail');
+  if (!el || !TH || !TH.fullHub || !TH.sel || !(TH.sel.type === 'home' || TH.sel.type === 'channel')) return;
+  const seq = (TH.railSeq = (TH.railSeq || 0) + 1);
+  try {
+    const alertsCh = TH.channels.find((c) => c.kind === 'alerts');
+    const dayStart = new Date(); dayStart.setHours(0, 0, 0, 0);
+    const monthStart = new Date(dayStart.getFullYear(), dayStart.getMonth(), 1);
+    const monthEnd = new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 1);
+    const since = new Date(Date.now() - 7 * 864e5).toISOString();
+    const needQuota = TH.owner || TH.isManager;
+    const none = Promise.resolve({ data: [] });
+    const [nq, eq, aq, rq, mq, gq, uq] = await Promise.all([
+      sb.from('team_notices').select('id,channel_id,author_id,title,body,pinned,created_at').order('pinned', { ascending: false }).order('created_at', { ascending: false }).limit(5),
+      sb.from('team_events').select('id,title,kind,starts_at,all_day').gte('starts_at', monthStart.toISOString()).order('starts_at').limit(60),
+      alertsCh ? sb.from('team_messages').select('id,body,created_at').eq('channel_id', alertsCh.id).order('created_at', { ascending: false }).limit(3) : none,
+      sb.from('team_notice_reads').select('notice_id').eq('user_id', TH.me),
+      sb.from('team_mentions').select('message_id,team_messages!inner(channel_id,author_id,body,created_at)').eq('user_id', TH.me).gte('team_messages.created_at', since).limit(20),
+      needQuota ? sb.from('team_access_grants').select('channel_id,manager_id,quota') : none,
+      needQuota ? sb.from('team_members').select('channel_id,granted_by').not('granted_by', 'is', null) : none,
+    ]);
+    if (!TH || seq !== TH.railSeq) return; // a newer render has started
+    const notes = (nq.data || []).slice(0, 5), alerts = (aq.data || []).slice(0, 3);
+    const allEv = eq.data || [];
+    const evDays = thEvKinds(allEv.filter((e) => new Date(e.starts_at) < monthEnd));
+    const upcoming = allEv.filter((e) => new Date(e.starts_at) >= dayStart).slice(0, 4);
+    const seen = new Set((rq.data || []).map((r) => r.notice_id));
+    const mentions = (mq.data || []).map((m) => m.team_messages).filter(Boolean).sort((x, y) => String(y.created_at).localeCompare(String(x.created_at)));
+    const loc = getDateLocale();
+    const cut = (x, n) => { const v = String(x || '').replace(/\s+/g, ' ').trim(); return v.length > n ? v.slice(0, n) + '…' : v; };
+    const chSel = (id) => "{type:'channel',id:'" + id + "'}";
+    const rowB = (sel, inner) => '<button type="button" class="b th-rb" onclick="thSelect(' + sel + ')">' + inner + '</button>';
+    const more = (sel) => '<button type="button" class="th-more" onclick="thSelect(' + sel + ')">' + esc(tht('viewAll', 'View all')) + ' ›</button>';
+    const card = (cls, icon, label, moreSel, rows) => '<div class="th-fc ' + cls + '"><div class="k"><span><i class="ti ' + icon + '"></i>' + esc(label) + '</span>' + (moreSel ? more(moreSel) : '') + '</div>' + rows + '</div>';
+    const quiet = (k, f) => '<div class="b th-cap">' + esc(tht(k, f)) + '</div>';
+    const newTag = (n, c) => seen.has(n.id) ? '' : ' <span class="th-ob" style="--c:var(' + c + ')">' + esc(tht('newTag', 'New')) + '</span>';
+    const when = (e) => e.all_day ? new Date(e.starts_at).toLocaleDateString(loc, { weekday: 'short', day: 'numeric', month: 'short' }) : thTime(e.starts_at);
 
-  const unread = TH.channels.filter((c) => thBadge(c.id) > 0).slice(0, 5);
-  const unreadBody = unread.length ? unread.map((c) => '<div class="th-oi" onclick="thSelect({type:\'channel\',id:\'' + c.id + '\'})"><span class="t">' + esc(thChannelLabel(c)) + '</span><span class="th-ob">' + thBadge(c.id) + '</span></div>').join('')
-    : none('allCaughtUp', 'You are all caught up.');
-  const alertsBody = alerts.length ? alerts.map((m) => '<div class="th-oi" onclick="thSelect({type:\'channel\',id:\'' + alertsCh.id + '\'})"><span class="t">' + esc(cut(m.body)) + '</span><span class="m">' + esc(thTime(m.created_at)) + '</span></div>').join('')
-    : none('noAlertsYet', 'No alerts yet.');
-  const noticeBody = notes.length ? notes.map((n) => '<div class="th-oi" onclick="thSelect({type:\'notices\'})"><span class="t">' + (n.pinned ? '<i class="ti ti-pin"></i> ' : '') + esc(n.title) + (seen.has(n.id) ? '' : ' <span class="th-ob">' + esc(tht('newTag', 'New')) + '</span>') + '</span><span class="m">' + esc(thTime(n.created_at)) + '</span></div>').join('')
-    : none('noNotices', 'No notices yet.');
-  const evBody = evs.length ? evs.map((e) => '<div class="th-oi" onclick="thSelect({type:\'calendar\'})"><span class="t">' + esc(e.title) + '</span><span class="m">' + esc(e.all_day ? new Date(e.starts_at).toLocaleDateString(loc, { day: 'numeric', month: 'short' }) : thTime(e.starts_at)) + '</span></div>').join('')
-    : none('noUpcoming', 'Nothing coming up.');
-  const miniCal = '<div class="th-cap" style="padding:0 8px">' + esc(monthStart.toLocaleDateString(loc, { month: 'long', year: 'numeric' })) + '</div><div class="th-cal th-mini" onclick="thSelect({type:\'calendar\'})" style="cursor:pointer">' + thCalGrid(monthStart, evDays, true, false) + '</div>';
+    // calendar
+    const canAdd = TH.owner || TH.isManager;
+    const lg = [['meeting', '--accent'], ['holiday', '--green'], ['closed', '--orange']].map(([k, c]) => '<span><b style="background:var(' + c + ',#f0883e)"></b>' + esc(tht('kind_' + k, k)) + '</span>').join('');
+    const evList = upcoming.length ? upcoming.map((e) => '<button type="button" class="th-ev ' + esc(e.kind) + '" onclick="thSelect({type:\'calendar\'})">' + esc(e.title) + '<span class="m">' + esc(tht('kind_' + e.kind, e.kind)) + ' · ' + esc(when(e)) + '</span></button>').join('')
+      : '<div class="th-cap">' + esc(tht('noUpcoming', 'Nothing coming up.')) + '</div>';
+    let h = '<div class="th-cp"><div class="hd"><span>' + esc(monthStart.toLocaleDateString(loc, { month: 'long', year: 'numeric' })) + '</span>'
+      + (canAdd ? '<button type="button" class="th-btn2" onclick="thSelect({type:\'calendar\'})"><i class="ti ti-plus"></i> ' + esc(tht('eventBtn', 'Event')) + '</button>' : '') + '</div>'
+      + '<div class="th-cal th-mini" role="button" tabindex="0" onclick="thSelect({type:\'calendar\'})" onkeydown="if(event.key===\'Enter\')thSelect({type:\'calendar\'})" style="cursor:pointer">' + thCalGrid(monthStart, evDays, true, false) + '</div>'
+      + '<div class="th-lg">' + lg + '</div>' + evList + '</div>';
 
-  main.innerHTML = '<div class="th-mh"><strong style="font-size:.85rem"><i class="ti ti-layout-dashboard"></i> ' + esc(tht('overview', 'Overview')) + '</strong></div>'
-    + '<div class="th-body"><div class="th-ov">'
-    + card('warn', 'ti-bell', tht('needsAttention', 'Needs your attention'), null, unreadBody)
-    + (alertsCh ? card('amb', 'ti-alert-triangle', tht('latestAlerts', 'Latest alerts'), "{type:'channel',id:'" + alertsCh.id + "'}", alertsBody) : '')
-    + card('ok', 'ti-speakerphone', tht('noticeboard', 'Noticeboard'), "{type:'notices'}", noticeBody)
-    + card('', 'ti-calendar', tht('upcoming', 'Coming up'), "{type:'calendar'}", miniCal + evBody)
-    + '</div></div>';
+    // needs attention: alerts (CEO and managers only), unread channels
+    h += '<div class="th-rt">' + esc(tht('needsAttention', 'Needs your attention')) + '</div>';
+    if (alertsCh) h += card('amb', 'ti-alert-triangle', tht('latestAlerts', 'Latest alerts'), chSel(alertsCh.id),
+      alerts.length ? alerts.map((m) => rowB(chSel(alertsCh.id), esc(cut(m.body, 110)) + '<span class="m">' + esc(thTime(m.created_at)) + '</span>')).join('') : quiet('noAlertsYet', 'No alerts yet.'));
+    const unread = TH.channels.filter((c) => thBadge(c.id) > 0).sort((x, y) => thBadge(y.id) - thBadge(x.id)).slice(0, 4);
+    h += unread.length
+      ? card('warn', 'ti-bell', tht('unreadLabel', 'Unread'), null, unread.map((c) => rowB(chSel(c.id), '<strong>' + esc(thChannelLabel(c)) + '</strong><span class="m">' + thBadge(c.id) + ' ' + esc(tht('unreadWord', 'new')) + '</span>')).join(''))
+      : card('ok', 'ti-circle-check', tht('unreadLabel', 'Unread'), null, quiet('allCaughtUp', 'You are all caught up.'));
+
+    // company notices
+    h += '<div class="th-rt">' + esc(tht('company', 'Company')) + '</div>';
+    const pinned = notes.filter((n) => n.pinned).slice(0, 2), recent = notes.filter((n) => !n.pinned).slice(0, 3);
+    pinned.forEach((n) => { h += card('', 'ti-pin', tht('pinnedNotice', 'Pinned notice'), null, rowB("{type:'notices'}", '<strong>' + esc(n.title) + '</strong>' + newTag(n, '--accent') + '<br>' + esc(cut(n.body, 110)))); });
+    if (recent.length) h += card('ok', 'ti-speakerphone', tht('latestNotices', 'Latest notices'), "{type:'notices'}", recent.map((n) => rowB("{type:'notices'}", '<strong>' + esc(n.title) + '</strong>' + newTag(n, '--green') + '<span class="m">' + esc(thTime(n.created_at)) + '</span>')).join(''));
+    else if (!pinned.length) h += card('ok', 'ti-speakerphone', tht('noticeboard', 'Noticeboard'), "{type:'notices'}", quiet('noNotices', 'No notices yet.'));
+
+    // for you: mentions, quotas
+    h += '<div class="th-rt">' + esc(tht('forYou', 'For you')) + '</div>';
+    const lastM = mentions[0];
+    const mChan = lastM ? TH.channels.find((c) => c.id === lastM.channel_id) : null;
+    h += card('', 'ti-at', tht('mentions7d', 'Mentions this week') + ': ' + mentions.length, null,
+      lastM && mChan ? rowB(chSel(mChan.id), '<strong>' + esc(thChannelLabel(mChan)) + '</strong> ' + esc(thName(lastM.author_id)) + ': ' + esc(cut(lastM.body, 70))) : quiet('mentionNone', 'No mentions this week.'));
+    if (needQuota) {
+      const grants = (gq.data || []).filter((g) => TH.owner || g.manager_id === TH.me);
+      const given = uq.data || [];
+      const used = (g) => given.filter((x) => x.channel_id === g.channel_id && x.granted_by === g.manager_id).length;
+      const chName = (id) => { const c = TH.channels.find((x) => x.id === id); return c ? thChannelLabel(c) : ''; };
+      if (grants.length) {
+        const lines = grants.slice(0, 4).map((g) => '<div class="b">' + esc(TH.owner
+          ? tht('quotaLineOwner', '{c}: {m}, quota {q}, used {u}').replace('{c}', chName(g.channel_id)).replace('{m}', thName(g.manager_id)).replace('{q}', g.quota).replace('{u}', used(g))
+          : tht('quotaLineMgr', '{c}: you may add {q} staff, used {u}').replace('{c}', chName(g.channel_id)).replace('{q}', g.quota).replace('{u}', used(g))) + '</div>').join('');
+        h += card('plain', 'ti-key', TH.owner ? tht('accessTitle', 'Access (CEO only)') : tht('yourQuota', 'Your quota'), TH.owner ? "{type:'access'}" : null,
+          lines + (TH.owner ? '' : '<div class="b th-cap">' + esc(tht('managerNote', 'Quotas are set by the CEO. You cannot raise them.')) + '</div>'));
+      }
+    }
+    el.innerHTML = h;
+  } catch (e) { /* optional panel */ }
 }
 
 async function thNotices(main) {
@@ -504,7 +610,15 @@ async function thDeleteNotice(id) {
   try { await thApi('DELETE', '/team/notices/' + id); thSelect({ type: 'notices' }); } catch (e) { thErr(e); }
 }
 
+// Day -> strongest kind of that day (closed > holiday > meeting > event).
+function thEvKinds(evs) {
+  const rank = { closed: 3, holiday: 2, meeting: 1, event: 0 };
+  const m = new Map();
+  evs.forEach((e) => { const d = new Date(e.starts_at).getDate(); if (!m.has(d) || (rank[e.kind] || 0) > (rank[m.get(d)] || 0)) m.set(d, e.kind); });
+  return m;
+}
 // Month grid shared by the Calendar section and the Overview. Fri/Sat shaded, event days and today marked.
+// evDays: Map(day of month -> event kind) so each day can be coloured by type.
 function thCalGrid(first, evDays, isCurrentMonth, pickable) {
   const now = new Date();
   const loc = getDateLocale();
@@ -514,7 +628,7 @@ function thCalGrid(first, evDays, isCurrentMonth, pickable) {
   const days = new Date(first.getFullYear(), first.getMonth() + 1, 0).getDate();
   for (let d = 1; d <= days; d++) {
     const wd = new Date(first.getFullYear(), first.getMonth(), d).getDay();
-    const cls = [(wd === 5 || wd === 6) ? 'wk' : '', evDays.has(d) ? 'ev' : '', (isCurrentMonth && d === now.getDate()) ? 'td' : ''].join(' ');
+    const cls = [(wd === 5 || wd === 6) ? 'wk' : '', evDays.has(d) ? 'ev ev-' + evDays.get(d) : '', (isCurrentMonth && d === now.getDate()) ? 'td' : ''].join(' ');
     const ymd = first.getFullYear() + '-' + String(first.getMonth() + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
     grid += '<span class="' + cls + '"' + (pickable ? ' style="cursor:pointer" onclick="thPickDay(\'' + ymd + '\')"' : '') + '>' + d + '</span>';
   }
@@ -530,7 +644,7 @@ async function thCalendar(main) {
   if (error) throw error;
   const evs = data || [];
   const canAddEv = TH.owner || TH.isManager;
-  const evDays = new Set(evs.map((e) => new Date(e.starts_at).getDate()));
+  const evDays = thEvKinds(evs);
   const loc = getDateLocale();
   const grid = thCalGrid(first, evDays, TH.monthOffset === 0, canAddEv);
   const kinds = ['meeting', 'holiday', 'closed', 'event'];
