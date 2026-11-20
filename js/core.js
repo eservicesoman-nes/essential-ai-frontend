@@ -319,7 +319,7 @@ function setupNavForRole(){
       const imageNavEl = document.querySelector('[data-view="image"]');
       const tierOk=hasTierModule(['operations','workforce','infrastructure']);
       if(ceoNavEl && !tierOk) ceoNavEl.style.display='none';
-      if(commandNavEl && mods.nes_command === false) commandNavEl.style.display='none';
+      if(commandNavEl && mods.nes_command === false && mods.team_chat !== true) commandNavEl.style.display='none';
       if(intelNavEl && !tierOk) intelNavEl.style.display='none';
       if(imageNavEl && mods.image_gen === false) imageNavEl.style.display='none';
       if(deenNavEl){
@@ -747,7 +747,7 @@ function showView(view){
     const tierOk=hasTierModule(['operations','workforce','infrastructure']);
     const blocked = {
       'ceo': !tierOk,
-      'command': mods.nes_command === false,
+      'command': mods.nes_command === false && mods.team_chat !== true,
       'intel': !tierOk,
       'image': mods.image_gen === false,
     };

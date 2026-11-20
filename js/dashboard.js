@@ -970,19 +970,19 @@ function showCommandCentre(){
     hub.id='teamHubWrapper';
     hub.style.cssText='position:absolute;top:0;inset-inline-start:228px;inset-inline-end:0;bottom:0;background:var(--bg);z-index:50;display:flex;flex-direction:column;';
     hub.style.overflow='hidden';
-hub.innerHTML=`<div style="padding-block:11px;padding-inline-end:var(--header-clearance);padding-inline-start:60px;border-bottom:1px solid var(--border);flex-shrink:0;"><div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;">${t('sectionTitle.teamHub')}</div><div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">${t('ui.dash.teamHubSub')}</div></div><div class="command-wrap" style="width:100%;flex:1;"><iframe id="teamHubIframe" class="command-iframe" src="${ROCKET_URL}" title="NES Team Hub" allow="microphone; camera" style="width:100%;height:100%;border:none;"></iframe></div>`;
+hub.innerHTML=`<div style="padding-block:11px;padding-inline-end:var(--header-clearance);padding-inline-start:60px;border-bottom:1px solid var(--border);flex-shrink:0;"><div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;">${t('sectionTitle.teamHub')}</div><div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">${t('ui.dash.teamHubSub')}</div></div><div id="thRoot" style="width:100%;flex:1;min-height:0;overflow:hidden;"></div>`;
     document.getElementById('app').appendChild(hub);
   }
   hub.style.display='flex';
   mc.style.display='none';
   window._teamHubVisible=true;
+  if(typeof thInit==='function')thInit(document.getElementById('thRoot'));
 }
 
 function hideTeamHub(){
   const hub=document.getElementById('teamHubWrapper');
   if(hub){
-    const iframe=document.getElementById('teamHubIframe');
-    if(iframe)iframe.src='about:blank';
+    if(typeof thTeardown==='function')thTeardown();
     hub.remove();
   }
   document.getElementById('mainContent').style.display='flex';
