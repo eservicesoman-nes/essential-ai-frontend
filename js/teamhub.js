@@ -375,7 +375,8 @@ async function thMembers(main, id) {
     + '<button class="th-btn2" onclick="thSelect({type:\'channel\',id:\'' + id + '\'})"><i class="ti ti-arrow-back-up"></i> ' + esc(tht('back', 'Back')) + '</button></div>'
     + '<div class="th-body">'
     + (options ? '<div class="th-form"><div class="th-row"><select id="thAddUser" style="flex:1">' + options + '</select><button class="th-btn" onclick="thAddMember(\'' + id + '\')">' + esc(tht('add', 'Add')) + '</button></div>'
-      + (TH.isManager ? '<div class="th-cap">' + esc(tht('quotaHint', 'You can add staff within the quota the CEO gave you.')) + '</div>' : '') + '</div>' : '')
+      + (TH.isManager ? '<div class="th-cap">' + esc(tht('quotaHint', 'You can add staff within the quota the CEO gave you.')) + '</div>' : '') + '</div>'
+      : '<div class="th-form"><div class="th-cap">' + esc(tht('noOneToAdd', 'Nobody else to add yet. Invite people first in Team, then add them here.')) + '</div></div>')
     + '<table class="th-tbl">' + rows + '</table></div>';
 }
 async function thAddMember(id) {

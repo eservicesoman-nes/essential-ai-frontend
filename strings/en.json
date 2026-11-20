@@ -949,6 +949,7 @@
     "quietHours": "Quiet hours",
     "quietIntro": "Team Hub does not send phone or email alerts yet. Your quiet hours are saved and will apply when it does.",
     "quotaHint": "You can add staff within the quota the CEO gave you.",
+    "noOneToAdd": "Nobody else to add yet. Invite people first in Team → Invite Staff, then add them here.",
     "readBy": "Read by...",
     "readByN": "Read by {r} of {n}",
     "remove": "Remove",
