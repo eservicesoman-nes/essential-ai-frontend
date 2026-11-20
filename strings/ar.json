@@ -944,7 +944,7 @@
     "role_ceo": "الرئيس التنفيذي",
     "role_manager": "مدير",
     "role_staff": "موظف",
-    "role_nesadmin": "المالك",
+    "role_nesadmin": "الرئيس التنفيذي",
     "save": "حفظ",
     "saved": "تم الحفظ",
     "teams": "الفرق",
@@ -953,6 +953,7 @@
     "unmute": "إلغاء الكتم",
     "usedOf": "{u} من {q} مستخدمة",
     "weather": "الطقس",
-    "weatherLoading": "الطقس..."
+    "weatherLoading": "الطقس...",
+    "allDay": "طوال اليوم"
   }
 }

@@ -17,10 +17,13 @@ async function thApi(method, path, body) {
   return j;
 }
 
+function thRole(role) { return tht('role_' + role, role || ''); }
+// Shows the person's position, plus their name when one is set (e.g. "Khalid · Manager", or just "CEO").
 function thName(id) {
   if (!id) return tht('bot', 'NES AI');
   const p = TH.people.get(id);
-  return p ? p.name : tht('former', 'Former member');
+  if (!p) return tht('former', 'Former member');
+  return p.name ? p.name + ' · ' + thRole(p.role) : thRole(p.role);
 }
 function thInitials(name) {
   return String(name || '?').trim().split(/\s+/).slice(0, 2).map((w) => w[0] || '').join('').toUpperCase() || '?';
@@ -313,6 +316,7 @@ function thMentionIds(text) {
   const tokens = (text.match(/@([^\s@.,!?:;]+)/g) || []).map((s) => s.slice(1).toLowerCase());
   if (!tokens.length) return ids;
   TH.people.forEach((p) => {
+    if (!p.name) return;
     const first = String(p.name).split(/\s+/)[0].toLowerCase();
     const joined = String(p.name).replace(/\s+/g, '').toLowerCase();
     if (tokens.includes(first) || tokens.includes(joined)) ids.push(p.id);
@@ -359,14 +363,14 @@ async function thMembers(main, id) {
   const { data, error } = await sb.from('team_members').select('user_id,granted_by').eq('channel_id', id);
   if (error) throw error;
   const inIt = new Set((data || []).map((m) => m.user_id));
-  const roleLbl = (r) => tht('role_' + r, r);
+  const roleLbl = thRole;
   const rows = (data || []).map((m) => {
     const canRemove = TH.owner || m.granted_by === TH.me;
-    return '<tr><td>' + esc(thName(m.user_id)) + '</td><td>' + esc(roleLbl((TH.people.get(m.user_id) || {}).role || '')) + '</td><td style="text-align:end">'
+    return '<tr><td>' + esc(thName(m.user_id)) + '</td><td style="text-align:end">'
       + (canRemove && m.user_id !== TH.me ? '<button class="th-btn2" onclick="thRemoveMember(\'' + id + '\',\'' + m.user_id + '\')">' + esc(tht('remove', 'Remove')) + '</button>' : '') + '</td></tr>';
   }).join('');
   const options = [...TH.people.values()].filter((p) => !inIt.has(p.id) && (TH.owner || p.role === 'staff'))
-    .map((p) => '<option value="' + esc(p.id) + '">' + esc(p.name) + ' (' + esc(roleLbl(p.role)) + ')</option>').join('');
+    .map((p) => '<option value="' + esc(p.id) + '">' + esc(thName(p.id)) + '</option>').join('');
   main.innerHTML = '<div class="th-mh"><strong style="font-size:.85rem">' + esc(thChannelLabel(ch)) + ' · ' + esc(tht('members', 'Members')) + '</strong>'
     + '<button class="th-btn2" onclick="thSelect({type:\'channel\',id:\'' + id + '\'})"><i class="ti ti-arrow-back-up"></i> ' + esc(tht('back', 'Back')) + '</button></div>'
     + '<div class="th-body">'
@@ -446,6 +450,7 @@ async function thCalendar(main) {
     .gte('starts_at', first.toISOString()).lt('starts_at', next.toISOString()).order('starts_at');
   if (error) throw error;
   const evs = data || [];
+  const canAddEv = TH.owner || TH.isManager;
   const evDays = new Set(evs.map((e) => new Date(e.starts_at).getDate()));
   const loc = getDateLocale();
   const dayNames = [...Array(7)].map((_, i) => new Date(2023, 0, 1 + i).toLocaleDateString(loc, { weekday: 'short' }));
@@ -455,13 +460,14 @@ async function thCalendar(main) {
   for (let d = 1; d <= days; d++) {
     const wd = new Date(first.getFullYear(), first.getMonth(), d).getDay();
     const cls = [(wd === 5 || wd === 6) ? 'wk' : '', evDays.has(d) ? 'ev' : '', (TH.monthOffset === 0 && d === now.getDate()) ? 'td' : ''].join(' ');
-    grid += '<span class="' + cls + '">' + d + '</span>';
+    const ymd = first.getFullYear() + '-' + String(first.getMonth() + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+    grid += '<span class="' + cls + '"' + (canAddEv ? ' style="cursor:pointer" onclick="thPickDay(\'' + ymd + '\')"' : '') + '>' + d + '</span>';
   }
   const kinds = ['meeting', 'holiday', 'closed', 'event'];
   const canAdd = TH.owner || TH.isManager;
   const form = canAdd ? '<div class="th-form"><div class="th-row"><input id="thETitle" maxlength="120" style="flex:1" placeholder="' + esc(tht('eventTitle', 'Event title')) + '">'
     + '<select id="thEKind">' + kinds.map((k) => '<option value="' + k + '">' + esc(tht('kind_' + k, k)) + '</option>').join('') + '</select></div>'
-    + '<div class="th-row"><input type="date" id="thEDate"><input type="time" id="thETime"><button class="th-btn" onclick="thAddEvent()">' + esc(tht('add', 'Add')) + '</button></div></div>' : '';
+    + '<div class="th-row"><input type="date" id="thEDate"><select id="thETime">' + thTimeOptions() + '</select><button class="th-btn" onclick="thAddEvent()">' + esc(tht('add', 'Add')) + '</button></div></div>' : '';
   const list = evs.map((e) => '<div class="th-note"><div class="th-meta">' + esc(tht('kind_' + e.kind, e.kind)) + ' · ' + esc(e.all_day ? new Date(e.starts_at).toLocaleDateString(loc, { day: 'numeric', month: 'short' }) : thTime(e.starts_at))
     + ((e.created_by === TH.me || TH.owner) ? '<span class="th-act" onclick="thDeleteEvent(\'' + e.id + '\')">' + esc(tht('delete', 'Delete')) + '</span>' : '')
     + '</div><div class="th-txt">' + esc(e.title) + '</div></div>').join('');
@@ -471,6 +477,21 @@ async function thCalendar(main) {
     + '<button class="th-btn2" onclick="TH.monthOffset++;thSelect({type:\'calendar\'})"><i class="ti ti-chevron-right"></i></button></div></div>'
     + '<div class="th-body"><div class="th-cal">' + grid + '</div>' + form + (list || '<div class="th-empty">' + esc(tht('noEvents', 'No events this month.')) + '</div>')
     + '<div class="th-cap" style="margin-top:8px">' + esc(tht('calNote', 'Team events, holidays and closures only. No leads or bookings here.')) + '</div></div>';
+}
+// Times every 30 minutes, 06:00 to 23:30, shown in the user's language. Empty = all day.
+function thTimeOptions() {
+  let h = '<option value="">' + esc(tht('allDay', 'All day')) + '</option>';
+  for (let m = 6 * 60; m < 24 * 60; m += 30) {
+    const hh = String(Math.floor(m / 60)).padStart(2, '0');
+    const mm = String(m % 60).padStart(2, '0');
+    const label = new Date(2026, 0, 1, m / 60 | 0, m % 60).toLocaleTimeString(getDateLocale(), { hour: '2-digit', minute: '2-digit' });
+    h += '<option value="' + hh + ':' + mm + '"' + (hh === '09' && mm === '00' ? ' selected' : '') + '>' + esc(label) + '</option>';
+  }
+  return h;
+}
+function thPickDay(ymd) {
+  const el = document.getElementById('thEDate');
+  if (el) { el.value = ymd; const t = document.getElementById('thETitle'); if (t) t.focus(); }
 }
 async function thAddEvent() {
   const title = document.getElementById('thETitle').value;
@@ -502,7 +523,7 @@ async function thAccess(main) {
     if (!managers.length) h += '<div class="th-txt">' + esc(tht('noManagers', 'No managers yet. Give someone the Manager role in Team first.')) + '</div>';
     else {
       h += '<div class="th-row"><select id="thGCh">' + shareable.map((c) => '<option value="' + c.id + '">' + esc(thChannelLabel(c)) + '</option>').join('') + '</select>'
-        + '<select id="thGMgr">' + managers.map((m) => '<option value="' + m.id + '">' + esc(m.name) + '</option>').join('') + '</select>'
+        + '<select id="thGMgr">' + managers.map((m) => '<option value="' + m.id + '">' + esc(thName(m.id)) + '</option>').join('') + '</select>'
         + '<input type="number" id="thGQuota" min="0" max="100" value="3" style="width:80px"><button class="th-btn" onclick="thSetQuota()">' + esc(tht('save', 'Save')) + '</button></div>';
     }
     h += '</div>';
@@ -547,5 +568,5 @@ async function thSavePrefs() {
   try { await thApi('PUT', '/team/prefs', { quiet_start: qs, quiet_end: qe }); thToast(tht('saved', 'Saved')); } catch (e) { thErr(e); }
 }
 
-Object.assign(window, { thInit, thTeardown, thSelect, thSend, thEditMsg, thDeleteMsg, thMute, thArchive, thAddMember, thRemoveMember,
+Object.assign(window, { thPickDay, thInit, thTeardown, thSelect, thSend, thEditMsg, thDeleteMsg, thMute, thArchive, thAddMember, thRemoveMember,
   thCreateChannel, thPostNotice, thReads, thDeleteNotice, thAddEvent, thDeleteEvent, thSetQuota, thRemoveQuota, thSavePrefs });

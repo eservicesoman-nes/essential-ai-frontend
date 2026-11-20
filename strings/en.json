@@ -957,7 +957,7 @@
     "role_ceo": "CEO",
     "role_manager": "Manager",
     "role_staff": "Staff",
-    "role_nesadmin": "Owner",
+    "role_nesadmin": "CEO",
     "save": "Save",
     "saved": "Saved",
     "teams": "Teams",
@@ -966,6 +966,7 @@
     "unmute": "Unmute",
     "usedOf": "{u} of {q} used",
     "weather": "Weather",
-    "weatherLoading": "Weather..."
+    "weatherLoading": "Weather...",
+    "allDay": "All day"
   }
 }

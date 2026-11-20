@@ -944,7 +944,7 @@
     "role_ceo": "CEO",
     "role_manager": "Gestor",
     "role_staff": "Colaborador",
-    "role_nesadmin": "Proprietário",
+    "role_nesadmin": "CEO",
     "save": "Guardar",
     "saved": "Guardado",
     "teams": "Equipas",
@@ -953,6 +953,7 @@
     "unmute": "Reativar som",
     "usedOf": "{u} de {q} usadas",
     "weather": "Tempo",
-    "weatherLoading": "Tempo..."
+    "weatherLoading": "Tempo...",
+    "allDay": "Dia inteiro"
   }
 }
