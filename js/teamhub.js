@@ -85,6 +85,19 @@ const TH_CSS = `
 #teamHubWrapper .th-cal .ev{background:var(--accent-md);color:var(--accent);font-weight:700}
 #teamHubWrapper .th-cal .td{outline:1px solid var(--accent)}
 #teamHubWrapper .th-empty{color:var(--muted);font-size:.78rem;text-align:center;padding:30px 10px}
+#teamHubWrapper .th-ov{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
+#teamHubWrapper .th-oc{--c:var(--accent);border:1px solid var(--border);border-top:2px solid var(--c);border-radius:12px;background:var(--card2);padding:12px 14px;display:flex;flex-direction:column;gap:6px;min-width:0}
+#teamHubWrapper .th-oc.warn{--c:var(--orange,#f0883e)}
+#teamHubWrapper .th-oc.amb{--c:var(--amber)}
+#teamHubWrapper .th-oc.ok{--c:var(--green)}
+#teamHubWrapper .th-oc h4{margin:0 0 2px;display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:.78rem;font-weight:600;color:var(--text)}
+#teamHubWrapper .th-oc h4 i{color:var(--c);margin-inline-end:5px}
+#teamHubWrapper .th-more{font-size:.64rem;font-weight:400;color:var(--c);cursor:pointer;white-space:nowrap}
+#teamHubWrapper .th-oi{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:6px 8px;border-radius:8px;cursor:pointer;font-size:.76rem}
+#teamHubWrapper .th-oi:hover{background:var(--accent-lo)}
+#teamHubWrapper .th-oi .t{min-width:0;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+#teamHubWrapper .th-oi .m{color:var(--muted);font-size:.64rem;white-space:nowrap}
+#teamHubWrapper .th-ob{font-size:.62rem;background:var(--c);color:#fff;border-radius:10px;padding:0 6px}
 #teamHubWrapper .th-tbl{width:100%;border-collapse:collapse;font-size:.76rem}
 #teamHubWrapper .th-tbl td,#teamHubWrapper .th-tbl th{padding:6px 4px;border-bottom:1px solid var(--border);text-align:start}
 @media (max-width:900px){
@@ -123,7 +136,7 @@ async function thInit(root) {
     }
     thRenderShell();
     thApi('POST', '/team/usage', { event: 'open_hub' }).catch(() => {});
-    const first = TH.fullHub ? { type: 'notices' } : (TH.channels.find((c) => c.kind === 'team') ? { type: 'channel', id: TH.channels.find((c) => c.kind === 'team').id } : { type: 'empty' });
+    const first = TH.fullHub ? { type: 'overview' } : (TH.channels.find((c) => c.kind === 'team') ? { type: 'channel', id: TH.channels.find((c) => c.kind === 'team').id } : { type: 'empty' });
     thSelect(first);
   } catch (e) {
     root.innerHTML = '<div class="th-empty">' + esc(tht('loadFail', 'Team Hub could not load')) + ': ' + esc(e.message) + '</div>';
@@ -186,6 +199,7 @@ function thRenderSide() {
   const item = (key, icon, label, on, badge) => '<div class="th-ci' + (on ? ' on' : '') + '" onclick="' + key + '"><span><i class="ti ' + icon + '"></i> ' + esc(label) + '</span>' + (badge ? '<span class="th-n">' + badge + '</span>' : '') + '</div>';
   let h = '';
   if (TH.fullHub) {
+    h += item("thSelect({type:'overview'})", 'ti-layout-dashboard', tht('overview', 'Overview'), s.type === 'overview');
     h += item("thSelect({type:'notices'})", 'ti-speakerphone', tht('noticeboard', 'Noticeboard'), s.type === 'notices');
     h += item("thSelect({type:'calendar'})", 'ti-calendar', tht('calendar', 'Calendar'), s.type === 'calendar');
   }
@@ -246,6 +260,7 @@ async function thSelect(sel) {
   try {
     if (sel.type === 'channel') await thChannel(main, sel.id);
     else if (sel.type === 'members') await thMembers(main, sel.id);
+    else if (sel.type === 'overview') await thOverview(main);
     else if (sel.type === 'notices') await thNotices(main);
     else if (sel.type === 'calendar') await thCalendar(main);
     else if (sel.type === 'access') await thAccess(main);
@@ -399,6 +414,45 @@ async function thCreateChannel() {
 }
 
 // ---------------- noticeboard ----------------
+// ---------------- overview ----------------
+// One-screen summary. Reads only what the person is already allowed to see (same Row Level Security as the other sections).
+async function thOverview(main) {
+  const alertsCh = TH.channels.find((c) => c.kind === 'alerts');
+  const dayStart = new Date(); dayStart.setHours(0, 0, 0, 0);
+  const [nq, eq, aq, rq] = await Promise.all([
+    sb.from('team_notices').select('id,channel_id,author_id,title,pinned,created_at').order('pinned', { ascending: false }).order('created_at', { ascending: false }).limit(3),
+    sb.from('team_events').select('id,title,kind,starts_at,all_day').gte('starts_at', dayStart.toISOString()).order('starts_at').limit(4),
+    alertsCh ? sb.from('team_messages').select('id,body,created_at').eq('channel_id', alertsCh.id).order('created_at', { ascending: false }).limit(3) : Promise.resolve({ data: [] }),
+    sb.from('team_notice_reads').select('notice_id').eq('user_id', TH.me),
+  ]);
+  if (nq.error) throw nq.error;
+  const notes = (nq.data || []).slice(0, 3), evs = (eq.data || []).slice(0, 4), alerts = (aq.data || []).slice(0, 3);
+  const seen = new Set((rq.data || []).map((r) => r.notice_id));
+  const loc = getDateLocale();
+  const cut = (x) => { const v = String(x || '').replace(/\s+/g, ' ').trim(); return v.length > 110 ? v.slice(0, 110) + '…' : v; };
+  const more = (sel) => '<span class="th-more" onclick="thSelect(' + sel + ')">' + esc(tht('viewAll', 'View all')) + ' ›</span>';
+  const card = (cls, icon, title, moreSel, body) => '<div class="th-oc ' + cls + '"><h4><span><i class="ti ' + icon + '"></i>' + esc(title) + '</span>' + (moreSel ? more(moreSel) : '') + '</h4>' + body + '</div>';
+  const none = (k, f) => '<div class="th-cap" style="padding:6px 8px">' + esc(tht(k, f)) + '</div>';
+
+  const unread = TH.channels.filter((c) => thBadge(c.id) > 0).slice(0, 5);
+  const unreadBody = unread.length ? unread.map((c) => '<div class="th-oi" onclick="thSelect({type:\'channel\',id:\'' + c.id + '\'})"><span class="t">' + esc(thChannelLabel(c)) + '</span><span class="th-ob">' + thBadge(c.id) + '</span></div>').join('')
+    : none('allCaughtUp', 'You are all caught up.');
+  const alertsBody = alerts.length ? alerts.map((m) => '<div class="th-oi" onclick="thSelect({type:\'channel\',id:\'' + alertsCh.id + '\'})"><span class="t">' + esc(cut(m.body)) + '</span><span class="m">' + esc(thTime(m.created_at)) + '</span></div>').join('')
+    : none('noAlertsYet', 'No alerts yet.');
+  const noticeBody = notes.length ? notes.map((n) => '<div class="th-oi" onclick="thSelect({type:\'notices\'})"><span class="t">' + (n.pinned ? '<i class="ti ti-pin"></i> ' : '') + esc(n.title) + (seen.has(n.id) ? '' : ' <span class="th-ob">' + esc(tht('newTag', 'New')) + '</span>') + '</span><span class="m">' + esc(thTime(n.created_at)) + '</span></div>').join('')
+    : none('noNotices', 'No notices yet.');
+  const evBody = evs.length ? evs.map((e) => '<div class="th-oi" onclick="thSelect({type:\'calendar\'})"><span class="t">' + esc(e.title) + '</span><span class="m">' + esc(e.all_day ? new Date(e.starts_at).toLocaleDateString(loc, { day: 'numeric', month: 'short' }) : thTime(e.starts_at)) + '</span></div>').join('')
+    : none('noUpcoming', 'Nothing coming up.');
+
+  main.innerHTML = '<div class="th-mh"><strong style="font-size:.85rem"><i class="ti ti-layout-dashboard"></i> ' + esc(tht('overview', 'Overview')) + '</strong></div>'
+    + '<div class="th-body"><div class="th-ov">'
+    + card('warn', 'ti-bell', tht('needsAttention', 'Needs your attention'), null, unreadBody)
+    + (alertsCh ? card('amb', 'ti-alert-triangle', tht('latestAlerts', 'Latest alerts'), "{type:'channel',id:'" + alertsCh.id + "'}", alertsBody) : '')
+    + card('ok', 'ti-speakerphone', tht('noticeboard', 'Noticeboard'), "{type:'notices'}", noticeBody)
+    + card('', 'ti-calendar', tht('upcoming', 'Coming up'), "{type:'calendar'}", evBody)
+    + '</div></div>';
+}
+
 async function thNotices(main) {
   const [{ data: notes, error }, { data: reads }] = await Promise.all([
     sb.from('team_notices').select('id,channel_id,author_id,title,body,pinned,created_at').order('pinned', { ascending: false }).order('created_at', { ascending: false }).limit(50),
