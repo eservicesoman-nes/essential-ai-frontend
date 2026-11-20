@@ -85,6 +85,9 @@ const TH_CSS = `
 #teamHubWrapper .th-cal .ev{background:var(--accent-md);color:var(--accent);font-weight:700}
 #teamHubWrapper .th-cal .td{outline:1px solid var(--accent)}
 #teamHubWrapper .th-empty{color:var(--muted);font-size:.78rem;text-align:center;padding:30px 10px}
+#teamHubWrapper .th-mini{font-size:.64rem;margin:0 0 6px}
+#teamHubWrapper .th-mini span{padding:4px 0}
+#teamHubWrapper .th-mini .wk{background:var(--card)}
 #teamHubWrapper .th-ov{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
 #teamHubWrapper .th-oc{--c:var(--accent);border:1px solid var(--border);border-top:2px solid var(--c);border-radius:12px;background:var(--card2);padding:12px 14px;display:flex;flex-direction:column;gap:6px;min-width:0}
 #teamHubWrapper .th-oc.warn{--c:var(--orange,#f0883e)}
@@ -419,14 +422,18 @@ async function thCreateChannel() {
 async function thOverview(main) {
   const alertsCh = TH.channels.find((c) => c.kind === 'alerts');
   const dayStart = new Date(); dayStart.setHours(0, 0, 0, 0);
+  const monthStart = new Date(dayStart.getFullYear(), dayStart.getMonth(), 1);
   const [nq, eq, aq, rq] = await Promise.all([
     sb.from('team_notices').select('id,channel_id,author_id,title,pinned,created_at').order('pinned', { ascending: false }).order('created_at', { ascending: false }).limit(3),
-    sb.from('team_events').select('id,title,kind,starts_at,all_day').gte('starts_at', dayStart.toISOString()).order('starts_at').limit(4),
+    sb.from('team_events').select('id,title,kind,starts_at,all_day').gte('starts_at', monthStart.toISOString()).order('starts_at').limit(60),
     alertsCh ? sb.from('team_messages').select('id,body,created_at').eq('channel_id', alertsCh.id).order('created_at', { ascending: false }).limit(3) : Promise.resolve({ data: [] }),
     sb.from('team_notice_reads').select('notice_id').eq('user_id', TH.me),
   ]);
   if (nq.error) throw nq.error;
-  const notes = (nq.data || []).slice(0, 3), evs = (eq.data || []).slice(0, 4), alerts = (aq.data || []).slice(0, 3);
+  const allEv = eq.data || [];
+  const monthEnd = new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 1);
+  const evDays = new Set(allEv.filter((e) => new Date(e.starts_at) < monthEnd).map((e) => new Date(e.starts_at).getDate()));
+  const notes = (nq.data || []).slice(0, 3), evs = allEv.filter((e) => new Date(e.starts_at) >= dayStart).slice(0, 4), alerts = (aq.data || []).slice(0, 3);
   const seen = new Set((rq.data || []).map((r) => r.notice_id));
   const loc = getDateLocale();
   const cut = (x) => { const v = String(x || '').replace(/\s+/g, ' ').trim(); return v.length > 110 ? v.slice(0, 110) + '…' : v; };
@@ -443,13 +450,14 @@ async function thOverview(main) {
     : none('noNotices', 'No notices yet.');
   const evBody = evs.length ? evs.map((e) => '<div class="th-oi" onclick="thSelect({type:\'calendar\'})"><span class="t">' + esc(e.title) + '</span><span class="m">' + esc(e.all_day ? new Date(e.starts_at).toLocaleDateString(loc, { day: 'numeric', month: 'short' }) : thTime(e.starts_at)) + '</span></div>').join('')
     : none('noUpcoming', 'Nothing coming up.');
+  const miniCal = '<div class="th-cap" style="padding:0 8px">' + esc(monthStart.toLocaleDateString(loc, { month: 'long', year: 'numeric' })) + '</div><div class="th-cal th-mini" onclick="thSelect({type:\'calendar\'})" style="cursor:pointer">' + thCalGrid(monthStart, evDays, true, false) + '</div>';
 
   main.innerHTML = '<div class="th-mh"><strong style="font-size:.85rem"><i class="ti ti-layout-dashboard"></i> ' + esc(tht('overview', 'Overview')) + '</strong></div>'
     + '<div class="th-body"><div class="th-ov">'
     + card('warn', 'ti-bell', tht('needsAttention', 'Needs your attention'), null, unreadBody)
     + (alertsCh ? card('amb', 'ti-alert-triangle', tht('latestAlerts', 'Latest alerts'), "{type:'channel',id:'" + alertsCh.id + "'}", alertsBody) : '')
     + card('ok', 'ti-speakerphone', tht('noticeboard', 'Noticeboard'), "{type:'notices'}", noticeBody)
-    + card('', 'ti-calendar', tht('upcoming', 'Coming up'), "{type:'calendar'}", evBody)
+    + card('', 'ti-calendar', tht('upcoming', 'Coming up'), "{type:'calendar'}", miniCal + evBody)
     + '</div></div>';
 }
 
@@ -496,6 +504,22 @@ async function thDeleteNotice(id) {
   try { await thApi('DELETE', '/team/notices/' + id); thSelect({ type: 'notices' }); } catch (e) { thErr(e); }
 }
 
+// Month grid shared by the Calendar section and the Overview. Fri/Sat shaded, event days and today marked.
+function thCalGrid(first, evDays, isCurrentMonth, pickable) {
+  const now = new Date();
+  const loc = getDateLocale();
+  const dayNames = [...Array(7)].map((_, i) => new Date(2023, 0, 1 + i).toLocaleDateString(loc, { weekday: 'short' }));
+  let grid = dayNames.map((d) => '<span class="h">' + esc(d) + '</span>').join('');
+  for (let i = 0; i < first.getDay(); i++) grid += '<span></span>';
+  const days = new Date(first.getFullYear(), first.getMonth() + 1, 0).getDate();
+  for (let d = 1; d <= days; d++) {
+    const wd = new Date(first.getFullYear(), first.getMonth(), d).getDay();
+    const cls = [(wd === 5 || wd === 6) ? 'wk' : '', evDays.has(d) ? 'ev' : '', (isCurrentMonth && d === now.getDate()) ? 'td' : ''].join(' ');
+    const ymd = first.getFullYear() + '-' + String(first.getMonth() + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+    grid += '<span class="' + cls + '"' + (pickable ? ' style="cursor:pointer" onclick="thPickDay(\'' + ymd + '\')"' : '') + '>' + d + '</span>';
+  }
+  return grid;
+}
 // ---------------- calendar ----------------
 async function thCalendar(main) {
   const now = new Date();
@@ -508,16 +532,7 @@ async function thCalendar(main) {
   const canAddEv = TH.owner || TH.isManager;
   const evDays = new Set(evs.map((e) => new Date(e.starts_at).getDate()));
   const loc = getDateLocale();
-  const dayNames = [...Array(7)].map((_, i) => new Date(2023, 0, 1 + i).toLocaleDateString(loc, { weekday: 'short' }));
-  let grid = dayNames.map((d) => '<span class="h">' + esc(d) + '</span>').join('');
-  for (let i = 0; i < first.getDay(); i++) grid += '<span></span>';
-  const days = new Date(first.getFullYear(), first.getMonth() + 1, 0).getDate();
-  for (let d = 1; d <= days; d++) {
-    const wd = new Date(first.getFullYear(), first.getMonth(), d).getDay();
-    const cls = [(wd === 5 || wd === 6) ? 'wk' : '', evDays.has(d) ? 'ev' : '', (TH.monthOffset === 0 && d === now.getDate()) ? 'td' : ''].join(' ');
-    const ymd = first.getFullYear() + '-' + String(first.getMonth() + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
-    grid += '<span class="' + cls + '"' + (canAddEv ? ' style="cursor:pointer" onclick="thPickDay(\'' + ymd + '\')"' : '') + '>' + d + '</span>';
-  }
+  const grid = thCalGrid(first, evDays, TH.monthOffset === 0, canAddEv);
   const kinds = ['meeting', 'holiday', 'closed', 'event'];
   const canAdd = TH.owner || TH.isManager;
   const form = canAdd ? '<div class="th-form"><div class="th-row"><input id="thETitle" maxlength="120" style="flex:1" placeholder="' + esc(tht('eventTitle', 'Event title')) + '">'
