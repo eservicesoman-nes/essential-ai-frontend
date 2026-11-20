@@ -1150,7 +1150,7 @@ async function requestCancellation(clientId, clientName) {
   modal.innerHTML = `
     <div style="background:#161b22;border:1px solid #f85149;border-radius:14px;padding:28px;max-width:440px;width:90%;box-shadow:0 0 40px rgba(248,81,73,.2);">
       <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:#f85149;margin-bottom:8px;"><i class="ti ti-alert-triangle"></i> Cancel Subscription</div>
-      <div style="font-size:13px;color:#8b949e;margin-bottom:16px;">You are requesting cancellation for <strong style="color:#e6edf3;">${clientName}</strong>. This will start a 30-day offboarding window and alert you via Telegram and Rocket.Chat.</div>
+      <div style="font-size:13px;color:#8b949e;margin-bottom:16px;">You are requesting cancellation for <strong style="color:#e6edf3;">${clientName}</strong>. This will start a 30-day offboarding window and alert you via Telegram and the Team Hub.</div>
       <div style="font-size:11px;color:#8b949e;margin-bottom:6px;font-family:var(--mono);">Reason (optional):</div>
       <textarea id="cancelReason" style="width:100%;background:#0d1117;border:1px solid #1a2332;border-radius:8px;padding:10px;color:#e6edf3;font-size:13px;resize:vertical;min-height:80px;font-family:'Inter',sans-serif;" placeholder="Enter reason for cancellation..."></textarea>
       <div style="display:flex;gap:10px;margin-top:16px;justify-content:flex-end;">
