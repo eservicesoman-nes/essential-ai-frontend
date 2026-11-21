@@ -244,14 +244,15 @@ function thRenderSide() {
   const s = TH.sel || {};
   const off = thCollapsed();
   const item = (act, icon, label, on, badge) => '<button type="button" class="th-ci' + (on ? ' on' : '') + '"' + (on ? ' aria-current="page"' : '') + ' onclick="' + act + '"><span><i class="ti ' + icon + '"></i> ' + esc(label) + '</span>' + (badge ? '<span class="th-n">' + badge + '</span>' : '') + '</button>';
-  const group = (key, title, items) => items ? '<button type="button" class="th-lb" aria-expanded="' + (!off.has(key)) + '" onclick="thToggleGroup(\'' + key + '\')"><i class="ti ti-chevron-' + (off.has(key) ? 'right' : 'down') + '"></i>' + esc(title) + '</button>' + (off.has(key) ? '' : items) : '';
+  const group = (key, title, items, keep) => items ? '<button type="button" class="th-lb" aria-expanded="' + (!off.has(key)) + '" onclick="thToggleGroup(\'' + key + '\')"><i class="ti ti-chevron-' + (off.has(key) ? 'right' : 'down') + '"></i>' + esc(title) + '</button>' + (keep || '') + (off.has(key) ? '' : items) : '';
   const chItem = (c, label) => item("thSelect({type:'channel',id:'" + c.id + "'})", 'ti-hash', label, s.type === 'channel' && s.id === c.id, thBadge(c.id));
   let h = '';
   if (TH.fullHub) {
+    // Home stays visible even when the General group is collapsed (only Noticeboard and Calendar fold away).
     h += group('general', tht('generalGroup', 'General'),
-      item("thSelect({type:'home'})", 'ti-home', tht('home', 'Home'), s.type === 'home')
-      + item("thSelect({type:'notices'})", 'ti-speakerphone', tht('noticeboard', 'Noticeboard'), s.type === 'notices')
-      + item("thSelect({type:'calendar'})", 'ti-calendar', tht('calendar', 'Calendar'), s.type === 'calendar'));
+      item("thSelect({type:'notices'})", 'ti-speakerphone', tht('noticeboard', 'Noticeboard'), s.type === 'notices')
+      + item("thSelect({type:'calendar'})", 'ti-calendar', tht('calendar', 'Calendar'), s.type === 'calendar'),
+      item("thSelect({type:'home'})", 'ti-home', tht('home', 'Home'), s.type === 'home'));
   }
   const sys = TH.channels.filter((c) => c.kind !== 'team');
   h += group('mgmt', tht('management', 'Management'), sys.map((c) => chItem(c, thChannelLabel(c).slice(2))).join(''));
