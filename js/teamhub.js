@@ -485,24 +485,22 @@ async function thRenderRail() {
   if (!el || !TH || !TH.fullHub || !TH.sel || !(TH.sel.type === 'home' || TH.sel.type === 'channel')) return;
   const seq = (TH.railSeq = (TH.railSeq || 0) + 1);
   try {
-    const alertsCh = TH.channels.find((c) => c.kind === 'alerts');
     const dayStart = new Date(); dayStart.setHours(0, 0, 0, 0);
     const monthStart = new Date(dayStart.getFullYear(), dayStart.getMonth(), 1);
     const monthEnd = new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 1);
     const since = new Date(Date.now() - 7 * 864e5).toISOString();
     const needQuota = TH.owner || TH.isManager;
     const none = Promise.resolve({ data: [] });
-    const [nq, eq, aq, rq, mq, gq, uq] = await Promise.all([
+    const [nq, eq, rq, mq, gq, uq] = await Promise.all([
       sb.from('team_notices').select('id,channel_id,author_id,title,body,pinned,created_at').order('pinned', { ascending: false }).order('created_at', { ascending: false }).limit(5),
       sb.from('team_events').select('id,title,kind,starts_at,all_day').gte('starts_at', monthStart.toISOString()).order('starts_at').limit(60),
-      alertsCh ? sb.from('team_messages').select('id,body,created_at').eq('channel_id', alertsCh.id).order('created_at', { ascending: false }).limit(3) : none,
       sb.from('team_notice_reads').select('notice_id').eq('user_id', TH.me),
       sb.from('team_mentions').select('message_id,team_messages!inner(channel_id,author_id,body,created_at)').eq('user_id', TH.me).gte('team_messages.created_at', since).limit(20),
       needQuota ? sb.from('team_access_grants').select('channel_id,manager_id,quota') : none,
       needQuota ? sb.from('team_members').select('channel_id,granted_by').not('granted_by', 'is', null) : none,
     ]);
     if (!TH || seq !== TH.railSeq) return; // a newer render has started
-    const notes = (nq.data || []).slice(0, 5), alerts = (aq.data || []).slice(0, 3);
+    const notes = (nq.data || []).slice(0, 5);
     const allEv = eq.data || [];
     const evDays = thEvKinds(allEv.filter((e) => new Date(e.starts_at) < monthEnd));
     const upcoming = allEv.filter((e) => new Date(e.starts_at) >= dayStart).slice(0, 4);
@@ -528,10 +526,8 @@ async function thRenderRail() {
       + '<div class="th-cal th-mini" role="button" tabindex="0" onclick="thSelect({type:\'calendar\'})" onkeydown="if(event.key===\'Enter\')thSelect({type:\'calendar\'})" style="cursor:pointer">' + thCalGrid(monthStart, evDays, true, false) + '</div>'
       + '<div class="th-lg">' + lg + '</div>' + evList + '</div>';
 
-    // needs attention: alerts (CEO and managers only), unread channels
+    // needs attention: unread channels (alerts live in the #alerts channel itself, no duplicate card)
     h += '<div class="th-rt">' + esc(tht('needsAttention', 'Needs your attention')) + '</div>';
-    if (alertsCh) h += card('amb', 'ti-alert-triangle', tht('latestAlerts', 'Latest alerts'), chSel(alertsCh.id),
-      alerts.length ? alerts.map((m) => rowB(chSel(alertsCh.id), esc(cut(m.body, 110)) + '<span class="m">' + esc(thTime(m.created_at)) + '</span>')).join('') : quiet('noAlertsYet', 'No alerts yet.'));
     const unread = TH.channels.filter((c) => thBadge(c.id) > 0).sort((x, y) => thBadge(y.id) - thBadge(x.id)).slice(0, 4);
     h += unread.length
       ? card('warn', 'ti-bell', tht('unreadLabel', 'Unread'), null, unread.map((c) => rowB(chSel(c.id), '<strong>' + esc(thChannelLabel(c)) + '</strong><span class="m">' + thBadge(c.id) + ' ' + esc(tht('unreadWord', 'new')) + '</span>')).join(''))
