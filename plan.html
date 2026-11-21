@@ -56,7 +56,8 @@
 (function () {
   var SUPABASE_URL = 'https://sfpfjjdtczvuxyhjievt.supabase.co';
   var SUPABASE_ANON = 'sb_publishable_MH7rnJ7r8_-1TzGXcieNfA_NXoHQZbm';
-  var sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+  // Public page: never pick up or refresh a logged-in NES AI session from this browser.
+  var sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON, { auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false } });
   var LANGS = [['en', 'EN'], ['ar', 'ع'], ['pt', 'PT']];
   var STR = {}, lang = 'en', CAT = null, busy = false;
   var $ = function (id) { return document.getElementById(id); };
