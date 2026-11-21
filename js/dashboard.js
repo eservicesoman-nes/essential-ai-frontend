@@ -544,6 +544,7 @@ async function showCEODashboard(){
     </div>
       <div id="ceoResizer" title="${t('ui.dash.dragResize')}"></div>
       <div style="display:flex;flex-direction:column;overflow:hidden;">
+        <div id="ceoCal" style="display:none;flex-shrink:0;padding:10px 14px 0;"></div>
         <div style="padding:9px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
           <div style="font-family:var(--mono);font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;display:flex;align-items:center;gap:5px;"><i class="ti ti-radar" style="font-size:11px;color:var(--nes-blue);"></i>${t('ceoDashboardSection.marketIntelligence')}</div>
           <div id="feedUnreadBadge" style="font-size:.58rem;font-family:var(--mono);padding:2px 7px;border-radius:8px;background:#1a3a6e;color:#409cff;font-weight:700;display:none;">0 NEW</div>
@@ -555,6 +556,7 @@ async function showCEODashboard(){
     `;
   const dashEl=document.getElementById('ceoDashContent');
   if(dashEl)requestAnimationFrame(()=>{dashEl.style.opacity='1';});
+  loadCeoCalendar();
   loadCeoFeed();
   loadApiSummary();
   loadUsageSummary();
@@ -987,4 +989,63 @@ function hideTeamHub(){
   }
   document.getElementById('mainContent').style.display='flex';
   window._teamHubVisible=false;
+}
+
+// Team Hub calendar card above Market Intelligence. Shows only when the client has the full Team Hub
+// (modules.nes_command !== false) and teamhub.js is loaded; any failure hides the card, never the dashboard.
+async function loadCeoCalendar(){
+  const box=document.getElementById('ceoCal');
+  if(!box)return;
+  try{
+    const mods=window.clientModules||{};
+    if(mods.nes_command===false||typeof thCalGrid!=='function'||typeof thEvKinds!=='function'||typeof tht!=='function'||typeof sb==='undefined')return;
+    const now=new Date();
+    const first=new Date(now.getFullYear(),now.getMonth(),1);
+    const next=new Date(now.getFullYear(),now.getMonth()+1,1);
+    const {data,error}=await sb.from('team_events').select('id,title,kind,starts_at,all_day')
+      .gte('starts_at',first.toISOString()).lt('starts_at',next.toISOString()).order('starts_at');
+    if(error)throw error;
+    if(!document.getElementById('ceoCal'))return;
+    const evs=data||[];
+    const loc=getDateLocale();
+    const upcoming=evs.filter(e=>new Date(e.starts_at)>=new Date(now.getFullYear(),now.getMonth(),now.getDate())).slice(0,2);
+    const when=e=>e.all_day?new Date(e.starts_at).toLocaleDateString(loc,{weekday:'short',day:'numeric',month:'short'}):new Date(e.starts_at).toLocaleString(loc,{day:'numeric',month:'short',hour:'numeric',minute:'2-digit'});
+    const kc={meeting:'var(--accent,#409cff)',holiday:'var(--green,#3fb950)',closed:'var(--orange,#f0883e)',event:'var(--accent,#409cff)'};
+    const lg=['meeting','holiday','closed'].map(k=>'<span><b style="background:'+kc[k]+'"></b>'+esc(tht('kind_'+k,k))+'</span>').join('');
+    const evList=upcoming.length?upcoming.map(e=>'<div class="cc-ev" style="--c:'+(kc[e.kind]||kc.event)+'">'+esc(e.title)+'<span>'+esc(tht('kind_'+e.kind,e.kind))+' · '+esc(when(e))+'</span></div>').join('')
+      :'<div style="font-size:.7rem;color:var(--muted);">'+esc(tht('noUpcoming','Nothing coming up.'))+'</div>';
+    box.innerHTML='<style>'
+      +'#ceoCal .cc{border:1px solid var(--border);border-top:2px solid var(--accent,#409cff);background:var(--card2,var(--surface));border-radius:12px;padding:10px 12px;cursor:pointer;box-sizing:border-box}'
+      +'#ceoCal .cc:focus-visible{outline:2px solid var(--accent,#409cff);outline-offset:2px}'
+      +'#ceoCal .cc-h{display:flex;justify-content:space-between;align-items:center;margin:0 0 6px;font-weight:600;font-size:.8rem}'
+      +'#ceoCal .cc-h i{color:var(--muted);font-size:.8rem}'
+      +'#ceoCal .cc-g{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center;font-size:.68rem;margin:0 0 6px}'
+      +'#ceoCal .cc-g span{padding:3px 0;border-radius:5px;color:var(--muted)}'
+      +'#ceoCal .cc-g .wk{background:var(--card,rgba(255,255,255,.04))}'
+      +'#ceoCal .cc-g .ev{background:rgba(64,156,255,.18);color:var(--accent,#409cff);font-weight:700}'
+      +'#ceoCal .cc-g .ev-closed{background:rgba(240,136,62,.2);color:var(--orange,#f0883e)}'
+      +'#ceoCal .cc-g .ev-holiday{background:rgba(63,185,80,.18);color:var(--green,#3fb950)}'
+      +'#ceoCal .cc-g .td{outline:1px solid var(--accent,#409cff)}'
+      +'#ceoCal .cc-lg{display:flex;gap:10px;flex-wrap:wrap;font-size:.64rem;color:var(--muted);margin:0 0 6px}'
+      +'#ceoCal .cc-lg b{display:inline-block;width:7px;height:7px;border-radius:2px;margin-inline-end:4px}'
+      +'#ceoCal .cc-ev{display:block;border-inline-start:3px solid var(--c);background:color-mix(in srgb,var(--c) 10%,transparent);border-radius:7px;padding:4px 9px;margin:0 0 4px;font-size:.74rem}'
+      +'#ceoCal .cc-ev span{display:block;color:var(--muted);font-size:.66rem}'
+      +'</style>'
+      +'<div class="cc" role="button" tabindex="0" id="ceoCalCard" aria-label="'+esc(tht('calendar','Calendar'))+'">'
+      +'<div class="cc-h"><span>'+esc(first.toLocaleDateString(loc,{month:'long',year:'numeric'}))+'</span><i class="ti ti-calendar"></i></div>'
+      +'<div class="cc-g">'+thCalGrid(first,thEvKinds(evs),true,false)+'</div>'
+      +'<div class="cc-lg">'+lg+'</div>'+evList+'</div>';
+    box.style.display='block';
+    const card=document.getElementById('ceoCalCard');
+    const go=()=>{
+      if(typeof showView==='function')showView('command');
+      let tries=0; // wait for the hub to finish loading, then open its Calendar section (gives up after ~6s)
+      const iv=setInterval(()=>{ tries++;
+        if(typeof TH!=='undefined'&&TH&&TH.channels&&typeof thSelect==='function'){clearInterval(iv);thSelect({type:'calendar'});}
+        else if(tries>30)clearInterval(iv);
+      },200);
+    };
+    card.onclick=go;
+    card.onkeydown=ev=>{ if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();go();} };
+  }catch(e){ box.style.display='none'; console.warn('ceo calendar',e&&e.message); }
 }
