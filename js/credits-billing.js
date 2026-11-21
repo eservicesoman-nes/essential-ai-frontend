@@ -207,7 +207,8 @@ function renderPlanCards(){
     }
     (PLAN_FEATURE_KEYS[p.plan]||[]).forEach(k=>f.push(li(t(k))));
     if(p.plan==='presence')f.push(li('Deen NES AI — '+t('ui.bill.freeGlobally')));
-    if(!custom&&p.features&&p.features.team_hub==='coming_soon')f.push(li(t('ui.bill.teamHubSoon'),true));
+    if(!custom&&p.features&&p.features.team_hub==='live')f.push(li(t('ui.bill.teamHub')));
+    else if(!custom&&p.features&&p.features.team_hub==='coming_soon')f.push(li(t('ui.bill.teamHubSoon'),true));
     if(!custom)f.push(li(t('ui.bill.fTrial7').replace('{n}',trialDefaultDays())));
     const priceHtml=custom
       ?`<div class="plan-price" style="color:${st.color};">${t('ui.bill.custom')}</div><div class="plan-period">&nbsp;</div>`
