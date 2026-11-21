@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Design your plan · NES AI</title>
+<style>
+  :root { --bg:#0a0f1e; --card:#121a2e; --field:#0d1426; --text:#e8e8ec; --muted:#8b949e; --blue:#409cff; --line:#23304d; --ok:#3fb950; --err:#f85149; --warn:#d29922; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif; min-height:100vh; padding:24px 16px; display:flex; justify-content:center; }
+  .card { width:100%; max-width:640px; background:var(--card); border:1px solid var(--line); border-radius:16px; padding:28px 24px; align-self:flex-start; }
+  .top { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+  .brand { font-weight:700; letter-spacing:.04em; color:var(--blue); }
+  .langs { display:flex; gap:6px; }
+  .langs button { background:none; border:1px solid var(--line); color:var(--muted); border-radius:8px; padding:4px 10px; cursor:pointer; font-size:.8rem; }
+  .langs button.on { color:var(--text); border-color:var(--blue); }
+  h1 { font-size:1.5rem; margin:14px 0 6px; }
+  p.sub { color:var(--muted); margin:0 0 22px; font-size:.95rem; line-height:1.5; }
+  h2 { font-size:.72rem; text-transform:uppercase; letter-spacing:.1em; color:var(--blue); margin:22px 0 10px; font-weight:600; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; }
+  label { display:block; font-size:.8rem; color:var(--muted); }
+  select, input[type=text], input[type=email], input[type=tel] { width:100%; margin-top:6px; background:var(--field); border:1px solid var(--line); color:var(--text); border-radius:10px; padding:11px 12px; font-size:1rem; font-family:inherit; }
+  select:focus, input:focus { outline:2px solid var(--blue); outline-offset:1px; }
+  .mods { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:8px 14px; }
+  .mod { display:flex; align-items:center; gap:8px; font-size:.95rem; color:var(--text); cursor:pointer; }
+  .mod.dis { color:var(--muted); cursor:default; }
+  .mod input { width:18px; height:18px; accent-color:var(--blue); margin:0; }
+  .badge { font-size:.65rem; color:var(--warn); border:1px solid var(--warn); border-radius:4px; padding:0 5px; }
+  .from { margin-top:18px; padding:10px 12px; border:1px solid var(--line); border-radius:10px; font-size:.82rem; color:var(--muted); line-height:1.5; }
+  .consent { display:flex; gap:10px; align-items:flex-start; margin-top:16px; font-size:.85rem; color:var(--text); line-height:1.4; cursor:pointer; }
+  .consent input { width:18px; height:18px; margin-top:2px; accent-color:var(--blue); flex-shrink:0; }
+  .priv { margin-top:8px; font-size:.75rem; color:var(--muted); line-height:1.5; }
+  .priv a, .foot a { color:var(--blue); }
+  button.send { width:100%; margin-top:20px; background:var(--blue); color:#fff; border:none; border-radius:10px; padding:14px; font-size:1rem; font-weight:600; cursor:pointer; }
+  button.send:disabled { opacity:.6; cursor:default; }
+  .msg { margin-top:14px; padding:12px; border-radius:10px; font-size:.9rem; background:rgba(248,81,73,.12); color:var(--err); }
+  .done, .off { text-align:center; padding:28px 8px; }
+  .done h2.t, .off h2.t { font-size:1.2rem; text-transform:none; letter-spacing:0; margin:0 0 8px; color:var(--ok); }
+  .off h2.t { color:var(--text); }
+  .done p, .off p { color:var(--muted); margin:0; line-height:1.5; }
+  .hp { position:absolute; top:0; inset-inline-start:0; width:0; height:0; overflow:hidden; opacity:0; pointer-events:none; }
+  .foot { text-align:center; color:var(--muted); font-size:.75rem; margin-top:22px; line-height:1.8; }
+  [dir=rtl] .consent, [dir=rtl] .mod { text-align:right; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="top"><span class="brand">NES AI</span><div class="langs" id="langs"></div></div>
+  <h1 id="title"></h1>
+  <p class="sub" id="sub"></p>
+  <div id="app"></div>
+  <div class="foot" id="foot"></div>
+</div>
+<script src="supabase.min.js"></script>
+<script>
+(function () {
+  var SUPABASE_URL = 'https://sfpfjjdtczvuxyhjievt.supabase.co';
+  var SUPABASE_ANON = 'sb_publishable_MH7rnJ7r8_-1TzGXcieNfA_NXoHQZbm';
+  var sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+  var LANGS = [['en', 'EN'], ['ar', 'ع'], ['pt', 'PT']];
+  var STR = {}, lang = 'en', CAT = null, busy = false;
+  var $ = function (id) { return document.getElementById(id); };
+  function get(path, fb) {
+    var c = STR, p = path.split('.');
+    for (var i = 0; i < p.length; i++) { if (!c) break; c = c[p[i]]; }
+    return typeof c === 'string' ? c : fb;
+  }
+  var pr = function (k) { return get('planRequest.' + k, ''); };
+  function el(tag, attrs, text) {
+    var e = document.createElement(tag);
+    if (attrs) Object.keys(attrs).forEach(function (k) { e.setAttribute(k, attrs[k]); });
+    if (text !== undefined) e.textContent = text;
+    return e;
+  }
+  function pickLang() {
+    var q = new URLSearchParams(location.search).get('lang');
+    var n = (q || (navigator.language || 'en')).slice(0, 2).toLowerCase();
+    return ['en', 'ar', 'pt'].indexOf(n) >= 0 ? n : 'en';
+  }
+  async function loadStrings(l) {
+    var r = await fetch('strings/' + l + '.json');
+    if (!r.ok) throw new Error('strings');
+    STR = await r.json();
+  }
+  async function setLang(l) {
+    lang = l;
+    try { await loadStrings(l); } catch (e) { if (l !== 'en') { lang = 'en'; await loadStrings('en'); } }
+    document.documentElement.lang = lang;
+    document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+    document.title = pr('pageTitle');
+    $('title').textContent = pr('title');
+    $('sub').textContent = pr('sub');
+    var foot = $('foot'); foot.textContent = '';
+    foot.appendChild(el('div', null, pr('powered')));
+    var langs = $('langs'); langs.textContent = '';
+    LANGS.forEach(function (x) {
+      var b = el('button', { type: 'button', 'aria-label': x[1] }, x[1]);
+      if (x[0] === lang) b.className = 'on';
+      b.onclick = function () { if (!busy && x[0] !== lang) { setLang(x[0]); } };
+      langs.appendChild(b);
+    });
+    render();
+  }
+
+  function showUnavailable() {
+    var app = $('app'); app.textContent = '';
+    var box = el('div', { class: 'off' });
+    box.appendChild(el('h2', { class: 't' }, pr('unavailableTitle')));
+    box.appendChild(el('p', null, pr('unavailableBody')));
+    app.appendChild(box);
+  }
+  function showDone() {
+    var app = $('app'); app.textContent = '';
+    var box = el('div', { class: 'done' });
+    box.appendChild(el('h2', { class: 't' }, pr('doneTitle')));
+    box.appendChild(el('p', null, pr('doneBody')));
+    app.appendChild(box);
+  }
+
+  function render() {
+    var app = $('app');
+    if (CAT === null) { app.textContent = pr('loading'); return; }
+    if (!CAT.enabled) { showUnavailable(); return; }
+    var items = CAT.items || [];
+    // keep what the visitor already picked when the language changes
+    var keep = {};
+    app.querySelectorAll('.step').forEach(function (s) { if (s.value) keep[s.value] = 1; });
+    app.querySelectorAll('.mod input:checked').forEach(function (c) { keep[c.value] = 1; });
+    var keepForm = {};
+    ['name', 'company', 'email', 'phone'].forEach(function (id) { var f = $(id); if (f) keepForm[id] = f.value; });
+    app.textContent = '';
+    var form = el('form', { id: 'f', novalidate: 'novalidate', autocomplete: 'on' });
+
+    var groups = ['sara_minutes_per_month', 'daily_ai_messages', 'team_user_limit', 'storage_free_gb', 'social_posts_per_day'];
+    form.appendChild(el('h2', null, pr('limits')));
+    var g = el('div', { class: 'grid' });
+    groups.forEach(function (lk) {
+      var steps = items.filter(function (i) { return i.limit_key === lk && i.status !== 'coming_soon'; });
+      if (!steps.length) return;
+      var lab = el('label', null, get('customPlan.group.' + lk, lk));
+      var sel = el('select', { class: 'step', 'data-limit': lk });
+      sel.appendChild(el('option', { value: '' }, get('customPlan.none', '—')));
+      steps.forEach(function (i) {
+        var o = el('option', { value: i.key }, String(i.qty));
+        if (keep[i.key]) o.selected = true;
+        sel.appendChild(o);
+      });
+      lab.appendChild(sel); g.appendChild(lab);
+    });
+    form.appendChild(g);
+
+    form.appendChild(el('h2', null, pr('modules')));
+    var mods = el('div', { class: 'mods' });
+    var flats = items.filter(function (i) { return i.unit === 'flat'; });
+    flats.forEach(function (i) {
+      var soon = i.status === 'coming_soon';
+      var lab = el('label', { class: 'mod' + (soon ? ' dis' : '') });
+      var cb = el('input', { type: 'checkbox', value: i.key, 'data-module': i.module_key });
+      if (soon) cb.disabled = true;
+      if (keep[i.key] && !soon) cb.checked = true;
+      lab.appendChild(cb);
+      lab.appendChild(el('span', null, get('customPlan.mod.' + i.module_key, i.module_key)));
+      if (soon) lab.appendChild(el('span', { class: 'badge' }, get('customPlan.comingSoon', '')));
+      mods.appendChild(lab);
+    });
+    form.appendChild(mods);
+    // dependencies (e.g. WhatsApp alerts needs Lead capture)
+    var byKey = {}; flats.forEach(function (i) { byKey[i.key] = i; });
+    var cbs = [].slice.call(mods.querySelectorAll('input'));
+    function modCb(moduleKey) { return cbs.filter(function (c) { return c.getAttribute('data-module') === moduleKey; })[0]; }
+    cbs.forEach(function (c) {
+      c.addEventListener('change', function () {
+        var it = byKey[c.value];
+        if (c.checked && it && it.depends_on) it.depends_on.forEach(function (d) { var x = modCb(d); if (x && !x.disabled) x.checked = true; });
+        if (!c.checked) flats.forEach(function (o) {
+          if (o.depends_on && o.depends_on.indexOf(it.module_key) >= 0) { var x = modCb(o.module_key); if (x) x.checked = false; }
+        });
+      });
+    });
+
+    if (CAT.min_total_omr) form.appendChild(el('div', { class: 'from' }, pr('from').replace('{min}', String(Math.round(Number(CAT.min_total_omr))))));
+
+    form.appendChild(el('h2', null, pr('contact')));
+    var c = el('div', { class: 'grid' });
+    [['name', 'text', 'name', true], ['company', 'text', 'organization', true], ['email', 'email', 'email', true], ['phone', 'tel', 'tel', false]].forEach(function (f) {
+      var lab = el('label', null, pr(f[0]));
+      var inp = el('input', { id: f[0], type: f[1], autocomplete: f[2], maxlength: f[0] === 'email' ? '254' : '120' });
+      if (f[3]) inp.required = true;
+      if (keepForm[f[0]]) inp.value = keepForm[f[0]];
+      lab.appendChild(inp); c.appendChild(lab);
+    });
+    form.appendChild(c);
+
+    var hp = el('div', { class: 'hp', 'aria-hidden': 'true' });
+    hp.appendChild(el('input', { id: 'website', name: 'website', type: 'text', tabindex: '-1', autocomplete: 'off' }));
+    form.appendChild(hp);
+
+    var cons = el('label', { class: 'consent' });
+    cons.appendChild(el('input', { id: 'consent', type: 'checkbox' }));
+    cons.appendChild(el('span', null, pr('consent')));
+    form.appendChild(cons);
+    var priv = el('div', { class: 'priv' }); priv.innerHTML = pr('privacy'); form.appendChild(priv);
+
+    form.appendChild(el('div', { id: 'msg', role: 'alert' }));
+    var btn = el('button', { class: 'send', type: 'submit', id: 'send' }, pr('submit'));
+    form.appendChild(btn);
+    form.addEventListener('submit', submit);
+    app.appendChild(form);
+  }
+
+  function showErr(text) {
+    var m = $('msg'); m.textContent = ''; if (!text) { m.className = ''; return; }
+    m.className = 'msg'; m.textContent = text;
+  }
+
+  async function submit(ev) {
+    ev.preventDefault();
+    if (busy) return;
+    var keys = [].slice.call(document.querySelectorAll('.step')).map(function (s) { return s.value; }).filter(Boolean)
+      .concat([].slice.call(document.querySelectorAll('.mod input:checked')).map(function (c) { return c.value; }));
+    var name = $('name').value.trim(), company = $('company').value.trim(), email = $('email').value.trim(), phone = $('phone').value.trim();
+    if (!keys.length) { showErr(pr('pickOne')); return; }
+    if (name.length < 2 || company.length < 2 || !/^[^@\s<>"']+@[^@\s<>"']+\.[^@\s<>"']{2,}$/.test(email) || !$('consent').checked) { showErr(pr('invalid')); return; }
+    showErr('');
+    busy = true; var btn = $('send'); btn.disabled = true; btn.textContent = pr('sending');
+    try {
+      var r = await sb.rpc('custom_quote_request_submit', {
+        p_keys: keys, p_name: name, p_company: company, p_email: email, p_phone: phone || null,
+        p_lang: lang, p_consent: true, p_hp: $('website').value
+      });
+      if (r.error) {
+        var m = String(r.error.message || '');
+        showErr(m.indexOf('too_many_requests') >= 0 ? pr('tooMany') : m.indexOf('invalid_input') >= 0 ? pr('invalid') : m.indexOf('unavailable') >= 0 ? pr('unavailableTitle') : pr('fail'));
+        busy = false; btn.disabled = false; btn.textContent = pr('submit');
+        return;
+      }
+      busy = false; showDone();
+    } catch (e) {
+      showErr(pr('fail')); busy = false; btn.disabled = false; btn.textContent = pr('submit');
+    }
+  }
+
+  (async function init() {
+    await setLang(pickLang());
+    try {
+      var r = await sb.rpc('custom_quote_public_catalogue');
+      CAT = (r && !r.error && r.data) ? r.data : { enabled: false };
+    } catch (e) { CAT = { enabled: false }; }
+    render();
+  })();
+})();
+</script>
+</body>
+</html>
