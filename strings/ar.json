@@ -278,7 +278,8 @@
     "users": "المستخدمون",
     "email": "البريد الإلكتروني",
     "saveCredentials": "حفظ بيانات الاعتماد",
-    "saveBranding": "حفظ الهوية التجارية"
+    "saveBranding": "حفظ الهوية التجارية",
+    "customPlan": "باقة مخصصة"
   },
   "itSetupItem": {
     "socialMedia": "وسائل التواصل الاجتماعي",
@@ -977,5 +978,52 @@
     "weather": "الطقس",
     "weatherLoading": "الطقس...",
     "allDay": "طوال اليوم"
+  },
+  "customPlan": {
+    "loading": "جارٍ التحميل…",
+    "loadError": "تعذّر تحميل كتالوج الباقة المخصصة.",
+    "off": "الباقة المخصصة غير مفعّلة. العروض مسودات داخلية فقط؛ الإرسال إلى العميل والدفع قريباً.",
+    "settingsLine": "الهامش {m}% · الحد الأدنى للهامش {f}% · الحد الأدنى للسعر {min} ر.ع · الرسوم الأساسية {base}",
+    "notSet": "غير محددة",
+    "none": "لا شيء",
+    "modules": "الوحدات",
+    "comingSoon": "قريباً",
+    "calc": "احسب",
+    "save": "حفظ كمسودة",
+    "send": "إرسال إلى العميل",
+    "quotes": "العروض المحفوظة",
+    "noQuotes": "لا توجد عروض بعد",
+    "pickOne": "اختر عنصراً واحداً على الأقل",
+    "calcError": "تعذّر تسعير هذا الاختيار.",
+    "item": "العنصر",
+    "qty": "الكمية",
+    "cost": "تكلفتنا (دولار)",
+    "price": "السعر (ر.ع)",
+    "noFloor": "الحد الأدنى للسعر غير محدد",
+    "total": "السعر الشهري",
+    "vat": "+ {v}% ضريبة القيمة المضافة",
+    "margin": "الهامش عند الاستخدام الكامل",
+    "warnings": "الفحوصات",
+    "saved": "تم حفظ مسودة العرض",
+    "items": "عناصر",
+    "group": {
+      "sara_minutes_per_month": "دقائق سارة / شهر",
+      "daily_ai_messages": "رسائل الذكاء الاصطناعي / يوم",
+      "team_user_limit": "مستخدمو الفريق",
+      "storage_free_gb": "التخزين (جيجابايت)",
+      "social_posts_per_day": "منشورات التواصل / يوم"
+    },
+    "mod": {
+      "nes_command": "مركز الفريق",
+      "ceo_dashboard": "لوحة الرئيس التنفيذي",
+      "intel_feed": "NES Pulse",
+      "ai_chatbot": "روبوت المحادثة",
+      "lead_capture": "التقاط العملاء المحتملين",
+      "whatsapp_alerts": "تنبيهات واتساب",
+      "email_notifications": "إشعارات البريد",
+      "apex_outreach": "Apex Outreach",
+      "apex_advisory": "Apex Advisory",
+      "islam360": "Deen NES AI"
+    }
   }
 }

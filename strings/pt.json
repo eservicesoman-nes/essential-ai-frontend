@@ -278,7 +278,8 @@
     "users": "Utilizadores",
     "email": "Email",
     "saveCredentials": "Guardar Credenciais",
-    "saveBranding": "Guardar Identidade Visual"
+    "saveBranding": "Guardar Identidade Visual",
+    "customPlan": "Plano personalizado"
   },
   "itSetupItem": {
     "socialMedia": "Redes sociais",
@@ -977,5 +978,52 @@
     "weather": "Tempo",
     "weatherLoading": "Tempo...",
     "allDay": "Dia inteiro"
+  },
+  "customPlan": {
+    "loading": "A carregar…",
+    "loadError": "Não foi possível carregar o catálogo do plano personalizado.",
+    "off": "O plano personalizado está desligado. As propostas são apenas rascunhos internos; o envio ao cliente e o pagamento estão para breve.",
+    "settingsLine": "Margem {m}% · margem mínima {f}% · preço mínimo OMR {min} · taxa base {base}",
+    "notSet": "não definida",
+    "none": "Nenhum",
+    "modules": "Módulos",
+    "comingSoon": "Em breve",
+    "calc": "Calcular",
+    "save": "Guardar rascunho",
+    "send": "Enviar ao cliente",
+    "quotes": "Propostas guardadas",
+    "noQuotes": "Ainda sem propostas",
+    "pickOne": "Escolha pelo menos um item",
+    "calcError": "Não foi possível calcular esta seleção.",
+    "item": "Item",
+    "qty": "Qtd",
+    "cost": "O nosso custo (USD)",
+    "price": "Preço (OMR)",
+    "noFloor": "preço mínimo não definido",
+    "total": "Preço mensal",
+    "vat": "+ {v}% IVA",
+    "margin": "Margem com uso total",
+    "warnings": "Verificações",
+    "saved": "Rascunho guardado",
+    "items": "itens",
+    "group": {
+      "sara_minutes_per_month": "Minutos Sara / mês",
+      "daily_ai_messages": "Mensagens IA / dia",
+      "team_user_limit": "Utilizadores da equipa",
+      "storage_free_gb": "Armazenamento (GB)",
+      "social_posts_per_day": "Publicações / dia"
+    },
+    "mod": {
+      "nes_command": "Team Hub",
+      "ceo_dashboard": "Painel CEO",
+      "intel_feed": "NES Pulse",
+      "ai_chatbot": "Chatbot IA",
+      "lead_capture": "Captação de leads",
+      "whatsapp_alerts": "Alertas WhatsApp",
+      "email_notifications": "Notificações por email",
+      "apex_outreach": "Apex Outreach",
+      "apex_advisory": "Apex Advisory",
+      "islam360": "Deen NES AI"
+    }
   }
 }

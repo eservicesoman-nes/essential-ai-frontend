@@ -102,7 +102,7 @@ function renderClientManagerFull(clients,activeId=null){
   setTimeout(()=>{
     if(window._activeTab&&window._activeTab!=='modules'){
       const tabEl=document.querySelector('.cm-tab[onclick*="\'' +window._activeTab+ '\'"]');
-      if(tabEl){['modules','creds','branding','agents','billing','users'].forEach(t=>{const e=document.getElementById('cm-'+t);if(e)e.style.display=t===window._activeTab?'block':'none';});document.querySelectorAll('.cm-tab').forEach(t=>t.classList.remove('active'));tabEl.classList.add('active');if(window._activeTab==='users'&&window._activeClientId)loadClientUsers(window._activeClientId);if(window._activeTab==='billing'&&window._activeClientId)loadPaymentHistory(window._activeClientId);}
+      if(tabEl){['modules','creds','branding','agents','billing','users','custom'].forEach(t=>{const e=document.getElementById('cm-'+t);if(e)e.style.display=t===window._activeTab?'block':'none';});document.querySelectorAll('.cm-tab').forEach(t=>t.classList.remove('active'));tabEl.classList.add('active');if(window._activeTab==='users'&&window._activeClientId)loadClientUsers(window._activeClientId);if(window._activeTab==='billing'&&window._activeClientId)loadPaymentHistory(window._activeClientId);if(window._activeTab==='custom'&&window._activeClientId&&window.loadCustomPlan)loadCustomPlan(window._activeClientId);}
     }
   },50);
   const colors=['#1a3a6e','#2d1f00','#0d2818','#2d0e0e','#1a2332'];
@@ -184,6 +184,7 @@ function renderClientDetail(c,colors,textColors,idx){
         <div class="cm-tab ${window._activeTab==='billing'?'active':''}" onclick="cmTab('billing',this)">${t('clientTab.billing')}</div>
         <div class="cm-tab ${window._activeTab==='users'?'active':''}" onclick="cmTab('users',this)"><i class="ti ti-users" style="margin-inline-end:4px;font-size:11px;"></i>${t('clientTab.users')}</div>
         <div class="cm-tab ${window._activeTab==='email'?'active':''}" onclick="cmTab('email',this)"><i class="ti ti-mail" style="margin-inline-end:4px;font-size:11px;"></i>${t('clientTab.email')}</div>
+        <div class="cm-tab ${window._activeTab==='custom'?'active':''}" onclick="cmTab('custom',this)"><i class="ti ti-adjustments" style="margin-inline-end:4px;font-size:11px;"></i>${t('clientTab.customPlan','Custom plan')}</div>
       </div>
       <div class="cm-content">
 
@@ -516,6 +517,10 @@ function renderClientDetail(c,colors,textColors,idx){
             <div id="em_plan_limit" style="font-family:var(--mono);font-size:.65rem;color:var(--muted);text-align:center;margin-top:6px;"></div>
             </div>
           </div>
+        </div>
+
+        <div id="cm-custom" style="display:none;">
+          <div id="cm-custom-body-${c.id}" style="min-height:40px;"></div>
         </div>
 
         <div id="cm-users" style="display:none;">

@@ -101,11 +101,12 @@ function cmTab(name,el){
     window._cmUnsaved=false;
   }
   window._activeTab=name;
-  ['modules','creds','branding','agents','billing','users','email'].forEach(t=>{const e=document.getElementById('cm-'+t);if(e)e.style.display=t===name?'block':'none';});
+  ['modules','creds','branding','agents','billing','users','email','custom'].forEach(t=>{const e=document.getElementById('cm-'+t);if(e)e.style.display=t===name?'block':'none';});
   document.querySelectorAll('.cm-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');
   if(name==='users'&&window._activeClientId)loadClientUsers(window._activeClientId);
   if(name==='email'&&window._activeClientId)loadEmailAccounts(window._activeClientId);
   if(name==='billing'&&window._activeClientId)loadPaymentHistory(window._activeClientId);
+  if(name==='custom'&&window._activeClientId&&window.loadCustomPlan)loadCustomPlan(window._activeClientId);
 }
 
 function showDeptAccessModal(){

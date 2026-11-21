@@ -278,7 +278,8 @@
     "users": "Users",
     "email": "Email",
     "saveCredentials": "Save Credentials",
-    "saveBranding": "Save Branding"
+    "saveBranding": "Save Branding",
+    "customPlan": "Custom plan"
   },
   "itSetupItem": {
     "socialMedia": "Social media",
@@ -990,5 +991,52 @@
     "weather": "Weather",
     "weatherLoading": "Weather...",
     "allDay": "All day"
+  },
+  "customPlan": {
+    "loading": "Loading…",
+    "loadError": "Could not load the custom plan catalogue.",
+    "off": "Custom plan is switched off. Quotes are internal drafts only; sending to the client and payment are coming soon.",
+    "settingsLine": "Margin {m}% · minimum margin {f}% · minimum price OMR {min} · base fee {base}",
+    "notSet": "not set",
+    "none": "None",
+    "modules": "Modules",
+    "comingSoon": "Coming soon",
+    "calc": "Calculate",
+    "save": "Save draft",
+    "send": "Send to client",
+    "quotes": "Saved quotes",
+    "noQuotes": "No quotes yet",
+    "pickOne": "Pick at least one item",
+    "calcError": "Could not price this selection.",
+    "item": "Item",
+    "qty": "Qty",
+    "cost": "Our cost (USD)",
+    "price": "Price (OMR)",
+    "noFloor": "minimum price not set",
+    "total": "Monthly price",
+    "vat": "+ {v}% VAT",
+    "margin": "Margin at full use",
+    "warnings": "Checks",
+    "saved": "Draft quote saved",
+    "items": "items",
+    "group": {
+      "sara_minutes_per_month": "Sara minutes / month",
+      "daily_ai_messages": "AI messages / day",
+      "team_user_limit": "Team users",
+      "storage_free_gb": "Storage (GB)",
+      "social_posts_per_day": "Social posts / day"
+    },
+    "mod": {
+      "nes_command": "Team Hub",
+      "ceo_dashboard": "CEO dashboard",
+      "intel_feed": "NES Pulse",
+      "ai_chatbot": "AI chatbot",
+      "lead_capture": "Lead capture",
+      "whatsapp_alerts": "WhatsApp alerts",
+      "email_notifications": "Email notifications",
+      "apex_outreach": "Apex Outreach",
+      "apex_advisory": "Apex Advisory",
+      "islam360": "Deen NES AI"
+    }
   }
 }
