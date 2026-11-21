@@ -57,7 +57,6 @@
     html += '<div style="display:flex;gap:8px;margin-bottom:12px;">'
       + '<button class="cm-btn" onclick="calcCustomPlan(\'' + esc(clientId) + '\',false)">' + esc(ct('calc', 'Calculate')) + '</button>'
       + '<button class="cm-btn primary" onclick="calcCustomPlan(\'' + esc(clientId) + '\',true)">' + esc(ct('save', 'Save draft')) + '</button>'
-      + '<button class="cm-btn" disabled title="' + esc(ct('comingSoon', 'Coming soon')) + '" style="opacity:.5;cursor:not-allowed;">' + esc(ct('send', 'Send to client')) + ' · ' + esc(ct('comingSoon', 'Coming soon')) + '</button>'
       + '</div>'
       + '<div id="cp-result-' + esc(clientId) + '"></div>'
       + '<div style="font-family:var(--mono);font-size:.68rem;color:var(--muted);margin:14px 0 6px;">' + esc(ct('quotes', 'Saved quotes')) + '</div>'
@@ -103,12 +102,80 @@
     const { data, error } = await sb.rpc('custom_quote_list', { p_client_id: clientId });
     if (error) { box.innerHTML = '<div style="color:#f85149;font-size:.75rem;">' + esc(error.message) + '</div>'; return; }
     if (!data || !data.length) { box.innerHTML = '<div style="color:var(--muted);font-size:.75rem;">' + esc(ct('noQuotes', 'No quotes yet')) + '</div>'; return; }
-    box.innerHTML = data.map(q => '<div style="display:flex;justify-content:space-between;gap:10px;border-bottom:1px solid var(--border);padding:6px 0;font-size:.74rem;">'
-      + '<span>' + esc(new Date(q.created_at).toLocaleString()) + ' · ' + esc(q.status) + ' · ' + (q.lines || []).length + ' ' + esc(ct('items', 'items')) + '</span>'
-      + '<span style="font-family:var(--mono);">OMR ' + num(q.price_omr) + ' · ' + num(q.margin_pct, 1) + '%</span></div>').join('');
+    const btn = (label, fn) => '<button class="cm-btn" style="padding:2px 9px;font-size:.68rem;" onclick="' + fn + '">' + esc(label) + '</button>';
+    box.innerHTML = data.map(q => {
+      const live = q.status === 'sent' && q.valid_until && new Date(q.valid_until) > new Date();
+      const st = q.status === 'sent' && !live ? 'expired' : q.status;
+      const extra = q.status === 'sent' && q.valid_until ? ' · ' + esc(ct('validUntil', 'valid until {d}').replace('{d}', fmtDate(q.valid_until))) : '';
+      const action = q.status === 'draft' ? btn(ct('send', 'Send to client'), "sendCustomQuote('" + esc(q.id) + "','" + esc(clientId) + "')")
+        : (q.status === 'sent' || q.status === 'accepted') ? btn(ct('withdraw', 'Withdraw'), "withdrawCustomQuote('" + esc(q.id) + "','" + esc(clientId) + "')") : '';
+      return '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;border-bottom:1px solid var(--border);padding:6px 0;font-size:.74rem;">'
+        + '<span>' + esc(new Date(q.created_at).toLocaleString()) + ' · <b>' + esc(st) + '</b>' + extra + ' · ' + (q.lines || []).length + ' ' + esc(ct('items', 'items')) + '</span>'
+        + '<span style="display:flex;align-items:center;gap:8px;"><span style="font-family:var(--mono);">OMR ' + num(q.price_omr) + ' · ' + num(q.margin_pct, 1) + '%</span>' + action + '</span></div>';
+    }).join('');
+  }
+
+  function fmtDate(d) {
+    try { return new Date(d).toLocaleDateString(typeof getDateLocale === 'function' ? getDateLocale('en-GB') : 'en-GB', { day: 'numeric', month: 'short', year: 'numeric' }); }
+    catch (e) { return String(d).slice(0, 10); }
+  }
+
+  async function sendCustomQuote(quoteId, clientId) {
+    if (!confirm(ct('sendConfirm', 'Send this quote to the client? Their account owner will see it on the Plans page for 14 days.'))) return;
+    const { error } = await sb.rpc('custom_quote_send', { p_quote_id: quoteId });
+    if (error) { showToast(error.message); return; }
+    showToast(ct('sent', 'Quote sent to the client'));
+    loadCustomQuoteList(clientId);
+  }
+
+  async function withdrawCustomQuote(quoteId, clientId) {
+    if (!confirm(ct('withdrawConfirm', 'Withdraw this quote? The client will no longer see it.'))) return;
+    const { error } = await sb.rpc('custom_quote_withdraw', { p_quote_id: quoteId });
+    if (error) { showToast(error.message); return; }
+    showToast(ct('withdrawn', 'Quote withdrawn'));
+    loadCustomQuoteList(clientId);
+  }
+
+  // Client side: the account owner's current quote on the Plans page. Items and one total only.
+  const qt = (k, fb) => t('quoteCard.' + k, fb);
+  function itemLabel(i) {
+    if (i.limit_key) return ct('group.' + i.limit_key, i.limit_key) + ': ' + num(i.qty);
+    return modName(i.module_key);
+  }
+  async function loadCustomQuoteCard() {
+    const box = document.getElementById('customQuoteCard');
+    if (!box || typeof sb === 'undefined') return;
+    let data = null;
+    try { const r = await sb.rpc('custom_quote_mine'); if (r.error) return; data = r.data; } catch (e) { return; }
+    if (!data || !data.id) { box.innerHTML = ''; return; }
+    const accepted = data.status === 'accepted';
+    const items = (data.items || []).map(i => '<li style="display:flex;gap:8px;align-items:center;padding:3px 0;"><i class="ti ti-check" style="color:#3fb950;font-size:13px;"></i>' + esc(itemLabel(i)) + '</li>').join('');
+    box.innerHTML = '<div style="max-width:560px;margin:0 auto 22px;background:var(--surface);border:1px solid #d29922;border-radius:12px;padding:18px 20px;">'
+      + '<div style="font-family:\'Syne\',sans-serif;font-size:.7rem;color:#d29922;text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px;">' + esc(qt('title', 'Your custom plan quote')) + '</div>'
+      + '<div style="color:var(--muted);font-size:.78rem;margin-bottom:10px;">' + esc(qt('intro', 'Prepared for you by New Essential Services. Prices are per month.')) + '</div>'
+      + '<ul style="list-style:none;margin:0 0 12px;padding:0;font-size:.85rem;">' + items + '</ul>'
+      + '<div style="display:flex;justify-content:space-between;font-size:.85rem;"><span>' + esc(qt('monthly', 'Monthly price')) + '</span><span style="font-family:var(--mono);">OMR ' + num(data.price_omr, 3) + '</span></div>'
+      + '<div style="display:flex;justify-content:space-between;font-size:.8rem;color:var(--muted);"><span>' + esc(qt('vat', 'VAT {v}%').replace('{v}', num(data.vat_pct))) + '</span><span style="font-family:var(--mono);">OMR ' + num(data.vat_omr, 3) + '</span></div>'
+      + '<div style="display:flex;justify-content:space-between;font-weight:700;font-size:.95rem;margin-top:6px;border-top:1px solid var(--border);padding-top:6px;"><span>' + esc(qt('totalIncl', 'Total per month incl. VAT')) + '</span><span style="font-family:var(--mono);color:#d29922;">OMR ' + num(data.total_incl_vat_omr, 3) + '</span></div>'
+      + (accepted
+        ? '<div style="margin-top:12px;padding:9px 12px;background:rgba(63,185,80,.10);border:1px solid rgba(63,185,80,.4);border-radius:8px;font-size:.8rem;">' + esc(qt('accepted', 'Accepted on {d}. New Essential Services will contact you with your invoice and your start date.').replace('{d}', fmtDate(data.accepted_at))) + '</div>'
+        : '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:12px;"><span style="font-family:var(--mono);font-size:.68rem;color:var(--muted);">' + esc(qt('validUntil', 'Valid until {d}').replace('{d}', fmtDate(data.valid_until))) + '</span>'
+          + '<button class="plan-action-btn" style="width:auto;padding:8px 18px;margin:0;" onclick="acceptCustomQuote(\'' + esc(data.id) + '\')">' + esc(qt('accept', 'Accept quote')) + '</button></div>')
+      + '</div>';
+  }
+  async function acceptCustomQuote(quoteId) {
+    if (!confirm(qt('acceptConfirm', 'Accept this quote? New Essential Services will send you an invoice. Nothing is charged automatically.'))) return;
+    const { error } = await sb.rpc('custom_quote_accept', { p_quote_id: quoteId });
+    if (error) { showToast(error.message); return; }
+    showToast(qt('acceptedToast', 'Quote accepted. We will send your invoice.'));
+    loadCustomQuoteCard();
   }
 
   window.loadCustomPlan = loadCustomPlan;
   window.calcCustomPlan = calcCustomPlan;
   window.loadCustomQuoteList = loadCustomQuoteList;
+  window.sendCustomQuote = sendCustomQuote;
+  window.withdrawCustomQuote = withdrawCustomQuote;
+  window.loadCustomQuoteCard = loadCustomQuoteCard;
+  window.acceptCustomQuote = acceptCustomQuote;
 })();

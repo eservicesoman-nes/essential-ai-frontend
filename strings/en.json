@@ -995,7 +995,7 @@
   "customPlan": {
     "loading": "Loading…",
     "loadError": "Could not load the custom plan catalogue.",
-    "off": "Custom plan is switched off. Quotes are internal drafts only; sending to the client and payment are coming soon.",
+    "off": "Custom plan access is switched off. You can send a quote and the client can accept it, but nothing is activated or charged: invoice by hand, activation comes later.",
     "settingsLine": "Margin {m}% · minimum margin {f}% · minimum price OMR {min} · base fee {base}",
     "notSet": "not set",
     "none": "None",
@@ -1037,6 +1037,24 @@
       "apex_outreach": "Apex Outreach",
       "apex_advisory": "Apex Advisory",
       "islam360": "Deen NES AI"
-    }
+    },
+    "sendConfirm": "Send this quote to the client? Their account owner will see it on the Plans page for 14 days.",
+    "sent": "Quote sent to the client",
+    "withdraw": "Withdraw",
+    "withdrawConfirm": "Withdraw this quote? The client will no longer see it.",
+    "withdrawn": "Quote withdrawn",
+    "validUntil": "valid until {d}"
+  },
+  "quoteCard": {
+    "title": "Your custom plan quote",
+    "intro": "Prepared for you by New Essential Services. Prices are per month.",
+    "monthly": "Monthly price",
+    "vat": "VAT {v}%",
+    "totalIncl": "Total per month incl. VAT",
+    "validUntil": "Valid until {d}",
+    "accept": "Accept quote",
+    "acceptConfirm": "Accept this quote? New Essential Services will send you an invoice. Nothing is charged automatically.",
+    "acceptedToast": "Quote accepted. We will send your invoice.",
+    "accepted": "Accepted on {d}. New Essential Services will contact you with your invoice and your start date."
   }
 }

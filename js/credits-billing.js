@@ -243,6 +243,7 @@ function showPricing(){
       <div style="text-align:center;margin-bottom:6px;font-family:var(--mono);font-size:.75rem;color:var(--muted);">${t('ui.bill.header')}</div>
       <div style="text-align:center;margin-bottom:16px;font-family:var(--mono);font-size:.68rem;color:var(--muted);">${t('ui.bill.trialCancel').replace('{n}',trialDefaultDays())}</div>
       ${trialCapsLine()}
+      <div id="customQuoteCard"></div>
 
       <div class="plan-grid">${renderPlanCards()}</div>
 
@@ -270,6 +271,7 @@ function showPricing(){
       </div>
     </div>`;
   addLocalCurrencyToPricing();
+  if(typeof loadCustomQuoteCard==='function')loadCustomQuoteCard();
 }
 
 // Purely additive: for non-Oman clients, appends a small local-currency equivalent

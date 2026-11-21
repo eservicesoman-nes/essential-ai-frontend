@@ -982,7 +982,7 @@
   "customPlan": {
     "loading": "A carregar…",
     "loadError": "Não foi possível carregar o catálogo do plano personalizado.",
-    "off": "O plano personalizado está desligado. As propostas são apenas rascunhos internos; o envio ao cliente e o pagamento estão para breve.",
+    "off": "O acesso do plano personalizado está desligado. Pode enviar uma proposta e o cliente pode aceitá-la, mas nada é ativado nem cobrado: fature manualmente, a ativação vem depois.",
     "settingsLine": "Margem {m}% · margem mínima {f}% · preço mínimo OMR {min} · taxa base {base}",
     "notSet": "não definida",
     "none": "Nenhum",
@@ -1024,6 +1024,24 @@
       "apex_outreach": "Apex Outreach",
       "apex_advisory": "Apex Advisory",
       "islam360": "Deen NES AI"
-    }
+    },
+    "sendConfirm": "Enviar esta proposta ao cliente? O titular da conta vê-la-á na página de Planos durante 14 dias.",
+    "sent": "Proposta enviada ao cliente",
+    "withdraw": "Retirar",
+    "withdrawConfirm": "Retirar esta proposta? O cliente deixará de a ver.",
+    "withdrawn": "Proposta retirada",
+    "validUntil": "válida até {d}"
+  },
+  "quoteCard": {
+    "title": "A sua proposta de plano personalizado",
+    "intro": "Preparada para si pela New Essential Services. Preços mensais.",
+    "monthly": "Preço mensal",
+    "vat": "IVA {v}%",
+    "totalIncl": "Total mensal com IVA",
+    "validUntil": "Válida até {d}",
+    "accept": "Aceitar proposta",
+    "acceptConfirm": "Aceitar esta proposta? A New Essential Services enviará uma fatura. Nada é cobrado automaticamente.",
+    "acceptedToast": "Proposta aceite. Enviaremos a sua fatura.",
+    "accepted": "Aceite em {d}. A New Essential Services entrará em contacto consigo com a fatura e a data de início."
   }
 }
