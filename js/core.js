@@ -326,6 +326,9 @@ function setupNavForRole(){
       if((curView==='ceo' && !hasTierModule(TIER_PLANS,'ceo_dashboard')) || (curView==='intel' && !hasTierModule(TIER_PLANS,'intel_feed'))){
         try{ localStorage.setItem('nesai_view','chat'); }catch(e){}
         showView('chat');
+      } else if(curView==='ceo' && userRole!=='nesadmin' && String(window.clientPlan||'').toLowerCase()==='presence'){
+        // The start view may have drawn the full dashboard before the plan was known; show the lite one.
+        showCEOLite();
       }
       if(imageNavEl && mods.image_gen === false) imageNavEl.style.display='none';
       if(deenNavEl){
@@ -376,6 +379,8 @@ function hasTierModule(planKeys, modKey){
   const plan=(window.clientPlan||'').toLowerCase();
   // Activated custom plan (hidden plan row custom_xxxx): tier modules come from the quoted modules, not the plan name.
   if(plan.startsWith('custom_'))return !!modKey && (window.clientModules||{})[modKey]===true;
+  // Presence gets the lite CEO Dashboard (showCEOLite in dashboard.js); every other tier module stays Operations and above.
+  if(plan==='presence' && modKey==='ceo_dashboard')return true;
   return planKeys.includes(plan);
 }
 

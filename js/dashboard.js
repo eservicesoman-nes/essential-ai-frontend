@@ -329,7 +329,64 @@ async function loadPartnerFeed(){
   }catch(e){}
 }
 
+// Presence plan: lite CEO Dashboard. Leads, Sara and usage only; no funnel, pipeline or Market Intelligence (Operations and above).
+async function showCEOLite(){
+  const mc=document.getElementById('mainContent');
+  mc.style.overflow='auto';
+  window._ceoRendered=false;
+  const card='background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px 14px;';
+  const lbl='font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;';
+  mc.innerHTML=`
+    <div style="padding-block:11px;padding-inline-end:var(--header-clearance);padding-inline-start:60px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;gap:10px;">
+      <div>
+        <div style="font-family:var(--mono);font-size:.8rem;color:var(--nes-blue);font-weight:800;">${t('sectionTitle.ceoDashboard')}</div>
+        <div style="font-family:var(--mono);font-size:.65rem;color:var(--muted);">${t('nav.live')} · ${new Date().toLocaleDateString(getDateLocale('en-GB'),{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</div>
+      </div>
+      <span style="font-family:var(--mono);font-size:.65rem;padding:3px 9px;border-radius:6px;border:1px solid var(--border);color:var(--nes-blue);">${t('ceoLite.badge')}</span>
+    </div>
+    <div class="page" id="ceoLiteContent" style="padding:14px 16px;max-width:760px;">
+      <div style="text-align:center;padding:40px;color:var(--muted);font-family:var(--mono);font-size:.8rem;">${t('loading.dashboard')}</div>
+    </div>`;
+  let leads=[];
+  try{
+    const since=new Date(Date.now()-30*24*60*60*1000).toISOString();
+    let q=sb.from('leads').select('id,email,phone,status,created_at').gte('created_at',since).order('created_at',{ascending:false}).limit(500);
+    if(userClientId)q=q.eq('client_id',userClientId);
+    const {data}=await q;
+    leads=data||[];
+  }catch(e){}
+  const stOf=l=>(l.status||'').toLowerCase();
+  const booked=l=>stOf(l)==='booked';
+  const called=l=>{const s=stOf(l);return s==='booked'||s.startsWith('called')||s==='calling'||s==='no_answer';};
+  const stLabel=l=>booked(l)?t('ceoLite.stBooked'):called(l)?t('ceoLite.stCalled'):t('ceoLite.stNew');
+  const metric=(icon,label,val)=>`<div style="${card}"><div style="${lbl}display:flex;align-items:center;gap:5px;"><i class="ti ${icon}" style="font-size:12px;color:var(--nes-blue);"></i>${label}</div><div style="font-size:1.6rem;font-weight:700;color:var(--text);margin-top:4px;">${val}</div></div>`;
+  const rows=leads.slice(0,5).map(l=>`<div style="display:flex;justify-content:space-between;gap:10px;font-size:.78rem;padding:6px 0;border-top:1px solid var(--border);"><span style="color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(l.email||l.phone||'—')}</span><span style="font-family:var(--mono);font-size:.68rem;color:var(--muted);white-space:nowrap;">${esc(stLabel(l))}</span></div>`).join('');
+  const el=document.getElementById('ceoLiteContent');
+  if(!el)return;
+  el.innerHTML=`
+    <div style="${lbl}margin-bottom:7px;">${t('ceoLite.last30')}</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:12px;">
+      ${metric('ti-users',t('ceoDashboardSection.funnelLeads'),leads.length)}
+      ${metric('ti-phone-call',t('ceoDashboardSection.funnelCalled'),leads.filter(called).length)}
+      ${metric('ti-calendar-check',t('ceoDashboardSection.funnelBookedLabel'),leads.filter(booked).length)}
+    </div>
+    <div style="${card}margin-bottom:12px;">
+      <div style="${lbl}margin-bottom:8px;">${t('ceoLite.usageTitle')}</div>
+      <div id="usageSummaryContent" style="display:flex;flex-direction:column;gap:9px;"><div style="color:var(--muted);font-family:var(--mono);font-size:.7rem;">${t('common.loading')}</div></div>
+    </div>
+    <div style="${card}margin-bottom:12px;">
+      <div style="${lbl}margin-bottom:4px;">${t('ceoLite.latestLeads')}</div>
+      ${rows||`<div style="color:var(--muted);font-size:.78rem;padding:8px 0;">${t('ceoLite.noLeads')}</div>`}
+    </div>
+    <div style="border:1px dashed var(--border);border-radius:8px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:12px;">
+      <div><div style="font-size:.8rem;font-weight:600;color:var(--text);"><i class="ti ti-lock" style="font-size:13px;"></i> ${t('ceoLite.lockedTitle')}</div><div style="font-size:.72rem;color:var(--muted);">${t('ceoLite.lockedDesc')}</div></div>
+      <button onclick="showPricing()" style="padding:6px 12px;border-radius:7px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:.72rem;cursor:pointer;white-space:nowrap;">${t('ceoLite.upgrade')}</button>
+    </div>`;
+  loadUsageSummary();
+}
+
 async function showCEODashboard(){
+  if(userClientId && userRole!=='nesadmin' && String(window.clientPlan||'').toLowerCase()==='presence'){ return showCEOLite(); }
   const mc=document.getElementById('mainContent');
   mc.style.overflow='hidden';
   if(window._ceoRendered&&document.getElementById('ceoDashContent')&&document.getElementById('ceoFeedItems')){

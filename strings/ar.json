@@ -1094,5 +1094,19 @@
     "back": "nes-ai.com",
     "powered": "بدعم من NES AI",
     "loading": "جارٍ التحميل…"
+  },
+  "ceoLite": {
+    "badge": "مبسّط",
+    "last30": "آخر 30 يومًا",
+    "usageTitle": "استهلاك الباقة",
+    "latestLeads": "أحدث العملاء المحتملين",
+    "noLeads": "لا يوجد عملاء محتملون بعد. سيظهرون هنا عند وصولهم.",
+    "lockedTitle": "مسار العملاء والمبيعات وMarket Intelligence",
+    "lockedDesc": "متضمنة ابتداءً من باقة Operations.",
+    "upgrade": "ترقية",
+    "stNew": "جديد",
+    "stCalled": "اتصلت سارة",
+    "stBooked": "محجوز",
+    "usageFailed": "تعذّر تحميل الاستهلاك."
   }
 }

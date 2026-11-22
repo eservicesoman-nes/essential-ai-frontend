@@ -1094,5 +1094,19 @@
     "back": "nes-ai.com",
     "powered": "Com tecnologia NES AI",
     "loading": "A carregar…"
+  },
+  "ceoLite": {
+    "badge": "Lite",
+    "last30": "Últimos 30 dias",
+    "usageTitle": "Utilização do plano",
+    "latestLeads": "Últimos leads",
+    "noLeads": "Ainda sem leads. Vão aparecer aqui quando chegarem.",
+    "lockedTitle": "Pipeline de leads, funil e Market Intelligence",
+    "lockedDesc": "Incluído a partir do plano Operations.",
+    "upgrade": "Atualizar",
+    "stNew": "Novo",
+    "stCalled": "Sara ligou",
+    "stBooked": "Marcado",
+    "usageFailed": "Não foi possível carregar a utilização."
   }
 }

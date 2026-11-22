@@ -1107,5 +1107,19 @@
     "back": "nes-ai.com",
     "powered": "Powered by NES AI",
     "loading": "Loading…"
+  },
+  "ceoLite": {
+    "badge": "Lite",
+    "last30": "Last 30 days",
+    "usageTitle": "Plan usage",
+    "latestLeads": "Latest leads",
+    "noLeads": "No leads yet. They will appear here as they arrive.",
+    "lockedTitle": "Lead pipeline, funnel and Market Intelligence",
+    "lockedDesc": "Included from the Operations plan.",
+    "upgrade": "Upgrade",
+    "stNew": "New",
+    "stCalled": "Sara called",
+    "stBooked": "Booked",
+    "usageFailed": "Usage could not be loaded."
   }
 }
