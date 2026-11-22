@@ -353,7 +353,14 @@
     "ok": "OK",
     "platformRunning": "Plataforma ativa 24/7 — todos os sistemas normais",
     "feelsLike": "Sensação térmica",
-    "gov": "Gov · Portos · Aviação"
+    "gov": "Gov · Portos · Aviação",
+    "funnel30d": "Funil · últimos 30 dias",
+    "funnelLeads": "Leads",
+    "funnelCalled": "Chamadas da Sara",
+    "funnelBooked": "marcadas",
+    "funnelRate": "Taxa de marcação",
+    "funnelTopSources": "Principais origens",
+    "funnelNoData": "Sem leads nos últimos 30 dias"
   },
   "briefcaseUi": {
     "askNesAi": "Perguntar à NES AI",

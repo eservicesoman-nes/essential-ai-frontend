@@ -366,7 +366,14 @@
     "ok": "OK",
     "platformRunning": "Platform running 24/7 — all systems normal",
     "feelsLike": "Feels like",
-    "gov": "Gov · Ports · Aviation"
+    "gov": "Gov · Ports · Aviation",
+    "funnel30d": "Funnel · last 30 days",
+    "funnelLeads": "Leads",
+    "funnelCalled": "Sara called",
+    "funnelBooked": "booked",
+    "funnelRate": "Booked rate",
+    "funnelTopSources": "Top sources",
+    "funnelNoData": "No leads in the last 30 days"
   },
   "briefcaseUi": {
     "askNesAi": "Ask NES AI",

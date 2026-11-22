@@ -349,7 +349,7 @@ async function showCEODashboard(){
   try{
     const today=new Date().toISOString().split('T')[0];
     const ownOnly=!!(userClientId && userRole !== 'nesadmin');
-    let leadsQ2=sb.from('leads').select('id,email,phone,country,industry,status,created_at').order('created_at',{ascending:false}).limit(1000);
+    let leadsQ2=sb.from('leads').select('id,email,phone,country,industry,status,created_at,source,utm_source,utm_campaign').order('created_at',{ascending:false}).limit(1000);
     let countQ=sb.from('leads').select('id',{count:'exact',head:true});
     if(ownOnly){leadsQ2=leadsQ2.eq('client_id',userClientId);countQ=countQ.eq('client_id',userClientId);}
     const[{data:allLeads},{count:exactTotal}]=await Promise.all([leadsQ2,countQ]);
@@ -374,6 +374,17 @@ async function showCEODashboard(){
     else if(s==='won'||s==='lost')stageCounts.closed++;
     else stageCounts.new++;
   });
+  // Funnel, last 30 days: leads -> Sara called -> booked, and top sources (UTM, else capture source). (22 Nov 2026)
+  const since30=new Date(Date.now()-30*24*60*60*1000).toISOString();
+  const f30=leads.filter(l=>(l.created_at||'')>=since30);
+  const isBooked=l=>(l.status||'').toLowerCase()==='booked';
+  const isCalled=l=>{const st=(l.status||'').toLowerCase();return st==='booked'||st.startsWith('called')||st==='calling'||st==='no_answer';};
+  const fLeads=f30.length,fCalled=f30.filter(isCalled).length,fBooked=f30.filter(isBooked).length;
+  const fRate=fLeads?Math.round(fBooked/fLeads*100):0;
+  const srcMap={};
+  f30.forEach(l=>{const k=(l.utm_source||l.source||'direct').toString().slice(0,40);const o=srcMap[k]||(srcMap[k]={n:0,b:0});o.n++;if(isBooked(l))o.b++;});
+  const srcRows=Object.entries(srcMap).sort((x,y)=>y[1].n-x[1].n).slice(0,5).map(([k,o])=>`
+    <div style="display:flex;justify-content:space-between;font-size:.72rem;padding:3px 0;border-bottom:1px solid var(--border);"><span style="color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:60%;">${esc(k)}</span><span style="font-family:var(--mono);color:var(--muted);">${o.n} · <span style="color:#3fb950;">${o.b} ${t('ceoDashboardSection.funnelBooked')}</span></span></div>`).join('');
   const stagePcts={
     new:Math.round(stageCounts.new/totalLeads*100)||0,
     contacted:Math.round(stageCounts.contacted/totalLeads*100)||0,
@@ -479,6 +490,18 @@ async function showCEODashboard(){
             <div class="dc-title">${t('ceoDashboardSection.leadGeography')}</div>
             ${geoRows||`<div style="color:var(--muted);font-family:var(--mono);font-size:.75rem;">${t('empty.noLeadsDashboard')}</div>`}
           </div>
+        </div>`:''}
+        ${(userRole==='ceo'||userRole==='nesadmin'||userRole==='nes_partner')?`
+        <div class="dash-card" style="margin-bottom:12px;">
+          <div class="dc-title" style="display:flex;align-items:center;gap:5px;"><i class="ti ti-filter" style="font-size:10px;color:var(--nes-blue)"></i>${t('ceoDashboardSection.funnel30d')}</div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:8px;text-align:center;">
+            <div><div style="font-size:1.05rem;font-weight:700;color:var(--nes-blue);">${fLeads}</div><div style="font-size:.6rem;color:var(--muted);">${t('ceoDashboardSection.funnelLeads')}</div></div>
+            <div><div style="font-size:1.05rem;font-weight:700;color:#7f77dd;">${fCalled}</div><div style="font-size:.6rem;color:var(--muted);">${t('ceoDashboardSection.funnelCalled')}</div></div>
+            <div><div style="font-size:1.05rem;font-weight:700;color:#3fb950;">${fBooked}</div><div style="font-size:.6rem;color:var(--muted);">${t('ceoDashboardSection.funnelBooked')}</div></div>
+            <div><div style="font-size:1.05rem;font-weight:700;color:#d29922;">${fRate}%</div><div style="font-size:.6rem;color:var(--muted);">${t('ceoDashboardSection.funnelRate')}</div></div>
+          </div>
+          <div style="font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-family:var(--mono);margin-bottom:3px;">${t('ceoDashboardSection.funnelTopSources')}</div>
+          ${srcRows||`<div style="color:var(--muted);font-family:var(--mono);font-size:.72rem;">${t('ceoDashboardSection.funnelNoData')}</div>`}
         </div>`:''}
         <div class="dash-card" style="margin-bottom:12px;">
           <div class="dc-title">${t('ceoDashboardSection.usageThisMonth')}</div>
