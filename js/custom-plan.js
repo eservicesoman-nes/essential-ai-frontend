@@ -7,6 +7,13 @@
   const num = (v, d) => (v === null || v === undefined || v === '') ? '—' : Number(v).toFixed(d == null ? 0 : d);
   const modName = (k) => ct('mod.' + k, k);
 
+  // Catalogue items by key, so quote lines show names (e.g. "Sara minutes / month") instead of keys (sara_200).
+  const CAT = {};
+  function lineName(key) {
+    const i = CAT[key];
+    if (!i) return String(key || '').replace(/^cm_/, '');
+    return i.limit_key ? ct('group.' + i.limit_key, i.limit_key) : modName(i.module_key);
+  }
   async function loadCustomPlan(clientId) {
     const box = document.getElementById('cm-custom-body-' + clientId);
     if (!box) return;
@@ -18,6 +25,7 @@
     }
     const s = data.settings || {};
     const items = data.items || [];
+    items.forEach(i => { CAT[i.key] = i; });
     let html = '';
     if (!s.enabled) {
       html += '<div style="background:rgba(210,153,34,.10);border:1px solid rgba(210,153,34,.45);border-radius:8px;padding:9px 12px;font-size:.75rem;margin-bottom:12px;">'
@@ -79,7 +87,7 @@
       return;
     }
     const rows = (data.lines || []).map(l =>
-      '<tr><td style="padding:5px 4px;">' + esc(l.key.replace(/^cm_/, '')) + '</td>'
+      '<tr><td style="padding:5px 4px;">' + esc(lineName(l.key)) + '</td>'
       + '<td style="text-align:right;padding:5px 4px;font-family:var(--mono);">' + num(l.qty) + '</td>'
       + '<td style="text-align:right;padding:5px 4px;font-family:var(--mono);">' + num(l.cost_usd, 2) + '</td>'
       + '<td style="text-align:right;padding:5px 4px;font-family:var(--mono);color:' + (l.priced ? 'var(--text)' : '#f0883e') + ';">'
