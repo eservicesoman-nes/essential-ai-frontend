@@ -497,7 +497,7 @@ async function showCEODashboard(){
           <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:8px;text-align:center;">
             <div><div style="font-size:1.05rem;font-weight:700;color:var(--nes-blue);">${fLeads}</div><div style="font-size:.6rem;color:var(--muted);">${t('ceoDashboardSection.funnelLeads')}</div></div>
             <div><div style="font-size:1.05rem;font-weight:700;color:#7f77dd;">${fCalled}</div><div style="font-size:.6rem;color:var(--muted);">${t('ceoDashboardSection.funnelCalled')}</div></div>
-            <div><div style="font-size:1.05rem;font-weight:700;color:#3fb950;">${fBooked}</div><div style="font-size:.6rem;color:var(--muted);">${t('ceoDashboardSection.funnelBooked')}</div></div>
+            <div><div style="font-size:1.05rem;font-weight:700;color:#3fb950;">${fBooked}</div><div style="font-size:.6rem;color:var(--muted);">${t('ceoDashboardSection.funnelBookedLabel')}</div></div>
             <div><div style="font-size:1.05rem;font-weight:700;color:#d29922;">${fRate}%</div><div style="font-size:.6rem;color:var(--muted);">${t('ceoDashboardSection.funnelRate')}</div></div>
           </div>
           <div style="font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-family:var(--mono);margin-bottom:3px;">${t('ceoDashboardSection.funnelTopSources')}</div>

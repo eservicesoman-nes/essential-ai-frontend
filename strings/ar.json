@@ -360,7 +360,8 @@
     "funnelBooked": "محجوز",
     "funnelRate": "نسبة الحجز",
     "funnelTopSources": "أهم المصادر",
-    "funnelNoData": "لا يوجد عملاء محتملون في آخر 30 يومًا"
+    "funnelNoData": "لا يوجد عملاء محتملون في آخر 30 يومًا",
+    "funnelBookedLabel": "محجوز"
   },
   "briefcaseUi": {
     "askNesAi": "اسأل نيس",

@@ -360,7 +360,8 @@
     "funnelBooked": "marcadas",
     "funnelRate": "Taxa de marcação",
     "funnelTopSources": "Principais origens",
-    "funnelNoData": "Sem leads nos últimos 30 dias"
+    "funnelNoData": "Sem leads nos últimos 30 dias",
+    "funnelBookedLabel": "Marcadas"
   },
   "briefcaseUi": {
     "askNesAi": "Perguntar à NES AI",
