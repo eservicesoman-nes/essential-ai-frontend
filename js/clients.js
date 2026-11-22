@@ -209,6 +209,22 @@ function renderClientDetail(c,colors,textColors,idx){
               const tierOk = c.full_access_override===true || presenceLite || (isCustomPlan ? modules[key]===true : ['operations','workforce','infrastructure'].includes((c.plan||'').toLowerCase()));
               const statusLabel = c.full_access_override===true ? 'Enabled — Custom access override' : presenceLite ? 'Included — lite view (Presence plan)' : isCustomPlan ? (tierOk ? 'Included — custom plan quote' : 'Not in the custom plan quote') : (tierOk ? 'Included — Operations plan or higher' : 'Not included — upgrade to Operations+');
               const statusColor = tierOk ? '#3fb950' : '#8b949e';
+              if(key==='ceo_dashboard'){
+                // NES admin can force this on or off per client (clients.tier_overrides via set_tier_override); 'plan' follows the plan tier.
+                const ovCur = ((c.tier_overrides||{})[key]) || 'plan';
+                const ovLabel = ovCur==='on' ? 'Forced on — NES admin override' : ovCur==='off' ? 'Forced off — NES admin override' : statusLabel;
+                const ovColor = ovCur==='on' ? '#3fb950' : ovCur==='off' ? '#f85149' : statusColor;
+                return `
+              <div class="mod">
+                <i class="ti ${icon} mod-icon"></i>
+                <div style="flex:1;"><div class="mod-name">${name}</div><div class="mod-desc" id="ovDesc_${key}" data-planlabel="${esc(statusLabel)}" data-plancolor="${statusColor}" style="color:${ovColor};">${ovLabel}</div></div>
+                <select class="form-select" style="width:auto;font-size:.7rem;padding:3px 6px;" onchange="setTierOverride('${c.id}','${key}',this.value,this)">
+                  <option value="plan"${ovCur==='plan'?' selected':''}>Follow plan</option>
+                  <option value="on"${ovCur==='on'?' selected':''}>Force on</option>
+                  <option value="off"${ovCur==='off'?' selected':''}>Force off</option>
+                </select>
+              </div>`;
+              }
               return `
               <div class="mod">
                 <i class="ti ${icon} mod-icon"></i>
@@ -768,6 +784,22 @@ async function loadPaymentHistory(clientId){
     }).join('');
   }catch(e){
     totalEl.textContent='Could not load payment history';
+  }
+}
+
+async function setTierOverride(clientId,key,value,selEl){
+  const desc=document.getElementById('ovDesc_'+key);
+  try{
+    const {error}=await sb.rpc('set_tier_override',{p_client_id:clientId,p_key:key,p_value:value});
+    if(error)throw new Error(error.message);
+    if(desc){
+      desc.textContent = value==='on' ? 'Forced on — NES admin override' : value==='off' ? 'Forced off — NES admin override' : (desc.dataset.planlabel||'');
+      desc.style.color = value==='on' ? '#3fb950' : value==='off' ? '#f85149' : (desc.dataset.plancolor||'');
+    }
+    showToast('Override saved');
+  }catch(e){
+    alert('Error: '+e.message);
+    if(selEl) selEl.value = (desc && /Forced on/.test(desc.textContent)) ? 'on' : (desc && /Forced off/.test(desc.textContent)) ? 'off' : 'plan';
   }
 }
 

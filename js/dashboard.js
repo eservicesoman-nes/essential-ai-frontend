@@ -386,7 +386,7 @@ async function showCEOLite(){
 }
 
 async function showCEODashboard(){
-  if(userClientId && userRole!=='nesadmin' && String(window.clientPlan||'').toLowerCase()==='presence'){ return showCEOLite(); }
+  if(userClientId && userRole!=='nesadmin' && String(window.clientPlan||'').toLowerCase()==='presence' && (window.clientTierOverrides||{}).ceo_dashboard!=='on'){ return showCEOLite(); }
   const mc=document.getElementById('mainContent');
   mc.style.overflow='hidden';
   if(window._ceoRendered&&document.getElementById('ceoDashContent')&&document.getElementById('ceoFeedItems')){

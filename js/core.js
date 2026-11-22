@@ -326,7 +326,7 @@ function setupNavForRole(){
       if((curView==='ceo' && !hasTierModule(TIER_PLANS,'ceo_dashboard')) || (curView==='intel' && !hasTierModule(TIER_PLANS,'intel_feed'))){
         try{ localStorage.setItem('nesai_view','chat'); }catch(e){}
         showView('chat');
-      } else if(curView==='ceo' && userRole!=='nesadmin' && String(window.clientPlan||'').toLowerCase()==='presence'){
+      } else if(curView==='ceo' && userRole!=='nesadmin' && String(window.clientPlan||'').toLowerCase()==='presence' && (window.clientTierOverrides||{}).ceo_dashboard!=='on'){
         // The start view may have drawn the full dashboard before the plan was known; show the lite one.
         showCEOLite();
       }
@@ -375,6 +375,10 @@ function setupNavForRole(){
 }
 
 function hasTierModule(planKeys, modKey){
+  // NES admin override per client (clients.tier_overrides): 'on' forces the module on, 'off' forces it off (also beats full access); absent means follow the plan.
+  const ov=(window.clientTierOverrides||{})[modKey];
+  if(ov==='on')return true;
+  if(ov==='off')return false;
   if(window.clientFullAccessOverride===true)return true;
   const plan=(window.clientPlan||'').toLowerCase();
   // Activated custom plan (hidden plan row custom_xxxx): tier modules come from the quoted modules, not the plan name.
@@ -405,7 +409,7 @@ function renderClientWorkspace(name, logoUrl, color){
 }
 async function showClientBrandingChip(){
   try{
-    const{data}=await sb.from('clients').select('name,primary_color,logo_url,plan,modules,full_access_override,apex_connect_paid_until,apex_outreach_paid_until,apex_advisory_paid_until,region,country,status,locale,currency').eq('id',userClientId).single();
+    const{data}=await sb.from('clients').select('name,primary_color,logo_url,plan,modules,tier_overrides,full_access_override,apex_connect_paid_until,apex_outreach_paid_until,apex_advisory_paid_until,region,country,status,locale,currency').eq('id',userClientId).single();
     if(!data)return;
     const chip=document.getElementById('roleChip');
     if(chip&&data.name)chip.textContent=data.name;
@@ -447,6 +451,7 @@ async function showClientBrandingChip(){
       }catch(e){}
     }
     window.clientFullAccessOverride = data.full_access_override === true;
+    window.clientTierOverrides = (data.tier_overrides && typeof data.tier_overrides==='object') ? data.tier_overrides : {};
     window.clientApexPaidUntil = {
       apex_connect: data.apex_connect_paid_until || null,
       apex_outreach: data.apex_outreach_paid_until || null,
