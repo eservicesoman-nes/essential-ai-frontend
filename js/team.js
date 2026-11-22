@@ -26,7 +26,12 @@ async function loadClientUsers(clientId){
             <div style="font-size:.68rem;color:${roleColors[u.role]||'var(--muted)'};font-family:var(--mono);text-transform:uppercase;">${u.role||'staff'}</div>
           </div>
         </div>
-        <button onclick="removeClientUser('${clientId}','${u.id}')" style="background:none;border:1px solid #2d0e0e;border-radius:6px;padding:4px 8px;color:#f85149;cursor:pointer;font-size:.7rem;"><i class="ti ti-user-minus"></i></button>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <select data-role-now="${esc(u.role||'staff')}" onchange="changeClientUserRole('${clientId}','${esc(u.id)}',this)" ${u.role==='nes_partner'?'disabled':''} title="Change role (NES admin)" style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:4px 6px;color:var(--text);font-size:.7rem;font-family:var(--mono);">
+            ${[['ceo','CEO'],['manager','Manager'],['staff','Staff']].concat(u.role==='nes_partner'?[['nes_partner','Partner']]:[]).map(([v,l])=>`<option value="${v}"${(u.role||'staff')===v?' selected':''}>${l}</option>`).join('')}
+          </select>
+          <button onclick="removeClientUser('${clientId}','${u.id}')" style="background:none;border:1px solid #2d0e0e;border-radius:6px;padding:4px 8px;color:#f85149;cursor:pointer;font-size:.7rem;"><i class="ti ti-user-minus"></i></button>
+        </div>
       </div>`).join('');
   }catch(e){
     el.innerHTML='<div style="color:var(--red);font-family:var(--mono);font-size:.75rem;">Error: '+esc(e.message)+'</div>';
@@ -423,6 +428,28 @@ async function loadTeamForClient(clientId){
   backBtn.innerHTML = `<button onclick="window.userClientId=null;loadTeam()" style="background:none;border:1px solid var(--border);border-radius:7px;padding:6px 12px;color:var(--muted);font-size:.75rem;cursor:pointer;display:flex;align-items:center;gap:6px;"><i class='ti ti-arrow-left'></i> Back to clients</button>`;
   const teamContent = document.getElementById('teamContent');
   if(teamContent) teamContent.insertBefore(backBtn, teamContent.firstChild);
+}
+
+// Client Manager, Users tab (NES admin): change a user's role with the same backend route as the Team page, with errors shown and the list refreshed.
+async function changeClientUserRole(clientId, userId, selEl){
+  const prev=selEl.dataset.roleNow, role=selEl.value;
+  if(role===prev)return;
+  if(!confirm('Change this user\'s role from '+prev.toUpperCase()+' to '+role.toUpperCase()+'?')){selEl.value=prev;return;}
+  try{
+    const res=await fetch(API_URL+'/api/client/'+clientId+'/user/'+userId+'/role',{
+      method:'PATCH',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
+      body:JSON.stringify({role})
+    });
+    let data={};try{data=await res.json();}catch(e){}
+    if(!res.ok)throw new Error(data.error||('HTTP '+res.status));
+    showToast(t('toast.roleUpdated'));
+    selEl.dataset.roleNow=role;
+    loadClientUsers(clientId);
+  }catch(e){
+    selEl.value=prev;
+    alert('Error: '+e.message);
+  }
 }
 
 async function updateUserRole(userId, clientId, role){
