@@ -205,8 +205,9 @@ function renderClientDetail(c,colors,textColors,idx){
               </div>`;
               }
               const isCustomPlan = String(c.plan||'').toLowerCase().startsWith('custom_');
-              const tierOk = c.full_access_override===true || (isCustomPlan ? modules[key]===true : ['operations','workforce','infrastructure'].includes((c.plan||'').toLowerCase()));
-              const statusLabel = c.full_access_override===true ? 'Enabled — Custom access override' : isCustomPlan ? (tierOk ? 'Included — custom plan quote' : 'Not in the custom plan quote') : (tierOk ? 'Included — Operations plan or higher' : 'Not included — upgrade to Operations+');
+              const presenceLite = !isCustomPlan && key==='ceo_dashboard' && (c.plan||'').toLowerCase()==='presence'; // Presence gets the lite CEO Dashboard (showCEOLite)
+              const tierOk = c.full_access_override===true || presenceLite || (isCustomPlan ? modules[key]===true : ['operations','workforce','infrastructure'].includes((c.plan||'').toLowerCase()));
+              const statusLabel = c.full_access_override===true ? 'Enabled — Custom access override' : presenceLite ? 'Included — lite view (Presence plan)' : isCustomPlan ? (tierOk ? 'Included — custom plan quote' : 'Not in the custom plan quote') : (tierOk ? 'Included — Operations plan or higher' : 'Not included — upgrade to Operations+');
               const statusColor = tierOk ? '#3fb950' : '#8b949e';
               return `
               <div class="mod">
