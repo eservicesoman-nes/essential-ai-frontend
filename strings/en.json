@@ -1128,7 +1128,7 @@
     "title": "Navigate",
     "from": "From",
     "to": "To",
-    "myLocation": "My location",
+    "myLocation": "Your current location",
     "toPlaceholder": "Search destination",
     "swap": "Swap",
     "drive": "Drive",
