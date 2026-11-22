@@ -52,16 +52,17 @@
   const trk = {}; ['utm_source','utm_medium','utm_campaign','utm_content','fbclid'].forEach(k => { const v = _q.get(k); if (v) trk[k] = v.slice(0, 200); });
   trk.landing_url = (location.origin + location.pathname).slice(0, 300);
   const T = {
-    pt: { title: 'Fale connosco', sub: 'Deixe os seus dados e a nossa assistente Sara liga-lhe em instantes.', name: 'Nome', phone: 'Telefone (com indicativo, ex. +351)', email: 'Email (opcional)', msg: 'Como podemos ajudar? (opcional)', consent: 'Aceito ser contactado(a) por telefone, incluindo por uma assistente de IA. A chamada pode ser gravada para fins de qualidade.', send: 'Pedir chamada', sending: 'A enviar…', ok: 'Obrigado! A Sara vai ligar-lhe dentro de momentos.', invalid: 'Verifique o nome, o telefone (com +indicativo) e aceite o consentimento.', fail: 'Não foi possível enviar. Tente novamente.', notfound: 'Formulário não encontrado.', priv: 'Os seus dados são usados apenas para responder ao seu pedido e tratados com tecnologia da New Essential Services (NES AI).    Pode retirar o consentimento a qualquer momento. <a href="https://nes-ai.com/legal.html#pt" target="_blank" rel="noopener" style="color:#409cff">Política de Privacidade</a>', toggle: 'EN' },
-    en: { title: 'Get in touch', sub: 'Leave your details and our assistant Sara will call you within moments.', name: 'Name', phone: 'Phone (with country code, e.g. +351)', email: 'Email (optional)', msg: 'How can we help? (optional)', consent: 'I agree to be contacted by phone, including by an AI assistant. The call may be recorded for quality purposes.', send: 'Request a call', sending: 'Sending…', ok: 'Thank you! Sara will call you within moments.', invalid: 'Please check your name, phone (with +country code) and tick the consent box.', fail: 'Could not send. Please try again.', notfound: 'Form not found.', priv: 'Your data is used only to respond to your request and processed with technology from New Essential Services (NES AI). You can withdraw consent at any time. <a href="https://nes-ai.com/legal.html" target="_blank" rel="noopener" style="color:#409cff">Privacy Policy</a>', toggle: 'PT' }
+    pt: { title: 'Fale connosco', sub: 'Deixe os seus dados e a nossa assistente Sara liga-lhe em instantes.', name: 'Nome', phone: 'Telefone (com indicativo, ex. {dial})', email: 'Email (opcional)', msg: 'Como podemos ajudar? (opcional)', consent: 'Aceito ser contactado(a) por telefone, incluindo por uma assistente de IA. A chamada pode ser gravada para fins de qualidade.', send: 'Pedir chamada', sending: 'A enviar…', ok: 'Obrigado! A Sara vai ligar-lhe dentro de momentos.', invalid: 'Verifique o nome, o telefone (com +indicativo) e aceite o consentimento.', fail: 'Não foi possível enviar. Tente novamente.', notfound: 'Formulário não encontrado.', priv: 'Os seus dados são usados apenas para responder ao seu pedido e tratados com tecnologia da New Essential Services (NES AI).    Pode retirar o consentimento a qualquer momento. <a href="https://nes-ai.com/legal.html#pt" target="_blank" rel="noopener" style="color:#409cff">Política de Privacidade</a>', toggle: 'EN' },
+    en: { title: 'Get in touch', sub: 'Leave your details and our assistant Sara will call you within moments.', name: 'Name', phone: 'Phone (with country code, e.g. {dial})', email: 'Email (optional)', msg: 'How can we help? (optional)', consent: 'I agree to be contacted by phone, including by an AI assistant. The call may be recorded for quality purposes.', send: 'Request a call', sending: 'Sending…', ok: 'Thank you! Sara will call you within moments.', invalid: 'Please check your name, phone (with +country code) and tick the consent box.', fail: 'Could not send. Please try again.', notfound: 'Form not found.', priv: 'Your data is used only to respond to your request and processed with technology from New Essential Services (NES AI). You can withdraw consent at any time. <a href="https://nes-ai.com/legal.html" target="_blank" rel="noopener" style="color:#409cff">Privacy Policy</a>', toggle: 'PT' }
   };
   let lang = 'pt';
+  let dial = '+351'; // phone hint: +351 for Portugal-locale forms, +968 otherwise (22 Nov 2026)
   const $ = (id) => document.getElementById(id);
   function render() {
     const t = T[lang];
     document.documentElement.lang = lang;
     $('title').textContent = t.title; $('sub').textContent = t.sub;
-    $('lName').textContent = t.name; $('lPhone').textContent = t.phone; $('lEmail').textContent = t.email; $('lMsg').textContent = t.msg;
+    $('lName').textContent = t.name; $('lPhone').textContent = t.phone.replace('{dial}', dial); $('phone').placeholder = dial === '+351' ? '+351 9XX XXX XXX' : '+968 9XXX XXXX'; $('lEmail').textContent = t.email; $('lMsg').textContent = t.msg;
     $('lConsent').textContent = t.consent; $('lPriv').innerHTML = t.priv; $('send').textContent = t.send; $('langBtn').textContent = t.toggle;
   }
   function show(kind, text) { const m = $('msg'); m.className = 'msg ' + kind; m.textContent = text; }
@@ -72,6 +73,7 @@
       if (r.ok === false) { render(); show('err', T[lang].notfound); $('send').disabled = true; return; }
       const d = await r.json();
       lang = String(d.locale || 'pt').startsWith('pt') ? 'pt' : 'en';
+      dial = lang === 'pt' ? '+351' : '+968';
       $('brand').textContent = d.name || '';
       document.title = d.name || 'Contact';
       render();
