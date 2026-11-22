@@ -321,6 +321,12 @@ function setupNavForRole(){
       if(ceoNavEl && !hasTierModule(TIER_PLANS,'ceo_dashboard')) ceoNavEl.style.display='none';
       if(commandNavEl && mods.nes_command === false && mods.team_chat !== true) commandNavEl.style.display='none';
       if(intelNavEl && !hasTierModule(TIER_PLANS,'intel_feed')) intelNavEl.style.display='none';
+      // The start view can open before plan/modules load; once they are known, leave a view this client does not have.
+      const curView = localStorage.getItem('nesai_view');
+      if((curView==='ceo' && !hasTierModule(TIER_PLANS,'ceo_dashboard')) || (curView==='intel' && !hasTierModule(TIER_PLANS,'intel_feed'))){
+        try{ localStorage.setItem('nesai_view','chat'); }catch(e){}
+        showView('chat');
+      }
       if(imageNavEl && mods.image_gen === false) imageNavEl.style.display='none';
       if(deenNavEl){
         const deenEnabled = mods.islam360 !== false;

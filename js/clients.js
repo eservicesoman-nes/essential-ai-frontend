@@ -156,7 +156,7 @@ function renderClientDetail(c,colors,textColors,idx){
           <div class="cm-av" style="background:${colors[idx%5]};color:${textColors[idx%5]};">${(c.name||'?').substring(0,2).toUpperCase()}</div>
           <div>
             <div class="cm-name">${c.name}</div>
-            <span class="cm-plan ${c.plan==='operations'?'plan-g':c.plan==='workforce'?'plan-e':'plan-s'}">${c.plan||'presence'}</span>
+            <span class="cm-plan ${c.plan==='operations'?'plan-g':c.plan==='workforce'?'plan-e':'plan-s'}">${String(c.plan||'').startsWith('custom_')?'custom':(c.plan||'presence')}</span>
           </div>
         </div>
         <div class="cm-actions">
