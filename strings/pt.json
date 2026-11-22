@@ -267,7 +267,8 @@
     "commissionDue": "Comissão Devida",
     "successRate": "Taxa de Sucesso",
     "activePartners": "Parceiros Ativos",
-    "pending": "Pendente"
+    "pending": "Pendente",
+    "overview": "Visão geral"
   },
   "clientTab": {
     "modules": "Módulos",

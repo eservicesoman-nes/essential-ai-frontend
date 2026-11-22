@@ -267,7 +267,8 @@
     "commissionDue": "العمولة المستحقة",
     "successRate": "معدل النجاح",
     "activePartners": "الشركاء النشطون",
-    "pending": "قيد الانتظار"
+    "pending": "قيد الانتظار",
+    "overview": "نظرة عامة"
   },
   "clientTab": {
     "modules": "الوحدات",
