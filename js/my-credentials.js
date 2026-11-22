@@ -57,6 +57,7 @@ function renderMyCredsForm(creds, client){
       {label:'WhatsApp',labelKey:'itSetupItem.whatsapp',desc:'Phone ID + API token',descKey:'itSetupItem.whatsappDesc',keys:['whatsapp_phone_id','whatsapp_token'],icon:'ti-brand-whatsapp'},
       {label:'Lead alerts email',labelKey:'itSetupItem.leadAlertsEmail',desc:'Where new leads are sent',descKey:'itSetupItem.leadAlertsEmailDesc',keys:['lead_email'],icon:'ti-mail'},
       {label:'Website',labelKey:'itSetupItem.website',desc:'Your website URL',descKey:'itSetupItem.websiteDesc',keys:['website'],icon:'ti-world'},
+      {label:'Meta Pixel',labelKey:'itSetupItem.metaPixel',desc:'Pixel ID for your lead form',descKey:'itSetupItem.metaPixelDesc',keys:['meta_pixel_id'],icon:'ti-brand-meta'},
     ]},
     {title:'Inbox & Email',titleKey:'itSetupItem.inboxEmail',items:[
       {label:'Email Account',labelKey:'itSetupItem.emailAccount',desc:'Connect your inbox (IMAP/SMTP)',descKey:'itSetupItem.emailAccountDesc',keys:['imap_email','imap_password','imap_host','smtp_host','smtp_port'],icon:'ti-inbox'},
@@ -142,14 +143,14 @@ function copyWidgetSnippet(btn, clientId){
 function editItCred(keysStr, label){
   const keys=keysStr.split(',');
   const creds=window._itCredsCache||{};
-  const _lk={facebook_token:'itSetupItem.facebook',instagram_business_id:'itSetupItem.instagram',linkedin_token:'itSetupItem.linkedin',whatsapp_phone_id:'itSetupItem.whatsapp',lead_email:'itSetupItem.leadAlertsEmail',website:'itSetupItem.website',imap_email:'itSetupItem.emailAccount'}[keys[0]];
+  const _lk={facebook_token:'itSetupItem.facebook',instagram_business_id:'itSetupItem.instagram',linkedin_token:'itSetupItem.linkedin',whatsapp_phone_id:'itSetupItem.whatsapp',lead_email:'itSetupItem.leadAlertsEmail',website:'itSetupItem.website',imap_email:'itSetupItem.emailAccount',meta_pixel_id:'itSetupItem.metaPixel'}[keys[0]];
   document.getElementById('it-cred-title').textContent=_lk?t(_lk,label):label;
   const fieldLabels={
     facebook_token:t('ui.creds.pageToken'),facebook_page_id:t('ui.creds.pageId'),
     instagram_business_id:t('ui.creds.businessId'),
     whatsapp_phone_id:t('ui.creds.phoneId'),whatsapp_token:t('ui.creds.apiToken'),
     linkedin_token:t('ui.creds.accessToken'),
-    lead_email:t('auth.emailAddress'),website:t('ui.creds.websiteUrl'),
+    lead_email:t('auth.emailAddress'),website:t('ui.creds.websiteUrl'),meta_pixel_id:t('itSetupItem.metaPixelField'),
     imap_email:t('auth.emailAddress'),imap_password:t('ui.creds.emailPassword'),
     imap_host:t('ui.creds.imapHost'),smtp_host:t('ui.creds.smtpHost'),smtp_port:t('ui.mail.smtpPort')
   };
@@ -169,6 +170,8 @@ function editItCred(keysStr, label){
 async function saveItCred(){
   const keys=window._itActiveKeys||[];
   const creds=window._itCredsCache||{};
+  const _px=document.getElementById('itf_meta_pixel_id');
+  if(_px&&_px.value.trim()&&/^\d{15,16}$/.test(_px.value.trim())===false){alert(t('itSetupItem.metaPixelInvalid'));return;}
   keys.forEach(function(k){
     const el=document.getElementById('itf_'+k);
     if(el&&el.value.trim())creds[k]=el.value.trim();

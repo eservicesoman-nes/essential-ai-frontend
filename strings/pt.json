@@ -298,7 +298,11 @@
     "website": "Website",
     "websiteDesc": "O URL do seu website",
     "emailAccount": "Conta de Email",
-    "emailAccountDesc": "Ligue a sua caixa de entrada (IMAP/SMTP)"
+    "emailAccountDesc": "Ligue a sua caixa de entrada (IMAP/SMTP)",
+    "metaPixel": "Meta Pixel",
+    "metaPixelDesc": "ID do Pixel para o seu formulário (mede os anúncios Meta)",
+    "metaPixelField": "ID do Pixel (15–16 dígitos)",
+    "metaPixelInvalid": "O ID do Pixel deve ter 15 ou 16 dígitos."
   },
   "apiCreditsLabel": {
     "apisMonitored": "APIs monitorizadas",

@@ -298,7 +298,11 @@
     "website": "Website",
     "websiteDesc": "Your website URL",
     "emailAccount": "Email Account",
-    "emailAccountDesc": "Connect your inbox (IMAP/SMTP)"
+    "emailAccountDesc": "Connect your inbox (IMAP/SMTP)",
+    "metaPixel": "Meta Pixel",
+    "metaPixelDesc": "Pixel ID for your lead form (measures Meta ads)",
+    "metaPixelField": "Pixel ID (15–16 digits)",
+    "metaPixelInvalid": "The Pixel ID must be 15 or 16 digits."
   },
   "apiCreditsLabel": {
     "apisMonitored": "APIs monitored",

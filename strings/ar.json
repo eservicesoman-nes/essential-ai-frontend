@@ -298,7 +298,11 @@
     "website": "الموقع الإلكتروني",
     "websiteDesc": "رابط موقعك الإلكتروني",
     "emailAccount": "حساب البريد الإلكتروني",
-    "emailAccountDesc": "اربط بريدك الوارد (IMAP/SMTP)"
+    "emailAccountDesc": "اربط بريدك الوارد (IMAP/SMTP)",
+    "metaPixel": "Meta Pixel",
+    "metaPixelDesc": "معرّف البكسل لنموذج العملاء (لقياس إعلانات ميتا)",
+    "metaPixelField": "معرّف البكسل (15–16 رقمًا)",
+    "metaPixelInvalid": "يجب أن يتكون معرّف البكسل من 15 أو 16 رقمًا."
   },
   "apiCreditsLabel": {
     "apisMonitored": "واجهات API المراقَبة",

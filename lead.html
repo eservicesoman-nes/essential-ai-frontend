@@ -77,7 +77,8 @@
       $('brand').textContent = d.name || '';
       document.title = d.name || 'Contact';
       render();
-    } catch (e) { render(); }
+      pxStart(d.pixel);
+    } catch (e) { render(); pxStart(''); }
   })();
   $('f').addEventListener('submit', async (ev) => {
     ev.preventDefault();
@@ -92,13 +93,14 @@
     $('send').disabled = false; $('send').textContent = t.send;
   });
   // Meta Pixel: NES's own forms only (other clients' forms are never tracked). No personal data is sent. (22 Nov 2026)
-  const PIXEL_ID = '1479219164148496';
-  const NES_FORMS = { 'fd6d2d73d24a16832350ff53': 'gcc', '2544eff692eff10989072a08': 'eu' };
-  const pxRegion = NES_FORMS[token] || '';
+  // Pixel ID comes from the client's IT Setup (backend returns it); NES's own forms fall back to the NES pixel. (22 Nov 2026)
+  const NES_PIXEL = '1479219164148496';
+  const NES_FORMS = { 'fd6d2d73d24a16832350ff53': 1, '2544eff692eff10989072a08': 1 };
+  let pxId = '';
   function loadPixel() {
     if (window.fbq) return;
     !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
-    fbq('init', PIXEL_ID); fbq('track', 'PageView');
+    fbq('init', pxId); fbq('track', 'PageView');
   }
   function getPxConsent() { try { return localStorage.getItem('nes_px_consent') || ''; } catch (e) { return ''; } }
   function setPxConsent(v) { try { localStorage.setItem('nes_px_consent', v); } catch (e) {} }
@@ -113,8 +115,12 @@
     b.addEventListener('click', (ev) => { const v = ev.target.getAttribute && ev.target.getAttribute('data-v'); if (!v) return; setPxConsent(v); b.remove(); if (v === 'yes') loadPixel(); });
     document.body.appendChild(b);
   }
-  if (pxRegion === 'gcc') loadPixel();
-  else if (pxRegion === 'eu') { const c = getPxConsent(); if (c === 'yes') loadPixel(); else if (c === '') setTimeout(pxBanner, 800); }
+  function pxStart(fromServer) {
+    pxId = /^\d{15,16}$/.test(String(fromServer || '')) ? String(fromServer) : (NES_FORMS[token] ? NES_PIXEL : '');
+    if (!pxId) return;
+    if (lang !== 'pt') { loadPixel(); return; } // GCC forms: load directly
+    const c = getPxConsent(); if (c === 'yes') loadPixel(); else if (c === '') pxBanner(); // Portugal (GDPR): consent first
+  }
   render();
 </script>
 </body>
