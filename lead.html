@@ -85,10 +85,34 @@
     $('send').disabled = true; $('send').textContent = t.sending;
     try {
       const r = await fetch(API + '/api/public/lead/' + encodeURIComponent(token), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: $('name').value.trim(), phone, email: $('email').value.trim(), message: $('message').value.trim(), consent: true, lang: lang, website: $('website').value, ...trk }) });
-      if (r.ok) { show('ok', t.ok); $('f').reset(); } else { show('err', r.status === 400 ? t.invalid : t.fail); }
+      if (r.ok) { show('ok', t.ok); $('f').reset(); if (window.fbq) fbq('track', 'Lead'); } else { show('err', r.status === 400 ? t.invalid : t.fail); }
     } catch (e) { show('err', t.fail); }
     $('send').disabled = false; $('send').textContent = t.send;
   });
+  // Meta Pixel: NES's own forms only (other clients' forms are never tracked). No personal data is sent. (22 Nov 2026)
+  const PIXEL_ID = '1479219164148496';
+  const NES_FORMS = { 'fd6d2d73d24a16832350ff53': 'gcc', '2544eff692eff10989072a08': 'eu' };
+  const pxRegion = NES_FORMS[token] || '';
+  function loadPixel() {
+    if (window.fbq) return;
+    !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', PIXEL_ID); fbq('track', 'PageView');
+  }
+  function getPxConsent() { try { return localStorage.getItem('nes_px_consent') || ''; } catch (e) { return ''; } }
+  function setPxConsent(v) { try { localStorage.setItem('nes_px_consent', v); } catch (e) {} }
+  function pxBanner() {
+    const pt = lang === 'pt';
+    const b = document.createElement('div');
+    b.style.cssText = 'position:fixed;left:12px;right:12px;bottom:12px;max-width:460px;margin:0 auto;background:#121a2e;border:1px solid #23304d;border-radius:12px;padding:14px;font-size:.8rem;color:#e8e8ec;z-index:9;line-height:1.4';
+    b.innerHTML = '<div></div><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px"><button type="button" data-v="no" style="background:none;border:1px solid #23304d;color:#e8e8ec;border-radius:8px;padding:6px 12px;cursor:pointer"></button><button type="button" data-v="yes" style="background:#409cff;border:0;color:#fff;border-radius:8px;padding:6px 12px;cursor:pointer"></button></div>';
+    b.firstChild.textContent = pt ? 'Usamos cookies de marketing (Meta Pixel) para medir os nossos anúncios. Aceita?' : 'We use marketing cookies (Meta Pixel) to measure our ads. Do you accept?';
+    b.querySelector('[data-v=no]').textContent = pt ? 'Recusar' : 'Decline';
+    b.querySelector('[data-v=yes]').textContent = pt ? 'Aceitar' : 'Accept';
+    b.addEventListener('click', (ev) => { const v = ev.target.getAttribute && ev.target.getAttribute('data-v'); if (!v) return; setPxConsent(v); b.remove(); if (v === 'yes') loadPixel(); });
+    document.body.appendChild(b);
+  }
+  if (pxRegion === 'gcc') loadPixel();
+  else if (pxRegion === 'eu') { const c = getPxConsent(); if (c === 'yes') loadPixel(); else if (c === '') setTimeout(pxBanner, 800); }
   render();
 </script>
 </body>
