@@ -8,7 +8,7 @@ const SUPABASE_URL='https://sfpfjjdtczvuxyhjievt.supabase.co';
 const SUPABASE_ANON='sb_publishable_MH7rnJ7r8_-1TzGXcieNfA_NXoHQZbm';
 const API_URL='https://api.essential-services.org';
 const ROCKET_URL='https://chat.essential-services.org';
-const LOGO_URL='https://files.catbox.moe/adhf8n.png';
+const LOGO_URL='https://app.nes-ai.com/nes-ai-logo.png';
 // ============================================================
 
 // Phase 4 (18 Nov 2026): plans, prices, limits and packs come from GET /api/catalogue
