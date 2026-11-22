@@ -211,7 +211,7 @@ function renderPlanCards(){
     else if(!custom&&p.features&&p.features.team_hub==='coming_soon')f.push(li(t('ui.bill.teamHubSoon'),true));
     if(!custom)f.push(li(t('ui.bill.fTrial7').replace('{n}',trialDefaultDays())));
     const priceHtml=custom
-      ?`<div class="plan-price" style="color:${st.color};">${t('ui.bill.custom')}</div><div class="plan-period">&nbsp;</div>`
+      ?`<div class="plan-price" data-fit="1" style="color:${st.color};white-space:nowrap;">${t('ui.bill.custom')}</div><div class="plan-period">&nbsp;</div>`
       :`<div class="plan-price"${st.border&&p.plan!=='operations'?` style="color:${st.color};"`:''}${eur!=null?' data-local-set="1"':''}>OMR ${price}</div>`
         +(eur!=null?`<div style="font-family:var(--mono);font-size:.7rem;color:var(--muted);margin-top:2px;">EUR ${eur}</div>`:'')
         +`<div class="plan-period">${t('ui.bill.perMonthUsd').replace('{usd}','$'+Math.round(price/OMR_PER_USD))}</div>`;
@@ -271,12 +271,23 @@ function showPricing(){
         <a href="mailto:office@essential-services.org" style="color:var(--nes-blue);text-decoration:none;">office@essential-services.org</a>
       </div>
     </div>`;
+  fitPlanPrices();
   addLocalCurrencyToPricing();
   if(typeof loadCustomQuoteCard==='function')loadCustomQuoteCard();
 }
 
 // Purely additive: for non-Oman clients, appends a small local-currency equivalent
 // under each OMR price. Never modifies the existing OMR/USD text. No-ops silently
+// Shrink one-word price labels (e.g. "Custom" / PT "Personalizado") until they fit inside the plan card.
+function fitPlanPrices(){
+  const run=()=>document.querySelectorAll('.plan-price[data-fit]').forEach(el=>{
+    el.style.fontSize='';
+    let s=parseFloat(getComputedStyle(el).fontSize)||28;
+    while(el.scrollWidth>el.clientWidth+1&&s>12){s-=1;el.style.fontSize=s+'px';}
+  });
+  try{run();if(document.fonts&&document.fonts.ready)document.fonts.ready.then(run).catch(()=>{});}catch(e){}
+}
+window.fitPlanPrices=fitPlanPrices;
 // on any error or for OMR clients, so it can never break pricing display.
 async function addLocalCurrencyToPricing(){
   try{
