@@ -48,6 +48,9 @@
 <script>
   const API = 'https://api.essential-services.org';
   const token = new URLSearchParams(location.search).get('t') || '';
+  const _q = new URLSearchParams(location.search);
+  const trk = {}; ['utm_source','utm_medium','utm_campaign','utm_content','fbclid'].forEach(k => { const v = _q.get(k); if (v) trk[k] = v.slice(0, 200); });
+  trk.landing_url = (location.origin + location.pathname).slice(0, 300);
   const T = {
     pt: { title: 'Fale connosco', sub: 'Deixe os seus dados e a nossa assistente Sara liga-lhe em instantes.', name: 'Nome', phone: 'Telefone (com indicativo, ex. +351)', email: 'Email (opcional)', msg: 'Como podemos ajudar? (opcional)', consent: 'Aceito ser contactado(a) por telefone, incluindo por uma assistente de IA. A chamada pode ser gravada para fins de qualidade.', send: 'Pedir chamada', sending: 'A enviar…', ok: 'Obrigado! A Sara vai ligar-lhe dentro de momentos.', invalid: 'Verifique o nome, o telefone (com +indicativo) e aceite o consentimento.', fail: 'Não foi possível enviar. Tente novamente.', notfound: 'Formulário não encontrado.', priv: 'Os seus dados são usados apenas para responder ao seu pedido e tratados com tecnologia da New Essential Services (NES AI).    Pode retirar o consentimento a qualquer momento. <a href="https://nes-ai.com/legal.html#pt" target="_blank" rel="noopener" style="color:#409cff">Política de Privacidade</a>', toggle: 'EN' },
     en: { title: 'Get in touch', sub: 'Leave your details and our assistant Sara will call you within moments.', name: 'Name', phone: 'Phone (with country code, e.g. +351)', email: 'Email (optional)', msg: 'How can we help? (optional)', consent: 'I agree to be contacted by phone, including by an AI assistant. The call may be recorded for quality purposes.', send: 'Request a call', sending: 'Sending…', ok: 'Thank you! Sara will call you within moments.', invalid: 'Please check your name, phone (with +country code) and tick the consent box.', fail: 'Could not send. Please try again.', notfound: 'Form not found.', priv: 'Your data is used only to respond to your request and processed with technology from New Essential Services (NES AI). You can withdraw consent at any time. <a href="https://nes-ai.com/legal.html" target="_blank" rel="noopener" style="color:#409cff">Privacy Policy</a>', toggle: 'PT' }
@@ -81,7 +84,7 @@
     if ($('name').value.trim().length < 2 || /^\+\d{8,15}$/.test(phone) === false || $('consent').checked === false) { show('err', t.invalid); return; }
     $('send').disabled = true; $('send').textContent = t.sending;
     try {
-      const r = await fetch(API + '/api/public/lead/' + encodeURIComponent(token), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: $('name').value.trim(), phone, email: $('email').value.trim(), message: $('message').value.trim(), consent: true, lang: lang, website: $('website').value }) });
+      const r = await fetch(API + '/api/public/lead/' + encodeURIComponent(token), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: $('name').value.trim(), phone, email: $('email').value.trim(), message: $('message').value.trim(), consent: true, lang: lang, website: $('website').value, ...trk }) });
       if (r.ok) { show('ok', t.ok); $('f').reset(); } else { show('err', r.status === 400 ? t.invalid : t.fail); }
     } catch (e) { show('err', t.fail); }
     $('send').disabled = false; $('send').textContent = t.send;
