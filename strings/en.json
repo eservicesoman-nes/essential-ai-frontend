@@ -378,7 +378,8 @@
     "funnelRate": "Booked rate",
     "funnelTopSources": "Top sources",
     "funnelNoData": "No leads in the last 30 days",
-    "funnelBookedLabel": "Booked"
+    "funnelBookedLabel": "Booked",
+    "highValueLeads": "High value leads"
   },
   "briefcaseUi": {
     "askNesAi": "Ask NES AI",
