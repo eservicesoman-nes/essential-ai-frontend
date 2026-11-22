@@ -1110,5 +1110,20 @@
     "stCalled": "اتصلت سارة",
     "stBooked": "محجوز",
     "usageFailed": "تعذّر تحميل الاستهلاك."
+  },
+  "navigate": {
+    "title": "التنقل",
+    "from": "من",
+    "to": "إلى",
+    "myLocation": "موقعي",
+    "toPlaceholder": "ابحث عن الوجهة",
+    "swap": "تبديل",
+    "drive": "قيادة",
+    "walk": "مشي",
+    "transit": "مواصلات",
+    "open": "فتح في خرائط Google",
+    "needTo": "أدخل الوجهة.",
+    "note": "يفتح خرائط Google بمسارك.",
+    "close": "إغلاق"
   }
 }

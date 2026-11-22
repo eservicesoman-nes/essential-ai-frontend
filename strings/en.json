@@ -1123,5 +1123,20 @@
     "stCalled": "Sara called",
     "stBooked": "Booked",
     "usageFailed": "Usage could not be loaded."
+  },
+  "navigate": {
+    "title": "Navigate",
+    "from": "From",
+    "to": "To",
+    "myLocation": "My location",
+    "toPlaceholder": "Search destination",
+    "swap": "Swap",
+    "drive": "Drive",
+    "walk": "Walk",
+    "transit": "Transit",
+    "open": "Open in Google Maps",
+    "needTo": "Enter a destination.",
+    "note": "Opens Google Maps with your route.",
+    "close": "Close"
   }
 }

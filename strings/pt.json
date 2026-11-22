@@ -1110,5 +1110,20 @@
     "stCalled": "Sara ligou",
     "stBooked": "Marcado",
     "usageFailed": "Não foi possível carregar a utilização."
+  },
+  "navigate": {
+    "title": "Navegar",
+    "from": "De",
+    "to": "Para",
+    "myLocation": "Minha localização",
+    "toPlaceholder": "Pesquisar destino",
+    "swap": "Trocar",
+    "drive": "Carro",
+    "walk": "A pé",
+    "transit": "Transporte",
+    "open": "Abrir no Google Maps",
+    "needTo": "Introduza um destino.",
+    "note": "Abre o Google Maps com o seu trajeto.",
+    "close": "Fechar"
   }
 }
