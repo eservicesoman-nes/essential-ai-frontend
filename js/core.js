@@ -317,10 +317,10 @@ function setupNavForRole(){
       const commandNavEl = document.querySelector('[data-view="command"]');
       const intelNavEl = document.querySelector('[data-view="intel"]');
       const imageNavEl = document.querySelector('[data-view="image"]');
-      const tierOk=hasTierModule(['operations','workforce','infrastructure']);
-      if(ceoNavEl && !tierOk) ceoNavEl.style.display='none';
+      const TIER_PLANS=['operations','workforce','infrastructure'];
+      if(ceoNavEl && !hasTierModule(TIER_PLANS,'ceo_dashboard')) ceoNavEl.style.display='none';
       if(commandNavEl && mods.nes_command === false && mods.team_chat !== true) commandNavEl.style.display='none';
-      if(intelNavEl && !tierOk) intelNavEl.style.display='none';
+      if(intelNavEl && !hasTierModule(TIER_PLANS,'intel_feed')) intelNavEl.style.display='none';
       if(imageNavEl && mods.image_gen === false) imageNavEl.style.display='none';
       if(deenNavEl){
         const deenEnabled = mods.islam360 !== false;
@@ -365,9 +365,11 @@ function setupNavForRole(){
   loadLeadCount();
 }
 
-function hasTierModule(planKeys){
+function hasTierModule(planKeys, modKey){
   if(window.clientFullAccessOverride===true)return true;
   const plan=(window.clientPlan||'').toLowerCase();
+  // Activated custom plan (hidden plan row custom_xxxx): tier modules come from the quoted modules, not the plan name.
+  if(plan.startsWith('custom_'))return !!modKey && (window.clientModules||{})[modKey]===true;
   return planKeys.includes(plan);
 }
 
@@ -744,11 +746,11 @@ function showView(view){
   // Module access enforcement
   if(userClientId && window.clientModules){
     const mods = window.clientModules;
-    const tierOk=hasTierModule(['operations','workforce','infrastructure']);
+    const TIER_PLANS=['operations','workforce','infrastructure'];
     const blocked = {
-      'ceo': !tierOk,
+      'ceo': !hasTierModule(TIER_PLANS,'ceo_dashboard'),
       'command': mods.nes_command === false && mods.team_chat !== true,
-      'intel': !tierOk,
+      'intel': !hasTierModule(TIER_PLANS,'intel_feed'),
       'image': mods.image_gen === false,
     };
     if(blocked[view]){

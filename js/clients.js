@@ -171,7 +171,7 @@ function renderClientDetail(c,colors,textColors,idx){
         </div>
       </div>
       <div class="cm-stats">
-        <div class="cm-stat"><div class="cs-lbl">Plan</div><div class="cs-val" style="font-size:.85rem;text-transform:capitalize;">${c.plan||'presence'}</div></div>
+        <div class="cm-stat"><div class="cs-lbl">Plan</div><div class="cs-val" style="font-size:.85rem;text-transform:capitalize;">${String(c.plan||'presence').startsWith('custom_')?'Custom (quote)':(c.plan||'presence')}</div></div>
         <div class="cm-stat"><div class="cs-lbl">Status</div><div class="cs-val" style="font-size:.85rem;color:${c.status==='active'?'#3fb950':'#d29922'}">${c.status||'active'}</div></div>
         <div class="cm-stat"><div class="cs-lbl">Industry</div><div class="cs-val" style="font-size:.85rem;">${c.industry||'—'}</div></div>
         <div class="cm-stat"><div class="cs-lbl">Region</div><div class="cs-val" style="font-size:.85rem;">${c.region||'—'}</div></div>
@@ -204,8 +204,9 @@ function renderClientDetail(c,colors,textColors,idx){
                 <button class="toggle ${modules[key]?'on':'off'}" data-module="${key}" onclick="this.classList.toggle('on');this.classList.toggle('off')"><div class="toggle-knob"></div></button>
               </div>`;
               }
-              const tierOk = c.full_access_override===true || ['operations','workforce','infrastructure'].includes((c.plan||'').toLowerCase());
-              const statusLabel = c.full_access_override===true ? 'Enabled — Custom access override' : (tierOk ? 'Included — Operations plan or higher' : 'Not included — upgrade to Operations+');
+              const isCustomPlan = String(c.plan||'').toLowerCase().startsWith('custom_');
+              const tierOk = c.full_access_override===true || (isCustomPlan ? modules[key]===true : ['operations','workforce','infrastructure'].includes((c.plan||'').toLowerCase()));
+              const statusLabel = c.full_access_override===true ? 'Enabled — Custom access override' : isCustomPlan ? (tierOk ? 'Included — custom plan quote' : 'Not in the custom plan quote') : (tierOk ? 'Included — Operations plan or higher' : 'Not included — upgrade to Operations+');
               const statusColor = tierOk ? '#3fb950' : '#8b949e';
               return `
               <div class="mod">
@@ -873,6 +874,7 @@ function clientFormFields(c={}){
     <div class="form-grid">
       <div class="form-field"><label class="form-label">${t('formLabel.plan')}</label>
         <select id="field_plan" class="form-select">
+          ${String(c.plan||'').startsWith('custom_')?`<option value="${esc(c.plan)}" selected>Custom plan (from quote; change via the Custom plan tab)</option>`:''}
           <option value="presence" ${c.plan==='presence'?'selected':''}>AI Presence</option>
           <option value="operations" ${c.plan==='operations'?'selected':''}>AI Operations</option>
           <option value="workforce" ${c.plan==='workforce'?'selected':''}>AI Workforce</option>

@@ -114,9 +114,13 @@
     box.innerHTML = data.map(q => {
       const live = q.status === 'sent' && q.valid_until && new Date(q.valid_until) > new Date();
       const st = q.status === 'sent' && !live ? 'expired' : q.status;
-      const extra = q.status === 'sent' && q.valid_until ? ' · ' + esc(ct('validUntil', 'valid until {d}').replace('{d}', fmtDate(q.valid_until))) : '';
-      const action = q.status === 'draft' ? btn(ct('send', 'Send to client'), "sendCustomQuote('" + esc(q.id) + "','" + esc(clientId) + "')")
-        : (q.status === 'sent' || q.status === 'accepted') ? btn(ct('withdraw', 'Withdraw'), "withdrawCustomQuote('" + esc(q.id) + "','" + esc(clientId) + "')") : '';
+      const extra = q.status === 'sent' && q.valid_until ? ' · ' + esc(ct('validUntil', 'valid until {d}').replace('{d}', fmtDate(q.valid_until)))
+        : q.status === 'active' && q.activated_at ? ' · ' + esc(ct('activeSince', 'active since {d}').replace('{d}', fmtDate(q.activated_at))) : '';
+      const qa = "('" + esc(q.id) + "','" + esc(clientId) + "')";
+      const action = q.status === 'draft' ? btn(ct('send', 'Send to client'), 'sendCustomQuote' + qa)
+        : q.status === 'accepted' ? btn(ct('activate', 'Activate (paid)'), 'activateCustomQuote' + qa) + btn(ct('withdraw', 'Withdraw'), 'withdrawCustomQuote' + qa)
+        : q.status === 'sent' ? btn(ct('withdraw', 'Withdraw'), 'withdrawCustomQuote' + qa)
+        : q.status === 'active' ? btn(ct('deactivate', 'Deactivate'), 'deactivateCustomQuote' + qa) : '';
       return '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;border-bottom:1px solid var(--border);padding:6px 0;font-size:.74rem;">'
         + '<span>' + esc(new Date(q.created_at).toLocaleString()) + ' · <b>' + esc(st) + '</b>' + extra + ' · ' + (q.lines || []).length + ' ' + esc(ct('items', 'items')) + '</span>'
         + '<span style="display:flex;align-items:center;gap:8px;"><span style="font-family:var(--mono);">OMR ' + num(q.price_omr) + ' · ' + num(q.margin_pct, 1) + '%</span>' + action + '</span></div>';
@@ -144,6 +148,22 @@
     loadCustomQuoteList(clientId);
   }
 
+  async function activateCustomQuote(quoteId, clientId) {
+    if (!confirm(ct('activateConfirm', 'Activate this custom plan? Only do this after the invoice is paid. The client switches to exactly what the quote lists, with Presence as the base for anything not picked.'))) return;
+    const { error } = await sb.rpc('custom_quote_activate', { p_quote_id: quoteId });
+    if (error) { showToast(error.message); return; }
+    showToast(ct('activated', 'Custom plan activated'));
+    loadCustomQuoteList(clientId);
+  }
+
+  async function deactivateCustomQuote(quoteId, clientId) {
+    if (!confirm(ct('deactivateConfirm', 'Deactivate this custom plan? The client goes back to the plan and modules it had before activation.'))) return;
+    const { error } = await sb.rpc('custom_quote_deactivate', { p_quote_id: quoteId });
+    if (error) { showToast(error.message); return; }
+    showToast(ct('deactivated', 'Custom plan deactivated'));
+    loadCustomQuoteList(clientId);
+  }
+
   // Client side: the account owner's current quote on the Plans page. Items and one total only.
   const qt = (k, fb) => t('quoteCard.' + k, fb);
   function itemLabel(i) {
@@ -156,7 +176,7 @@
     let data = null;
     try { const r = await sb.rpc('custom_quote_mine'); if (r.error) return; data = r.data; } catch (e) { return; }
     if (!data || !data.id) { box.innerHTML = ''; return; }
-    const accepted = data.status === 'accepted';
+    const accepted = data.status === 'accepted' || data.status === 'active';
     const items = (data.items || []).map(i => '<li style="display:flex;gap:8px;align-items:center;padding:3px 0;"><i class="ti ti-check" style="color:#3fb950;font-size:13px;"></i>' + esc(itemLabel(i)) + '</li>').join('');
     box.innerHTML = '<div style="max-width:560px;margin:0 auto 22px;background:var(--surface);border:1px solid #d29922;border-radius:12px;padding:18px 20px;">'
       + '<div style="font-family:\'Syne\',sans-serif;font-size:.7rem;color:#d29922;text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px;">' + esc(qt('title', 'Your custom plan quote')) + '</div>'
@@ -166,7 +186,9 @@
       + '<div style="display:flex;justify-content:space-between;font-size:.8rem;color:var(--muted);"><span>' + esc(qt('vat', 'VAT {v}%').replace('{v}', num(data.vat_pct))) + '</span><span style="font-family:var(--mono);">OMR ' + num(data.vat_omr, 3) + '</span></div>'
       + '<div style="display:flex;justify-content:space-between;font-weight:700;font-size:.95rem;margin-top:6px;border-top:1px solid var(--border);padding-top:6px;"><span>' + esc(qt('totalIncl', 'Total per month incl. VAT')) + '</span><span style="font-family:var(--mono);color:#d29922;">OMR ' + num(data.total_incl_vat_omr, 3) + '</span></div>'
       + (accepted
-        ? '<div style="margin-top:12px;padding:9px 12px;background:rgba(63,185,80,.10);border:1px solid rgba(63,185,80,.4);border-radius:8px;font-size:.8rem;">' + esc(qt('accepted', 'Accepted on {d}. New Essential Services will contact you with your invoice and your start date.').replace('{d}', fmtDate(data.accepted_at))) + '</div>'
+        ? '<div style="margin-top:12px;padding:9px 12px;background:rgba(63,185,80,.10);border:1px solid rgba(63,185,80,.4);border-radius:8px;font-size:.8rem;">' + esc(data.status === 'active'
+          ? qt('active', 'Your custom plan is active since {d}.').replace('{d}', fmtDate(data.activated_at))
+          : qt('accepted', 'Accepted on {d}. New Essential Services will contact you with your invoice and your start date.').replace('{d}', fmtDate(data.accepted_at))) + '</div>'
         : '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:12px;"><span style="font-family:var(--mono);font-size:.68rem;color:var(--muted);">' + esc(qt('validUntil', 'Valid until {d}').replace('{d}', fmtDate(data.valid_until))) + '</span>'
           + '<button class="plan-action-btn" style="width:auto;padding:8px 18px;margin:0;" onclick="acceptCustomQuote(\'' + esc(data.id) + '\')">' + esc(qt('accept', 'Accept quote')) + '</button></div>')
       + '</div>';
@@ -186,4 +208,6 @@
   window.withdrawCustomQuote = withdrawCustomQuote;
   window.loadCustomQuoteCard = loadCustomQuoteCard;
   window.acceptCustomQuote = acceptCustomQuote;
+  window.activateCustomQuote = activateCustomQuote;
+  window.deactivateCustomQuote = deactivateCustomQuote;
 })();

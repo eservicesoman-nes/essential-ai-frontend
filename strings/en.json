@@ -996,7 +996,7 @@
   "customPlan": {
     "loading": "Loading…",
     "loadError": "Could not load the custom plan catalogue.",
-    "off": "Custom plan access is switched off. You can send a quote and the client can accept it, but nothing is activated or charged: invoice by hand, activation comes later.",
+    "off": "Custom plans are switched off: quotes can be sent and accepted, but Activate is blocked until custom plans are switched on.",
     "settingsLine": "Margin {m}% · minimum margin {f}% · minimum price OMR {min} · base fee {base}",
     "notSet": "not set",
     "none": "None",
@@ -1044,7 +1044,14 @@
     "withdraw": "Withdraw",
     "withdrawConfirm": "Withdraw this quote? The client will no longer see it.",
     "withdrawn": "Quote withdrawn",
-    "validUntil": "valid until {d}"
+    "validUntil": "valid until {d}",
+    "activate": "Activate (paid)",
+    "deactivate": "Deactivate",
+    "activeSince": "active since {d}",
+    "activateConfirm": "Activate this custom plan? Only do this after the invoice is paid. The client switches to exactly what the quote lists, with Presence as the base for anything not picked.",
+    "deactivateConfirm": "Deactivate this custom plan? The client goes back to the plan and modules it had before activation.",
+    "activated": "Custom plan activated",
+    "deactivated": "Custom plan deactivated"
   },
   "quoteCard": {
     "title": "Your custom plan quote",
@@ -1056,7 +1063,8 @@
     "accept": "Accept quote",
     "acceptConfirm": "Accept this quote? New Essential Services will send you an invoice. Nothing is charged automatically.",
     "acceptedToast": "Quote accepted. We will send your invoice.",
-    "accepted": "Accepted on {d}. New Essential Services will contact you with your invoice and your start date."
+    "accepted": "Accepted on {d}. New Essential Services will contact you with your invoice and your start date.",
+    "active": "Your custom plan is active since {d}."
   },
   "planRequest": {
     "pageTitle": "Design your plan · NES AI",

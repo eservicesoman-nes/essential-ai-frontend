@@ -983,7 +983,7 @@
   "customPlan": {
     "loading": "A carregar…",
     "loadError": "Não foi possível carregar o catálogo do plano personalizado.",
-    "off": "O acesso do plano personalizado está desligado. Pode enviar uma proposta e o cliente pode aceitá-la, mas nada é ativado nem cobrado: fature manualmente, a ativação vem depois.",
+    "off": "Os planos personalizados estão desligados: as propostas podem ser enviadas e aceites, mas Ativar fica bloqueado até os planos personalizados serem ligados.",
     "settingsLine": "Margem {m}% · margem mínima {f}% · preço mínimo OMR {min} · taxa base {base}",
     "notSet": "não definida",
     "none": "Nenhum",
@@ -1031,7 +1031,14 @@
     "withdraw": "Retirar",
     "withdrawConfirm": "Retirar esta proposta? O cliente deixará de a ver.",
     "withdrawn": "Proposta retirada",
-    "validUntil": "válida até {d}"
+    "validUntil": "válida até {d}",
+    "activate": "Ativar (pago)",
+    "deactivate": "Desativar",
+    "activeSince": "ativo desde {d}",
+    "activateConfirm": "Ativar este plano personalizado? Faça-o só depois de a fatura estar paga. O cliente passa a ter exatamente o que a proposta indica, com o Presence como base para o que não foi escolhido.",
+    "deactivateConfirm": "Desativar este plano personalizado? O cliente volta ao plano e módulos que tinha antes da ativação.",
+    "activated": "Plano personalizado ativado",
+    "deactivated": "Plano personalizado desativado"
   },
   "quoteCard": {
     "title": "A sua proposta de plano personalizado",
@@ -1043,7 +1050,8 @@
     "accept": "Aceitar proposta",
     "acceptConfirm": "Aceitar esta proposta? A New Essential Services enviará uma fatura. Nada é cobrado automaticamente.",
     "acceptedToast": "Proposta aceite. Enviaremos a sua fatura.",
-    "accepted": "Aceite em {d}. A New Essential Services entrará em contacto consigo com a fatura e a data de início."
+    "accepted": "Aceite em {d}. A New Essential Services entrará em contacto consigo com a fatura e a data de início.",
+    "active": "O seu plano personalizado está ativo desde {d}."
   },
   "planRequest": {
     "pageTitle": "Desenhe o seu plano · NES AI",
