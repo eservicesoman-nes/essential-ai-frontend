@@ -20,16 +20,16 @@ function openNavigate(){
   ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:10000;display:flex;align-items:flex-start;justify-content:center;padding:64px 14px 14px;';
   const inp='width:100%;box-sizing:border-box;padding:11px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg,var(--surface));color:var(--text);font-size:.9rem;';
   const modeBtn=(v,ic,k,on)=>`<button type="button" class="navMode" data-mode="${v}" onclick="setNavMode('${v}')" style="flex:1;padding:9px 6px;border-radius:8px;border:1px solid var(--border);cursor:pointer;font-size:.78rem;display:flex;align-items:center;justify-content:center;gap:5px;${on?'background:var(--nes-blue);color:#fff;border-color:var(--nes-blue);':'background:var(--surface);color:var(--text);'}"><i class="ti ${ic}"></i>${t(k)}</button>`;
-  ov.innerHTML=`<div role="dialog" aria-modal="true" style="width:100%;max-width:420px;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;box-shadow:0 8px 32px rgba(0,0,0,.35);color:var(--text);">
+  ov.innerHTML=`<style>#navFrom::placeholder{color:var(--text);opacity:1;font-weight:500;}#navTo::placeholder{opacity:.5;}</style><div role="dialog" aria-modal="true" style="width:100%;max-width:420px;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;box-shadow:0 8px 32px rgba(0,0,0,.35);color:var(--text);">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
       <div style="font-weight:700;font-size:1rem;display:flex;align-items:center;gap:8px;"><i class="ti ti-route" style="color:var(--nes-blue);"></i>${t('navigate.title')}</div>
       <button type="button" onclick="closeNavigate()" aria-label="${t('navigate.close')}" style="background:none;border:none;color:var(--text);font-size:1.2rem;cursor:pointer;"><i class="ti ti-x"></i></button>
     </div>
     <label style="font-size:.72rem;opacity:.7;">${t('navigate.from')}</label>
-    <input id="navFrom" type="text" maxlength="200" autocomplete="off" placeholder="${t('navigate.myLocation')}" style="${inp}margin:4px 0 8px;">
+    <div style="position:relative;margin:4px 0 8px;"><i class="ti ti-current-location" style="position:absolute;inset-inline-start:11px;top:50%;transform:translateY(-50%);color:var(--nes-blue);font-size:1.05rem;pointer-events:none;"></i><input id="navFrom" type="text" maxlength="200" autocomplete="off" placeholder="${t('navigate.myLocation')}" style="${inp}padding-inline-start:36px;"></div>
     <div style="text-align:center;margin:-2px 0 4px;"><button type="button" onclick="swapNavigate()" aria-label="${t('navigate.swap')}" title="${t('navigate.swap')}" style="background:var(--surface);border:1px solid var(--border);border-radius:50%;width:32px;height:32px;color:var(--nes-blue);cursor:pointer;"><i class="ti ti-arrows-up-down"></i></button></div>
     <label style="font-size:.72rem;opacity:.7;">${t('navigate.to')}</label>
-    <input id="navTo" type="text" maxlength="200" autocomplete="off" placeholder="${t('navigate.toPlaceholder')}" style="${inp}margin:4px 0 12px;">
+    <div style="position:relative;margin:4px 0 12px;"><i class="ti ti-map-pin-filled" style="position:absolute;inset-inline-start:11px;top:50%;transform:translateY(-50%);color:#ea4335;font-size:1.05rem;pointer-events:none;"></i><input id="navTo" type="text" maxlength="200" autocomplete="off" placeholder="${t('navigate.toPlaceholder')}" style="${inp}padding-inline-start:36px;"></div>
     <div style="display:flex;gap:6px;margin-bottom:14px;">${modeBtn('driving','ti-car','navigate.drive',true)}${modeBtn('walking','ti-walk','navigate.walk',false)}${modeBtn('transit','ti-bus','navigate.transit',false)}</div>
     <button type="button" id="navGo" onclick="goNavigate()" style="width:100%;padding:12px;border:none;border-radius:8px;background:var(--nes-blue);color:#fff;font-weight:600;font-size:.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;"><i class="ti ti-navigation"></i>${t('navigate.open')}</button>
     <div id="navErr" style="color:#f85149;font-size:.75rem;margin-top:8px;display:none;">${t('navigate.needTo')}</div>
@@ -53,7 +53,7 @@ function setNavMode(m){
 }
 function swapNavigate(){
   const f=document.getElementById('navFrom'),to=document.getElementById('navTo');
-  if(!f||!to)return;
+  if(!f||!to||!f.value.trim())return; // blank From = current location, nothing to swap
   const v=f.value;f.value=to.value;to.value=v;
 }
 function goNavigate(){
