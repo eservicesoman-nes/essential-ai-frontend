@@ -17,6 +17,9 @@ async function loadClientUsers(clientId){
       return;
     }
     const roleColors={ceo:'#409cff',manager:'#3fb950',staff:'#8b949e',nes_partner:'#7f77dd'};
+    // Role change is for NES-internal accounts only (clients.is_internal); client accounts show the role as read-only text.
+    let canChangeRole=false;
+    try{const {data:cr}=await sb.from('clients').select('is_internal').eq('id',clientId).maybeSingle();canChangeRole=cr?.is_internal===true;}catch(_){}
     el.innerHTML=users.map(u=>`
       <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-radius:8px;margin-bottom:6px;">
         <div style="display:flex;align-items:center;gap:10px;">
@@ -27,9 +30,9 @@ async function loadClientUsers(clientId){
           </div>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <select data-role-now="${esc(u.role||'staff')}" onchange="changeClientUserRole('${clientId}','${esc(u.id)}',this)" ${u.role==='nes_partner'?'disabled':''} title="Change role (NES admin)" style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:4px 6px;color:var(--text);font-size:.7rem;font-family:var(--mono);">
+          ${canChangeRole?`          <select data-role-now="${esc(u.role||'staff')}" onchange="changeClientUserRole('${clientId}','${esc(u.id)}',this)" ${u.role==='nes_partner'?'disabled':''} title="Change role (NES admin)" style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:4px 6px;color:var(--text);font-size:.7rem;font-family:var(--mono);">
             ${[['ceo','CEO'],['manager','Manager'],['staff','Staff']].concat(u.role==='nes_partner'?[['nes_partner','Partner']]:[]).map(([v,l])=>`<option value="${v}"${(u.role||'staff')===v?' selected':''}>${l}</option>`).join('')}
-          </select>
+          </select>`:''}
           <button onclick="removeClientUser('${clientId}','${u.id}')" style="background:none;border:1px solid #2d0e0e;border-radius:6px;padding:4px 8px;color:#f85149;cursor:pointer;font-size:.7rem;"><i class="ti ti-user-minus"></i></button>
         </div>
       </div>`).join('');
