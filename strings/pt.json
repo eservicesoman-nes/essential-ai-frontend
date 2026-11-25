@@ -392,7 +392,7 @@
     "costUnavailable": "Controlo de custos ainda não configurado (função admin_cost_overview em falta).",
     "callsMonth": "Chamadas este mês",
     "unassigned": "Sem cliente $",
-    "spendVsCeiling": "Gasto em chamadas por cliente vs limite do plano",
+    "spendVsCeiling": "Gasto por cliente (chamadas + IA) vs limite do plano",
     "ceilingTbd": "limite a definir",
     "dailySpend": "Gasto diário em chamadas — últimos 30 dias",
     "balanceHistory": "Histórico de saldos — últimos 30 dias",

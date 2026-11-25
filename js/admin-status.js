@@ -353,7 +353,7 @@ async function checkPlatformStatus(){
       const updHtml='<span style="font-size:.6rem;font-family:var(--mono);color:'+(stale?'#d29922':'var(--muted)')+';" title="'+_asEsc(stale?t('adminStatusUi.staleHint',"Not updated in 7+ days. Balance is entered by hand; update it in Manage."):'')+'">'+(stale?'⚠ '+t('adminStatusUi.manual',"manual")+' · ':'')+lcTxt+'</span>';
       html+='<div style="padding:8px 14px;border-bottom:1px solid rgba(26,35,50,.4);">';
       html+='<div style="display:grid;grid-template-columns:1fr 60px 60px 88px 60px;gap:4px;align-items:center;">';
-      html+='<div style="font-size:.72rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+_asEsc(a.service_name)+'</div>';
+      html+='<div style="font-size:.72rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+_asSvcDot(a.service_name)+_asEsc(a.service_name)+'</div>';
       html+='<div style="font-size:.72rem;font-weight:700;color:'+color+';">'+bal+'</div>';
       html+='<div style="font-size:.68rem;color:var(--muted);font-family:var(--mono);">'+usage+'</div>';
       html+='<div>'+updHtml+'</div>';
@@ -416,7 +416,7 @@ function _asCostTrackerHtml(cost, err){
   h+=kpi(t('adminStatusUi.unassigned',"Unassigned $"),'$'+(parseFloat(cost.unassigned_spend_usd)||0).toFixed(2),'var(--muted)');
   h+='</div>';
   // per-client spend vs ceiling
-  h+='<div style="font-size:.6rem;color:var(--muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">'+t('adminStatusUi.spendVsCeiling',"Client call spend vs plan ceiling")+'</div>';
+  h+='<div style="font-size:.6rem;color:var(--muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">'+t('adminStatusUi.spendVsCeiling',"Client spend (calls + AI) vs plan ceiling")+'</div>';
   const clients=(cost.clients||[]).filter(x=>x.status!=='suspended'||parseFloat(x.spend_usd)>0);
   if(!clients.length){h+='<div style="font-size:.7rem;color:var(--muted);">—</div>';}
   clients.forEach(function(cl){
@@ -461,11 +461,15 @@ function _asBalanceLines(hist){
     if(pts.length>=2){
       const mx=Math.max(...pts),mn=Math.min(...pts),rg=(mx-mn)||1,W=120,H=18;
       const d=pts.map((v,i)=>(i/(pts.length-1)*W).toFixed(1)+','+(H-(v-mn)/rg*H).toFixed(1)).join(' ');
-      spark='<svg viewBox="0 0 '+W+' '+H+'" width="120" height="18"><polyline points="'+d+'" fill="none" stroke="#409cff" stroke-width="1.5"/></svg>';
+      spark='<svg viewBox="0 0 '+W+' '+H+'" width="120" height="18"><polyline points="'+d+'" fill="none" stroke="'+_asSvcColor(n)+'" stroke-width="1.5"/></svg>';
     } else { spark='<span style="font-size:.56rem;color:var(--muted);">'+t('adminStatusUi.onePoint',"1 snapshot so far")+'</span>'; }
-    h+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;"><span style="font-size:.66rem;color:var(--text);width:70px;">'+_asEsc(n)+'</span>'+spark+'<span style="font-size:.62rem;color:var(--muted);font-family:var(--mono);margin-inline-start:auto;">$'+last.toFixed(2)+'</span></div>';
+    h+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;"><span style="font-size:.66rem;color:var(--text);width:84px;white-space:nowrap;">'+_asSvcDot(n)+_asEsc(n)+'</span>'+spark+'<span style="font-size:.62rem;color:var(--muted);font-family:var(--mono);margin-inline-start:auto;">$'+last.toFixed(2)+'</span></div>';
   });
   return h;
 }
 
+// Each API provider gets its own colour (dot in API Credits + line in Balance history). Unknown services get a stable fallback colour.
+const _AS_SVC_COLORS={anthropic:'#d97757',deepseek:'#4d6bfe',fal:'#c084fc',gemini:'#22d3ee',openai:'#10b981',twilio:'#f43f5e',vapi:'#facc15'};
+function _asSvcColor(name){const k=String(name||'').toLowerCase().trim();if(_AS_SVC_COLORS[k])return _AS_SVC_COLORS[k];const pal=['#fb923c','#a3e635','#f472b6','#38bdf8','#e879f9','#2dd4bf'];let h=0;for(const ch of k)h=(h*31+ch.charCodeAt(0))>>>0;return pal[h%pal.length];}
+function _asSvcDot(name){return '<span aria-hidden="true" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+_asSvcColor(name)+';margin-inline-end:6px;vertical-align:middle;flex-shrink:0;"></span>';}
 const _AS_AI_MODELS={gemini:/^gemini/i,anthropic:/^claude/i,deepseek:/^deepseek/i,openai:/^(gpt|o\d|text-embedding)/i,fal:/^(flux|fal)/i};

@@ -405,7 +405,7 @@
     "costUnavailable": "Cost tracker not set up yet (admin_cost_overview function missing).",
     "callsMonth": "Calls this month",
     "unassigned": "Unassigned $",
-    "spendVsCeiling": "Client call spend vs plan ceiling",
+    "spendVsCeiling": "Client spend (calls + AI) vs plan ceiling",
     "ceilingTbd": "ceiling TBD",
     "dailySpend": "Daily call spend — last 30 days",
     "balanceHistory": "Balance history — last 30 days",
